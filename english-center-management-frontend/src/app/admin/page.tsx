@@ -65,26 +65,26 @@ const AdminDashboard: React.FC = () => {
 
   const quickActions = [
     {
-      title: 'Manage Students',
-      description: 'Add, edit, or remove student accounts',
+      title: 'Quản lý học viên',
+      description: 'Thêm, chỉnh sửa hoặc xóa tài khoản học viên',
       icon: <UserPlus size={24} />,
       iconBg: 'bg-blue-100 text-blue-600',
     },
     {
-      title: 'Manage Teachers',
-      description: 'Oversee teacher profiles and assignments',
+      title: 'Quản lý giáo viên',
+      description: 'Giám sát hồ sơ và phân công giáo viên',
       icon: <UserCheck size={24} />,
       iconBg: 'bg-green-100 text-green-600',
     },
     {
-      title: 'Manage Classes',
-      description: 'Create and schedule new classes',
+      title: 'Quản lý lớp học',
+      description: 'Tạo và lên lịch lớp học mới',
       icon: <Calendar size={24} />,
       iconBg: 'bg-purple-100 text-purple-600',
     },
     {
-      title: 'View Reports',
-      description: 'Access detailed analytics and reports',
+      title: 'Xem báo cáo',
+      description: 'Truy cập phân tích và báo cáo chi tiết',
       icon: <BarChart3 size={24} />,
       iconBg: 'bg-orange-100 text-orange-600',
     },
@@ -95,8 +95,8 @@ const AdminDashboard: React.FC = () => {
     .slice(0, 3)
     .map((student: Student) => ({
       name: student.name,
-      course: student.currentClass || 'Basic English',
-      time: '2 hours ago',
+      course: student.currentClass || 'Tiếng Anh cơ bản',
+      time: '2 giờ trước',
       avatar:
         student.avatar ||
         'https://images.unsplash.com/photo-1494790108755-2616b612b3fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80',
@@ -160,7 +160,7 @@ const AdminDashboard: React.FC = () => {
       />
       <div className='flex-1'>
         <p className='font-medium text-gray-900'>{name}</p>
-        <p className='text-sm text-gray-500'>Enrolled in {course}</p>
+        <p className='text-sm text-gray-500'>Đăng ký {course}</p>
       </div>
       <p className='text-sm text-gray-400'>{time}</p>
     </div>
@@ -186,55 +186,56 @@ const AdminDashboard: React.FC = () => {
   );
 
   return (
-    <div className='min-h-screen bg-gray-50 p-6'>
-      <div className='max-w-7xl mx-auto'>
-        {/* Stats Grid */}
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
-          {stats.map((stat, index) => (
-            <StatCard key={index} {...stat} />
+    <>
+      {/* Stats Grid */}
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
+        {stats.map((stat, index) => (
+          <StatCard key={index} {...stat} />
+        ))}
+      </div>
+
+      {/* Quick Actions */}
+      <div className='mb-8'>
+        <h2 className='text-xl font-bold text-gray-900 mb-6'>Thao tác nhanh</h2>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
+          {quickActions.map((action, index) => (
+            <QuickActionCard key={index} {...action} />
           ))}
         </div>
+      </div>
 
-        {/* Quick Actions */}
-        <div className='mb-8'>
-          <h2 className='text-xl font-bold text-gray-900 mb-6'>
-            Quick Actions
-          </h2>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
-            {quickActions.map((action, index) => (
-              <QuickActionCard key={index} {...action} />
+      {/* Recent Activity */}
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
+        {/* Recent Enrollments */}
+        <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+          <div className='flex items-center justify-between mb-6'>
+            <h3 className='text-lg font-semibold text-gray-900'>
+              Đăng ký gần đây
+            </h3>
+            <button className='text-blue-600 text-sm font-medium hover:text-blue-700'>
+              Xem tất cả
+            </button>
+          </div>
+          <div className='space-y-1'>
+            {recentEnrollments.map((enrollment, index) => (
+              <EnrollmentItem key={index} {...enrollment} />
             ))}
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-          {/* Recent Enrollments */}
-          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
-            <h3 className='text-lg font-bold text-gray-900 mb-6'>
-              Recent Enrollments
-            </h3>
-            <div className='space-y-1'>
-              {recentEnrollments.map((enrollment, index) => (
-                <EnrollmentItem key={index} {...enrollment} />
-              ))}
-            </div>
-          </div>
-
-          {/* System Status */}
-          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
-            <h3 className='text-lg font-bold text-gray-900 mb-6'>
-              System Status
-            </h3>
-            <div className='space-y-3'>
-              {systemStatus.map((status, index) => (
-                <StatusItem key={index} {...status} />
-              ))}
-            </div>
+        {/* System Status */}
+        <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+          <h3 className='text-lg font-semibold text-gray-900 mb-6'>
+            Trạng thái hệ thống
+          </h3>
+          <div className='space-y-3'>
+            {systemStatus.map((status, index) => (
+              <StatusItem key={index} {...status} />
+            ))}
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

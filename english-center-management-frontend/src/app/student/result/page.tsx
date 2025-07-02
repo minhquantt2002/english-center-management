@@ -62,10 +62,10 @@ const TestResultsDashboard: React.FC = () => {
   };
 
   const getScoreLabel = (score: number) => {
-    if (score >= 90) return 'Excellent';
-    if (score >= 80) return 'Very Good';
-    if (score >= 70) return 'Needs Improvement';
-    return 'Poor';
+    if (score >= 90) return 'Xuất sắc';
+    if (score >= 80) return 'Rất tốt';
+    if (score >= 70) return 'Cần cải thiện';
+    return 'Yếu';
   };
 
   return (
@@ -74,10 +74,10 @@ const TestResultsDashboard: React.FC = () => {
         {/* Header */}
         <div className='mb-8'>
           <h1 className='text-3xl font-bold text-gray-900 mb-2'>
-            Test Results & Feedback
+            Kết quả kiểm tra & Nhận xét
           </h1>
           <p className='text-gray-600'>
-            Track your progress and view detailed feedback from your instructors
+            Theo dõi tiến độ học tập và xem nhận xét chi tiết từ giáo viên
           </p>
         </div>
 
@@ -86,7 +86,7 @@ const TestResultsDashboard: React.FC = () => {
           <div className='bg-white rounded-lg shadow-sm p-6 border border-gray-200'>
             <div className='flex items-center justify-between mb-4'>
               <h3 className='text-sm font-medium text-gray-500'>
-                Overall Average
+                Điểm trung bình
               </h3>
               <div className='w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center'>
                 <TrendingUp className='w-4 h-4 text-blue-600' />
@@ -97,13 +97,13 @@ const TestResultsDashboard: React.FC = () => {
             </div>
             <div className='flex items-center text-sm text-green-600'>
               <TrendingUp className='w-4 h-4 mr-1' />
-              +3.2% from last test
+              +3.2% từ lần kiểm tra trước
             </div>
           </div>
 
           <div className='bg-white rounded-lg shadow-sm p-6 border border-gray-200'>
             <div className='flex items-center justify-between mb-4'>
-              <h3 className='text-sm font-medium text-gray-500'>Listening</h3>
+              <h3 className='text-sm font-medium text-gray-500'>Nghe</h3>
               <div className='w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center'>
                 <Headphones className='w-4 h-4 text-blue-600' />
               </div>
@@ -118,7 +118,7 @@ const TestResultsDashboard: React.FC = () => {
 
           <div className='bg-white rounded-lg shadow-sm p-6 border border-gray-200'>
             <div className='flex items-center justify-between mb-4'>
-              <h3 className='text-sm font-medium text-gray-500'>Speaking</h3>
+              <h3 className='text-sm font-medium text-gray-500'>Nói</h3>
               <div className='w-8 h-8 bg-red-100 rounded-full flex items-center justify-center'>
                 <Mic className='w-4 h-4 text-red-600' />
               </div>
@@ -133,7 +133,7 @@ const TestResultsDashboard: React.FC = () => {
 
           <div className='bg-white rounded-lg shadow-sm p-6 border border-gray-200'>
             <div className='flex items-center justify-between mb-4'>
-              <h3 className='text-sm font-medium text-gray-500'>Reading</h3>
+              <h3 className='text-sm font-medium text-gray-500'>Đọc</h3>
               <div className='w-8 h-8 bg-green-100 rounded-full flex items-center justify-center'>
                 <BookOpen className='w-4 h-4 text-green-600' />
               </div>
@@ -151,7 +151,7 @@ const TestResultsDashboard: React.FC = () => {
         <div className='bg-white rounded-lg shadow-sm border border-gray-200 mb-8'>
           <div className='px-6 py-4 border-b border-gray-200'>
             <h2 className='text-xl font-semibold text-gray-900'>
-              Recent Test Results
+              Kết quả kiểm tra gần đây
             </h2>
           </div>
           <div className='overflow-x-auto'>
@@ -159,28 +159,28 @@ const TestResultsDashboard: React.FC = () => {
               <thead className='bg-gray-50'>
                 <tr>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Test Date
+                    Ngày kiểm tra
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Course
+                    Khóa học
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Listening
+                    Nghe
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Speaking
+                    Nói
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Reading
+                    Đọc
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Writing
+                    Viết
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Overall
+                    Tổng điểm
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Actions
+                    Thao tác
                   </th>
                 </tr>
               </thead>

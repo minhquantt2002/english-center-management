@@ -58,47 +58,7 @@ const getProgressPercentage = (students: string) => {
 export default function EnglishCourseInterface() {
   return (
     <div className='min-h-screen bg-gray-50'>
-      {/* Header */}
-      <header className='bg-white shadow-sm border-b'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='flex items-center justify-between h-16'>
-            <div className='flex items-center space-x-4'>
-              <div className='bg-cyan-500 text-white w-8 h-8 rounded flex items-center justify-center font-bold'>
-                Z
-              </div>
-              <span className='text-xl font-semibold text-gray-900'>
-                Zenlish
-              </span>
-              <span className='text-sm text-gray-500'>Trung tâm Tiếng Anh</span>
-            </div>
-            <div className='flex items-center space-x-4'>
-              <User className='w-5 h-5 text-gray-600' />
-              <span className='text-sm text-gray-700'>Lê Lan</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Breadcrumb */}
-      <div className='bg-white border-b'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3'>
-          <nav className='flex items-center space-x-2 text-sm'>
-            <a href='#' className='text-cyan-600 hover:text-cyan-700'>
-              Trang chủ
-            </a>
-            <ChevronRight className='w-4 h-4 text-gray-400' />
-            <a href='#' className='text-cyan-600 hover:text-cyan-700'>
-              Khóa học
-            </a>
-            <ChevronRight className='w-4 h-4 text-gray-400' />
-            <span className='text-gray-500'>Danh sách lớp học</span>
-          </nav>
-        </div>
-      </div>
-
-      {/* Main Content */}
       <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-        {/* Course Header */}
         <div className='flex items-center justify-between mb-8'>
           <div>
             <h1 className='text-3xl font-bold text-gray-900 mb-2'>

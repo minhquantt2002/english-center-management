@@ -5,10 +5,10 @@ import React, { useState } from 'react';
 const ZenlishLogin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('Admin');
+  const [role, setRole] = useState('Quản trị');
 
   const handleSubmit = () => {
-    console.log('Login attempt:', { email, password, role });
+    console.log('Yêu cầu đăng nhập:', { email, password, role });
   };
 
   return (
@@ -17,7 +17,7 @@ const ZenlishLogin: React.FC = () => {
         {/* Header */}
         <div className='text-center mb-8'>
           <h1 className='text-3xl font-bold text-blue-600 mb-2'>Zenlish</h1>
-          <p className='text-gray-500 text-lg'>Student Management System</p>
+          <p className='text-gray-500 text-lg'>Hệ thống quản lý học viên</p>
         </div>
 
         {/* Login Form */}
@@ -35,7 +35,7 @@ const ZenlishLogin: React.FC = () => {
               id='email'
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder='Enter your email'
+              placeholder='Nhập email của bạn'
               className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 text-gray-700 placeholder-gray-400'
             />
           </div>
@@ -46,14 +46,14 @@ const ZenlishLogin: React.FC = () => {
               htmlFor='password'
               className='block text-sm font-medium text-gray-700 mb-2'
             >
-              Password
+              Mật khẩu
             </label>
             <input
               type='password'
               id='password'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder='Enter your password'
+              placeholder='Nhập mật khẩu của bạn'
               className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 text-gray-700 placeholder-gray-400'
             />
           </div>
@@ -64,7 +64,7 @@ const ZenlishLogin: React.FC = () => {
               htmlFor='role'
               className='block text-sm font-medium text-gray-700 mb-2'
             >
-              Role
+              Vai trò
             </label>
             <select
               id='role'
@@ -72,9 +72,10 @@ const ZenlishLogin: React.FC = () => {
               onChange={(e) => setRole(e.target.value)}
               className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 text-gray-700 bg-white'
             >
-              <option value='Admin'>Admin</option>
-              <option value='Teacher'>Teacher</option>
-              <option value='Student'>Student</option>
+              <option value='Quản trị'>Quản trị</option>
+              <option value='Giáo viên'>Giáo viên</option>
+              <option value='Học viên'>Học viên</option>
+              <option value='Tuyển sinh'>Tuyển sinh</option>
             </select>
           </div>
 
@@ -83,7 +84,7 @@ const ZenlishLogin: React.FC = () => {
             onClick={handleSubmit}
             className='w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 outline-none'
           >
-            Sign In
+            Đăng nhập
           </button>
         </div>
 
@@ -93,7 +94,7 @@ const ZenlishLogin: React.FC = () => {
             href='#'
             className='text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200'
           >
-            Forgot your password?
+            Quên mật khẩu?
           </a>
         </div>
       </div>

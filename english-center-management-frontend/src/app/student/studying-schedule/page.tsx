@@ -164,7 +164,7 @@ const ClassSchedule: React.FC = () => {
             </button>
             <button className='bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2'>
               <Download className='w-4 h-4' />
-              Export
+              Xuất
             </button>
           </div>
         </div>

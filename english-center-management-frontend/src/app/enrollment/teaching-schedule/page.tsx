@@ -1,26 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { mockTeachers, mockClassSessions } from '../../../data';
 import { ClassSession as TeacherClassSession } from '../../../types';
 
-interface ClassSession {
-  id: string;
-  name: string;
-  room: string;
-  type:
-    | 'basic'
-    | 'ielts'
-    | 'business'
-    | 'conversation'
-    | 'toeic'
-    | 'kids'
-    | 'advanced';
-  time: string;
-  day: number;
-}
-
 export default function TeachingSchedule() {
-  const [currentWeek, setCurrentWeek] = useState('23/12/2024 - 29/12/2024');
+  const currentWeek = '23/12/2024 - 29/12/2024';
 
   // Use first teacher from mock data
   const teacher = mockTeachers[0]

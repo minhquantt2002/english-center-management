@@ -84,10 +84,10 @@ const ClassScoreEntry: React.FC = () => {
         <div className='flex justify-between items-start mb-8'>
           <div>
             <h1 className='text-2xl font-semibold text-gray-900 mb-1'>
-              Select Class
+              Chọn lớp học
             </h1>
             <p className='text-gray-500'>
-              Choose a class to enter student scores
+              Chọn một lớp để nhập điểm cho học viên
             </p>
           </div>
           <div className='flex items-center gap-4'>
@@ -104,7 +104,7 @@ const ClassScoreEntry: React.FC = () => {
             </select>
             <button className='inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors'>
               <Filter className='w-4 h-4 mr-2' />
-              Filter
+              Lọc
             </button>
           </div>
         </div>
@@ -116,7 +116,7 @@ const ClassScoreEntry: React.FC = () => {
               {selectedClass}
             </h2>
             <p className='text-gray-500'>
-              {students.length} students • Test: Mid-term Evaluation
+              {students.length} học viên • Bài kiểm tra: Đánh giá giữa kỳ
             </p>
           </div>
           <button
@@ -124,7 +124,7 @@ const ClassScoreEntry: React.FC = () => {
             className='inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors'
           >
             <Save className='w-4 h-4 mr-2' />
-            Save All Scores
+            Lưu tất cả điểm
           </button>
         </div>
 
@@ -157,7 +157,7 @@ const ClassScoreEntry: React.FC = () => {
                   className='inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors'
                 >
                   <Save className='w-4 h-4 mr-2' />
-                  Save
+                  Lưu
                 </button>
               </div>
 
@@ -165,7 +165,7 @@ const ClassScoreEntry: React.FC = () => {
               <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-6'>
                 <div>
                   <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Listening
+                    Nghe
                   </label>
                   <input
                     type='number'
@@ -185,7 +185,7 @@ const ClassScoreEntry: React.FC = () => {
                 </div>
                 <div>
                   <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Speaking
+                    Nói
                   </label>
                   <input
                     type='number'
@@ -201,7 +201,7 @@ const ClassScoreEntry: React.FC = () => {
                 </div>
                 <div>
                   <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Reading
+                    Đọc
                   </label>
                   <input
                     type='number'
@@ -217,7 +217,7 @@ const ClassScoreEntry: React.FC = () => {
                 </div>
                 <div>
                   <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Writing
+                    Viết
                   </label>
                   <input
                     type='number'
@@ -236,10 +236,10 @@ const ClassScoreEntry: React.FC = () => {
               {/* Comments */}
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Comments
+                  Nhận xét
                 </label>
                 <textarea
-                  placeholder='Enter additional comments about the student performance...'
+                  placeholder='Nhập thêm nhận xét về kết quả học tập của học viên...'
                   value={student.comments}
                   onChange={(e) =>
                     updateStudentComments(student.id, e.target.value)

@@ -246,7 +246,7 @@ const MyClassesDashboard = () => {
                   </span>
                 </div>
                 <button className='text-blue-600 hover:text-blue-700 text-sm font-medium'>
-                  View Details
+                  Xem chi tiết
                 </button>
               </div>
             </div>

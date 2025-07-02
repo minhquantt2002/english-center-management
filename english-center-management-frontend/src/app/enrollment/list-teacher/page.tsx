@@ -34,32 +34,12 @@ export default function TeacherManagement() {
 
   return (
     <div className='min-h-screen bg-gray-50'>
-      {/* Header */}
-      <header className='bg-white shadow-sm border-b'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='flex justify-between items-center h-16'>
-            <div className='flex items-center space-x-4'>
-              <h1 className='text-2xl font-bold text-teal-600'>Zenlish</h1>
-              <span className='text-gray-500'>English Center</span>
-            </div>
-            <div className='flex items-center space-x-4'>
-              <span className='text-gray-700'>Lê tân</span>
-              <div className='w-8 h-8 bg-gray-300 rounded-full'></div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
       <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
         {/* Page Title */}
         <div className='mb-8'>
           <h2 className='text-3xl font-bold text-gray-900 mb-2'>
             Danh sách giáo viên
           </h2>
-          <p className='text-gray-600'>
-            Quản lý thông tin giáo viên trung tâm Zenlish
-          </p>
         </div>
 
         {/* Filters */}

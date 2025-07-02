@@ -100,15 +100,16 @@ const StudentFeedback: React.FC = () => {
   };
 
   const handleSaveFeedback = () => {
-    console.log('Saving feedback:', {
+    console.log('Lưu nhận xét:', {
       student: selectedStudent,
       skill: selectedSkill,
       feedback: feedback,
     });
+    // Here you would save the feedback to the backend
   };
 
   const handlePreview = () => {
-    console.log('Preview feedback');
+    console.log('Xem trước nhận xét');
   };
 
   const skillIcons = {
@@ -124,18 +125,18 @@ const StudentFeedback: React.FC = () => {
         {/* Header */}
         <div className='mb-8'>
           <h1 className='text-3xl font-semibold text-gray-900 mb-2'>
-            Student Feedback
+            Nhận xét học viên
           </h1>
           <p className='text-gray-500'>
-            Provide constructive feedback to help your students improve their
-            English skills
+            Cung cấp nhận xét có tính xây dựng để giúp học viên cải thiện kỹ
+            năng tiếng Anh
           </p>
         </div>
 
         {/* Select Class */}
         <div className='mb-8'>
           <h2 className='text-lg font-medium text-gray-700 mb-4'>
-            Select Class
+            Chọn lớp học
           </h2>
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
             {classes.map((classItem) => (
@@ -151,7 +152,7 @@ const StudentFeedback: React.FC = () => {
                 <Users className='w-8 h-8 mx-auto mb-3' />
                 <h3 className='font-semibold text-lg mb-1'>{classItem.name}</h3>
                 <p className='text-sm opacity-75'>
-                  {classItem.studentCount} students
+                  {classItem.studentCount} học viên
                 </p>
               </button>
             ))}
@@ -164,7 +165,7 @@ const StudentFeedback: React.FC = () => {
             {/* Student List */}
             <div className='lg:col-span-1'>
               <h3 className='text-lg font-medium text-gray-700 mb-4'>
-                Students - {currentClass.name}
+                Học viên - {currentClass.name}
               </h3>
               <div className='bg-white rounded-lg border border-gray-200 overflow-hidden'>
                 {currentClass.students.map((student) => (
@@ -190,14 +191,14 @@ const StudentFeedback: React.FC = () => {
                         {student.studentId}
                       </p>
                       <p className='text-xs text-gray-400'>
-                        Last feedback: {student.lastFeedback}
+                        Nhận xét gần nhất: {student.lastFeedback}
                       </p>
                     </div>
                   </button>
                 ))}
                 {currentClass.students.length === 0 && (
                   <div className='p-8 text-center text-gray-500'>
-                    No students in this class yet
+                    Chưa có học viên nào trong lớp này
                   </div>
                 )}
               </div>
@@ -227,7 +228,7 @@ const StudentFeedback: React.FC = () => {
                   {/* Skill Selection */}
                   <div className='mb-6'>
                     <h4 className='text-lg font-medium text-gray-700 mb-4'>
-                      Select Skill
+                      Chọn kỹ năng
                     </h4>
                     <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
                       {Object.entries(skillIcons).map(([skill, Icon]) => (
@@ -242,7 +243,13 @@ const StudentFeedback: React.FC = () => {
                         >
                           <Icon className='w-6 h-6 mx-auto mb-2' />
                           <span className='text-sm font-medium capitalize'>
-                            {skill}
+                            {skill === 'speaking'
+                              ? 'Nói'
+                              : skill === 'listening'
+                              ? 'Nghe'
+                              : skill === 'reading'
+                              ? 'Đọc'
+                              : 'Viết'}
                           </span>
                         </button>
                       ))}
@@ -252,33 +259,48 @@ const StudentFeedback: React.FC = () => {
                   {/* Feedback Textarea */}
                   <div className='mb-6'>
                     <label className='block text-lg font-medium text-gray-700 mb-4'>
-                      Feedback for {selectedSkill}
+                      Nhận xét về kỹ năng{' '}
+                      {selectedSkill === 'speaking'
+                        ? 'Nói'
+                        : selectedSkill === 'listening'
+                        ? 'Nghe'
+                        : selectedSkill === 'reading'
+                        ? 'Đọc'
+                        : 'Viết'}
                     </label>
                     <textarea
                       value={feedback}
                       onChange={(e) => handleFeedbackChange(e.target.value)}
-                      placeholder={`Write your feedback for ${selectedStudent.name}'s ${selectedSkill} skills...`}
+                      placeholder={`Viết nhận xét của bạn về kỹ năng ${
+                        selectedSkill === 'speaking'
+                          ? 'nói'
+                          : selectedSkill === 'listening'
+                          ? 'nghe'
+                          : selectedSkill === 'reading'
+                          ? 'đọc'
+                          : 'viết'
+                      } của ${selectedStudent.name}...`}
                       className='w-full h-40 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none'
                       maxLength={500}
                     />
                     <div className='flex justify-between items-center mt-2'>
                       <span className='text-sm text-gray-500'>
-                        {charCount}/500 characters
+                        {charCount}/500 ký tự
                       </span>
                       <div className='flex space-x-3'>
                         <button
                           onClick={handlePreview}
-                          className='inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                          className='px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2'
                         >
-                          <Eye className='w-4 h-4 mr-2' />
-                          Preview
+                          <Eye className='w-4 h-4' />
+                          Xem trước
                         </button>
                         <button
                           onClick={handleSaveFeedback}
-                          className='inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors'
+                          className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2'
                         >
                           <Save className='w-4 h-4 mr-2' />
-                          Save Feedback
+                          Lưu nhận xét
                         </button>
                       </div>
                     </div>

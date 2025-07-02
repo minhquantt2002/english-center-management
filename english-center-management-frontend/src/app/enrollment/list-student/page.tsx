@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Plus, Eye, Edit, User } from 'lucide-react';
+import { Search, Plus, Eye, Edit } from 'lucide-react';
 import { mockStudents } from '../../../data';
 import { Student } from '../../../types';
 
@@ -50,20 +50,6 @@ export default function StudentManagement() {
 
   return (
     <div className='min-h-screen bg-gray-50'>
-      {/* Header */}
-      <header className='bg-white border-b border-gray-200 px-6 py-4'>
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-6'>
-            <h1 className='text-2xl font-bold text-teal-600'>Zenlish</h1>
-            <span className='text-gray-600'>Quản lý học viên</span>
-          </div>
-          <div className='flex items-center gap-2'>
-            <User className='w-5 h-5 text-gray-600' />
-            <span className='text-gray-700'>Lê Tấn</span>
-          </div>
-        </div>
-      </header>
-
       <div className='p-6'>
         {/* Page Title */}
         <div className='flex items-center justify-between mb-6'>
@@ -71,9 +57,6 @@ export default function StudentManagement() {
             <h2 className='text-2xl font-bold text-gray-900'>
               Danh sách học viên
             </h2>
-            <p className='text-gray-600 mt-1'>
-              Quản lý thông tin học viên trung tâm Zenlish
-            </p>
           </div>
           <button className='flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors'>
             <Plus className='w-4 h-4' />
@@ -110,10 +93,10 @@ export default function StudentManagement() {
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
               >
                 <option value='all'>Tất cả trình độ</option>
-                <option value='beginner'>Beginner</option>
-                <option value='elementary'>Elementary</option>
-                <option value='intermediate'>Intermediate</option>
-                <option value='advanced'>Advanced</option>
+                <option value='beginner'>Sơ cấp</option>
+                <option value='elementary'>Cơ bản</option>
+                <option value='intermediate'>Trung cấp</option>
+                <option value='advanced'>Nâng cao</option>
               </select>
             </div>
 
