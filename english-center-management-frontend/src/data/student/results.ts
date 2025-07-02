@@ -1,0 +1,78 @@
+import { StudentScores, TestResult } from '../../types';
+
+export const mockStudentScores: StudentScores = {
+  listening: 85,
+  speaking: 78,
+  reading: 90,
+  writing: 82,
+};
+
+export const mockTestResults: TestResult[] = [
+  {
+    id: 'test_1',
+    studentId: 'student_1',
+    courseId: 'course_1',
+    courseName: 'English Fundamentals',
+    testType: 'final',
+    date: '2024-01-20',
+    scores: {
+      listening: 85,
+      speaking: 78,
+      reading: 90,
+      writing: 82,
+    },
+    overall: 84,
+    feedback:
+      'Excellent performance in reading and listening. Keep working on speaking fluency.',
+    teacherId: 'teacher_1',
+    teacherName: 'Sarah Johnson',
+    maxScore: 100,
+    gradeLevel: 'B',
+    createdAt: '2024-01-20T14:30:00Z',
+    updatedAt: '2024-01-21T10:00:00Z',
+  },
+  {
+    id: 'test_2',
+    studentId: 'student_1',
+    courseId: 'course_1',
+    courseName: 'English Fundamentals',
+    testType: 'midterm',
+    date: '2024-01-05',
+    scores: {
+      listening: 80,
+      speaking: 75,
+      reading: 88,
+      writing: 79,
+    },
+    overall: 81,
+    feedback: 'Good progress overall. Focus more on writing structure.',
+    teacherId: 'teacher_1',
+    teacherName: 'Sarah Johnson',
+    maxScore: 100,
+    gradeLevel: 'B',
+    createdAt: '2024-01-05T14:30:00Z',
+    updatedAt: '2024-01-06T10:00:00Z',
+  },
+  {
+    id: 'test_3',
+    studentId: 'student_1',
+    courseId: 'course_1',
+    courseName: 'English Fundamentals',
+    testType: 'quiz',
+    date: '2024-01-12',
+    scores: {
+      listening: 82,
+      speaking: 76,
+      reading: 89,
+      writing: 80,
+    },
+    overall: 82,
+    feedback: 'Very good vocabulary retention. Well done!',
+    teacherId: 'teacher_1',
+    teacherName: 'Sarah Johnson',
+    maxScore: 50,
+    gradeLevel: 'B',
+    createdAt: '2024-01-12T10:30:00Z',
+    updatedAt: '2024-01-12T15:00:00Z',
+  },
+];
