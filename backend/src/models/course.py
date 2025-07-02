@@ -1,15 +1,21 @@
-from sqlalchemy import Column, Integer, String, Text, Float
+from sqlalchemy import Column, String, Text, DateTime, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from ..database import Base
+from sqlalchemy.sql import func
+from src.database import Base
+import uuid
+
 
 class Course(Base):
     __tablename__ = "courses"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    title = Column(String(255), nullable=False)
     description = Column(Text)
-    level = Column(String)
-    price = Column(Float)
-    duration = Column(Integer) 
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    classes = relationship("Class", back_populates="course")
+    # Relationships
+    creator = relationship("User", back_populates="created_courses")
+    classrooms = relationship("Classroom", back_populates="course") 
