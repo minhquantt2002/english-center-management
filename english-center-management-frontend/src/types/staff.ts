@@ -1,36 +1,4 @@
-import {
-  BaseEntity,
-  CourseLevel,
-  TimeSlot,
-  DayOfWeek,
-  BaseFilters,
-} from './common';
-
-// Student form data for enrollment
-export interface StudentFormData {
-  fullName: string;
-  birthDate: string;
-  phoneNumber: string;
-  email: string;
-  level: string;
-  notes: string;
-  address?: string;
-  parentContact?: string;
-}
-
-// Schedule form data for creating class schedules
-export interface ScheduleFormData {
-  className: string;
-  startDate: string;
-  sessionsPerWeek: string;
-  startTime: string;
-  endTime: string;
-  room: string;
-  instructor: string;
-  selectedDays: {
-    [key: string]: boolean;
-  };
-}
+import { BaseEntity, CourseLevel, TimeSlot, DayOfWeek } from './common';
 
 // Schedule interfaces
 export interface Schedule extends BaseEntity {
@@ -48,8 +16,8 @@ export interface Schedule extends BaseEntity {
   bgColor?: string;
 }
 
-// Enrollment interface
-export interface Enrollment extends BaseEntity {
+// Staff interface
+export interface Staff extends BaseEntity {
   studentId: string;
   studentName: string;
   courseId: string;
@@ -68,8 +36,8 @@ export interface Enrollment extends BaseEntity {
   endDate?: string;
 }
 
-// Enrollment statistics for dashboard
-export interface EnrollmentStats {
+// Staff statistics for dashboard
+export interface StaffStats {
   newRegistrations: number;
   activeClasses: number;
   todaySchedule: number;
@@ -94,18 +62,7 @@ export interface EnrollmentStats {
   }>;
 }
 
-// Class assignment for enrollment
-export interface ClassAssignment extends BaseEntity {
-  studentId: string;
-  studentName: string;
-  classId: string;
-  className: string;
-  assignmentDate: string;
-  status: 'active' | 'completed' | 'transferred' | 'dropped';
-  assignedBy: string; // user id who made the assignment
-}
-
-// Room management for enrollment
+// Room management for Staff
 export interface Room extends BaseEntity {
   name: string;
   capacity: number;
@@ -115,7 +72,7 @@ export interface Room extends BaseEntity {
   type: 'classroom' | 'lab' | 'auditorium' | 'online';
 }
 
-// Invoice for enrollment fees
+// Invoice for Staff fees
 export interface Invoice extends BaseEntity {
   studentId: string;
   studentName: string;
@@ -143,46 +100,4 @@ export interface Payment extends BaseEntity {
   referenceNumber?: string;
   notes?: string;
   processedBy: string; // user id who processed the payment
-}
-
-// Enrollment filters
-export interface EnrollmentFilters extends BaseFilters {
-  status?: Enrollment['status'];
-  paymentStatus?: Enrollment['paymentStatus'];
-  level?: CourseLevel;
-  dateFrom?: string;
-  dateTo?: string;
-  course?: string;
-}
-
-export interface ScheduleFilters extends BaseFilters {
-  teacher?: string;
-  room?: string;
-  day?: string;
-  timeSlot?: string;
-  status?: 'active' | 'inactive';
-}
-
-// Waitlist management
-export interface Waitlist extends BaseEntity {
-  studentId: string;
-  studentName: string;
-  courseId: string;
-  courseName: string;
-  requestedLevel: CourseLevel;
-  priority: number;
-  requestDate: string;
-  status: 'waiting' | 'offered' | 'enrolled' | 'expired';
-  notes?: string;
-}
-
-// Class capacity and availability
-export interface ClassCapacity {
-  classId: string;
-  className: string;
-  maxCapacity: number;
-  currentEnrollment: number;
-  availableSpots: number;
-  waitlistCount: number;
-  status: 'available' | 'full' | 'closed';
 }

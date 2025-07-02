@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import EnrollmentSidebar from './_components/EnrollmentSidebar';
-import EnrollmentNavbar from './_components/EnrollmentNavbar';
+import { StaffSidebar, StaffNavbar } from './_components';
 
-interface EnrollmentLayoutProps {
+interface StaffLayoutProps {
   children: React.ReactNode;
 }
 
-const EnrollmentLayout: React.FC<EnrollmentLayoutProps> = ({ children }) => {
+const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -46,7 +45,7 @@ const EnrollmentLayout: React.FC<EnrollmentLayoutProps> = ({ children }) => {
           }
         `}
       >
-        <EnrollmentSidebar />
+        <StaffSidebar />
       </div>
 
       {/* Mobile overlay */}
@@ -64,7 +63,7 @@ const EnrollmentLayout: React.FC<EnrollmentLayoutProps> = ({ children }) => {
         }`}
       >
         {/* Navbar */}
-        <EnrollmentNavbar onToggleSidebar={toggleSidebar} />
+        <StaffNavbar onToggleSidebar={toggleSidebar} />
 
         {/* Page content */}
         <main className='flex-1 overflow-x-hidden overflow-y-auto pt-16 pb-6'>
@@ -78,4 +77,4 @@ const EnrollmentLayout: React.FC<EnrollmentLayoutProps> = ({ children }) => {
   );
 };
 
-export default EnrollmentLayout;
+export default StaffLayout;

@@ -1,6 +1,6 @@
-import { EnrollmentStats } from '@/types';
+import { StaffStats } from '@/types/staff';
 
-export const mockEnrollmentStats: EnrollmentStats = {
+export const mockStaffStats: StaffStats = {
   newRegistrations: 12,
   activeClasses: 24,
   todaySchedule: 18,

@@ -15,7 +15,7 @@ import {
 interface PersonalInfoModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userRole?: 'admin' | 'enrollment' | 'student' | 'teacher';
+  userRole?: 'admin' | 'staff' | 'student' | 'teacher';
 }
 
 interface PersonalInfo {
@@ -86,7 +86,7 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
           text: 'text-blue-600',
           button: 'bg-blue-500 hover:bg-blue-600',
         };
-      case 'enrollment':
+      case 'staff':
         return {
           primary: 'green',
           accent: 'blue',
@@ -178,7 +178,7 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
                 {userRole === 'student' && `Học viên ${personalInfo.level}`}
                 {userRole === 'teacher' && 'Giáo viên tiếng Anh'}
                 {userRole === 'admin' && 'Quản trị viên hệ thống'}
-                {userRole === 'enrollment' && 'Nhân viên tuyển sinh'}
+                {userRole === 'staff' && 'Nhân viên nhân sự'}
               </p>
               {(personalInfo.studentId || personalInfo.employeeId) && (
                 <p className='text-gray-500 text-sm'>

@@ -2,14 +2,14 @@
 
 import React from 'react';
 import { Users, Calendar, BarChart3 } from 'lucide-react';
-import { mockEnrollmentStats } from '../../data';
+import { mockStaffStats } from '../../data/staff/stats';
 
 const Dashboard = () => {
-  // Use mock data from enrollment module
+  // Use mock data from staff module
   const statsData = [
     {
       title: 'Học viên mới đăng ký',
-      value: String(mockEnrollmentStats.newRegistrations),
+      value: String(mockStaffStats.newRegistrations),
       change: '+18% so với tháng qua',
       changeType: 'positive',
       icon: Users,
@@ -17,7 +17,7 @@ const Dashboard = () => {
     },
     {
       title: 'Lớp đang hoạt động',
-      value: String(mockEnrollmentStats.activeClasses),
+      value: String(mockStaffStats.activeClasses),
       change: '— Không đổi so với tuần trước',
       changeType: 'neutral',
       icon: Calendar,
@@ -25,7 +25,7 @@ const Dashboard = () => {
     },
     {
       title: 'Lịch học hôm nay',
-      value: String(mockEnrollmentStats.todaySchedule),
+      value: String(mockStaffStats.todaySchedule),
       change: '5 lớp đang diễn ra',
       changeType: 'info',
       icon: BarChart3,
@@ -33,12 +33,9 @@ const Dashboard = () => {
     },
   ];
 
-  const recentRegistrations = mockEnrollmentStats.recentRegistrations.slice(
-    0,
-    3
-  );
+  const recentRegistrations = mockStaffStats.recentRegistrations.slice(0, 3);
 
-  const todaySchedule = mockEnrollmentStats.todayScheduleDetails.slice(0, 3);
+  const todaySchedule = mockStaffStats.todayScheduleDetails.slice(0, 3);
 
   const quickActions = [
     {

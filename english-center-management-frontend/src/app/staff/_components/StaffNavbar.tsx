@@ -15,13 +15,11 @@ import {
 } from 'lucide-react';
 import PersonalInfoModal from '../../../components/PersonalInfoModal';
 
-interface EnrollmentNavbarProps {
+interface StaffNavbarProps {
   onToggleSidebar?: () => void;
 }
 
-const EnrollmentNavbar: React.FC<EnrollmentNavbarProps> = ({
-  onToggleSidebar,
-}) => {
+const StaffNavbar: React.FC<StaffNavbarProps> = ({ onToggleSidebar }) => {
   const pathname = usePathname();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -32,11 +30,11 @@ const EnrollmentNavbar: React.FC<EnrollmentNavbarProps> = ({
     const paths = pathname.split('/').filter(Boolean);
     const breadcrumbs = [];
 
-    if (paths.length === 1 && paths[0] === 'enrollment') {
-      return [{ name: 'Tổng quan', href: '/enrollment' }];
+    if (paths.length === 1 && paths[0] === 'staff') {
+      return [{ name: 'Tổng quan', href: '/staff' }];
     }
 
-    breadcrumbs.push({ name: 'Tổng quan', href: '/enrollment' });
+    breadcrumbs.push({ name: 'Tổng quan', href: '/staff' });
 
     if (paths.length > 1) {
       const pageName = paths[1];
@@ -56,7 +54,7 @@ const EnrollmentNavbar: React.FC<EnrollmentNavbarProps> = ({
         name:
           pageNames[pageName] ||
           pageName.charAt(0).toUpperCase() + pageName.slice(1),
-        href: `/enrollment/${pageName}`,
+        href: `/staff/${pageName}`,
       });
     }
 
@@ -214,14 +212,12 @@ const EnrollmentNavbar: React.FC<EnrollmentNavbarProps> = ({
             >
               <img
                 src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
-                alt='Enrollment Staff'
+                alt='Staff'
                 className='w-8 h-8 rounded-full object-cover'
               />
               <div className='hidden md:block text-left'>
-                <p className='text-sm font-medium text-gray-900'>
-                  Enrollment Staff
-                </p>
-                <p className='text-xs text-gray-500'>Admission Officer</p>
+                <p className='text-sm font-medium text-gray-900'>Staff</p>
+                <p className='text-xs text-gray-500'>Staff</p>
               </div>
               <ChevronDown className='w-4 h-4 text-gray-500' />
             </button>
@@ -233,16 +229,12 @@ const EnrollmentNavbar: React.FC<EnrollmentNavbarProps> = ({
                   <div className='flex items-center gap-3'>
                     <img
                       src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
-                      alt='Enrollment Staff'
+                      alt='Staff'
                       className='w-10 h-10 rounded-full object-cover'
                     />
                     <div>
-                      <p className='text-sm font-medium text-gray-900'>
-                        Enrollment Staff
-                      </p>
-                      <p className='text-xs text-gray-500'>
-                        enrollment@zenlish.com
-                      </p>
+                      <p className='text-sm font-medium text-gray-900'>Staff</p>
+                      <p className='text-xs text-gray-500'>staff@zenlish.com</p>
                     </div>
                   </div>
                 </div>
@@ -277,10 +269,10 @@ const EnrollmentNavbar: React.FC<EnrollmentNavbarProps> = ({
       <PersonalInfoModal
         isOpen={showPersonalInfo}
         onClose={() => setShowPersonalInfo(false)}
-        userRole='enrollment'
+        userRole='staff'
       />
     </header>
   );
 };
 
-export default EnrollmentNavbar;
+export default StaffNavbar;

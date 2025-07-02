@@ -1,6 +1,6 @@
-import { Enrollment, Invoice, Payment } from '@/types';
+import { Staff, Invoice, Payment } from '@/types';
 
-export const mockEnrollments: Enrollment[] = [
+export const mockStaffs: Staff[] = [
   {
     id: 'enrollment_1',
     studentId: 'student_1',

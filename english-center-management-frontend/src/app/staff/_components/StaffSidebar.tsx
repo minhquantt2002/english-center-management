@@ -24,69 +24,69 @@ interface MenuItem {
   badge?: string;
 }
 
-const EnrollmentSidebar: React.FC = () => {
+const StaffSidebar: React.FC = () => {
   const pathname = usePathname();
 
   const menuItems: MenuItem[] = [
     {
       name: 'Tổng quan',
-      href: '/enrollment',
+      href: '/staff',
       icon: <LayoutDashboard className='w-5 h-5' />,
     },
     {
       name: 'Học viên',
-      href: '/enrollment/list-student',
+      href: '/staff/list-student',
       icon: <Users className='w-5 h-5' />,
       badge: '98',
     },
     {
       name: 'Giáo viên',
-      href: '/enrollment/list-teacher',
+      href: '/staff/list-teacher',
       icon: <GraduationCap className='w-5 h-5' />,
       badge: '12',
     },
     {
       name: 'Khóa học',
-      href: '/enrollment/list-course',
+      href: '/staff/list-course',
       icon: <BookOpen className='w-5 h-5' />,
       badge: '6',
     },
     {
       name: 'Lớp học',
-      href: '/enrollment/list-classroom',
+      href: '/staff/list-classroom',
       icon: <School className='w-5 h-5' />,
       badge: '8',
     },
     {
       name: 'Tạo học viên',
-      href: '/enrollment/create-student',
+      href: '/staff/create-student',
       icon: <UserPlus className='w-5 h-5' />,
     },
     {
       name: 'Phân công học viên',
-      href: '/enrollment/assign-student',
+      href: '/staff/assign-student',
       icon: <ClipboardList className='w-5 h-5' />,
     },
     {
       name: 'Tạo lịch học',
-      href: '/enrollment/create-schedule',
+      href: '/staff/create-schedule',
       icon: <Calendar className='w-5 h-5' />,
     },
     {
       name: 'Lịch giảng dạy',
-      href: '/enrollment/teaching-schedule',
+      href: '/staff/teaching-schedule',
       icon: <Calendar className='w-5 h-5' />,
     },
     {
       name: 'Hóa đơn học viên',
-      href: '/enrollment/create-student-invoice',
+      href: '/staff/create-student-invoice',
       icon: <Receipt className='w-5 h-5' />,
     },
   ];
 
   const isActive = (href: string) => {
-    if (href === '/enrollment') {
-      return pathname === '/enrollment';
+    if (href === '/staff') {
+      return pathname === '/staff';
     }
     return pathname.startsWith(href);
   };
@@ -97,10 +97,10 @@ const EnrollmentSidebar: React.FC = () => {
       <div className='h-16 flex items-center px-6 border-b border-gray-200'>
         <div className='flex items-center gap-3'>
           <div className='w-8 h-8 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg flex items-center justify-center'>
-            <span className='text-white font-bold text-sm'>E</span>
+            <span className='text-white font-bold text-sm'>S</span>
           </div>
           <div>
-            <h1 className='text-xl font-bold text-gray-900'>Tuyển sinh</h1>
+            <h1 className='text-xl font-bold text-gray-900'>Nhân sự</h1>
             <p className='text-xs text-gray-500'>Bảng quản lý</p>
           </div>
         </div>
@@ -164,7 +164,7 @@ const EnrollmentSidebar: React.FC = () => {
       {/* Settings at bottom */}
       <div className='absolute bottom-4 left-3 right-3'>
         <Link
-          href='/enrollment/settings'
+          href='/staff/settings'
           className='group flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200'
         >
           <Settings className='w-5 h-5 text-gray-500 group-hover:text-gray-700' />
@@ -175,4 +175,4 @@ const EnrollmentSidebar: React.FC = () => {
   );
 };
 
-export default EnrollmentSidebar;
+export default StaffSidebar;

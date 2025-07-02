@@ -6,7 +6,7 @@ export interface BaseEntity {
 }
 
 // Common types
-export type UserRole = 'admin' | 'teacher' | 'student' | 'enrollment';
+export type UserRole = 'admin' | 'teacher' | 'student' | 'staff';
 export type UserStatus = 'active' | 'inactive' | 'suspended' | 'graduated';
 export type CourseLevel =
   | 'beginner'
@@ -17,23 +17,6 @@ export type CourseLevel =
   | 'proficiency';
 export type CourseStatus = 'active' | 'upcoming' | 'completed' | 'cancelled';
 
-// API Response interfaces
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
-}
-
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
 // Common UI interfaces
 export interface StatCard {
   title: string;
@@ -42,15 +25,6 @@ export interface StatCard {
   changeType: 'positive' | 'negative' | 'neutral';
   icon: string;
   iconBg: string;
-}
-
-export interface QuickAction {
-  title: string;
-  description: string;
-  icon: string;
-  iconBg: string;
-  href?: string;
-  onClick?: () => void;
 }
 
 // Time and Schedule common types
@@ -67,22 +41,6 @@ export interface DayOfWeek {
   friday: boolean;
   saturday: boolean;
   sunday: boolean;
-}
-
-// Contact information
-export interface ContactInfo {
-  name: string;
-  phone: string;
-  relationship: string;
-}
-
-// Address interface
-export interface Address {
-  street?: string;
-  city?: string;
-  state?: string;
-  zipCode?: string;
-  country?: string;
 }
 
 // System status interface

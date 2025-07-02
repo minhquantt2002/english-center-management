@@ -1,3 +1,3 @@
-export * from './enrollments';
+export * from './staff';
 export * from './schedules';
 export * from './stats';

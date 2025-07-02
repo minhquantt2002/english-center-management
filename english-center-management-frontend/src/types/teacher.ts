@@ -1,10 +1,4 @@
-import {
-  BaseEntity,
-  CourseLevel,
-  UserStatus,
-  TimeSlot,
-  BaseFilters,
-} from './common';
+import { BaseEntity, CourseLevel, UserStatus, TimeSlot } from './common';
 import { StudentScores } from './student';
 
 // Teacher profile interface
@@ -119,28 +113,6 @@ export interface TeacherTask extends BaseEntity {
   estimatedTime?: number; // minutes
 }
 
-// Student feedback given by teachers
-export interface TeacherStudentFeedback extends BaseEntity {
-  studentId: string;
-  studentName: string;
-  teacherId: string;
-  teacherName: string;
-  classId: string;
-  className: string;
-  date: string;
-  type: 'performance' | 'behavior' | 'attendance' | 'general';
-  content: string;
-  rating?: number; // 1-5 scale
-  isPrivate: boolean;
-  categories?: {
-    participation: number;
-    homework_completion: number;
-    class_behavior: number;
-    progress: number;
-  };
-  recommendations?: string[];
-}
-
 // Attendance management by teachers
 export interface AttendanceEntry extends BaseEntity {
   studentId: string;
@@ -153,19 +125,6 @@ export interface AttendanceEntry extends BaseEntity {
   notes?: string;
   markedBy: string; // teacher id
   markedAt: string;
-}
-
-// Class attendance summary
-export interface ClassAttendance {
-  classId: string;
-  className: string;
-  sessionDate: string;
-  totalStudents: number;
-  presentStudents: number;
-  absentStudents: number;
-  lateStudents: number;
-  attendanceRate: number;
-  entries: AttendanceEntry[];
 }
 
 // Assignment/Homework management
@@ -246,37 +205,4 @@ export interface GradeBookStudent {
   averageScore: number;
   attendanceRate: number;
   status: UserStatus;
-}
-
-// Teacher performance metrics
-export interface TeacherMetrics {
-  teacherId: string;
-  period: {
-    start: string;
-    end: string;
-  };
-  stats: {
-    totalClasses: number;
-    totalStudents: number;
-    averageAttendance: number;
-    averageStudentScore: number;
-    classRating: number;
-    feedbackCount: number;
-  };
-  classPerformance: Array<{
-    classId: string;
-    className: string;
-    averageScore: number;
-    attendanceRate: number;
-    studentCount: number;
-  }>;
-}
-
-// Teacher filters
-export interface TeacherFilters extends BaseFilters {
-  class?: string;
-  level?: CourseLevel;
-  date?: string;
-  status?: 'scheduled' | 'completed' | 'in-progress';
-  room?: string;
 }

@@ -4,7 +4,6 @@ import {
   CourseStatus,
   UserRole,
   UserStatus,
-  BaseFilters,
 } from './common';
 
 // User base interface
@@ -94,30 +93,6 @@ export interface Student extends User {
   };
 }
 
-// Admin filter interfaces
-export interface UserFilters extends BaseFilters {
-  role?: UserRole;
-  status?: UserStatus;
-  level?: CourseLevel;
-}
-
-export interface CourseFilters extends BaseFilters {
-  level?: CourseLevel;
-  status?: CourseStatus;
-}
-
-export interface ClassFilters extends BaseFilters {
-  level?: CourseLevel;
-  teacher?: string;
-  status?: 'active' | 'inactive';
-}
-
-export interface AdminTeacherFilters extends BaseFilters {
-  specialization?: string;
-  status?: UserStatus;
-  assignedClass?: string;
-}
-
 // Admin dashboard specific interfaces
 export interface AdminStats {
   totalStudents: number;
@@ -135,20 +110,4 @@ export interface AdminStats {
     status: string;
     statusColor: string;
   }>;
-}
-
-// Role and permission management
-export interface Role extends BaseEntity {
-  name: string;
-  description: string;
-  permissions: string[];
-  isDefault: boolean;
-}
-
-export interface Permission {
-  id: string;
-  name: string;
-  description: string;
-  module: string;
-  action: 'create' | 'read' | 'update' | 'delete' | 'manage';
 }
