@@ -1,27 +1,21 @@
 from typing import Optional
-from decimal import Decimal
+from datetime import datetime
+from uuid import UUID
 from .base import BaseSchema
 
 class CourseBase(BaseSchema):
-    name: str
-    description: str
-    level: str
-    price: Decimal
-    duration: int 
-    max_students: int
-    status: str = "active"
+    title: str
+    description: Optional[str] = None
 
 class CourseCreate(CourseBase):
-    pass
+    created_by: Optional[UUID] = None  # Will be set by controller
 
 class CourseUpdate(BaseSchema):
-    name: Optional[str] = None
+    title: Optional[str] = None
     description: Optional[str] = None
-    level: Optional[str] = None
-    price: Optional[Decimal] = None
-    duration: Optional[int] = None
-    max_students: Optional[int] = None
-    status: Optional[str] = None
 
 class CourseResponse(CourseBase):
-    pass
+    id: UUID
+    created_by: UUID
+    created_at: datetime
+    updated_at: datetime

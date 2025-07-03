@@ -1,26 +1,31 @@
 from pydantic import EmailStr
 from typing import Optional
+from datetime import datetime
+from uuid import UUID
 from .base import BaseSchema
 from ..models.user import UserRole
 
 class UserBase(BaseSchema):
+    name: str
     email: EmailStr
-    full_name: str
     role: UserRole
-    is_active: bool = True
 
 class UserCreate(UserBase):
     password: str
-    confirm_password: str
 
 class UserUpdate(BaseSchema):
+    name: Optional[str] = None
     email: Optional[EmailStr] = None
-    full_name: Optional[str] = None
     password: Optional[str] = None
-    is_active: Optional[bool] = None
+    role: Optional[UserRole] = None
 
 class UserResponse(UserBase):
-    id: int
+    id: UUID
+    created_at: datetime
+    updated_at: datetime
 
 class UserInDB(UserBase):
-    hashed_password: str
+    id: UUID
+    password: str
+    created_at: datetime
+    updated_at: datetime
