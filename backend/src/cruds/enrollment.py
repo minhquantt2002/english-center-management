@@ -16,22 +16,22 @@ def get_enrollments_by_student(db: Session, student_id: UUID) -> List[Enrollment
     """Get enrollments for specific student"""
     return db.query(Enrollment).filter(Enrollment.student_id == student_id).all()
 
-def get_enrollments_by_classroom(db: Session, classroom_id: UUID) -> List[Enrollment]:
+def get_enrollments_by_classroom(db: Session, class_id: UUID) -> List[Enrollment]:
     """Get enrollments for specific classroom"""
-    return db.query(Enrollment).filter(Enrollment.classroom_id == classroom_id).all()
+    return db.query(Enrollment).filter(Enrollment.class_id == class_id).all()
 
-def get_enrollment_by_student_classroom(db: Session, student_id: UUID, classroom_id: UUID) -> Optional[Enrollment]:
+def get_enrollment_by_student_classroom(db: Session, student_id: UUID, class_id: UUID) -> Optional[Enrollment]:
     """Get specific enrollment by student and classroom"""
     return db.query(Enrollment)\
         .filter(Enrollment.student_id == student_id)\
-        .filter(Enrollment.classroom_id == classroom_id)\
+        .filter(Enrollment.class_id == class_id)\
         .first()
 
 def create_enrollment(db: Session, enrollment_data: EnrollmentCreate) -> Enrollment:
     """Create new enrollment"""
     db_enrollment = Enrollment(
         student_id=enrollment_data.student_id,
-        classroom_id=enrollment_data.classroom_id
+        class_id=enrollment_data.class_id
     )
     db.add(db_enrollment)
     db.commit()
@@ -52,6 +52,6 @@ def count_enrollments_by_student(db: Session, student_id: UUID) -> int:
     """Count enrollments for a student"""
     return db.query(Enrollment).filter(Enrollment.student_id == student_id).count()
 
-def count_enrollments_by_classroom(db: Session, classroom_id: UUID) -> int:
+def count_enrollments_by_classroom(db: Session, class_id: UUID) -> int:
     """Count enrollments for a classroom"""
-    return db.query(Enrollment).filter(Enrollment.classroom_id == classroom_id).count() 
+    return db.query(Enrollment).filter(Enrollment.class_id == class_id).count() 

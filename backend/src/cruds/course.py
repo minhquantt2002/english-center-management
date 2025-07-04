@@ -12,16 +12,16 @@ def get_courses(db: Session, skip: int = 0, limit: int = 100) -> List[Course]:
     """Get courses with pagination"""
     return db.query(Course).offset(skip).limit(limit).all()
 
-def get_courses_by_creator(db: Session, creator_id: UUID) -> List[Course]:
-    """Get courses created by specific user"""
-    return db.query(Course).filter(Course.created_by == creator_id).all()
+def get_courses_by_level(db: Session, level: str) -> List[Course]:
+    """Get courses by level"""
+    return db.query(Course).filter(Course.level == level).all()
 
 def create_course(db: Session, course_data: CourseCreate) -> Course:
     """Create new course"""
     db_course = Course(
-        title=course_data.title,
+        course_name=course_data.course_name,
         description=course_data.description,
-        created_by=course_data.created_by
+        level=course_data.level
     )
     db.add(db_course)
     db.commit()

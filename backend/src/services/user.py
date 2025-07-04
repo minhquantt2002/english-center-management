@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from ..cruds import user as user_crud
 from ..schemas.user import UserCreate, UserUpdate
-from ..models.user import User, UserRole
+from ..models.user import User
 from .auth import get_password_hash
 
 def get_user(db: Session, user_id: UUID) -> Optional[User]:
@@ -18,9 +18,9 @@ def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
     """Get list of users with pagination"""
     return user_crud.get_users(db, skip=skip, limit=limit)
 
-def get_users_by_role(db: Session, role: UserRole) -> List[User]:
-    """Get users by role"""
-    return user_crud.get_users_by_role(db, role)
+def get_users_by_role(db: Session, role_name: str) -> List[User]:
+    """Get users by role name"""
+    return user_crud.get_users_by_role(db, role_name)
 
 def create_user(db: Session, user_data: UserCreate) -> User:
     """Create new user"""
@@ -44,6 +44,6 @@ def count_total_users(db: Session) -> int:
     """Count total users"""
     return user_crud.count_total_users(db)
 
-def count_users_by_role(db: Session, role: UserRole) -> int:
-    """Count users by role"""
-    return user_crud.count_users_by_role(db, role)
+def count_users_by_role(db: Session, role_name: str) -> int:
+    """Count users by role name"""
+    return user_crud.count_users_by_role(db, role_name)

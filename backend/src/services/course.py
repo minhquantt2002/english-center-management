@@ -13,9 +13,9 @@ def get_courses(db: Session, skip: int = 0, limit: int = 100) -> List[Course]:
     """Get list of courses with pagination"""
     return course_crud.get_courses(db, skip=skip, limit=limit)
 
-def get_courses_by_creator(db: Session, creator_id: UUID) -> List[Course]:
-    """Get courses created by specific user"""
-    return course_crud.get_courses_by_creator(db, creator_id)
+def get_courses_by_level(db: Session, level: str) -> List[Course]:
+    """Get courses by level"""
+    return course_crud.get_courses_by_level(db, level)
 
 def create_course(db: Session, course_data: CourseCreate) -> Course:
     """Create new course"""

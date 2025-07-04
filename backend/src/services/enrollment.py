@@ -17,13 +17,13 @@ def get_enrollments_by_student(db: Session, student_id: UUID) -> List[Enrollment
     """Get enrollments for specific student"""
     return enrollment_crud.get_enrollments_by_student(db, student_id)
 
-def get_enrollments_by_classroom(db: Session, classroom_id: UUID) -> List[Enrollment]:
+def get_enrollments_by_classroom(db: Session, class_id: UUID) -> List[Enrollment]:
     """Get enrollments for specific classroom"""
-    return enrollment_crud.get_enrollments_by_classroom(db, classroom_id)
+    return enrollment_crud.get_enrollments_by_classroom(db, class_id)
 
-def get_enrollment_by_student_classroom(db: Session, student_id: UUID, classroom_id: UUID) -> Optional[Enrollment]:
+def get_enrollment_by_student_classroom(db: Session, student_id: UUID, class_id: UUID) -> Optional[Enrollment]:
     """Get specific enrollment by student and classroom"""
-    return enrollment_crud.get_enrollment_by_student_classroom(db, student_id, classroom_id)
+    return enrollment_crud.get_enrollment_by_student_classroom(db, student_id, class_id)
 
 def create_enrollment(db: Session, enrollment_data: EnrollmentCreate) -> Enrollment:
     """Create new enrollment"""
@@ -37,6 +37,6 @@ def count_enrollments_by_student(db: Session, student_id: UUID) -> int:
     """Count enrollments for a student"""
     return enrollment_crud.count_enrollments_by_student(db, student_id)
 
-def count_enrollments_by_classroom(db: Session, classroom_id: UUID) -> int:
+def count_enrollments_by_classroom(db: Session, class_id: UUID) -> int:
     """Count enrollments for a classroom"""
-    return enrollment_crud.count_enrollments_by_classroom(db, classroom_id) 
+    return enrollment_crud.count_enrollments_by_classroom(db, class_id) 

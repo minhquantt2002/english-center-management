@@ -1,17 +1,9 @@
-from sqlalchemy import Column, String, DateTime, Enum
+from sqlalchemy import Column, String, Text, Date, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from src.database import Base
-import enum
 import uuid
-
-
-class UserRole(enum.Enum):
-    STUDENT = "student"
-    TEACHER = "teacher"
-    ADMIN = "admin"
-    STAFF = "staff"
 
 
 class User(Base):
@@ -21,22 +13,25 @@ class User(Base):
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)
-    role = Column(Enum(UserRole), nullable=False, default=UserRole.STUDENT)
+    role_name = Column(String(50), nullable=False)  # admin, receptionist, teacher, student
+    bio = Column(Text)
+    date_of_birth = Column(Date)
+    phone_number = Column(String(20))
+    input_level = Column(String(50))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # Relationships
-    # Courses created by this user (if teacher/staff)
-    created_courses = relationship("Course", back_populates="creator")
-    
-    # Classrooms taught by this user (if teacher)
-    taught_classrooms = relationship("Classroom", back_populates="teacher")
+    # Classes taught by this user (if teacher)
+    taught_classes = relationship("Class", back_populates="teacher")
     
     # Student enrollments (if student)
     enrollments = relationship("Enrollment", back_populates="student")
     
-    # Student results (if student)
-    results = relationship("Result", back_populates="student")
+    # Student scores (if student)
+    scores = relationship("Score", back_populates="student")
     
-    # Student attendances (if student)
-    attendances = relationship("Attendance", back_populates="student") 
+    # Feedbacks given by teacher
+    given_feedbacks = relationship("Feedback", foreign_keys="Feedback.teacher_id", back_populates="teacher")
+    
+    # Feedbacks received by student
+    received_feedbacks = relationship("Feedback", foreign_keys="Feedback.student_id", back_populates="student") 

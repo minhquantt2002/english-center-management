@@ -1,17 +1,21 @@
-from .user import User, UserRole
+from .user import User
 from .course import Course
-from .classroom import Classroom
-from .schedule import Schedule, DayOfWeek
-from .result import Result
-from .attendance import Attendance, AttendanceStatus
+from .classroom import Class, ClassStatus
 from .enrollment import Enrollment
+from .room import Room
+from .exam import Exam
+from .score import Score
+from .feedback import Feedback
+from .schedule import Schedule, Weekday
 
 __all__ = [
-    "User", "UserRole",
+    "User",
     "Course",
-    "Classroom",
-    "Schedule", "DayOfWeek",
-    "Result",
-    "Attendance", "AttendanceStatus",
-    "Enrollment"
+    "Class", "ClassStatus",
+    "Enrollment",
+    "Room",
+    "Exam",
+    "Score",
+    "Feedback",
+    "Schedule", "Weekday"
 ] 

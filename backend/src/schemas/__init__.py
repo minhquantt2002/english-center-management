@@ -5,8 +5,12 @@ from .course import CourseBase, CourseCreate, CourseUpdate, CourseResponse
 from .classroom import ClassroomBase, ClassroomCreate, ClassroomUpdate, ClassroomResponse
 from .enrollment import EnrollmentBase, EnrollmentCreate, EnrollmentResponse
 from .schedule import ScheduleBase, ScheduleCreate, ScheduleUpdate, ScheduleResponse
-from .result import ResultBase, ResultCreate, ResultUpdate, ResultResponse
-from .attendance import AttendanceBase, AttendanceCreate, AttendanceUpdate, AttendanceResponse
+from .room import RoomBase, RoomCreate, RoomUpdate, RoomResponse
+from .exam import ExamBase, ExamCreate, ExamUpdate, ExamResponse
+from .score import ScoreBase, ScoreCreate, ScoreUpdate, ScoreResponse
+from .feedback import FeedbackBase, FeedbackCreate, FeedbackUpdate, FeedbackResponse
+from .student import StudentBase, StudentCreate, StudentUpdate, StudentResponse
+from .teacher import TeacherBase, TeacherCreate, TeacherUpdate, TeacherResponse
 
 __all__ = [
     "BaseSchema",
@@ -22,8 +26,16 @@ __all__ = [
     "EnrollmentBase", "EnrollmentCreate", "EnrollmentResponse",
     # Schedule
     "ScheduleBase", "ScheduleCreate", "ScheduleUpdate", "ScheduleResponse",
-    # Result
-    "ResultBase", "ResultCreate", "ResultUpdate", "ResultResponse",
-    # Attendance
-    "AttendanceBase", "AttendanceCreate", "AttendanceUpdate", "AttendanceResponse",
+    # Room
+    "RoomBase", "RoomCreate", "RoomUpdate", "RoomResponse",
+    # Exam
+    "ExamBase", "ExamCreate", "ExamUpdate", "ExamResponse",
+    # Score
+    "ScoreBase", "ScoreCreate", "ScoreUpdate", "ScoreResponse",
+    # Feedback
+    "FeedbackBase", "FeedbackCreate", "FeedbackUpdate", "FeedbackResponse",
+    # Student
+    "StudentBase", "StudentCreate", "StudentUpdate", "StudentResponse",
+    # Teacher
+    "TeacherBase", "TeacherCreate", "TeacherUpdate", "TeacherResponse",
 ] 

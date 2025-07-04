@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..dependencies import get_current_admin_user
-from ..models.user import User, UserRole
+from ..models.user import User
 from ..schemas.user import UserResponse, UserCreate, UserUpdate
 from ..services import user as user_service
 
@@ -86,16 +86,24 @@ async def delete_user(
     user_service.delete_user(db, user_id)
     return {"message": "Xóa người dùng thành công"}
 
-@router.get("/users/role/{role}", response_model=List[UserResponse])
+@router.get("/users/role/{role_name}", response_model=List[UserResponse])
 async def get_users_by_role(
-    role: UserRole,
+    role_name: str,
     current_user: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db)
 ):
     """
     Lấy danh sách người dùng theo role (chỉ admin)
     """
-    users = user_service.get_users_by_role(db, role)
+    # Validate role name
+    valid_roles = ["admin", "receptionist", "teacher", "student"]
+    if role_name not in valid_roles:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Role không hợp lệ. Chỉ chấp nhận: {', '.join(valid_roles)}"
+        )
+    
+    users = user_service.get_users_by_role(db, role_name)
     return users
 
 @router.get("/statistics")
@@ -108,9 +116,9 @@ async def get_system_statistics(
     """
     stats = {
         "total_users": user_service.count_total_users(db),
-        "total_students": user_service.count_users_by_role(db, UserRole.STUDENT),
-        "total_teachers": user_service.count_users_by_role(db, UserRole.TEACHER),
-        "total_staff": user_service.count_users_by_role(db, UserRole.STAFF),
-        "total_admins": user_service.count_users_by_role(db, UserRole.ADMIN),
+        "total_students": user_service.count_users_by_role(db, "student"),
+        "total_teachers": user_service.count_users_by_role(db, "teacher"),
+        "total_receptionists": user_service.count_users_by_role(db, "receptionist"),
+        "total_admins": user_service.count_users_by_role(db, "admin"),
     }
     return stats 

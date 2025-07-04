@@ -7,15 +7,14 @@ from ..models.user import User
 from ..schemas.user import UserResponse, UserUpdate
 from ..schemas.classroom import ClassroomResponse
 from ..schemas.enrollment import EnrollmentResponse
-from ..schemas.result import ResultResponse
-from ..schemas.attendance import AttendanceResponse
+from ..schemas.score import ScoreResponse
 from ..schemas.schedule import ScheduleResponse
 from ..services import user as user_service
 from ..services import classroom as classroom_service
 from ..services import enrollment as enrollment_service
-from ..services import result as result_service
-from ..services import attendance as attendance_service
+from ..services import score as score_service
 from ..services import schedule as schedule_service
+from ..services import student as student_service
 
 router = APIRouter()
 
@@ -38,8 +37,8 @@ async def update_my_profile(
     """
     Cập nhật thông tin cá nhân (chỉ một số trường nhất định)
     """
-    # Học sinh chỉ được cập nhật name, không được đổi email, role
-    allowed_fields = {"name"}
+    # Học sinh chỉ được cập nhật name, bio, phone_number, date_of_birth
+    allowed_fields = {"name", "bio", "phone_number", "date_of_birth"}
     update_data = {k: v for k, v in user_data.dict(exclude_unset=True).items() if k in allowed_fields}
     
     if not update_data:
@@ -84,10 +83,7 @@ async def get_classroom_detail(
     Lấy chi tiết lớp học (chỉ lớp mà học sinh đã đăng ký)
     """
     # Kiểm tra xem học sinh có đăng ký lớp này không
-    enrollment = enrollment_service.get_enrollment_by_student_classroom(
-        db, current_user.id, classroom_id
-    )
-    if not enrollment:
+    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Bạn chưa đăng ký lớp học này"
@@ -102,73 +98,36 @@ async def get_classroom_detail(
     
     return classroom
 
-# Academic Results
-@router.get("/results", response_model=List[ResultResponse])
-async def get_my_results(
+# Academic Scores
+@router.get("/scores", response_model=List[ScoreResponse])
+async def get_my_scores(
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
     """
-    Lấy danh sách kết quả học tập của học sinh
+    Lấy danh sách điểm số của học sinh
     """
-    results = result_service.get_results_by_student(db, current_user.id)
-    return results
+    scores = score_service.get_scores_by_student(db, current_user.id)
+    return scores
 
-@router.get("/classrooms/{classroom_id}/results", response_model=List[ResultResponse])
-async def get_my_classroom_results(
+@router.get("/classrooms/{classroom_id}/scores", response_model=List[ScoreResponse])
+async def get_my_classroom_scores(
     classroom_id: str,
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
     """
-    Lấy kết quả học tập của học sinh trong một lớp học cụ thể
+    Lấy điểm số của học sinh trong một lớp học cụ thể
     """
     # Kiểm tra xem học sinh có đăng ký lớp này không
-    enrollment = enrollment_service.get_enrollment_by_student_classroom(
-        db, current_user.id, classroom_id
-    )
-    if not enrollment:
+    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Bạn chưa đăng ký lớp học này"
         )
     
-    results = result_service.get_results_by_student_classroom(db, current_user.id, classroom_id)
-    return results
-
-# Attendance Records
-@router.get("/attendance", response_model=List[AttendanceResponse])
-async def get_my_attendance(
-    current_user: User = Depends(get_current_student_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy danh sách điểm danh của học sinh
-    """
-    attendances = attendance_service.get_attendance_by_student(db, current_user.id)
-    return attendances
-
-@router.get("/classrooms/{classroom_id}/attendance", response_model=List[AttendanceResponse])
-async def get_my_classroom_attendance(
-    classroom_id: str,
-    current_user: User = Depends(get_current_student_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy điểm danh của học sinh trong một lớp học cụ thể
-    """
-    # Kiểm tra xem học sinh có đăng ký lớp này không
-    enrollment = enrollment_service.get_enrollment_by_student_classroom(
-        db, current_user.id, classroom_id
-    )
-    if not enrollment:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Bạn chưa đăng ký lớp học này"
-        )
-    
-    attendances = attendance_service.get_attendance_by_student_classroom(db, current_user.id, classroom_id)
-    return attendances
+    scores = score_service.get_scores_by_student_classroom(db, current_user.id, classroom_id)
+    return scores
 
 # Schedule Information
 @router.get("/schedules", response_model=List[ScheduleResponse])
@@ -192,10 +151,7 @@ async def get_classroom_schedules(
     Lấy lịch học của một lớp học cụ thể
     """
     # Kiểm tra xem học sinh có đăng ký lớp này không
-    enrollment = enrollment_service.get_enrollment_by_student_classroom(
-        db, current_user.id, classroom_id
-    )
-    if not enrollment:
+    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Bạn chưa đăng ký lớp học này"
@@ -213,13 +169,13 @@ async def get_my_statistics(
     """
     Lấy thống kê học tập của học sinh
     """
+    # Sử dụng student service để lấy academic summary
+    academic_summary = student_service.get_student_academic_summary(db, current_user.id)
+    
     stats = {
-        "total_enrollments": enrollment_service.count_enrollments_by_student(db, current_user.id),
-        "total_results": result_service.count_results_by_student(db, current_user.id),
-        "average_score": result_service.get_average_score_by_student(db, current_user.id),
-        "attendance_rate": attendance_service.get_attendance_rate_by_student(db, current_user.id),
-        "total_present": attendance_service.count_attendance_by_student_status(db, current_user.id, "present"),
-        "total_absent": attendance_service.count_attendance_by_student_status(db, current_user.id, "absent"),
-        "total_late": attendance_service.count_attendance_by_student_status(db, current_user.id, "late"),
+        "student_id": str(current_user.id),
+        "total_enrollments": academic_summary.get("total_enrollments", 0),
+        "total_scores": academic_summary.get("total_scores", 0),
+        "average_score": academic_summary.get("average_score", 0.0),
     }
     return stats 

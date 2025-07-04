@@ -5,13 +5,11 @@ from ..database import get_db
 from ..dependencies import get_current_teacher_user
 from ..models.user import User
 from ..schemas.classroom import ClassroomResponse, ClassroomUpdate
-from ..schemas.student import StudentResponse
-from ..schemas.attendance import AttendanceResponse, AttendanceCreate
-from ..schemas.result import ResultResponse, ResultCreate
+from ..schemas.user import UserResponse
+from ..schemas.score import ScoreResponse, ScoreCreate
 from ..services import classroom as classroom_service
 from ..services import student as student_service
-from ..services import attendance as attendance_service
-from ..services import result as result_service
+from ..services import score as score_service
 
 router = APIRouter()
 
@@ -44,7 +42,7 @@ async def get_classroom_detail(
         )
     
     # Kiểm tra quyền truy cập
-    if current_user.role.value != "admin" and classroom.teacher_id != current_user.id:
+    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Không có quyền truy cập lớp học này"
@@ -70,7 +68,7 @@ async def update_classroom(
         )
     
     # Kiểm tra quyền
-    if current_user.role.value != "admin" and classroom.teacher_id != current_user.id:
+    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Không có quyền cập nhật lớp học này"
@@ -80,7 +78,7 @@ async def update_classroom(
     return updated_classroom
 
 # Student Management in Classroom
-@router.get("/classrooms/{classroom_id}/students", response_model=List[StudentResponse])
+@router.get("/classrooms/{classroom_id}/students", response_model=List[UserResponse])
 async def get_classroom_students(
     classroom_id: str,
     current_user: User = Depends(get_current_teacher_user),
@@ -97,7 +95,7 @@ async def get_classroom_students(
         )
     
     # Kiểm tra quyền
-    if current_user.role.value != "admin" and classroom.teacher_id != current_user.id:
+    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Không có quyền truy cập lớp học này"
@@ -106,16 +104,16 @@ async def get_classroom_students(
     students = student_service.get_students_by_classroom(db, classroom_id)
     return students
 
-# Attendance Management
-@router.post("/classrooms/{classroom_id}/attendance", response_model=AttendanceResponse)
-async def create_attendance_record(
+# Score Management
+@router.post("/classrooms/{classroom_id}/scores", response_model=ScoreResponse)
+async def create_student_score(
     classroom_id: str,
-    attendance_data: AttendanceCreate,
+    score_data: ScoreCreate,
     current_user: User = Depends(get_current_teacher_user),
     db: Session = Depends(get_db)
 ):
     """
-    Tạo bản ghi điểm danh cho học sinh
+    Tạo điểm số cho học sinh
     """
     classroom = classroom_service.get_classroom(db, classroom_id)
     if not classroom:
@@ -125,77 +123,23 @@ async def create_attendance_record(
         )
     
     # Kiểm tra quyền
-    if current_user.role.value != "admin" and classroom.teacher_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Không có quyền điểm danh lớp học này"
-        )
-    
-    attendance = attendance_service.create_attendance(db, attendance_data)
-    return attendance
-
-@router.get("/classrooms/{classroom_id}/attendance", response_model=List[AttendanceResponse])
-async def get_classroom_attendance(
-    classroom_id: str,
-    current_user: User = Depends(get_current_teacher_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy danh sách điểm danh của lớp học
-    """
-    classroom = classroom_service.get_classroom(db, classroom_id)
-    if not classroom:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Lớp học không tồn tại"
-        )
-    
-    # Kiểm tra quyền
-    if current_user.role.value != "admin" and classroom.teacher_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Không có quyền truy cập lớp học này"
-        )
-    
-    attendances = attendance_service.get_attendance_by_classroom(db, classroom_id)
-    return attendances
-
-# Result Management
-@router.post("/classrooms/{classroom_id}/results", response_model=ResultResponse)
-async def create_student_result(
-    classroom_id: str,
-    result_data: ResultCreate,
-    current_user: User = Depends(get_current_teacher_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Tạo kết quả học tập cho học sinh
-    """
-    classroom = classroom_service.get_classroom(db, classroom_id)
-    if not classroom:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Lớp học không tồn tại"
-        )
-    
-    # Kiểm tra quyền
-    if current_user.role.value != "admin" and classroom.teacher_id != current_user.id:
+    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Không có quyền nhập điểm cho lớp học này"
         )
     
-    result = result_service.create_result(db, result_data)
-    return result
+    score = score_service.create_score(db, score_data)
+    return score
 
-@router.get("/classrooms/{classroom_id}/results", response_model=List[ResultResponse])
-async def get_classroom_results(
+@router.get("/classrooms/{classroom_id}/scores", response_model=List[ScoreResponse])
+async def get_classroom_scores(
     classroom_id: str,
     current_user: User = Depends(get_current_teacher_user),
     db: Session = Depends(get_db)
 ):
     """
-    Lấy danh sách kết quả học tập của lớp học
+    Lấy danh sách điểm số của lớp học
     """
     classroom = classroom_service.get_classroom(db, classroom_id)
     if not classroom:
@@ -205,11 +149,30 @@ async def get_classroom_results(
         )
     
     # Kiểm tra quyền
-    if current_user.role.value != "admin" and classroom.teacher_id != current_user.id:
+    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Không có quyền truy cập lớp học này"
         )
     
-    results = result_service.get_results_by_classroom(db, classroom_id)
-    return results 
+    scores = score_service.get_scores_by_classroom(db, classroom_id)
+    return scores
+
+# Teacher Statistics
+@router.get("/statistics")
+async def get_teacher_statistics(
+    current_user: User = Depends(get_current_teacher_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy thống kê của giáo viên
+    """
+    total_classes = len(classroom_service.get_classrooms_by_teacher(db, current_user.id))
+    total_students = student_service.count_students_by_teacher(db, current_user.id) if hasattr(student_service, 'count_students_by_teacher') else 0
+    
+    stats = {
+        "teacher_id": str(current_user.id),
+        "total_classes": total_classes,
+        "total_students": total_students,
+    }
+    return stats 

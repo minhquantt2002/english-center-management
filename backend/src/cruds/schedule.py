@@ -2,9 +2,9 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 from uuid import UUID
 from datetime import time
-from ..models.schedule import Schedule, DayOfWeek
+from ..models.schedule import Schedule, Weekday
 from ..models.enrollment import Enrollment
-from ..models.classroom import Classroom
+from ..models.classroom import Class
 from ..schemas.schedule import ScheduleCreate, ScheduleUpdate
 
 def get_schedule(db: Session, schedule_id: UUID) -> Optional[Schedule]:
@@ -15,29 +15,33 @@ def get_schedules(db: Session, skip: int = 0, limit: int = 100) -> List[Schedule
     """Get schedules with pagination"""
     return db.query(Schedule).offset(skip).limit(limit).all()
 
-def get_schedules_by_classroom(db: Session, classroom_id: UUID) -> List[Schedule]:
+def get_schedules_by_classroom(db: Session, class_id: UUID) -> List[Schedule]:
     """Get schedules for specific classroom"""
-    return db.query(Schedule).filter(Schedule.classroom_id == classroom_id).all()
+    return db.query(Schedule).filter(Schedule.class_id == class_id).all()
 
 def get_schedules_by_student(db: Session, student_id: UUID) -> List[Schedule]:
     """Get schedules for specific student (through enrollments)"""
     return db.query(Schedule)\
-        .join(Classroom, Schedule.classroom_id == Classroom.id)\
-        .join(Enrollment, Classroom.id == Enrollment.classroom_id)\
+        .join(Class, Schedule.class_id == Class.id)\
+        .join(Enrollment, Class.id == Enrollment.class_id)\
         .filter(Enrollment.student_id == student_id)\
         .all()
 
+def get_schedules_by_room(db: Session, room_id: UUID) -> List[Schedule]:
+    """Get schedules for specific room"""
+    return db.query(Schedule).filter(Schedule.room_id == room_id).all()
+
 def get_schedule_by_classroom_time(
     db: Session, 
-    classroom_id: UUID, 
-    day_of_week: DayOfWeek, 
+    class_id: UUID, 
+    weekday: Weekday, 
     start_time: time, 
     end_time: time
 ) -> Optional[Schedule]:
     """Check if schedule exists for classroom at specific time"""
     return db.query(Schedule)\
-        .filter(Schedule.classroom_id == classroom_id)\
-        .filter(Schedule.day_of_week == day_of_week)\
+        .filter(Schedule.class_id == class_id)\
+        .filter(Schedule.weekday == weekday)\
         .filter(Schedule.start_time == start_time)\
         .filter(Schedule.end_time == end_time)\
         .first()
@@ -45,8 +49,9 @@ def get_schedule_by_classroom_time(
 def create_schedule(db: Session, schedule_data: ScheduleCreate) -> Schedule:
     """Create new schedule"""
     db_schedule = Schedule(
-        classroom_id=schedule_data.classroom_id,
-        day_of_week=schedule_data.day_of_week,
+        class_id=schedule_data.class_id,
+        room_id=schedule_data.room_id,
+        weekday=schedule_data.weekday,
         start_time=schedule_data.start_time,
         end_time=schedule_data.end_time
     )
@@ -79,6 +84,6 @@ def delete_schedule(db: Session, schedule_id: UUID) -> bool:
     db.commit()
     return True
 
-def count_schedules_by_classroom(db: Session, classroom_id: UUID) -> int:
+def count_schedules_by_classroom(db: Session, class_id: UUID) -> int:
     """Count schedules for a classroom"""
-    return db.query(Schedule).filter(Schedule.classroom_id == classroom_id).count() 
+    return db.query(Schedule).filter(Schedule.class_id == class_id).count() 

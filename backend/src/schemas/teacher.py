@@ -1,11 +1,13 @@
 from typing import Optional
+from datetime import datetime
+from uuid import UUID
 from .base import BaseSchema
 
 class TeacherBase(BaseSchema):
-    user_id: int
-    specialization: str
-    phone: str
-    address: str
+    user_id: UUID
+    specialization: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
     education: Optional[str] = None
     experience_years: Optional[int] = None
 
@@ -20,4 +22,5 @@ class TeacherUpdate(BaseSchema):
     experience_years: Optional[int] = None
 
 class TeacherResponse(TeacherBase):
-    pass
+    id: UUID
+    created_at: datetime

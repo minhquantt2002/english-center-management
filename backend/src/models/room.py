@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, DateTime
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -6,14 +6,14 @@ from src.database import Base
 import uuid
 
 
-class Course(Base):
-    __tablename__ = "courses"
+class Room(Base):
+    __tablename__ = "rooms"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    course_name = Column(String(255), nullable=False)
-    description = Column(Text)
-    level = Column(String(50))
+    name = Column(String(255), nullable=False)
+    capacity = Column(Integer)
+    address = Column(String(500))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    classes = relationship("Class", back_populates="course") 
+    schedules = relationship("Schedule", back_populates="room") 

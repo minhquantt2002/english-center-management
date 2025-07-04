@@ -3,19 +3,23 @@ from . import course
 from . import classroom
 from . import enrollment
 from . import schedule
-from . import result
-from . import attendance
 from . import student
 from . import teacher
+from . import room
+from . import exam
+from . import score
+from . import feedback
 
 __all__ = [
     "user",
     "course",
-    "classroom", 
+    "classroom",
     "enrollment",
     "schedule",
-    "result",
-    "attendance",
     "student",
-    "teacher"
+    "teacher",
+    "room",
+    "exam",
+    "score",
+    "feedback"
 ] 

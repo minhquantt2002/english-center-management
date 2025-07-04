@@ -33,8 +33,8 @@ async def login(
     access_token = auth_service.create_access_token(
         data={
             "sub": user.email,
-            "user_id": user.id,
-            "role": user.role.value
+            "user_id": str(user.id),
+            "role": user.role_name
         },
         expires_delta=access_token_expires
     )
@@ -65,8 +65,12 @@ async def get_current_user_info(
     
     return UserResponse(
         id=user.id,
+        name=user.name,
         email=user.email,
-        full_name=user.full_name,
-        role=user.role,
-        is_active=user.is_active
+        role_name=user.role_name,
+        bio=user.bio,
+        date_of_birth=user.date_of_birth,
+        phone_number=user.phone_number,
+        input_level=user.input_level,
+        created_at=user.created_at
     )

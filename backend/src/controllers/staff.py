@@ -8,10 +8,12 @@ from ..schemas.course import CourseResponse, CourseCreate, CourseUpdate
 from ..schemas.classroom import ClassroomResponse, ClassroomCreate, ClassroomUpdate
 from ..schemas.enrollment import EnrollmentResponse, EnrollmentCreate
 from ..schemas.schedule import ScheduleResponse, ScheduleCreate, ScheduleUpdate
+from ..schemas.room import RoomResponse, RoomCreate, RoomUpdate
 from ..services import course as course_service
 from ..services import classroom as classroom_service
 from ..services import enrollment as enrollment_service
 from ..services import schedule as schedule_service
+from ..services import room as room_service
 
 router = APIRouter()
 
@@ -38,7 +40,6 @@ async def create_course(
     """
     Tạo khóa học mới
     """
-    course_data.created_by = current_user.id
     course = course_service.create_course(db, course_data)
     return course
 
@@ -127,6 +128,71 @@ async def update_classroom(
     updated_classroom = classroom_service.update_classroom(db, classroom_id, classroom_data)
     return updated_classroom
 
+# Room Management  
+@router.get("/rooms", response_model=List[RoomResponse])
+async def get_all_rooms(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy danh sách tất cả phòng học
+    """
+    rooms = room_service.get_rooms(db, skip=skip, limit=limit)
+    return rooms
+
+@router.post("/rooms", response_model=RoomResponse)
+async def create_room(
+    room_data: RoomCreate,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Tạo phòng học mới
+    """
+    room = room_service.create_room(db, room_data)
+    return room
+
+@router.put("/rooms/{room_id}", response_model=RoomResponse)
+async def update_room(
+    room_id: str,
+    room_data: RoomUpdate,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Cập nhật thông tin phòng học
+    """
+    room = room_service.get_room(db, room_id)
+    if not room:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Phòng học không tồn tại"
+        )
+    
+    updated_room = room_service.update_room(db, room_id, room_data)
+    return updated_room
+
+@router.delete("/rooms/{room_id}")
+async def delete_room(
+    room_id: str,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Xóa phòng học
+    """
+    room = room_service.get_room(db, room_id)
+    if not room:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Phòng học không tồn tại"
+        )
+    
+    room_service.delete_room(db, room_id)
+    return {"message": "Xóa phòng học thành công"}
+
 # Enrollment Management
 @router.get("/enrollments", response_model=List[EnrollmentResponse])
 async def get_all_enrollments(
@@ -152,7 +218,7 @@ async def create_enrollment(
     """
     # Kiểm tra xem học sinh đã đăng ký lớp này chưa
     existing_enrollment = enrollment_service.get_enrollment_by_student_classroom(
-        db, enrollment_data.student_id, enrollment_data.classroom_id
+        db, enrollment_data.student_id, enrollment_data.class_id
     )
     if existing_enrollment:
         raise HTTPException(
@@ -219,7 +285,7 @@ async def create_schedule(
     """
     # Kiểm tra xem đã có lịch học cho lớp này vào thời gian này chưa
     existing_schedule = schedule_service.get_schedule_by_classroom_time(
-        db, schedule_data.classroom_id, schedule_data.day_of_week, 
+        db, schedule_data.class_id, schedule_data.weekday, 
         schedule_data.start_time, schedule_data.end_time
     )
     if existing_schedule:
