@@ -15,7 +15,7 @@ import {
   Calendar,
   Award,
 } from 'lucide-react';
-import PersonalInfoModal from '../../../components/PersonalInfoModal';
+import { usePersonalInfo } from '../../../components/PersonalInfoContext';
 
 interface TeacherNavbarProps {
   onToggleSidebar?: () => void;
@@ -25,7 +25,7 @@ const TeacherNavbar: React.FC<TeacherNavbarProps> = ({ onToggleSidebar }) => {
   const pathname = usePathname();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showPersonalInfo, setShowPersonalInfo] = useState(false);
+  const { openModal } = usePersonalInfo();
 
   // Generate breadcrumbs from pathname
   const generateBreadcrumbs = () => {
@@ -260,7 +260,7 @@ const TeacherNavbar: React.FC<TeacherNavbarProps> = ({ onToggleSidebar }) => {
                 <div className='py-2'>
                   <button
                     onClick={() => {
-                      setShowPersonalInfo(true);
+                      openModal('teacher');
                       setShowUserMenu(false);
                     }}
                     className='w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50'
@@ -291,13 +291,6 @@ const TeacherNavbar: React.FC<TeacherNavbarProps> = ({ onToggleSidebar }) => {
           </div>
         </div>
       </div>
-
-      {/* Personal Info Modal */}
-      <PersonalInfoModal
-        isOpen={showPersonalInfo}
-        onClose={() => setShowPersonalInfo(false)}
-        userRole='teacher'
-      />
     </header>
   );
 };

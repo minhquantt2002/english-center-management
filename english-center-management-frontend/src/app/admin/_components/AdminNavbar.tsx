@@ -13,7 +13,7 @@ import {
   MessageSquare,
   HelpCircle,
 } from 'lucide-react';
-import PersonalInfoModal from '../../../components/PersonalInfoModal';
+import { usePersonalInfo } from '../../../components/PersonalInfoContext';
 
 interface AdminNavbarProps {
   onToggleSidebar?: () => void;
@@ -23,7 +23,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar }) => {
   const pathname = usePathname();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showPersonalInfo, setShowPersonalInfo] = useState(false);
+  const { openModal } = usePersonalInfo();
 
   // Generate breadcrumbs from pathname
   const generateBreadcrumbs = () => {
@@ -242,7 +242,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar }) => {
                 <div className='py-2'>
                   <button
                     onClick={() => {
-                      setShowPersonalInfo(true);
+                      openModal('admin');
                       setShowUserMenu(false);
                     }}
                     className='w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50'
@@ -265,13 +265,6 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar }) => {
           </div>
         </div>
       </div>
-
-      {/* Personal Info Modal */}
-      <PersonalInfoModal
-        isOpen={showPersonalInfo}
-        onClose={() => setShowPersonalInfo(false)}
-        userRole='admin'
-      />
     </header>
   );
 };
