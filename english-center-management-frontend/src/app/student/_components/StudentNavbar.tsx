@@ -137,7 +137,7 @@ const StudentNavbar: React.FC<StudentNavbarProps> = ({ onToggleSidebar }) => {
             </div>
             <input
               type='text'
-              placeholder='Search lessons, tests...'
+              placeholder='Tìm kiếm bài học, bài kiểm tra...'
               className='block w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500'
             />
           </div>

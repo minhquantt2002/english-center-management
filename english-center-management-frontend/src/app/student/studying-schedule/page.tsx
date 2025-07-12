@@ -105,11 +105,9 @@ const ClassSchedule: React.FC = () => {
       <div className='max-w-7xl mx-auto'>
         {/* Header */}
         <div className='mb-8'>
-          <h1 className='text-3xl font-bold text-gray-900 mb-2'>
-            Class Schedule
-          </h1>
+          <h1 className='text-3xl font-bold text-gray-900 mb-2'>Lịch học</h1>
           <p className='text-gray-600'>
-            Manage your weekly classes and study plan
+            Quản lý lịch học hàng tuần và kế hoạch học tập
           </p>
         </div>
 
@@ -160,7 +158,7 @@ const ClassSchedule: React.FC = () => {
           <div className='flex gap-3'>
             <button className='bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2'>
               <Plus className='w-4 h-4' />
-              Add Class
+              Thêm lớp
             </button>
             <button className='bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2'>
               <Download className='w-4 h-4' />
@@ -174,7 +172,7 @@ const ClassSchedule: React.FC = () => {
           {/* Header Row */}
           <div className='grid grid-cols-8 border-b border-gray-200'>
             <div className='p-4 bg-gray-50 font-medium text-gray-700 text-center'>
-              Time
+              Giờ
             </div>
             {weekDays.map((day, index) => (
               <div key={day} className='p-4 bg-gray-50 text-center'>
@@ -225,27 +223,27 @@ const ClassSchedule: React.FC = () => {
 
         {/* Legend */}
         <div className='mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4'>
-          <h3 className='font-medium text-gray-900 mb-3'>Class Types</h3>
+          <h3 className='font-medium text-gray-900 mb-3'>Loại lớp học</h3>
           <div className='flex flex-wrap gap-4'>
             <div className='flex items-center gap-2'>
               <div className='w-4 h-4 bg-blue-100 border-l-4 border-blue-500 rounded'></div>
-              <span className='text-sm text-gray-600'>Grammar Classes</span>
+              <span className='text-sm text-gray-600'>Lớp ngữ pháp</span>
             </div>
             <div className='flex items-center gap-2'>
               <div className='w-4 h-4 bg-green-100 border-l-4 border-green-500 rounded'></div>
-              <span className='text-sm text-gray-600'>Speaking Practice</span>
+              <span className='text-sm text-gray-600'>Luyện nói</span>
             </div>
             <div className='flex items-center gap-2'>
               <div className='w-4 h-4 bg-purple-100 border-l-4 border-purple-500 rounded'></div>
-              <span className='text-sm text-gray-600'>Writing Workshop</span>
+              <span className='text-sm text-gray-600'>Lớp viết</span>
             </div>
             <div className='flex items-center gap-2'>
               <div className='w-4 h-4 bg-orange-100 border-l-4 border-orange-500 rounded'></div>
-              <span className='text-sm text-gray-600'>Reading Sessions</span>
+              <span className='text-sm text-gray-600'>Lớp đọc</span>
             </div>
             <div className='flex items-center gap-2'>
               <div className='w-4 h-4 bg-red-100 border-l-4 border-red-500 rounded'></div>
-              <span className='text-sm text-gray-600'>Test Preparation</span>
+              <span className='text-sm text-gray-600'>Luyện thi</span>
             </div>
           </div>
         </div>

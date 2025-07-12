@@ -82,15 +82,15 @@ const CourseManagement = () => {
         <div className='flex justify-between items-start mb-8'>
           <div>
             <h1 className='text-3xl font-bold text-gray-900'>
-              Course Management
+              Quản lý khóa học
             </h1>
             <p className='text-gray-600 mt-1'>
-              Manage and organize all training courses
+              Quản lý và tổ chức tất cả các khóa học đào tạo
             </p>
           </div>
           <button className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors'>
             <Plus size={20} />
-            Add New Course
+            Thêm khóa học mới
           </button>
         </div>
 
@@ -100,41 +100,41 @@ const CourseManagement = () => {
             {/* Level Filter */}
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Filter by Level
+                Lọc theo cấp độ
               </label>
               <select
                 value={levelFilter}
                 onChange={(e) => setLevelFilter(e.target.value)}
                 className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
               >
-                <option>All Levels</option>
-                <option>Beginner</option>
-                <option>Intermediate</option>
-                <option>Advanced</option>
+                <option>Tất cả cấp độ</option>
+                <option>Cơ bản</option>
+                <option>Trung cấp</option>
+                <option>Nâng cao</option>
               </select>
             </div>
 
             {/* Status Filter */}
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Filter by Status
+                Lọc theo trạng thái
               </label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
               >
-                <option>All Status</option>
-                <option>Active</option>
-                <option>Upcoming</option>
-                <option>Completed</option>
+                <option>Tất cả trạng thái</option>
+                <option>Hoạt động</option>
+                <option>Sắp diễn ra</option>
+                <option>Đã hoàn thành</option>
               </select>
             </div>
 
             {/* Search */}
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Search Courses
+                Tìm kiếm khóa học
               </label>
               <div className='relative'>
                 <Search
@@ -143,7 +143,7 @@ const CourseManagement = () => {
                 />
                 <input
                   type='text'
-                  placeholder='Search by course name...'
+                  placeholder='Tìm kiếm theo tên khóa học...'
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
@@ -156,7 +156,9 @@ const CourseManagement = () => {
         {/* Course Table */}
         <div className='bg-white rounded-lg shadow-sm overflow-hidden'>
           <div className='px-6 py-4 border-b border-gray-200'>
-            <h2 className='text-xl font-semibold text-gray-900'>All Courses</h2>
+            <h2 className='text-xl font-semibold text-gray-900'>
+              Tất cả khóa học
+            </h2>
           </div>
 
           <div className='overflow-x-auto'>
@@ -164,25 +166,25 @@ const CourseManagement = () => {
               <thead className='bg-gray-50'>
                 <tr>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Course Name
+                    Tên khóa học
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Level
+                    Cấp độ
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Duration
+                    Thời lượng
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Start Date
+                    Ngày bắt đầu
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    End Date
+                    Ngày kết thúc
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Status
+                    Trạng thái
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Actions
+                    Thao tác
                   </th>
                 </tr>
               </thead>
@@ -245,11 +247,11 @@ const CourseManagement = () => {
           {/* Pagination */}
           <div className='bg-gray-50 px-6 py-3 flex items-center justify-between border-t border-gray-200'>
             <div className='text-sm text-gray-700'>
-              Showing 1 to 4 of 12 courses
+              Hiển thị 1 đến 4 của 12 khóa học
             </div>
             <div className='flex items-center space-x-2'>
               <button className='px-3 py-1 text-sm text-gray-500 hover:text-gray-700 transition-colors'>
-                Previous
+                Trước
               </button>
               <button className='px-3 py-1 text-sm bg-blue-600 text-white rounded'>
                 1
@@ -261,7 +263,7 @@ const CourseManagement = () => {
                 3
               </button>
               <button className='px-3 py-1 text-sm text-gray-500 hover:text-gray-700 transition-colors'>
-                Next
+                Tiếp
               </button>
             </div>
           </div>

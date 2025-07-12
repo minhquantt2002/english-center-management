@@ -85,21 +85,21 @@ const TeachingSchedule = () => {
   const stats = [
     {
       icon: Clock,
-      label: 'Total Hours',
+      label: 'Tổng giờ',
       value: mockClassSessions.length.toString(),
       bgColor: 'bg-blue-50',
       iconColor: 'text-blue-500',
     },
     {
       icon: Calendar,
-      label: 'Classes',
+      label: 'Lớp học',
       value: mockClassSessions.length.toString(),
       bgColor: 'bg-green-50',
       iconColor: 'text-green-500',
     },
     {
       icon: Users,
-      label: 'Rooms Used',
+      label: 'Phòng sử dụng',
       value: '4',
       bgColor: 'bg-purple-50',
       iconColor: 'text-purple-500',
@@ -118,15 +118,15 @@ const TeachingSchedule = () => {
         <div className='flex justify-between items-center mb-8'>
           <div>
             <h1 className='text-2xl font-semibold text-gray-900 mb-1'>
-              Teaching Schedule
+              Lịch giảng dạy
             </h1>
             <p className='text-gray-500'>
-              Manage and view your weekly teaching schedule
+              Quản lý và xem lịch giảng dạy hàng tuần
             </p>
           </div>
           <button className='inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors'>
             <Plus className='w-4 h-4 mr-2' />
-            Add Class
+            Thêm lớp
           </button>
         </div>
 
@@ -166,7 +166,7 @@ const TeachingSchedule = () => {
           </div>
           <div className='flex items-center space-x-2'>
             <button className='inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'>
-              Week View
+              Xem theo tuần
               <ChevronDown className='w-4 h-4 ml-1' />
             </button>
           </div>
@@ -177,7 +177,7 @@ const TeachingSchedule = () => {
           {/* Header Row */}
           <div className='grid grid-cols-8 border-b border-gray-200'>
             <div className='p-4 text-sm font-medium text-gray-500 bg-gray-50'>
-              Time
+              Giờ
             </div>
             {days.map((day) => (
               <div

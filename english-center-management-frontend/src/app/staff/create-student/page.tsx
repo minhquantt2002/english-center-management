@@ -256,14 +256,12 @@ export default function CreateStudentPage() {
                   onChange={(e) => handleInputChange('level', e.target.value)}
                 >
                   <option value=''>Chọn trình độ</option>
-                  <option value='beginner'>Beginner - Cơ bản</option>
-                  <option value='elementary'>Elementary - Sơ cấp</option>
-                  <option value='intermediate'>Intermediate - Trung cấp</option>
-                  <option value='upper-intermediate'>
-                    Upper Intermediate - Trung cấp cao
-                  </option>
-                  <option value='advanced'>Advanced - Nâng cao</option>
-                  <option value='proficiency'>Proficiency - Thành thạo</option>
+                  <option value='beginner'>Cơ bản</option>
+                  <option value='elementary'>Sơ cấp</option>
+                  <option value='intermediate'>Trung cấp</option>
+                  <option value='upper-intermediate'>Trung cấp cao</option>
+                  <option value='advanced'>Nâng cao</option>
+                  <option value='proficiency'>Thành thạo</option>
                 </select>
               </div>
 

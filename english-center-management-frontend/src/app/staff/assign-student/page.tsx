@@ -96,7 +96,7 @@ const AddStudentModal: React.FC = () => {
               Thêm học viên vào lớp
             </h2>
             <p className='text-sm text-gray-600 mt-1'>
-              Lớp: English Intermediate - A2
+              Lớp: Tiếng Anh trung cấp - A2
             </p>
           </div>
           <button
@@ -134,11 +134,11 @@ const AddStudentModal: React.FC = () => {
                 value={levelFilter}
                 onChange={(e) => setLevelFilter(e.target.value)}
               >
-                <option>Elementary (A2)</option>
-                <option>Pre-Intermediate (A2-B1)</option>
-                <option>Intermediate (B1)</option>
-                <option>Upper-Intermediate (B2)</option>
-                <option>Advanced (C1)</option>
+                <option>Sơ cấp (A2)</option>
+                <option>Sơ trung cấp (A2-B1)</option>
+                <option>Trung cấp (B1)</option>
+                <option>Trung cấp cao (B2)</option>
+                <option>Nâng cao (C1)</option>
               </select>
             </div>
             <div>

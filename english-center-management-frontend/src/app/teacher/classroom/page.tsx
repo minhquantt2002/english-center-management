@@ -139,10 +139,10 @@ const MyClassesDashboard = () => {
         <div className='flex justify-between items-start mb-8'>
           <div>
             <h1 className='text-2xl font-semibold text-gray-900 mb-1'>
-              My Classes
+              Lớp học của tôi
             </h1>
             <p className='text-gray-500'>
-              Manage and monitor your teaching classes
+              Quản lý và theo dõi các lớp học của bạn
             </p>
           </div>
           <div className='flex items-center space-x-3'>
@@ -150,12 +150,12 @@ const MyClassesDashboard = () => {
               <Search className='w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400' />
               <input
                 type='text'
-                placeholder='Search classes...'
+                placeholder='Tìm kiếm lớp học...'
                 className='pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white'
               />
             </div>
             <button className='inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'>
-              Filter
+              Lọc
               <ChevronDown className='w-4 h-4 ml-1' />
             </button>
           </div>
@@ -227,7 +227,7 @@ const MyClassesDashboard = () => {
               <div className='bg-gray-50 rounded-lg p-3 mb-4'>
                 <div className='flex items-center text-sm text-gray-600 mb-1'>
                   <Book className='w-4 h-4 mr-2' />
-                  Current Unit
+                  Bài học hiện tại
                 </div>
                 <p className='text-sm font-medium text-gray-900'>
                   {classItem.unit}
@@ -242,7 +242,7 @@ const MyClassesDashboard = () => {
                     classItem.students
                   )}
                   <span className='text-sm text-gray-600 ml-3'>
-                    {classItem.students} students
+                    {classItem.students} học viên
                   </span>
                 </div>
                 <button className='text-blue-600 hover:text-blue-700 text-sm font-medium'>

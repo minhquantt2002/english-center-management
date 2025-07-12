@@ -248,14 +248,14 @@ const TestResultsDashboard: React.FC = () => {
         <div className='bg-white rounded-lg shadow-sm border border-gray-200'>
           <div className='px-6 py-4 border-b border-gray-200'>
             <h2 className='text-xl font-semibold text-gray-900'>
-              Detailed Feedback
+              Nhận xét chi tiết
             </h2>
           </div>
           <div className='p-6'>
             <div className='flex items-center justify-between mb-6'>
               <div>
                 <h3 className='text-lg font-semibold text-gray-900'>
-                  Intermediate English - Dec 15, 2024
+                  Tiếng Anh trung cấp - 15/12/2024
                 </h3>
                 <p className='text-sm text-gray-500'>
                   Instructor: Ms. Emily Chen
@@ -311,7 +311,7 @@ const TestResultsDashboard: React.FC = () => {
 
             <div className='bg-blue-50 rounded-lg p-6'>
               <h4 className='font-semibold text-blue-900 mb-3'>
-                Recommendations for Improvement:
+                Khuyến nghị cải thiện:
               </h4>
               <ul className='space-y-2 text-sm text-blue-800'>
                 <li className='flex items-start'>

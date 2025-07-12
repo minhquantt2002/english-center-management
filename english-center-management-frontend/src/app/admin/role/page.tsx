@@ -102,15 +102,16 @@ const UserRolePermissionManagement = () => {
         <div className='flex justify-between items-start mb-8'>
           <div>
             <h1 className='text-3xl font-bold text-gray-900'>
-              User Role & Permission Management
+              Quản lý vai trò và quyền người dùng
             </h1>
             <p className='text-gray-600 mt-1'>
-              Manage user accounts, roles, and permissions across the platform
+              Quản lý tài khoản người dùng, vai trò và quyền trên toàn bộ nền
+              tảng
             </p>
           </div>
           <button className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors'>
             <Plus size={20} />
-            Add User
+            Thêm người dùng
           </button>
         </div>
 
@@ -119,7 +120,7 @@ const UserRolePermissionManagement = () => {
           <div className='lg:col-span-2'>
             <div className='bg-white rounded-lg shadow-sm p-6'>
               <h2 className='text-xl font-semibold text-gray-900 mb-4'>
-                User Accounts
+                Tài khoản người dùng
               </h2>
 
               {/* Search and Filter */}
@@ -131,7 +132,7 @@ const UserRolePermissionManagement = () => {
                   />
                   <input
                     type='text'
-                    placeholder='Search users...'
+                    placeholder='Tìm kiếm người dùng...'
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
@@ -142,11 +143,11 @@ const UserRolePermissionManagement = () => {
                   onChange={(e) => setRoleFilter(e.target.value)}
                   className='px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 >
-                  <option>All Roles</option>
-                  <option>Admin</option>
-                  <option>Teacher</option>
-                  <option>Receptionist</option>
-                  <option>Student</option>
+                  <option>Tất cả vai trò</option>
+                  <option>Quản trị</option>
+                  <option>Giáo viên</option>
+                  <option>Lễ tân</option>
+                  <option>Học viên</option>
                 </select>
               </div>
 
@@ -156,16 +157,16 @@ const UserRolePermissionManagement = () => {
                   <thead className='bg-gray-50'>
                     <tr>
                       <th className='px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                        User
+                        Người dùng
                       </th>
                       <th className='px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                        Role
+                        Vai trò
                       </th>
                       <th className='px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                        Status
+                        Trạng thái
                       </th>
                       <th className='px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                        Actions
+                        Thao tác
                       </th>
                     </tr>
                   </thead>
@@ -218,10 +219,10 @@ const UserRolePermissionManagement = () => {
                         <td className='px-4 py-4 whitespace-nowrap text-sm font-medium'>
                           <div className='flex space-x-2'>
                             <button className='text-blue-600 hover:text-blue-900 transition-colors'>
-                              Edit
+                              Chỉnh sửa
                             </button>
                             <button className='text-red-600 hover:text-red-900 transition-colors'>
-                              Revoke
+                              Thu hồi
                             </button>
                           </div>
                         </td>
@@ -237,10 +238,10 @@ const UserRolePermissionManagement = () => {
           <div className='lg:col-span-1'>
             <div className='bg-white rounded-lg shadow-sm p-6'>
               <h2 className='text-xl font-semibold text-gray-900 mb-2'>
-                Role Assignment
+                Phân công vai trò
               </h2>
               <p className='text-gray-600 text-sm mb-6'>
-                Select a user to modify their role and permissions
+                Chọn người dùng để chỉnh sửa vai trò và quyền
               </p>
 
               {selectedUser ? (
@@ -248,7 +249,7 @@ const UserRolePermissionManagement = () => {
                   {/* Selected User */}
                   <div className='mb-6'>
                     <h3 className='text-sm font-medium text-gray-700 mb-3'>
-                      Selected User
+                      Người dùng đã chọn
                     </h3>
                     <div className='flex items-center p-3 bg-gray-50 rounded-lg'>
                       <img
@@ -270,24 +271,24 @@ const UserRolePermissionManagement = () => {
                   {/* Assign Role */}
                   <div className='mb-6'>
                     <h3 className='text-sm font-medium text-gray-700 mb-3'>
-                      Assign Role
+                      Phân công vai trò
                     </h3>
                     <select
                       value={selectedRole}
                       onChange={(e) => setSelectedRole(e.target.value)}
                       className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                     >
-                      <option>Admin</option>
-                      <option>Teacher</option>
-                      <option>Receptionist</option>
-                      <option>Student</option>
+                      <option>Quản trị</option>
+                      <option>Giáo viên</option>
+                      <option>Lễ tân</option>
+                      <option>Học viên</option>
                     </select>
                   </div>
 
                   {/* Permissions */}
                   <div className='mb-6'>
                     <h3 className='text-sm font-medium text-gray-700 mb-3'>
-                      Permissions
+                      Quyền hạn
                     </h3>
                     <div className='space-y-3'>
                       {permissions.map((permission) => (

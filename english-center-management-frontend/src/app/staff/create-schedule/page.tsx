@@ -105,16 +105,16 @@ export default function CreateScheduleModal() {
             >
               <option value=''>-- Chọn lớp học --</option>
               <option value='adv-001'>
-                ADV-001 - English Communication Advanced
+                ADV-001 - Tiếng Anh giao tiếp nâng cao
               </option>
               <option value='adv-002'>
-                ADV-002 - English Communication Advanced
+                ADV-002 - Tiếng Anh giao tiếp nâng cao
               </option>
               <option value='int-001'>
-                INT-001 - English Communication Intermediate
+                INT-001 - Tiếng Anh giao tiếp trung cấp
               </option>
               <option value='beg-001'>
-                BEG-001 - English Communication Beginner
+                BEG-001 - Tiếng Anh giao tiếp cơ bản
               </option>
             </select>
           </div>

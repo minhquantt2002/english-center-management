@@ -62,7 +62,7 @@ export default function EnglishCourseInterface() {
         <div className='flex items-center justify-between mb-8'>
           <div>
             <h1 className='text-3xl font-bold text-gray-900 mb-2'>
-              Khóa học: English Communication Advanced
+              Khóa học: Tiếng Anh giao tiếp nâng cao
             </h1>
             <div className='flex items-center space-x-6 text-sm text-gray-600'>
               <div className='flex items-center space-x-2'>
