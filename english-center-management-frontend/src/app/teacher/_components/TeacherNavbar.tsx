@@ -3,15 +3,11 @@
 import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import {
-  Bell,
-  Search,
   User,
   LogOut,
   Settings,
   ChevronDown,
   Menu,
-  MessageSquare,
-  HelpCircle,
   Calendar,
   Award,
 } from 'lucide-react';
@@ -24,7 +20,6 @@ interface TeacherNavbarProps {
 const TeacherNavbar: React.FC<TeacherNavbarProps> = ({ onToggleSidebar }) => {
   const pathname = usePathname();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const { openModal } = usePersonalInfo();
 
   // Generate breadcrumbs from pathname
@@ -72,32 +67,6 @@ const TeacherNavbar: React.FC<TeacherNavbarProps> = ({ onToggleSidebar }) => {
 
   const breadcrumbs = generateBreadcrumbs();
 
-  const notifications = [
-    {
-      id: 1,
-      title: 'Lớp học sắp bắt đầu',
-      message: 'Lớp tiếng Anh nâng cao bắt đầu sau 15 phút - Phòng A201',
-      time: '15 phút',
-      unread: true,
-    },
-    {
-      id: 2,
-      title: 'Bài tập đã nộp',
-      message: 'John Smith đã nộp Bài tập Writing số 3',
-      time: '1 giờ trước',
-      unread: true,
-    },
-    {
-      id: 3,
-      title: 'Nhắc nhở chấm điểm',
-      message: 'Vui lòng xem xét và hoàn thiện điểm cho lớp Trung cấp',
-      time: '3 giờ trước',
-      unread: false,
-    },
-  ];
-
-  const unreadCount = notifications.filter((n) => n.unread).length;
-
   return (
     <header className='h-16 bg-white border-b border-gray-200 fixed top-0 right-0 left-64 z-20'>
       <div className='h-full flex items-center justify-between px-6'>
@@ -132,91 +101,7 @@ const TeacherNavbar: React.FC<TeacherNavbarProps> = ({ onToggleSidebar }) => {
           </nav>
         </div>
 
-        {/* Right side - Search, Notifications, Profile */}
         <div className='flex items-center gap-4'>
-          {/* Search */}
-          <div className='relative hidden md:block'>
-            <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-              <Search className='h-4 w-4 text-gray-400' />
-            </div>
-            <input
-              type='text'
-              placeholder='Tìm kiếm học viên, lớp học...'
-              className='block w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
-            />
-          </div>
-
-          {/* Quick actions */}
-          <button className='p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900'>
-            <MessageSquare className='w-5 h-5' />
-          </button>
-
-          <button className='p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900'>
-            <Calendar className='w-5 h-5' />
-          </button>
-
-          <button className='p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900'>
-            <HelpCircle className='w-5 h-5' />
-          </button>
-
-          {/* Notifications */}
-          <div className='relative'>
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              className='p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 relative'
-            >
-              <Bell className='w-5 h-5' />
-              {unreadCount > 0 && (
-                <span className='absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center'>
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-
-            {/* Notifications dropdown */}
-            {showNotifications && (
-              <div className='absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50'>
-                <div className='p-4 border-b border-gray-200'>
-                  <h3 className='text-sm font-medium text-gray-900'>
-                    Thông báo
-                  </h3>
-                </div>
-                <div className='max-h-64 overflow-y-auto'>
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`p-4 border-b border-gray-100 hover:bg-gray-50 ${
-                        notification.unread ? 'bg-orange-50' : ''
-                      }`}
-                    >
-                      <div className='flex justify-between items-start'>
-                        <div className='flex-1'>
-                          <p className='text-sm font-medium text-gray-900'>
-                            {notification.title}
-                          </p>
-                          <p className='text-sm text-gray-600 mt-1'>
-                            {notification.message}
-                          </p>
-                          <p className='text-xs text-gray-400 mt-2'>
-                            {notification.time}
-                          </p>
-                        </div>
-                        {notification.unread && (
-                          <div className='w-2 h-2 bg-orange-500 rounded-full'></div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className='p-4 text-center'>
-                  <button className='text-sm text-orange-600 hover:text-orange-800 font-medium'>
-                    Xem tất cả thông báo
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* User Profile */}
           <div className='relative'>
             <button

@@ -18,27 +18,27 @@ const UserRolePermissionManagement = () => {
   const [selectedRole, setSelectedRole] = useState('admin');
 
   const [permissions, setPermissions] = useState<Permission[]>([
-    { id: 'user-management', name: 'User Management', checked: true },
-    { id: 'course-management', name: 'Course Management', checked: true },
-    { id: 'content-creation', name: 'Content Creation', checked: false },
-    { id: 'reports-analytics', name: 'Reports & Analytics', checked: false },
-    { id: 'system-settings', name: 'System Settings', checked: false },
+    { id: 'user-management', name: 'Quản lý người dùng', checked: true },
+    { id: 'course-management', name: 'Quản lý khóa học', checked: true },
+    { id: 'content-creation', name: 'Tạo nội dung', checked: false },
+    { id: 'reports-analytics', name: 'Báo cáo & Phân tích', checked: false },
+    { id: 'system-settings', name: 'Cài đặt hệ thống', checked: false },
     {
       id: 'financial-management',
-      name: 'Financial Management',
+      name: 'Quản lý tài chính',
       checked: false,
     },
   ]);
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'Admin':
+      case 'admin':
         return 'bg-purple-100 text-purple-800';
-      case 'Teacher':
+      case 'teacher':
         return 'bg-blue-100 text-blue-800';
-      case 'Receptionist':
+      case 'staff':
         return 'bg-orange-100 text-orange-800';
-      case 'Student':
+      case 'student':
         return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -47,11 +47,11 @@ const UserRolePermissionManagement = () => {
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'Active':
+      case 'active':
         return 'bg-green-100 text-green-800';
-      case 'Suspended':
+      case 'suspended':
         return 'bg-yellow-100 text-yellow-800';
-      case 'Inactive':
+      case 'inactive':
         return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -78,7 +78,7 @@ const UserRolePermissionManagement = () => {
           ...perm,
           checked: ['course-management', 'content-creation'].includes(perm.id),
         };
-      } else if (user.role === 'enrollment') {
+      } else if (user.role === 'staff') {
         return { ...perm, checked: ['user-management'].includes(perm.id) };
       } else {
         return { ...perm, checked: false };
@@ -316,11 +316,11 @@ const UserRolePermissionManagement = () => {
                   <div className='space-y-3'>
                     <button className='w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors'>
                       <Save size={16} />
-                      Change Role
+                      Thay đổi vai trò
                     </button>
                     <button className='w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors'>
                       <Ban size={16} />
-                      Revoke Access
+                      Thu hồi quyền truy cập
                     </button>
                   </div>
                 </div>
@@ -328,11 +328,11 @@ const UserRolePermissionManagement = () => {
                 <div className='text-center py-8'>
                   <UserX className='mx-auto h-12 w-12 text-gray-400' />
                   <h3 className='mt-2 text-sm font-medium text-gray-900'>
-                    No user selected
+                    Chưa chọn người dùng
                   </h3>
                   <p className='mt-1 text-sm text-gray-500'>
-                    Click on a user from the table to manage their role and
-                    permissions.
+                    Nhấp vào một người dùng từ bảng để quản lý vai trò và quyền
+                    của họ.
                   </p>
                 </div>
               )}

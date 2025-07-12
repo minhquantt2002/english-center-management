@@ -3,14 +3,24 @@
 import React, { useState } from 'react';
 import { Search, Plus, Eye, Edit } from 'lucide-react';
 import { mockStudents } from '../../../data';
-import { Student } from '../../../types';
+import { Student, StudentProfile } from '../../../types';
+import CreateStudentModal, {
+  StudentFormData,
+} from './_components/create-student-modal';
+import EditStudentModal from './_components/edit-student-modal';
+import ViewStudentModal from './_components/view-student-modal';
 
 export default function StudentManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<StudentProfile | null>(
+    null
+  );
 
-  // Use mock students data
   const students = mockStudents.map((student: Student) => ({
     id: student.id,
     name: student.name,
@@ -19,7 +29,27 @@ export default function StudentManagement() {
     level: student.level.charAt(0).toUpperCase() + student.level.slice(1),
     currentClass: student.currentClass || 'Chưa phân lớp',
     status: student.status as 'active' | 'inactive' | 'pending',
+    role: student.role,
+    studentId: student.studentId,
+    enrollmentDate: student.enrollmentDate,
   }));
+
+  // Filter students based on search term, level, and status
+  const filteredStudents = students.filter((student) => {
+    const matchesSearch =
+      searchTerm === '' ||
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesLevel =
+      selectedLevel === 'all' || student.level.toLowerCase() === selectedLevel;
+
+    const matchesStatus =
+      selectedStatus === 'all' || student.status === selectedStatus;
+
+    return matchesSearch && matchesLevel && matchesStatus;
+  });
 
   const levelColors = {
     Beginner: 'bg-green-100 text-green-800',
@@ -48,6 +78,79 @@ export default function StudentManagement() {
       .toUpperCase();
   };
 
+  const handleCreateStudent = async (studentData: StudentFormData) => {
+    // TODO: Implement API call to create student
+    console.log('Creating student:', studentData);
+
+    // Simulate API call delay
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Simulate API call success
+    // In a real application, you would make an API call here
+    // and then update the students list with the new student
+
+    // For now, we'll just show a success message
+    alert('Học viên đã được tạo thành công!');
+  };
+
+  const handleUpdateStudent = async (
+    studentId: string,
+    studentData: StudentFormData
+  ) => {
+    // TODO: Implement API call to update student
+    console.log('Updating student:', studentId, studentData);
+
+    // Simulate API call delay
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Simulate API call success
+    // In a real application, you would make an API call here
+    // and then update the students list with the updated student
+
+    // For now, we'll just show a success message
+    alert('Thông tin học viên đã được cập nhật thành công!');
+  };
+
+  const handleViewStudent = (student: any) => {
+    // Convert student data to StudentProfile format for the modal
+    const studentProfile: StudentProfile = {
+      id: student.id,
+      studentId: student.studentId || `ST${student.id.padStart(3, '0')}`,
+      name: student.name,
+      email: student.email,
+      phone: student.phone,
+      level: student.level.toLowerCase() as any,
+      currentClass: student.currentClass,
+      enrollmentDate: student.enrollmentDate || '2024-01-15',
+      enrollmentStatus: student.status as any,
+      createdAt: '2024-01-15T08:00:00Z',
+      updatedAt: '2024-01-15T08:00:00Z',
+    };
+
+    setSelectedStudent(studentProfile);
+    setIsViewModalOpen(true);
+  };
+
+  const handleEditStudent = (student: any) => {
+    // Convert student data to StudentProfile format for the modal
+    const studentProfile: StudentProfile = {
+      id: student.id,
+      studentId: student.studentId || `ST${student.id.padStart(3, '0')}`,
+      name: student.name,
+      email: student.email,
+      phone: student.phone,
+      level: student.level.toLowerCase() as any,
+      currentClass: student.currentClass,
+      enrollmentDate: student.enrollmentDate || '2024-01-15',
+      enrollmentStatus: student.status as any,
+      createdAt: '2024-01-15T08:00:00Z',
+      updatedAt: '2024-01-15T08:00:00Z',
+    };
+
+    setSelectedStudent(studentProfile);
+    setIsEditModalOpen(true);
+  };
+
   return (
     <div className='min-h-screen bg-gray-50'>
       <div className='p-6'>
@@ -58,7 +161,10 @@ export default function StudentManagement() {
               Danh sách học viên
             </h2>
           </div>
-          <button className='flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors'>
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className='flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors'
+          >
             <Plus className='w-4 h-4' />
             Thêm học viên
           </button>
@@ -120,6 +226,18 @@ export default function StudentManagement() {
 
         {/* Students Table */}
         <div className='bg-white rounded-lg shadow-sm overflow-hidden'>
+          {/* Table Header with Count */}
+          <div className='px-6 py-4 border-b border-gray-200 bg-gray-50'>
+            <div className='flex items-center justify-between'>
+              <h3 className='text-lg font-medium text-gray-900'>
+                Danh sách học viên
+              </h3>
+              <span className='text-sm text-gray-500'>
+                {filteredStudents.length} học viên
+              </span>
+            </div>
+          </div>
+
           <div className='overflow-x-auto'>
             <table className='w-full'>
               <thead className='bg-gray-50 border-b border-gray-200'>
@@ -148,64 +266,121 @@ export default function StudentManagement() {
                 </tr>
               </thead>
               <tbody className='bg-white divide-y divide-gray-200'>
-                {students.map((student) => (
-                  <tr key={student.id} className='hover:bg-gray-50'>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <div className='flex items-center'>
-                        <div className='w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-medium'>
-                          {getInitials(student.name)}
+                {filteredStudents.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className='px-6 py-12 text-center'>
+                      <div className='text-gray-500'>
+                        <div className='text-lg font-medium mb-2'>
+                          Không tìm thấy học viên
                         </div>
-                        <div className='ml-3'>
-                          <div className='text-sm font-medium text-gray-900'>
-                            {student.name}
-                          </div>
+                        <div className='text-sm'>
+                          {searchTerm ||
+                          selectedLevel !== 'all' ||
+                          selectedStatus !== 'all'
+                            ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm'
+                            : 'Chưa có học viên nào trong hệ thống'}
                         </div>
-                      </div>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                      {student.phone}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                      {student.email}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          levelColors[student.level as keyof typeof levelColors]
-                        }`}
-                      >
-                        {student.level}
-                      </span>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                      {student.currentClass}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          statusColors[student.status]
-                        }`}
-                      >
-                        {statusLabels[student.status]}
-                      </span>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
-                      <div className='flex items-center space-x-2'>
-                        <button className='text-indigo-600 hover:text-indigo-900'>
-                          <Eye className='w-4 h-4' />
-                        </button>
-                        <button className='text-gray-600 hover:text-gray-900'>
-                          <Edit className='w-4 h-4' />
-                        </button>
                       </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredStudents.map((student) => (
+                    <tr key={student.id} className='hover:bg-gray-50'>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <div className='flex items-center'>
+                          <div className='w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-medium'>
+                            {getInitials(student.name)}
+                          </div>
+                          <div className='ml-3'>
+                            <div className='text-sm font-medium text-gray-900'>
+                              {student.name}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                        {student.phone}
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                        {student.email}
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            levelColors[
+                              student.level as keyof typeof levelColors
+                            ]
+                          }`}
+                        >
+                          {student.level}
+                        </span>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                        {student.currentClass}
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            statusColors[student.status]
+                          }`}
+                        >
+                          {statusLabels[student.status]}
+                        </span>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
+                        <div className='flex items-center space-x-2'>
+                          <button
+                            onClick={() => handleViewStudent(student)}
+                            className='text-indigo-600 hover:text-indigo-900 transition-colors'
+                            title='Xem chi tiết'
+                          >
+                            <Eye className='w-4 h-4' />
+                          </button>
+                          <button
+                            onClick={() => handleEditStudent(student)}
+                            className='text-gray-600 hover:text-gray-900 transition-colors'
+                            title='Chỉnh sửa'
+                          >
+                            <Edit className='w-4 h-4' />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
       </div>
+
+      {/* Create Student Modal */}
+      <CreateStudentModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreateStudent={handleCreateStudent}
+      />
+
+      {/* View Student Modal */}
+      <ViewStudentModal
+        isOpen={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false);
+          setSelectedStudent(null);
+        }}
+        student={selectedStudent}
+      />
+
+      {/* Edit Student Modal */}
+      <EditStudentModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedStudent(null);
+        }}
+        onUpdateStudent={handleUpdateStudent}
+        student={selectedStudent}
+      />
     </div>
   );
 }

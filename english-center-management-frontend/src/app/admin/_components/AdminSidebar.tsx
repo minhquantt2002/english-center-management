@@ -9,9 +9,7 @@ import {
   GraduationCap,
   BookOpen,
   School,
-  FolderOpen,
   Shield,
-  Settings,
   ChevronRight,
 } from 'lucide-react';
 
@@ -54,11 +52,6 @@ const AdminSidebar: React.FC = () => {
       href: '/admin/classroom',
       icon: <School className='w-5 h-5' />,
       badge: '15',
-    },
-    {
-      name: 'Danh mục',
-      href: '/admin/category',
-      icon: <FolderOpen className='w-5 h-5' />,
     },
     {
       name: 'Vai trò & Quyền',
@@ -143,17 +136,6 @@ const AdminSidebar: React.FC = () => {
           ))}
         </div>
       </nav>
-
-      {/* Settings at bottom */}
-      <div className='absolute bottom-4 left-3 right-3'>
-        <Link
-          href='/admin/settings'
-          className='group flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200'
-        >
-          <Settings className='w-5 h-5 text-gray-500 group-hover:text-gray-700' />
-          <span>Cài đặt</span>
-        </Link>
-      </div>
     </div>
   );
 };

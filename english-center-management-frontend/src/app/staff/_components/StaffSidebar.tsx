@@ -10,10 +10,8 @@ import {
   BookOpen,
   School,
   Calendar,
-  UserPlus,
   Receipt,
   ClipboardList,
-  Settings,
   ChevronRight,
 } from 'lucide-react';
 
@@ -56,11 +54,6 @@ const StaffSidebar: React.FC = () => {
       href: '/staff/list-classroom',
       icon: <School className='w-5 h-5' />,
       badge: '8',
-    },
-    {
-      name: 'Tạo học viên',
-      href: '/staff/create-student',
-      icon: <UserPlus className='w-5 h-5' />,
     },
     {
       name: 'Phân công học viên',
@@ -160,17 +153,6 @@ const StaffSidebar: React.FC = () => {
           ))}
         </div>
       </nav>
-
-      {/* Settings at bottom */}
-      <div className='absolute bottom-4 left-3 right-3'>
-        <Link
-          href='/staff/settings'
-          className='group flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200'
-        >
-          <Settings className='w-5 h-5 text-gray-500 group-hover:text-gray-700' />
-          <span>Cài đặt</span>
-        </Link>
-      </div>
     </div>
   );
 };

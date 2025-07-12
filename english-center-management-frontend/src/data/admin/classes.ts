@@ -3,7 +3,7 @@ import { ClassData } from '@/types';
 export const mockClasses: ClassData[] = [
   {
     id: 'class_1',
-    name: 'English Basics A1',
+    name: 'Tiếng Anh Cơ Bản A1',
     level: 'beginner',
     teacher: {
       id: 'teacher_1',
@@ -17,7 +17,7 @@ export const mockClasses: ClassData[] = [
       days: 'Mon, Wed, Fri',
       time: '9:00 AM - 10:30 AM',
     },
-    room: 'Room A101',
+    room: 'Phòng A101',
     courseId: 'course_1',
     status: 'active',
     createdAt: '2024-01-15T08:00:00Z',
@@ -25,7 +25,7 @@ export const mockClasses: ClassData[] = [
   },
   {
     id: 'class_2',
-    name: 'Grammar Fundamentals',
+    name: 'Ngữ Pháp Cơ Bản',
     level: 'beginner',
     teacher: {
       id: 'teacher_1',
@@ -39,7 +39,7 @@ export const mockClasses: ClassData[] = [
       days: 'Mon, Thu',
       time: '10:00 AM - 11:30 AM',
     },
-    room: 'Room C303',
+    room: 'Phòng C303',
     courseId: 'course_1',
     status: 'active',
     createdAt: '2024-01-15T08:00:00Z',
@@ -47,7 +47,7 @@ export const mockClasses: ClassData[] = [
   },
   {
     id: 'class_3',
-    name: 'Conversation Skills B1',
+    name: 'Kỹ Năng Giao Tiếp B1',
     level: 'intermediate',
     teacher: {
       id: 'teacher_2',
@@ -61,7 +61,7 @@ export const mockClasses: ClassData[] = [
       days: 'Tue, Thu',
       time: '2:00 PM - 4:00 PM',
     },
-    room: 'Room B205',
+    room: 'Phòng B205',
     courseId: 'course_4',
     status: 'active',
     createdAt: '2024-01-22T08:00:00Z',
@@ -69,7 +69,7 @@ export const mockClasses: ClassData[] = [
   },
   {
     id: 'class_4',
-    name: 'English 201 - Intermediate',
+    name: 'Tiếng Anh 201 - Trung Cấp',
     level: 'intermediate',
     teacher: {
       id: 'teacher_2',
@@ -83,7 +83,7 @@ export const mockClasses: ClassData[] = [
       days: 'Mon, Wed, Fri',
       time: '3:00 PM - 4:30 PM',
     },
-    room: 'Room A101',
+    room: 'Phòng A101',
     courseId: 'course_4',
     status: 'active',
     createdAt: '2024-01-12T08:00:00Z',
@@ -91,7 +91,7 @@ export const mockClasses: ClassData[] = [
   },
   {
     id: 'class_5',
-    name: 'Advanced Writing C1',
+    name: 'Viết Nâng Cao C1',
     level: 'advanced',
     teacher: {
       id: 'teacher_3',
@@ -105,7 +105,7 @@ export const mockClasses: ClassData[] = [
       days: 'Saturday',
       time: '10:00 AM - 1:00 PM',
     },
-    room: 'Room B203',
+    room: 'Phòng B203',
     courseId: 'course_3',
     status: 'inactive',
     createdAt: '2023-12-01T08:00:00Z',
@@ -113,7 +113,7 @@ export const mockClasses: ClassData[] = [
   },
   {
     id: 'class_6',
-    name: 'Business English B2',
+    name: 'Tiếng Anh Thương Mại B2',
     level: 'intermediate',
     teacher: {
       id: 'teacher_4',
@@ -127,7 +127,7 @@ export const mockClasses: ClassData[] = [
       days: 'Tue, Thu',
       time: '6:00 PM - 7:30 PM',
     },
-    room: 'Room A201',
+    room: 'Phòng A201',
     courseId: 'course_2',
     status: 'active',
     createdAt: '2024-02-01T08:00:00Z',
@@ -135,7 +135,7 @@ export const mockClasses: ClassData[] = [
   },
   {
     id: 'class_7',
-    name: 'IELTS Preparation',
+    name: 'Luyện Thi IELTS',
     level: 'upper-intermediate',
     teacher: {
       id: 'teacher_3',
@@ -149,7 +149,7 @@ export const mockClasses: ClassData[] = [
       days: 'Mon, Wed, Fri',
       time: '2:00 PM - 4:00 PM',
     },
-    room: 'Room B105',
+    room: 'Phòng B105',
     courseId: 'course_5',
     status: 'active',
     createdAt: '2024-03-01T08:00:00Z',

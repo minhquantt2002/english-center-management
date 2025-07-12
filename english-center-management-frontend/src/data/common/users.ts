@@ -1,6 +1,6 @@
 import { User, Teacher, Student } from '@/types';
 
-// Common users data
+// Dữ liệu người dùng chung
 export const mockUsers: User[] = [
   {
     id: 'user_1',
@@ -57,7 +57,7 @@ export const mockUsers: User[] = [
     phone: '+84 123 456 789',
     avatar:
       'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150&h=150&fit=crop&crop=face',
-    role: 'enrollment',
+    role: 'staff',
     status: 'active',
     createdAt: '2023-01-10T08:00:00Z',
     updatedAt: '2024-01-15T08:00:00Z',
@@ -76,7 +76,7 @@ export const mockUsers: User[] = [
   },
 ];
 
-// Mock teachers
+// Dữ liệu giáo viên mẫu
 export const mockTeachers: Teacher[] = [
   {
     id: 'teacher_1',
@@ -88,9 +88,9 @@ export const mockTeachers: Teacher[] = [
     role: 'teacher',
     status: 'active',
     teacherId: 'T001',
-    specialization: 'English Grammar Specialist',
+    specialization: 'Chuyên gia ngữ pháp tiếng Anh',
     assignedClasses: ['class_1', 'class_2'],
-    qualification: 'TESOL Certificate',
+    qualification: 'Chứng chỉ TESOL',
     experience: 5,
     hourlyRate: 25,
     createdAt: '2023-01-15T08:00:00Z',
@@ -106,9 +106,9 @@ export const mockTeachers: Teacher[] = [
     role: 'teacher',
     status: 'active',
     teacherId: 'T002',
-    specialization: 'Conversation Expert',
+    specialization: 'Chuyên gia hội thoại',
     assignedClasses: ['class_3', 'class_4'],
-    qualification: 'CELTA Certificate',
+    qualification: 'Chứng chỉ CELTA',
     experience: 8,
     hourlyRate: 30,
     createdAt: '2023-02-01T08:00:00Z',
@@ -124,9 +124,9 @@ export const mockTeachers: Teacher[] = [
     role: 'teacher',
     status: 'inactive',
     teacherId: 'T003',
-    specialization: 'IELTS Preparation',
+    specialization: 'Giảng dạy IELTS',
     assignedClasses: ['class_5'],
-    qualification: 'IELTS Training Certificate',
+    qualification: 'Chứng chỉ đào tạo IELTS',
     experience: 3,
     hourlyRate: 28,
     createdAt: '2023-01-20T08:00:00Z',
@@ -142,9 +142,9 @@ export const mockTeachers: Teacher[] = [
     role: 'teacher',
     status: 'active',
     teacherId: 'T004',
-    specialization: 'Business English',
+    specialization: 'Tiếng Anh thương mại',
     assignedClasses: ['class_6'],
-    qualification: 'Business English Certificate',
+    qualification: 'Chứng chỉ Tiếng Anh thương mại',
     experience: 6,
     hourlyRate: 32,
     createdAt: '2023-03-01T08:00:00Z',
@@ -152,7 +152,7 @@ export const mockTeachers: Teacher[] = [
   },
 ];
 
-// Mock students
+// Dữ liệu học viên mẫu
 export const mockStudents: Student[] = [
   {
     id: 'student_1',

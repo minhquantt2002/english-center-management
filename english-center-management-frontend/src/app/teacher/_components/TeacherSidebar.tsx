@@ -6,13 +6,9 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Calendar,
-  Users,
   ClipboardCheck,
   MessageSquare,
   School,
-  BarChart3,
-  BookOpen,
-  Settings,
   ChevronRight,
   GraduationCap,
 } from 'lucide-react';
@@ -56,27 +52,6 @@ const TeacherSidebar: React.FC = () => {
       href: '/teacher/student-feedback',
       icon: <MessageSquare className='w-5 h-5' />,
       badge: '3',
-    },
-    {
-      name: 'Học viên',
-      href: '/teacher/students',
-      icon: <Users className='w-5 h-5' />,
-      badge: '45',
-    },
-    {
-      name: 'Báo cáo',
-      href: '/teacher/reports',
-      icon: <BarChart3 className='w-5 h-5' />,
-    },
-    {
-      name: 'Tài liệu',
-      href: '/teacher/resources',
-      icon: <BookOpen className='w-5 h-5' />,
-    },
-    {
-      name: 'Thông tin cá nhân',
-      href: '/personal-info',
-      icon: <GraduationCap className='w-5 h-5' />,
     },
   ];
 
@@ -156,31 +131,6 @@ const TeacherSidebar: React.FC = () => {
           ))}
         </div>
       </nav>
-
-      {/* Teaching Stats Card */}
-      <div className='absolute bottom-20 left-3 right-3'>
-        <div className='bg-gradient-to-br from-orange-500 to-red-500 rounded-lg p-4 text-white'>
-          <div className='text-sm font-medium mb-2'>Thống kê giảng dạy</div>
-          <div className='text-xs opacity-90 mb-3'>
-            Lớp đang dạy: 4 • Học viên: 45
-          </div>
-          <div className='w-full bg-white/20 rounded-full h-2'>
-            <div className='bg-white rounded-full h-2 w-4/5'></div>
-          </div>
-          <div className='text-xs mt-2 opacity-90'>Hoàn thành 80% buổi học</div>
-        </div>
-      </div>
-
-      {/* Settings at bottom */}
-      <div className='absolute bottom-4 left-3 right-3'>
-        <Link
-          href='/teacher/settings'
-          className='group flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200'
-        >
-          <Settings className='w-5 h-5 text-gray-500 group-hover:text-gray-700' />
-          <span>Cài đặt</span>
-        </Link>
-      </div>
     </div>
   );
 };

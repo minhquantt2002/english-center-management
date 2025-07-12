@@ -9,12 +9,26 @@ const ClassManagement: React.FC = () => {
   const [levelFilter, setLevelFilter] = useState('All Levels');
   const [teacherFilter, setTeacherFilter] = useState('All Teachers');
 
+  const getLevel = (level: string) => {
+    switch (level) {
+      case 'beginner':
+        return 'Sơ cấp';
+      case 'intermediate':
+        return 'Trung cấp';
+      case 'advanced':
+        return 'Cao cấp';
+      case 'upper-intermediate':
+        return 'Cao cấp';
+      default:
+        return 'Sơ cấp';
+    }
+  };
+
   // Use mock classes data
   const classes = mockClasses.map((classItem: ClassData) => ({
     id: classItem.id,
     name: classItem.name,
-    level: (classItem.level.charAt(0).toUpperCase() +
-      classItem.level.slice(1)) as 'Beginner' | 'Intermediate' | 'Advanced',
+    level: getLevel(classItem.level),
     teacher: {
       name: classItem.teacher.name,
       avatar: classItem.teacher.avatar,
@@ -28,11 +42,11 @@ const ClassManagement: React.FC = () => {
 
   const getLevelBadgeColor = (level: string) => {
     switch (level) {
-      case 'Beginner':
+      case 'Sơ cấp':
         return 'bg-green-100 text-green-700';
-      case 'Intermediate':
+      case 'Trung cấp':
         return 'bg-blue-100 text-blue-700';
-      case 'Advanced':
+      case 'Cao cấp':
         return 'bg-purple-100 text-purple-700';
       default:
         return 'bg-gray-100 text-gray-700';
@@ -57,10 +71,10 @@ const ClassManagement: React.FC = () => {
         {/* Header */}
         <div className='mb-8'>
           <h1 className='text-2xl font-bold text-gray-900 mb-2'>
-            Class Management
+            Quản lý lớp học
           </h1>
           <p className='text-gray-600'>
-            Manage and organize all classes in the Zenlish training system
+            Quản lý và tổ chức tất cả các lớp học trong hệ thống đào tạo Zenlish
           </p>
         </div>
 
@@ -70,7 +84,7 @@ const ClassManagement: React.FC = () => {
             {/* Level Filter */}
             <div className='relative'>
               <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Filter by Level
+                Lọc theo cấp độ
               </label>
               <div className='relative'>
                 <select
@@ -78,10 +92,10 @@ const ClassManagement: React.FC = () => {
                   onChange={(e) => setLevelFilter(e.target.value)}
                   className='appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px]'
                 >
-                  <option>All Levels</option>
-                  <option>Beginner</option>
-                  <option>Intermediate</option>
-                  <option>Advanced</option>
+                  <option>Tất cả cấp độ</option>
+                  <option>Sơ cấp</option>
+                  <option>Trung cấp</option>
+                  <option>Cao cấp</option>
                 </select>
                 <ChevronDown
                   className='absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400'
@@ -93,7 +107,7 @@ const ClassManagement: React.FC = () => {
             {/* Teacher Filter */}
             <div className='relative'>
               <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Filter by Teacher
+                Lọc theo giáo viên
               </label>
               <div className='relative'>
                 <select
@@ -101,7 +115,7 @@ const ClassManagement: React.FC = () => {
                   onChange={(e) => setTeacherFilter(e.target.value)}
                   className='appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px]'
                 >
-                  <option>All Teachers</option>
+                  <option>Tất cả giáo viên</option>
                   <option>Sarah Johnson</option>
                   <option>Michael Chen</option>
                   <option>Emma Wilson</option>
@@ -120,7 +134,7 @@ const ClassManagement: React.FC = () => {
             className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors duration-200 font-medium'
           >
             <Plus size={16} />
-            Add Class
+            Thêm lớp học
           </button>
         </div>
 
@@ -129,12 +143,12 @@ const ClassManagement: React.FC = () => {
           {/* Table Header */}
           <div className='bg-gray-50 px-6 py-4 border-b border-gray-200'>
             <div className='grid grid-cols-12 gap-4 text-sm font-medium text-gray-500'>
-              <div className='col-span-3'>Class Name</div>
-              <div className='col-span-2'>Level</div>
-              <div className='col-span-2'>Assigned Teacher</div>
-              <div className='col-span-1'>Students</div>
-              <div className='col-span-3'>Schedule</div>
-              <div className='col-span-1'>Actions</div>
+              <div className='col-span-3'>Tên lớp</div>
+              <div className='col-span-2'>Cấp độ</div>
+              <div className='col-span-2'>Giáo viên phụ trách</div>
+              <div className='col-span-1'>Học viên</div>
+              <div className='col-span-3'>Lịch học</div>
+              <div className='col-span-1'>Thao tác</div>
             </div>
           </div>
 
@@ -157,7 +171,7 @@ const ClassManagement: React.FC = () => {
                   <div className='col-span-2'>
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${getLevelBadgeColor(
-                        classItem.level
+                        classItem.level || ''
                       )}`}
                     >
                       {classItem.level}
@@ -201,14 +215,14 @@ const ClassManagement: React.FC = () => {
                       <button
                         onClick={() => handleEditClass(classItem.id)}
                         className='p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors duration-150'
-                        title='Edit class'
+                        title='Sửa lớp học'
                       >
                         <Edit2 size={16} />
                       </button>
                       <button
                         onClick={() => handleDeleteClass(classItem.id)}
                         className='p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors duration-150'
-                        title='Delete class'
+                        title='Xóa lớp học'
                       >
                         <Trash2 size={16} />
                       </button>
@@ -227,16 +241,16 @@ const ClassManagement: React.FC = () => {
               <Plus size={48} className='mx-auto' />
             </div>
             <h3 className='text-lg font-medium text-gray-900 mb-2'>
-              No classes found
+              Không tìm thấy lớp học nào
             </h3>
             <p className='text-gray-500 mb-6'>
-              Get started by creating your first class.
+              Bắt đầu bằng cách tạo lớp học đầu tiên của bạn.
             </p>
             <button
               onClick={handleAddClass}
               className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors duration-200'
             >
-              Add Class
+              Thêm lớp học
             </button>
           </div>
         )}

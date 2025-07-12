@@ -2,17 +2,7 @@
 
 import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import {
-  Bell,
-  Search,
-  User,
-  LogOut,
-  Settings,
-  ChevronDown,
-  Menu,
-  MessageSquare,
-  HelpCircle,
-} from 'lucide-react';
+import { User, LogOut, Settings, ChevronDown, Menu } from 'lucide-react';
 import { usePersonalInfo } from '../../../components/PersonalInfoContext';
 
 interface StaffNavbarProps {
@@ -22,7 +12,6 @@ interface StaffNavbarProps {
 const StaffNavbar: React.FC<StaffNavbarProps> = ({ onToggleSidebar }) => {
   const pathname = usePathname();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const { openModal } = usePersonalInfo();
 
   // Generate breadcrumbs from pathname
@@ -63,32 +52,6 @@ const StaffNavbar: React.FC<StaffNavbarProps> = ({ onToggleSidebar }) => {
 
   const breadcrumbs = generateBreadcrumbs();
 
-  const notifications = [
-    {
-      id: 1,
-      title: 'Yêu cầu đăng ký mới',
-      message: 'Maria Garcia muốn đăng ký khóa tiếng Anh nâng cao',
-      time: '5 phút trước',
-      unread: true,
-    },
-    {
-      id: 2,
-      title: 'Xung đột lịch học',
-      message: 'Phòng A bị xung đột với lớp tiếng Anh thương mại',
-      time: '15 phút trước',
-      unread: true,
-    },
-    {
-      id: 3,
-      title: 'Xác nhận thanh toán',
-      message: 'Hóa đơn #1234 đã được thanh toán thành công',
-      time: '1 giờ trước',
-      unread: false,
-    },
-  ];
-
-  const unreadCount = notifications.filter((n) => n.unread).length;
-
   return (
     <header className='h-16 bg-white border-b border-gray-200 fixed top-0 right-0 left-64 z-20'>
       <div className='h-full flex items-center justify-between px-6'>
@@ -123,87 +86,7 @@ const StaffNavbar: React.FC<StaffNavbarProps> = ({ onToggleSidebar }) => {
           </nav>
         </div>
 
-        {/* Right side - Search, Notifications, Profile */}
         <div className='flex items-center gap-4'>
-          {/* Search */}
-          <div className='relative hidden md:block'>
-            <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-              <Search className='h-4 w-4 text-gray-400' />
-            </div>
-            <input
-              type='text'
-              placeholder='Tìm kiếm học viên, khóa học...'
-              className='block w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500'
-            />
-          </div>
-
-          {/* Quick actions */}
-          <button className='p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900'>
-            <MessageSquare className='w-5 h-5' />
-          </button>
-
-          <button className='p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900'>
-            <HelpCircle className='w-5 h-5' />
-          </button>
-
-          {/* Notifications */}
-          <div className='relative'>
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              className='p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 relative'
-            >
-              <Bell className='w-5 h-5' />
-              {unreadCount > 0 && (
-                <span className='absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center'>
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-
-            {/* Notifications dropdown */}
-            {showNotifications && (
-              <div className='absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50'>
-                <div className='p-4 border-b border-gray-200'>
-                  <h3 className='text-sm font-medium text-gray-900'>
-                    Thông báo
-                  </h3>
-                </div>
-                <div className='max-h-64 overflow-y-auto'>
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`p-4 border-b border-gray-100 hover:bg-gray-50 ${
-                        notification.unread ? 'bg-green-50' : ''
-                      }`}
-                    >
-                      <div className='flex justify-between items-start'>
-                        <div className='flex-1'>
-                          <p className='text-sm font-medium text-gray-900'>
-                            {notification.title}
-                          </p>
-                          <p className='text-sm text-gray-600 mt-1'>
-                            {notification.message}
-                          </p>
-                          <p className='text-xs text-gray-400 mt-2'>
-                            {notification.time}
-                          </p>
-                        </div>
-                        {notification.unread && (
-                          <div className='w-2 h-2 bg-green-500 rounded-full'></div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className='p-4 text-center'>
-                  <button className='text-sm text-green-600 hover:text-green-800 font-medium'>
-                    Xem tất cả thông báo
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* User Profile */}
           <div className='relative'>
             <button

@@ -55,11 +55,9 @@ const StudentManagement = () => {
       <div className='max-w-7xl mx-auto'>
         {/* Header */}
         <div className='mb-8'>
-          <h1 className='text-3xl font-bold text-gray-900'>
-            Student Management
-          </h1>
+          <h1 className='text-3xl font-bold text-gray-900'>Quản lý học viên</h1>
           <p className='text-gray-600 mt-1'>
-            Manage and organize student records
+            Quản lý và tổ chức hồ sơ học viên
           </p>
         </div>
 
@@ -73,7 +71,7 @@ const StudentManagement = () => {
             />
             <input
               type='text'
-              placeholder='Search students...'
+              placeholder='Tìm kiếm học viên...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className='w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
@@ -86,10 +84,10 @@ const StudentManagement = () => {
             onChange={(e) => setLevelFilter(e.target.value)}
             className='px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[150px]'
           >
-            <option>All Levels</option>
-            <option>Beginner</option>
-            <option>Intermediate</option>
-            <option>Advanced</option>
+            <option>Tất cả trình độ</option>
+            <option>Sơ cấp</option>
+            <option>Trung cấp</option>
+            <option>Cao cấp</option>
           </select>
 
           {/* Status Filter */}
@@ -98,16 +96,10 @@ const StudentManagement = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
             className='px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px]'
           >
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Inactive</option>
+            <option>Tất cả trạng thái</option>
+            <option>Đang học</option>
+            <option>Tạm nghỉ</option>
           </select>
-
-          {/* Add Student Button */}
-          <button className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors whitespace-nowrap'>
-            <Plus size={20} />
-            Add Student
-          </button>
         </div>
 
         {/* Students Table */}
@@ -117,22 +109,22 @@ const StudentManagement = () => {
               <thead className='bg-gray-50'>
                 <tr>
                   <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Student
+                    Học viên
                   </th>
                   <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Contact
+                    Liên hệ
                   </th>
                   <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Level
+                    Trình độ
                   </th>
                   <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Current Class
+                    Lớp học hiện tại
                   </th>
                   <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Status
+                    Trạng thái
                   </th>
                   <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Actions
+                    Thao tác
                   </th>
                 </tr>
               </thead>
@@ -156,7 +148,7 @@ const StudentManagement = () => {
                             {student.name}
                           </div>
                           <div className='text-sm text-gray-500'>
-                            ID: {student.studentId}
+                            Mã số: {student.studentId}
                           </div>
                         </div>
                       </div>
@@ -182,7 +174,7 @@ const StudentManagement = () => {
                       </span>
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                      {student.currentClass || 'Not assigned'}
+                      {student.currentClass || 'Chưa phân lớp'}
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap'>
                       <span

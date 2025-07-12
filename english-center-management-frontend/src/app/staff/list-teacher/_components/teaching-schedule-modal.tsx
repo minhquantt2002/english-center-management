@@ -1,65 +1,68 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
-import { mockTeachers, mockClassSessions } from '../../../data';
-import { ClassSession as TeacherClassSession } from '../../../types';
+import { mockTeachers, mockSchedules } from '../../../../data';
+import { Schedule } from '../../../../types';
 
-export default function TeachingSchedule() {
+interface TeachingScheduleModalProps {
+  teacherId: string;
+  teacherName: string;
+  onClose: () => void;
+}
+
+export default function TeachingScheduleModal({
+  teacherId,
+  teacherName,
+  onClose,
+}: TeachingScheduleModalProps) {
   const currentWeek = '23/12/2024 - 29/12/2024';
 
-  // Use first teacher from mock data
-  const teacher = mockTeachers[0]
-    ? {
-        name: mockTeachers[0].name,
-        subject: 'Giáo viên tiếng Anh',
-        id: mockTeachers[0].id,
-        status: 'Đang hoạt động',
-      }
-    : {
-        name: 'Giáo viên',
-        subject: 'Giáo viên tiếng Anh',
-        id: 'GV001',
-        status: 'Đang hoạt động',
-      };
+  // Find teacher from mock data
+  const teacher = mockTeachers.find((t) => t.id === teacherId);
+  const teacherInfo = teacher || {
+    name: teacherName,
+    specialization: 'Giáo viên tiếng Anh',
+    id: teacherId,
+    status: 'active' as const,
+  };
 
-  // Use mock class sessions
-  const sessions = mockClassSessions
-    .slice(0, 5)
-    .map((session: TeacherClassSession, index: number) => ({
-      id: session.id,
-      name: session.title,
-      room: session.room,
-      type: (index % 7 === 0
-        ? 'basic'
-        : index % 7 === 1
-        ? 'ielts'
-        : index % 7 === 2
-        ? 'business'
-        : index % 7 === 3
-        ? 'conversation'
-        : index % 7 === 4
-        ? 'toeic'
-        : index % 7 === 5
-        ? 'kids'
-        : 'advanced') as
-        | 'basic'
-        | 'ielts'
-        | 'business'
-        | 'conversation'
-        | 'toeic'
-        | 'kids'
-        | 'advanced',
-      time: session.time.split(' - ')[0], // Extract start time
-      day: (index % 6) + 2, // Distribute across days 2-7
-    }));
+  // Get schedules for this specific teacher
+  const teacherSchedules = mockSchedules.filter(
+    (schedule) => schedule.teacherId === teacherId
+  );
+
+  // Convert schedules to session format for display
+  const sessions = teacherSchedules.map((schedule: Schedule, index: number) => {
+    const typeMap = {
+      'English Basics A1': 'basic',
+      'Grammar Fundamentals': 'grammar',
+      'Conversation Skills B1': 'conversation',
+      'English 201 - Intermediate': 'intermediate',
+      'Business English B2': 'business',
+      'IELTS Preparation': 'ielts',
+    } as const;
+
+    const type = typeMap[schedule.className as keyof typeof typeMap] || 'basic';
+
+    return {
+      id: schedule.id,
+      name: schedule.className,
+      room: schedule.room,
+      type: type,
+      time: schedule.timeSlot.startTime,
+      day:
+        Object.entries(schedule.daysOfWeek).findIndex(([_, value]) => value) +
+        2, // Convert to day number
+      endTime: schedule.timeSlot.endTime,
+    };
+  });
 
   const typeColors = {
     basic: 'bg-blue-100 text-blue-800 border-blue-200',
-    ielts: 'bg-green-100 text-green-800 border-green-200',
-    business: 'bg-purple-100 text-purple-800 border-purple-200',
-    conversation: 'bg-orange-100 text-orange-800 border-orange-200',
-    toeic: 'bg-red-100 text-red-800 border-red-200',
-    kids: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    advanced: 'bg-pink-100 text-pink-800 border-pink-200',
+    grammar: 'bg-purple-100 text-purple-800 border-purple-200',
+    conversation: 'bg-green-100 text-green-800 border-green-200',
+    intermediate: 'bg-orange-100 text-orange-800 border-orange-200',
+    business: 'bg-red-100 text-red-800 border-red-200',
+    ielts: 'bg-yellow-100 text-yellow-800 border-yellow-200',
   };
 
   const timeSlots = ['8:00', '9:00', '10:00', '14:00', '15:00', '19:00'];
@@ -86,7 +89,10 @@ export default function TeachingSchedule() {
         <div className='bg-white rounded-lg shadow-sm p-6 mb-6'>
           <div className='flex items-center justify-between mb-4'>
             <div className='flex items-center gap-4'>
-              <button className='flex items-center gap-2 text-gray-600 hover:text-gray-800'>
+              <button
+                onClick={onClose}
+                className='flex items-center gap-2 text-gray-600 hover:text-gray-800'
+              >
                 <ArrowLeft className='w-4 h-4' />
                 <span>Trở lại danh sách</span>
               </button>
@@ -100,17 +106,23 @@ export default function TeachingSchedule() {
           {/* Teacher Info */}
           <div className='flex items-center gap-4'>
             <div className='w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center'>
-              <span className='text-gray-600 font-semibold'>SJ</span>
+              <span className='text-gray-600 font-semibold'>
+                {teacherInfo.name.charAt(0)}
+              </span>
             </div>
             <div>
               <h2 className='text-xl font-semibold text-gray-900'>
-                {teacher.name}
+                {teacherInfo.name}
               </h2>
-              <p className='text-gray-600'>{teacher.subject}</p>
+              <p className='text-gray-600'>{teacherInfo.specialization}</p>
               <div className='flex items-center gap-4 mt-1'>
-                <span className='text-sm text-gray-500'>ID: {teacher.id}</span>
+                <span className='text-sm text-gray-500'>
+                  ID: {teacherInfo.id}
+                </span>
                 <span className='px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full'>
-                  {teacher.status}
+                  {teacherInfo.status === 'active'
+                    ? 'Đang hoạt động'
+                    : 'Không hoạt động'}
                 </span>
               </div>
             </div>
@@ -180,11 +192,14 @@ export default function TeachingSchedule() {
                         <div
                           key={session.id}
                           className={`p-2 rounded border-l-4 text-xs ${
-                            typeColors[session.type]
+                            typeColors[session.type as keyof typeof typeColors]
                           }`}
                         >
                           <div className='font-medium'>{session.name}</div>
                           <div className='text-gray-600'>{session.room}</div>
+                          <div className='text-gray-500 text-xs'>
+                            {session.time} - {session.endTime}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -194,6 +209,31 @@ export default function TeachingSchedule() {
             ))}
           </div>
         </div>
+
+        {/* Summary */}
+        {teacherSchedules.length > 0 && (
+          <div className='bg-white rounded-lg shadow-sm p-6 mt-6'>
+            <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+              Tóm tắt lịch giảng dạy
+            </h3>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+              {teacherSchedules.map((schedule) => (
+                <div key={schedule.id} className='border rounded-lg p-4'>
+                  <h4 className='font-medium text-gray-900'>
+                    {schedule.className}
+                  </h4>
+                  <p className='text-sm text-gray-600'>{schedule.room}</p>
+                  <p className='text-sm text-gray-600'>
+                    {schedule.timeSlot.startTime} - {schedule.timeSlot.endTime}
+                  </p>
+                  <p className='text-sm text-gray-600'>
+                    {schedule.sessionsPerWeek} buổi/tuần
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

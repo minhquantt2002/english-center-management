@@ -20,20 +20,20 @@ const TeacherManagement = () => {
     assignedClasses: teacher.assignedClasses || [],
     status:
       teacher.status === 'active'
-        ? 'Active'
+        ? 'Hoạt động'
         : teacher.status === 'inactive'
-        ? 'Inactive'
-        : 'On Leave',
+        ? 'Không hoạt động'
+        : 'Nghỉ phép',
     avatar: teacher.avatar,
   }));
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'Active':
+      case 'Hoạt động':
         return 'bg-green-100 text-green-800';
-      case 'On Leave':
+      case 'Nghỉ phép':
         return 'bg-yellow-100 text-yellow-800';
-      case 'Inactive':
+      case 'Không hoạt động':
         return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -67,10 +67,10 @@ const TeacherManagement = () => {
         {/* Header */}
         <div className='mb-8'>
           <h1 className='text-3xl font-bold text-gray-900'>
-            Teacher Management
+            Quản lý giáo viên
           </h1>
           <p className='text-gray-600 mt-1'>
-            Manage and organize teaching staff
+            Quản lý và tổ chức đội ngũ giảng dạy
           </p>
         </div>
 
@@ -84,7 +84,7 @@ const TeacherManagement = () => {
             />
             <input
               type='text'
-              placeholder='Search teachers...'
+              placeholder='Tìm kiếm giáo viên...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className='w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
@@ -97,11 +97,11 @@ const TeacherManagement = () => {
             onChange={(e) => setSubjectFilter(e.target.value)}
             className='px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[150px]'
           >
-            <option>All Subjects</option>
-            <option>Grammar</option>
-            <option>Conversation</option>
+            <option>Tất cả môn học</option>
+            <option>Ngữ pháp</option>
+            <option>Hội thoại</option>
             <option>IELTS</option>
-            <option>Business English</option>
+            <option>Tiếng Anh thương mại</option>
           </select>
 
           {/* Status Filter */}
@@ -110,16 +110,16 @@ const TeacherManagement = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
             className='px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px]'
           >
-            <option>All Status</option>
-            <option>Active</option>
-            <option>On Leave</option>
-            <option>Inactive</option>
+            <option>Tất cả trạng thái</option>
+            <option>Hoạt động</option>
+            <option>Nghỉ phép</option>
+            <option>Không hoạt động</option>
           </select>
 
           {/* Add Teacher Button */}
           <button className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors whitespace-nowrap'>
             <Plus size={20} />
-            Add Teacher
+            Thêm giáo viên
           </button>
         </div>
 
@@ -130,19 +130,19 @@ const TeacherManagement = () => {
               <thead className='bg-gray-50'>
                 <tr>
                   <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Teacher
+                    Giáo viên
                   </th>
                   <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Contact
+                    Liên hệ
                   </th>
                   <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Assigned Classes
+                    Lớp được phân công
                   </th>
                   <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Status
+                    Trạng thái
                   </th>
                   <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Actions
+                    Thao tác
                   </th>
                 </tr>
               </thead>
@@ -218,11 +218,11 @@ const TeacherManagement = () => {
           {/* Pagination */}
           <div className='bg-gray-50 px-6 py-3 flex items-center justify-between border-t border-gray-200'>
             <div className='text-sm text-gray-700'>
-              Showing 1 to 4 of 12 teachers
+              Hiển thị 1 đến 4 trong tổng số 12 giáo viên
             </div>
             <div className='flex items-center space-x-2'>
               <button className='px-3 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors'>
-                Previous
+                Trước
               </button>
               <button className='px-3 py-2 text-sm bg-blue-600 text-white rounded'>
                 1
@@ -234,7 +234,7 @@ const TeacherManagement = () => {
                 3
               </button>
               <button className='px-3 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors'>
-                Next
+                Tiếp
               </button>
             </div>
           </div>

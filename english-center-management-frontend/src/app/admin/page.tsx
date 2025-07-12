@@ -10,17 +10,15 @@ import {
   UserCheck,
   Calendar,
   BarChart3,
-  TrendingUp,
   ArrowUp,
 } from 'lucide-react';
-import { mockStatCards, mockSystemStatus, mockStudents } from '../../data';
+import { mockStatCards, mockStudents } from '../../data';
 import { Student } from '../../types';
 
 interface StatCardProps {
   title: string;
   value: string;
   change: string;
-  changeType: 'positive' | 'negative' | 'neutral';
   icon: React.ReactNode;
   iconBg: string;
 }
@@ -61,8 +59,6 @@ const AdminDashboard: React.FC = () => {
       ),
   }));
 
-  const systemStatus = mockSystemStatus;
-
   const quickActions = [
     {
       title: 'Quản lý học viên',
@@ -90,7 +86,7 @@ const AdminDashboard: React.FC = () => {
     },
   ];
 
-  // Get recent enrollments from students data
+  // Lấy danh sách đăng ký gần đây từ dữ liệu học viên
   const recentEnrollments = mockStudents
     .slice(0, 3)
     .map((student: Student) => ({
@@ -106,7 +102,6 @@ const AdminDashboard: React.FC = () => {
     title,
     value,
     change,
-    changeType,
     icon,
     iconBg,
   }) => (
@@ -187,14 +182,14 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <>
-      {/* Stats Grid */}
+      {/* Thống kê */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
         {stats.map((stat, index) => (
           <StatCard key={index} {...stat} />
         ))}
       </div>
 
-      {/* Quick Actions */}
+      {/* Thao tác nhanh */}
       <div className='mb-8'>
         <h2 className='text-xl font-bold text-gray-900 mb-6'>Thao tác nhanh</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
@@ -204,39 +199,23 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-        {/* Recent Enrollments */}
-        <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
-          <div className='flex items-center justify-between mb-6'>
-            <h3 className='text-lg font-semibold text-gray-900'>
-              Đăng ký gần đây
-            </h3>
-            <button className='text-blue-600 text-sm font-medium hover:text-blue-700'>
-              Xem tất cả
-            </button>
-          </div>
-          <div className='space-y-1'>
-            {recentEnrollments.map((enrollment, index) => (
-              <EnrollmentItem key={index} {...enrollment} />
-            ))}
-          </div>
-        </div>
-
-        {/* System Status */}
-        <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
-          <h3 className='text-lg font-semibold text-gray-900 mb-6'>
-            Trạng thái hệ thống
+      {/* Đăng ký gần đây */}
+      <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+        <div className='flex items-center justify-between mb-6'>
+          <h3 className='text-lg font-semibold text-gray-900'>
+            Đăng ký gần đây
           </h3>
-          <div className='space-y-3'>
-            {systemStatus.map((status, index) => (
-              <StatusItem key={index} {...status} />
-            ))}
-          </div>
+          <button className='text-blue-600 text-sm font-medium hover:text-blue-700'>
+            Xem tất cả
+          </button>
+        </div>
+        <div className='space-y-1'>
+          {recentEnrollments.map((enrollment, index) => (
+            <EnrollmentItem key={index} {...enrollment} />
+          ))}
         </div>
       </div>
     </>
   );
 };
-
 export default AdminDashboard;

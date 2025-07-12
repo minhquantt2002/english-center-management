@@ -1,14 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Calendar } from 'lucide-react';
+import { Search, Calendar, X } from 'lucide-react';
 import { mockTeachers } from '../../../data';
 import { Teacher } from '../../../types';
+import TeachingScheduleModal from './_components/teaching-schedule-modal';
 
 export default function TeacherManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState('Tất cả trình độ');
   const [subjectFilter, setSubjectFilter] = useState('Tất cả môn học');
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
 
   // Use mock teachers data
   const teachers = mockTeachers.map((teacher: Teacher, index: number) => ({
@@ -29,8 +32,32 @@ export default function TeacherManagement() {
   }));
 
   const handleSchedule = (teacherId: string) => {
-    console.log(`Scheduling for teacher ${teacherId}`);
+    const teacher = mockTeachers.find((t) => t.id === teacherId);
+    if (teacher) {
+      setSelectedTeacher(teacher);
+      setShowScheduleModal(true);
+    }
   };
+
+  const closeScheduleModal = () => {
+    setShowScheduleModal(false);
+    setSelectedTeacher(null);
+  };
+
+  // Filter teachers based on search and filters
+  const filteredTeachers = teachers.filter((teacher) => {
+    const matchesSearch =
+      teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      teacher.phone.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesLevel =
+      levelFilter === 'Tất cả trình độ' || teacher.level === levelFilter;
+    const matchesSubject =
+      subjectFilter === 'Tất cả môn học' || teacher.subject === subjectFilter;
+
+    return matchesSearch && matchesLevel && matchesSubject;
+  });
 
   return (
     <div className='min-h-screen bg-gray-50'>
@@ -112,7 +139,7 @@ export default function TeacherManagement() {
                 </tr>
               </thead>
               <tbody className='divide-y divide-gray-200'>
-                {teachers.map((teacher) => (
+                {filteredTeachers.map((teacher) => (
                   <tr key={teacher.id} className='hover:bg-gray-50'>
                     <td className='py-4 px-6'>
                       <div className='flex items-center space-x-3'>
@@ -166,7 +193,8 @@ export default function TeacherManagement() {
           <div className='bg-white px-6 py-4 border-t border-gray-200'>
             <div className='flex items-center justify-between'>
               <div className='text-sm text-gray-700'>
-                Hiển thị 1 đến 5 trong tổng số 12 giáo viên
+                Hiển thị 1 đến {filteredTeachers.length} trong tổng số{' '}
+                {teachers.length} giáo viên
               </div>
               <div className='flex items-center space-x-2'>
                 <button className='px-3 py-1 text-sm text-gray-500 bg-white border border-gray-300 rounded hover:bg-gray-50'>
@@ -186,6 +214,32 @@ export default function TeacherManagement() {
           </div>
         </div>
       </main>
+
+      {/* Teaching Schedule Modal */}
+      {showScheduleModal && selectedTeacher && (
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+          <div className='bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden'>
+            <div className='flex items-center justify-between p-6 border-b border-gray-200'>
+              <h3 className='text-xl font-semibold text-gray-900'>
+                Lịch giảng dạy - {selectedTeacher.name}
+              </h3>
+              <button
+                onClick={closeScheduleModal}
+                className='text-gray-400 hover:text-gray-600'
+              >
+                <X className='w-6 h-6' />
+              </button>
+            </div>
+            <div className='overflow-y-auto max-h-[calc(90vh-120px)]'>
+              <TeachingScheduleModal
+                teacherId={selectedTeacher.id}
+                teacherName={selectedTeacher.name}
+                onClose={closeScheduleModal}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,47 +4,61 @@ import React, { useState } from 'react';
 import { Search, Edit, Trash2, Plus } from 'lucide-react';
 import { mockCourses } from '../../../data';
 import { Course } from '../../../types';
+import CreateCourseModal, { CourseFormData } from './_components/create-course';
 
 const CourseManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState('All Levels');
   const [statusFilter, setStatusFilter] = useState('All Status');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const getLevel = (level: string) => {
+    switch (level) {
+      case 'beginner':
+        return 'Sơ cấp';
+      case 'intermediate':
+        return 'Trung cấp';
+      case 'advanced':
+        return 'Cao cấp';
+      case 'upper-intermediate':
+        return 'Cao cấp';
+      default:
+        return 'Sơ cấp';
+    }
+  };
 
   // Use mock courses data
   const courses = mockCourses.map((course: Course) => ({
     id: course.id,
     name: course.name,
     description: course.description,
-    level: (course.level.charAt(0).toUpperCase() + course.level.slice(1)) as
-      | 'Beginner'
-      | 'Intermediate'
-      | 'Advanced',
-    duration: `${course.duration} weeks`,
-    startDate: new Date(course.startDate).toLocaleDateString('en-US', {
+    level: getLevel(course.level),
+    duration: `${course.duration}`,
+    startDate: new Date(course.startDate).toLocaleDateString('vi-VN', {
       year: 'numeric',
-      month: 'short',
+      month: 'numeric',
       day: 'numeric',
     }),
-    endDate: new Date(course.endDate).toLocaleDateString('en-US', {
+    endDate: new Date(course.endDate).toLocaleDateString('vi-VN', {
       year: 'numeric',
-      month: 'short',
+      month: 'numeric',
       day: 'numeric',
     }),
     status:
       course.status === 'active'
-        ? 'Active'
+        ? 'Đang hoạt động'
         : course.status === 'completed'
-        ? 'Completed'
-        : ('Upcoming' as 'Active' | 'Upcoming' | 'Completed'),
+        ? 'Đã hoàn thành'
+        : ('Sắp diễn ra' as 'Đang hoạt động' | 'Sắp diễn ra' | 'Đã hoàn thành'),
   }));
 
   const getLevelBadgeColor = (level: string) => {
     switch (level) {
-      case 'Beginner':
+      case 'Sơ cấp':
         return 'bg-green-100 text-green-800';
-      case 'Intermediate':
+      case 'Trung cấp':
         return 'bg-yellow-100 text-yellow-800';
-      case 'Advanced':
+      case 'Cao cấp':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -53,11 +67,11 @@ const CourseManagement = () => {
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'Active':
+      case 'Đang hoạt động':
         return 'bg-blue-100 text-blue-800';
-      case 'Upcoming':
+      case 'Sắp diễn ra':
         return 'bg-purple-100 text-purple-800';
-      case 'Completed':
+      case 'Đã hoàn thành':
         return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -75,6 +89,24 @@ const CourseManagement = () => {
     return matchesSearch && matchesLevel && matchesStatus;
   });
 
+  const handleCreateCourse = async (courseData: CourseFormData) => {
+    try {
+      // Here you would typically make an API call to create the course
+      console.log('Creating course:', courseData);
+
+      // For now, we'll just show a success message
+      alert('Khóa học đã được tạo thành công!');
+
+      // In a real application, you would:
+      // 1. Make API call to create course
+      // 2. Update the courses list
+      // 3. Show success notification
+    } catch (error) {
+      console.error('Error creating course:', error);
+      alert('Có lỗi xảy ra khi tạo khóa học!');
+    }
+  };
+
   return (
     <div className='min-h-screen bg-gray-50 p-6'>
       <div className='max-w-7xl mx-auto'>
@@ -88,7 +120,10 @@ const CourseManagement = () => {
               Quản lý và tổ chức tất cả các khóa học đào tạo
             </p>
           </div>
-          <button className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors'>
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors'
+          >
             <Plus size={20} />
             Thêm khóa học mới
           </button>
@@ -125,7 +160,7 @@ const CourseManagement = () => {
                 className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
               >
                 <option>Tất cả trạng thái</option>
-                <option>Hoạt động</option>
+                <option>Đang hoạt động</option>
                 <option>Sắp diễn ra</option>
                 <option>Đã hoàn thành</option>
               </select>
@@ -269,6 +304,13 @@ const CourseManagement = () => {
           </div>
         </div>
       </div>
+
+      {/* Create Course Modal */}
+      <CreateCourseModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreateCourse={handleCreateCourse}
+      />
     </div>
   );
 };
