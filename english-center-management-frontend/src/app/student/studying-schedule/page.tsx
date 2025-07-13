@@ -1,135 +1,196 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, Download } from 'lucide-react';
-import { mockStudentClasses } from '../../../data';
-import { StudentClass } from '../../../types';
+import React, { useState, useMemo } from 'react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Clock,
+  MapPin,
+  User,
+  BookOpen,
+  XCircle,
+  Eye,
+  Info,
+} from 'lucide-react';
+import { mockStudentSchedules } from '../../../data/student/schedules';
+import { StudentSchedule } from '../../../types/student';
 
-interface ClassEvent {
-  id: string;
-  title: string;
-  room: string;
-  instructor: string;
-  startTime: string;
-  endTime: string;
-  day: number; // 0 = Monday, 1 = Tuesday, etc.
-  color: 'blue' | 'green' | 'purple' | 'orange' | 'red';
-}
+const StudyingSchedule: React.FC = () => {
+  const [currentWeek, setCurrentWeek] = useState(new Date(2024, 0, 22)); // January 22, 2024
+  const [selectedSchedule, setSelectedSchedule] =
+    useState<StudentSchedule | null>(null);
 
-const ClassSchedule: React.FC = () => {
-  const [currentWeek, setCurrentWeek] = useState(new Date(2024, 11, 16)); // December 16, 2024
-  const [selectedView, setSelectedView] = useState<'Day' | 'Week' | 'Month'>(
-    'Week'
-  );
-
-  // Use mock student classes data
-  const classEvents: ClassEvent[] = mockStudentClasses
-    .slice(0, 3)
-    .map((studentClass: StudentClass, index: number) => {
-      const [startTime, endTime] = studentClass.schedule.time.split(' - ');
-      return {
-        id: studentClass.id,
-        title: studentClass.name,
-        room: studentClass.room,
-        instructor: studentClass.teacher.name,
-        startTime: startTime,
-        endTime: endTime || '12:00 PM',
-        day: index % 5, // Distribute across weekdays (0-4)
-        color: (['blue', 'green', 'purple', 'orange', 'red'] as const)[
-          index % 5
-        ],
-      };
-    });
-
+  // Time slots for the timetable
   const timeSlots = [
-    '8:00 AM',
-    '9:00 AM',
-    '10:00 AM',
-    '11:00 AM',
-    '12:00 PM',
-    '1:00 PM',
-    '2:00 PM',
-    '3:00 PM',
-    '4:00 PM',
-    '5:00 PM',
-    '6:00 PM',
+    { id: '1', startTime: '07:00', endTime: '08:30', label: '07:00 - 08:30' },
+    { id: '2', startTime: '08:30', endTime: '10:00', label: '08:30 - 10:00' },
+    { id: '3', startTime: '10:00', endTime: '11:30', label: '10:00 - 11:30' },
+    { id: '4', startTime: '14:00', endTime: '15:30', label: '14:00 - 15:30' },
+    { id: '5', startTime: '15:30', endTime: '17:00', label: '15:30 - 17:00' },
+    { id: '6', startTime: '17:00', endTime: '18:30', label: '17:00 - 18:30' },
+    { id: '7', startTime: '18:30', endTime: '20:00', label: '18:30 - 20:00' },
+    { id: '8', startTime: '20:00', endTime: '21:30', label: '20:00 - 21:30' },
   ];
 
-  const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const weekNumbers = [16, 17, 18, 19, 20, 21, 22];
+  const dayNames = {
+    Monday: 'Thứ 2',
+    Tuesday: 'Thứ 3',
+    Wednesday: 'Thứ 4',
+    Thursday: 'Thứ 5',
+    Friday: 'Thứ 6',
+    Saturday: 'Thứ 7',
+    Sunday: 'Chủ nhật',
+  };
 
+  // Get week range for current week
   const getWeekRange = (date: Date) => {
     const start = new Date(date);
-    const end = new Date(date);
+    const dayOfWeek = start.getDay();
+    const diff = start.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust for Sunday
+    start.setDate(diff);
+
+    const end = new Date(start);
     end.setDate(start.getDate() + 6);
 
     const formatDate = (d: Date) => {
-      return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+      return d.toLocaleDateString('vi-VN', { month: 'long', day: 'numeric' });
     };
 
     return `${formatDate(start)} - ${formatDate(end)}, ${start.getFullYear()}`;
   };
 
+  // Get week number
+  const getWeekNumber = (date: Date) => {
+    const start = new Date(date.getFullYear(), 0, 1);
+    const days = Math.floor(
+      (date.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)
+    );
+    return Math.ceil((days + start.getDay() + 1) / 7);
+  };
+
+  // Navigate between weeks
   const navigateWeek = (direction: 'prev' | 'next') => {
     const newDate = new Date(currentWeek);
     newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
     setCurrentWeek(newDate);
   };
 
-  const getColorClasses = (color: string) => {
-    const colorMap = {
-      blue: 'bg-blue-100 border-l-blue-500 text-blue-800',
-      green: 'bg-green-100 border-l-green-500 text-green-800',
-      purple: 'bg-purple-100 border-l-purple-500 text-purple-800',
-      orange: 'bg-orange-100 border-l-orange-500 text-orange-800',
-      red: 'bg-red-100 border-l-red-500 text-red-800',
-    };
-    return colorMap[color as keyof typeof colorMap] || colorMap.blue;
+  // Get schedules for current week
+  const weekSchedules = useMemo(() => {
+    const startOfWeek = new Date(currentWeek);
+    const dayOfWeek = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    startOfWeek.setDate(diff);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    return mockStudentSchedules.filter((schedule) => {
+      const scheduleDate = new Date(schedule.date);
+      return scheduleDate >= startOfWeek && scheduleDate <= endOfWeek;
+    });
+  }, [currentWeek]);
+
+  // Helper function to get session for a specific day and time slot
+  const getSessionForSlot = (
+    day: string,
+    timeSlot: { startTime: string; endTime: string }
+  ) => {
+    return weekSchedules.find((schedule) => {
+      const scheduleTime = schedule.time.split(' - ');
+      const scheduleStartTime = scheduleTime[0];
+      const scheduleEndTime = scheduleTime[1];
+
+      return (
+        schedule.day === day &&
+        scheduleStartTime === timeSlot.startTime &&
+        scheduleEndTime === timeSlot.endTime
+      );
+    });
   };
 
-  const renderClassCard = (classEvent: ClassEvent) => (
-    <div
-      key={classEvent.id}
-      className={`p-3 rounded-lg border-l-4 ${getColorClasses(
-        classEvent.color
-      )} cursor-pointer hover:shadow-md transition-shadow duration-200 h-32`}
-    >
-      <h4 className='font-semibold text-sm mb-1'>{classEvent.title}</h4>
-      <p className='text-xs opacity-75 mb-1'>{classEvent.room}</p>
-      <p className='text-xs opacity-75'>{classEvent.instructor}</p>
-    </div>
-  );
+  // Get status color
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'upcoming':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'completed':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  // Get status text
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'upcoming':
+        return 'Sắp tới';
+      case 'completed':
+        return 'Đã hoàn thành';
+      case 'cancelled':
+        return 'Đã hủy';
+      default:
+        return status;
+    }
+  };
+
+  // Get type text
+  const getTypeText = (type: string) => {
+    switch (type) {
+      case 'class':
+        return 'Lớp học';
+      case 'exam':
+        return 'Kiểm tra';
+      case 'extra':
+        return 'Luyện tập';
+      default:
+        return 'Khác';
+    }
+  };
+
+  // Get type color
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'class':
+        return 'bg-blue-500';
+      case 'exam':
+        return 'bg-red-500';
+      case 'extra':
+        return 'bg-green-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
+  const weekDays = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
 
   return (
     <div className='min-h-screen bg-gray-50 p-6'>
       <div className='max-w-7xl mx-auto'>
         {/* Header */}
         <div className='mb-8'>
-          <h1 className='text-3xl font-bold text-gray-900 mb-2'>Lịch học</h1>
+          <h1 className='text-3xl font-bold text-gray-900 mb-2'>
+            Lịch học của tôi
+          </h1>
           <p className='text-gray-600'>
-            Quản lý lịch học hàng tuần và kế hoạch học tập
+            Xem lịch học hàng tuần và theo dõi tiến độ học tập
           </p>
         </div>
 
         {/* Controls */}
         <div className='flex flex-col sm:flex-row justify-between items-center mb-8 gap-4'>
-          {/* View Toggle */}
-          <div className='bg-white rounded-lg p-1 shadow-sm border border-gray-200'>
-            {(['Day', 'Week', 'Month'] as const).map((view) => (
-              <button
-                key={view}
-                onClick={() => setSelectedView(view)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  selectedView === view
-                    ? 'bg-blue-500 text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                {view}
-              </button>
-            ))}
-          </div>
-
           {/* Week Navigation */}
           <div className='flex items-center gap-4'>
             <button
@@ -143,7 +204,9 @@ const ClassSchedule: React.FC = () => {
               <div className='font-semibold text-gray-900'>
                 {getWeekRange(currentWeek)}
               </div>
-              <div className='text-sm text-gray-500'>Week 51</div>
+              <div className='text-sm text-gray-500'>
+                Tuần {getWeekNumber(currentWeek)}
+              </div>
             </div>
 
             <button
@@ -154,102 +217,279 @@ const ClassSchedule: React.FC = () => {
             </button>
           </div>
 
-          {/* Action Buttons */}
-          <div className='flex gap-3'>
-            <button className='bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2'>
-              <Plus className='w-4 h-4' />
-              Thêm lớp
-            </button>
-            <button className='bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2'>
-              <Download className='w-4 h-4' />
-              Xuất
-            </button>
-          </div>
+          {/* Today Button */}
+          <button
+            onClick={() => setCurrentWeek(new Date())}
+            className='bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2'
+          >
+            <Calendar className='w-4 h-4' />
+            Hôm nay
+          </button>
         </div>
 
-        {/* Schedule Grid */}
+        {/* Timetable */}
         <div className='bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden'>
-          {/* Header Row */}
-          <div className='grid grid-cols-8 border-b border-gray-200'>
-            <div className='p-4 bg-gray-50 font-medium text-gray-700 text-center'>
-              Giờ
-            </div>
-            {weekDays.map((day, index) => (
-              <div key={day} className='p-4 bg-gray-50 text-center'>
-                <div className='font-medium text-gray-700'>{day}</div>
-                <div className='text-2xl font-bold text-gray-900 mt-1'>
-                  {weekNumbers[index]}
-                </div>
-              </div>
-            ))}
+          <div className='p-6 border-b border-gray-200'>
+            <h3 className='text-lg font-semibold text-gray-900'>
+              Thời khóa biểu tuần
+            </h3>
           </div>
 
-          {/* Time Slots */}
-          <div className='grid grid-cols-8'>
-            {/* Time Column */}
-            <div className='bg-gray-50'>
-              {timeSlots.map((time) => (
-                <div
-                  key={time}
-                  className='p-4 border-b border-gray-200 h-20 flex items-center justify-center text-sm text-gray-600'
-                >
-                  {time}
+          <div className='overflow-x-auto'>
+            <div className='min-w-[800px]'>
+              {/* Header Row */}
+              <div className='grid grid-cols-8 gap-1 mb-2'>
+                <div className='p-3 bg-gray-100 font-medium text-gray-700 text-center text-sm'>
+                  Thời gian
+                </div>
+                {Object.entries(dayNames).map(([key, value]) => (
+                  <div
+                    key={key}
+                    className='p-3 bg-gray-100 font-medium text-gray-700 text-center text-sm'
+                  >
+                    {value}
+                  </div>
+                ))}
+              </div>
+
+              {/* Time Slots Rows */}
+              {timeSlots.map((timeSlot) => (
+                <div key={timeSlot.id} className='grid grid-cols-8 gap-1 mb-1'>
+                  <div className='p-3 bg-gray-50 text-gray-600 text-sm font-medium text-center border border-gray-200'>
+                    {timeSlot.label}
+                  </div>
+                  {Object.keys(dayNames).map((day) => {
+                    const session = getSessionForSlot(day, timeSlot);
+                    return (
+                      <div
+                        key={day}
+                        className='p-2 border border-gray-200 min-h-[80px] relative'
+                      >
+                        {session ? (
+                          <div className='h-full'>
+                            <div className='h-full flex flex-col'>
+                              <div className='flex items-start justify-between mb-1'>
+                                <div className='text-xs font-medium text-gray-900 truncate'>
+                                  {session.title}
+                                </div>
+                                <button
+                                  onClick={() => setSelectedSchedule(session)}
+                                  className='text-blue-600 hover:text-blue-800 text-xs ml-1'
+                                >
+                                  <Eye className='w-3 h-3' />
+                                </button>
+                              </div>
+                              <div className='text-xs text-gray-600 mb-1'>
+                                {session.room}
+                              </div>
+                              <div className='text-xs text-gray-600 mb-1'>
+                                {session.teacher}
+                              </div>
+                              <div className='flex items-center gap-1 mb-1'>
+                                <span
+                                  className={`w-2 h-2 rounded-full ${getTypeColor(
+                                    session.type
+                                  )}`}
+                                ></span>
+                                <span className='text-xs text-gray-600'>
+                                  {getTypeText(session.type)}
+                                </span>
+                              </div>
+                              <span
+                                className={`text-xs px-1 py-0.5 rounded-full ${getStatusColor(
+                                  session.status
+                                )}`}
+                              >
+                                {getStatusText(session.status)}
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className='h-full flex items-center justify-center text-gray-400 text-xs'>
+                            Trống
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               ))}
             </div>
-
-            {/* Day Columns */}
-            {Array.from({ length: 7 }, (_, dayIndex) => (
-              <div key={dayIndex} className='border-l border-gray-200'>
-                {timeSlots.map((time, timeIndex) => {
-                  const classForThisSlot = classEvents.find(
-                    (event) =>
-                      event.day === dayIndex && event.startTime === time
-                  );
-
-                  return (
-                    <div
-                      key={`${dayIndex}-${timeIndex}`}
-                      className='border-b border-gray-200 h-20 p-2'
-                    >
-                      {classForThisSlot && renderClassCard(classForThisSlot)}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
           </div>
         </div>
 
         {/* Legend */}
         <div className='mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4'>
-          <h3 className='font-medium text-gray-900 mb-3'>Loại lớp học</h3>
+          <h3 className='font-medium text-gray-900 mb-3'>Chú thích</h3>
           <div className='flex flex-wrap gap-4'>
-            <div className='flex items-center gap-2'>
-              <div className='w-4 h-4 bg-blue-100 border-l-4 border-blue-500 rounded'></div>
-              <span className='text-sm text-gray-600'>Lớp ngữ pháp</span>
+            <div className='flex items-center space-x-2'>
+              <div className='w-4 h-4 bg-blue-500 rounded'></div>
+              <span className='text-sm text-gray-700'>Lớp học thường</span>
             </div>
-            <div className='flex items-center gap-2'>
-              <div className='w-4 h-4 bg-green-100 border-l-4 border-green-500 rounded'></div>
-              <span className='text-sm text-gray-600'>Luyện nói</span>
+            <div className='flex items-center space-x-2'>
+              <div className='w-4 h-4 bg-red-500 rounded'></div>
+              <span className='text-sm text-gray-700'>Kiểm tra</span>
             </div>
-            <div className='flex items-center gap-2'>
-              <div className='w-4 h-4 bg-purple-100 border-l-4 border-purple-500 rounded'></div>
-              <span className='text-sm text-gray-600'>Lớp viết</span>
+            <div className='flex items-center space-x-2'>
+              <div className='w-4 h-4 bg-green-500 rounded'></div>
+              <span className='text-sm text-gray-700'>Luyện tập thêm</span>
             </div>
-            <div className='flex items-center gap-2'>
-              <div className='w-4 h-4 bg-orange-100 border-l-4 border-orange-500 rounded'></div>
-              <span className='text-sm text-gray-600'>Lớp đọc</span>
+            <div className='flex items-center space-x-2'>
+              <div className='w-4 h-4 bg-blue-100 border border-blue-200 rounded'></div>
+              <span className='text-sm text-gray-700'>Sắp tới</span>
             </div>
-            <div className='flex items-center gap-2'>
-              <div className='w-4 h-4 bg-red-100 border-l-4 border-red-500 rounded'></div>
-              <span className='text-sm text-gray-600'>Luyện thi</span>
+            <div className='flex items-center space-x-2'>
+              <div className='w-4 h-4 bg-green-100 border border-green-200 rounded'></div>
+              <span className='text-sm text-gray-700'>Đã hoàn thành</span>
+            </div>
+            <div className='flex items-center space-x-2'>
+              <div className='w-4 h-4 bg-red-100 border border-red-200 rounded'></div>
+              <span className='text-sm text-gray-700'>Đã hủy</span>
             </div>
           </div>
         </div>
+
+        {/* Schedule Detail Modal */}
+        {selectedSchedule && (
+          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+            <div className='bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4'>
+              {/* Header */}
+              <div className='flex items-center justify-between p-6 border-b border-gray-200'>
+                <div>
+                  <h2 className='text-2xl font-bold text-gray-900'>
+                    Chi tiết lịch học
+                  </h2>
+                  <p className='text-gray-600 mt-1'>
+                    Thông tin chi tiết về buổi học
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSelectedSchedule(null)}
+                  className='text-gray-400 hover:text-gray-600 transition-colors'
+                >
+                  <XCircle className='w-6 h-6' />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className='p-6'>
+                <div className='space-y-4'>
+                  <div className='flex items-center space-x-3'>
+                    <BookOpen className='w-5 h-5 text-gray-500' />
+                    <div>
+                      <p className='text-sm text-gray-600'>Tên lớp</p>
+                      <p className='font-medium text-gray-900'>
+                        {selectedSchedule.title}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className='flex items-center space-x-3'>
+                    <Clock className='w-5 h-5 text-gray-500' />
+                    <div>
+                      <p className='text-sm text-gray-600'>Thời gian</p>
+                      <p className='font-medium text-gray-900'>
+                        {selectedSchedule.time}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className='flex items-center space-x-3'>
+                    <Calendar className='w-5 h-5 text-gray-500' />
+                    <div>
+                      <p className='text-sm text-gray-600'>Ngày</p>
+                      <p className='font-medium text-gray-900'>
+                        {
+                          dayNames[
+                            selectedSchedule.day as keyof typeof dayNames
+                          ]
+                        }{' '}
+                        - {selectedSchedule.date}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className='flex items-center space-x-3'>
+                    <MapPin className='w-5 h-5 text-gray-500' />
+                    <div>
+                      <p className='text-sm text-gray-600'>Phòng học</p>
+                      <p className='font-medium text-gray-900'>
+                        {selectedSchedule.room}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className='flex items-center space-x-3'>
+                    <User className='w-5 h-5 text-gray-500' />
+                    <div>
+                      <p className='text-sm text-gray-600'>Giáo viên</p>
+                      <p className='font-medium text-gray-900'>
+                        {selectedSchedule.teacher}
+                      </p>
+                    </div>
+                  </div>
+
+                  {selectedSchedule.topic && (
+                    <div className='flex items-center space-x-3'>
+                      <Info className='w-5 h-5 text-gray-500' />
+                      <div>
+                        <p className='text-sm text-gray-600'>Chủ đề</p>
+                        <p className='font-medium text-gray-900'>
+                          {selectedSchedule.topic}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className='flex items-center space-x-3'>
+                    <div
+                      className={`w-5 h-5 rounded ${getTypeColor(
+                        selectedSchedule.type
+                      )}`}
+                    ></div>
+                    <div>
+                      <p className='text-sm text-gray-600'>Loại</p>
+                      <p className='font-medium text-gray-900'>
+                        {getTypeText(selectedSchedule.type)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className='flex items-center space-x-3'>
+                    <div
+                      className={`w-5 h-5 rounded ${
+                        selectedSchedule.status === 'upcoming'
+                          ? 'bg-blue-100 border border-blue-200'
+                          : selectedSchedule.status === 'completed'
+                          ? 'bg-green-100 border border-green-200'
+                          : 'bg-red-100 border border-red-200'
+                      }`}
+                    ></div>
+                    <div>
+                      <p className='text-sm text-gray-600'>Trạng thái</p>
+                      <p className='font-medium text-gray-900'>
+                        {getStatusText(selectedSchedule.status)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className='flex items-center justify-end p-6 border-t border-gray-200 bg-gray-50'>
+                <button
+                  onClick={() => setSelectedSchedule(null)}
+                  className='px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default ClassSchedule;
+export default StudyingSchedule;

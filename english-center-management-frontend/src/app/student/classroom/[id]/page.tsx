@@ -1,0 +1,585 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import {
+  BookOpen,
+  Clock,
+  MapPin,
+  User,
+  Calendar,
+  CheckCircle,
+  PlayCircle,
+  Award,
+  FileText,
+  Video,
+  MessageCircle,
+  ArrowLeft,
+  Users,
+  Target,
+  BarChart3,
+  Download,
+  Eye,
+} from 'lucide-react';
+import { mockStudentClasses } from '@/data/student/classes';
+import { StudentClass } from '@/types/student';
+
+const ClassDetailPage: React.FC = () => {
+  const params = useParams();
+  const router = useRouter();
+  const [classData, setClassData] = useState<StudentClass | null>(null);
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'materials' | 'assignments' | 'schedule'
+  >('overview');
+
+  useEffect(() => {
+    const classId = params.id as string;
+    const foundClass = mockStudentClasses.find((c) => c.id === classId);
+    if (foundClass) {
+      setClassData(foundClass);
+    } else {
+      // Redirect to classroom list if class not found
+      router.push('/student/classroom');
+    }
+  }, [params.id, router]);
+
+  const getLevelColor = (level: string) => {
+    switch (level) {
+      case 'beginner':
+        return 'bg-green-100 text-green-800';
+      case 'intermediate':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'advanced':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'In Progress':
+        return 'bg-blue-100 text-blue-800';
+      case 'Upcoming':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Completed':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getProgressPercentage = (completed: number, total: number) => {
+    return Math.round((completed / total) * 100);
+  };
+
+  if (!classData) {
+    return (
+      <div className='flex items-center justify-center h-64'>
+        <div className='text-gray-500'>Đang tải...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className='space-y-6'>
+      {/* Header with Back Button */}
+      <div className='flex items-center gap-4'>
+        <button
+          onClick={() => router.push('/student/classroom')}
+          className='flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors'
+        >
+          <ArrowLeft className='w-5 h-5' />
+          <span>Quay lại</span>
+        </button>
+        <div className='flex-1'>
+          <h1 className='text-2xl font-bold text-gray-900'>{classData.name}</h1>
+          <p className='text-gray-600 mt-1'>Chi tiết lớp học</p>
+        </div>
+        <div className='flex items-center gap-3'>
+          <button className='px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors'>
+            <MessageCircle className='w-4 h-4' />
+          </button>
+        </div>
+      </div>
+
+      {/* Class Info Cards */}
+      <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
+        <div className='bg-white rounded-lg p-4 border border-gray-200'>
+          <div className='flex items-center gap-3'>
+            <div className='w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center'>
+              <User className='w-5 h-5 text-blue-600' />
+            </div>
+            <div>
+              <p className='text-sm text-gray-600'>Giáo viên</p>
+              <p className='font-medium text-gray-900'>
+                {classData.teacher.name}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className='bg-white rounded-lg p-4 border border-gray-200'>
+          <div className='flex items-center gap-3'>
+            <div className='w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center'>
+              <Clock className='w-5 h-5 text-green-600' />
+            </div>
+            <div>
+              <p className='text-sm text-gray-600'>Lịch học</p>
+              <p className='font-medium text-gray-900'>
+                {classData.schedule.days}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className='bg-white rounded-lg p-4 border border-gray-200'>
+          <div className='flex items-center gap-3'>
+            <div className='w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center'>
+              <MapPin className='w-5 h-5 text-purple-600' />
+            </div>
+            <div>
+              <p className='text-sm text-gray-600'>Phòng học</p>
+              <p className='font-medium text-gray-900'>{classData.room}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className='bg-white rounded-lg p-4 border border-gray-200'>
+          <div className='flex items-center gap-3'>
+            <div className='w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center'>
+              <Target className='w-5 h-5 text-orange-600' />
+            </div>
+            <div>
+              <p className='text-sm text-gray-600'>Trạng thái</p>
+              <p className='font-medium text-gray-900'>
+                {classData.status === 'In Progress' && 'Đang học'}
+                {classData.status === 'Upcoming' && 'Sắp tới'}
+                {classData.status === 'Completed' && 'Hoàn thành'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className='bg-white rounded-lg border border-gray-200'>
+        {/* Tabs */}
+        <div className='flex border-b border-gray-200'>
+          {[
+            { id: 'overview', label: 'Tổng quan', icon: BookOpen },
+            { id: 'materials', label: 'Tài liệu', icon: FileText },
+            { id: 'assignments', label: 'Bài tập', icon: Award },
+            { id: 'schedule', label: 'Lịch học', icon: Calendar },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === tab.id
+                  ? 'border-purple-500 text-purple-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <tab.icon className='w-4 h-4' />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Content */}
+        <div className='p-6'>
+          {activeTab === 'overview' && (
+            <div className='space-y-6'>
+              {/* Class Details */}
+              <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
+                <div className='space-y-6'>
+                  <div>
+                    <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+                      Thông tin lớp học
+                    </h3>
+                    <div className='space-y-4'>
+                      <div className='flex items-center gap-3'>
+                        <div className='w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center'>
+                          <BookOpen className='w-5 h-5 text-gray-600' />
+                        </div>
+                        <div>
+                          <p className='text-sm text-gray-600'>Tên lớp</p>
+                          <p className='font-medium text-gray-900'>
+                            {classData.name}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className='flex items-center gap-3'>
+                        <div className='w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center'>
+                          <User className='w-5 h-5 text-gray-600' />
+                        </div>
+                        <div>
+                          <p className='text-sm text-gray-600'>Giáo viên</p>
+                          <p className='font-medium text-gray-900'>
+                            {classData.teacher.name}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className='flex items-center gap-3'>
+                        <div className='w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center'>
+                          <Clock className='w-5 h-5 text-gray-600' />
+                        </div>
+                        <div>
+                          <p className='text-sm text-gray-600'>Thời gian học</p>
+                          <p className='font-medium text-gray-900'>
+                            {classData.schedule.time}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className='flex items-center gap-3'>
+                        <div className='w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center'>
+                          <MapPin className='w-5 h-5 text-gray-600' />
+                        </div>
+                        <div>
+                          <p className='text-sm text-gray-600'>Phòng học</p>
+                          <p className='font-medium text-gray-900'>
+                            {classData.room}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+                      Cấp độ & Trạng thái
+                    </h3>
+                    <div className='flex gap-2'>
+                      <span
+                        className={`px-3 py-1 text-sm font-medium rounded-full ${getLevelColor(
+                          classData.level
+                        )}`}
+                      >
+                        {classData.level === 'beginner' && 'Cơ bản'}
+                        {classData.level === 'intermediate' && 'Trung cấp'}
+                        {classData.level === 'advanced' && 'Nâng cao'}
+                      </span>
+                      <span
+                        className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(
+                          classData.status
+                        )}`}
+                      >
+                        {classData.status === 'In Progress' && 'Đang học'}
+                        {classData.status === 'Upcoming' && 'Sắp tới'}
+                        {classData.status === 'Completed' && 'Hoàn thành'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className='space-y-6'>
+                  <div>
+                    <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+                      Tiến độ học tập
+                    </h3>
+                    {classData.sessionsCompleted && classData.totalSessions && (
+                      <div className='space-y-4'>
+                        <div className='flex items-center justify-between'>
+                          <span className='text-sm text-gray-600'>
+                            Buổi học
+                          </span>
+                          <span className='font-medium text-gray-900'>
+                            {classData.sessionsCompleted}/
+                            {classData.totalSessions}
+                          </span>
+                        </div>
+                        <div className='w-full bg-gray-200 rounded-full h-3'>
+                          <div
+                            className='bg-purple-600 h-3 rounded-full transition-all duration-300'
+                            style={{
+                              width: `${getProgressPercentage(
+                                classData.sessionsCompleted,
+                                classData.totalSessions
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                        <p className='text-sm text-gray-600'>
+                          {getProgressPercentage(
+                            classData.sessionsCompleted,
+                            classData.totalSessions
+                          )}
+                          % hoàn thành
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {classData.nextSession &&
+                    classData.status === 'In Progress' && (
+                      <div>
+                        <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+                          Buổi học tiếp theo
+                        </h3>
+                        <div className='p-4 bg-purple-50 rounded-lg border border-purple-200'>
+                          <div className='flex items-center gap-3'>
+                            <Calendar className='w-5 h-5 text-purple-600' />
+                            <div>
+                              <p className='font-medium text-gray-900'>
+                                {new Date(
+                                  classData.nextSession
+                                ).toLocaleDateString('vi-VN', {
+                                  weekday: 'long',
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                                })}
+                              </p>
+                              <p className='text-sm text-gray-600'>
+                                {classData.schedule.time}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                </div>
+              </div>
+
+              {/* Recent Activities */}
+              <div>
+                <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+                  Hoạt động gần đây
+                </h3>
+                <div className='space-y-3'>
+                  <div className='flex items-center gap-3 p-4 bg-gray-50 rounded-lg'>
+                    <div className='w-10 h-10 bg-green-100 rounded-full flex items-center justify-center'>
+                      <CheckCircle className='w-5 h-5 text-green-600' />
+                    </div>
+                    <div className='flex-1'>
+                      <p className='text-sm font-medium text-gray-900'>
+                        Hoàn thành bài tập Unit 5
+                      </p>
+                      <p className='text-xs text-gray-500'>2 giờ trước</p>
+                    </div>
+                  </div>
+                  <div className='flex items-center gap-3 p-4 bg-gray-50 rounded-lg'>
+                    <div className='w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center'>
+                      <Video className='w-5 h-5 text-blue-600' />
+                    </div>
+                    <div className='flex-1'>
+                      <p className='text-sm font-medium text-gray-900'>
+                        Xem video bài giảng
+                      </p>
+                      <p className='text-xs text-gray-500'>1 ngày trước</p>
+                    </div>
+                  </div>
+                  <div className='flex items-center gap-3 p-4 bg-gray-50 rounded-lg'>
+                    <div className='w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center'>
+                      <BarChart3 className='w-5 h-5 text-purple-600' />
+                    </div>
+                    <div className='flex-1'>
+                      <p className='text-sm font-medium text-gray-900'>
+                        Nhận điểm kiểm tra giữa kỳ
+                      </p>
+                      <p className='text-xs text-gray-500'>3 ngày trước</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'materials' && (
+            <div className='space-y-6'>
+              <h3 className='text-lg font-semibold text-gray-900'>
+                Tài liệu học tập
+              </h3>
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                <div className='p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors'>
+                  <div className='flex items-center gap-3 mb-3'>
+                    <FileText className='w-6 h-6 text-blue-600' />
+                    <span className='font-medium text-gray-900'>
+                      Sách giáo khoa
+                    </span>
+                  </div>
+                  <p className='text-sm text-gray-600 mb-3'>
+                    English File Intermediate
+                  </p>
+                  <div className='flex gap-2'>
+                    <button className='flex-1 bg-purple-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1'>
+                      <Download className='w-4 h-4' />
+                      Tải xuống
+                    </button>
+                    <button className='px-3 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors'>
+                      <Eye className='w-4 h-4' />
+                    </button>
+                  </div>
+                </div>
+
+                <div className='p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors'>
+                  <div className='flex items-center gap-3 mb-3'>
+                    <Video className='w-6 h-6 text-red-600' />
+                    <span className='font-medium text-gray-900'>
+                      Video bài giảng
+                    </span>
+                  </div>
+                  <p className='text-sm text-gray-600 mb-3'>
+                    Unit 5: Communication Skills
+                  </p>
+                  <div className='flex gap-2'>
+                    <button className='flex-1 bg-purple-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1'>
+                      <PlayCircle className='w-4 h-4' />
+                      Xem video
+                    </button>
+                    <button className='px-3 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors'>
+                      <Download className='w-4 h-4' />
+                    </button>
+                  </div>
+                </div>
+
+                <div className='p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors'>
+                  <div className='flex items-center gap-3 mb-3'>
+                    <FileText className='w-6 h-6 text-green-600' />
+                    <span className='font-medium text-gray-900'>Bài tập</span>
+                  </div>
+                  <p className='text-sm text-gray-600 mb-3'>
+                    Unit 5 - Practice Exercises
+                  </p>
+                  <div className='flex gap-2'>
+                    <button className='flex-1 bg-purple-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1'>
+                      <Download className='w-4 h-4' />
+                      Tải xuống
+                    </button>
+                    <button className='px-3 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors'>
+                      <Eye className='w-4 h-4' />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'assignments' && (
+            <div className='space-y-6'>
+              <h3 className='text-lg font-semibold text-gray-900'>Bài tập</h3>
+              <div className='space-y-4'>
+                <div className='p-4 border border-gray-200 rounded-lg'>
+                  <div className='flex items-center justify-between mb-3'>
+                    <h4 className='font-medium text-gray-900'>
+                      Bài tập Unit 5
+                    </h4>
+                    <span className='px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full'>
+                      Hoàn thành
+                    </span>
+                  </div>
+                  <p className='text-sm text-gray-600 mb-3'>
+                    Làm bài tập về kỹ năng giao tiếp trong môi trường công sở
+                  </p>
+                  <div className='flex items-center justify-between text-sm text-gray-500'>
+                    <span>Hạn nộp: 20/01/2024</span>
+                    <span className='font-medium text-green-600'>
+                      Điểm: 9.5/10
+                    </span>
+                  </div>
+                </div>
+
+                <div className='p-4 border border-gray-200 rounded-lg'>
+                  <div className='flex items-center justify-between mb-3'>
+                    <h4 className='font-medium text-gray-900'>
+                      Bài tập Unit 6
+                    </h4>
+                    <span className='px-3 py-1 text-sm font-medium bg-yellow-100 text-yellow-800 rounded-full'>
+                      Đang làm
+                    </span>
+                  </div>
+                  <p className='text-sm text-gray-600 mb-3'>
+                    Viết bài luận về chủ đề "Technology in Education"
+                  </p>
+                  <div className='flex items-center justify-between text-sm text-gray-500'>
+                    <span>Hạn nộp: 25/01/2024</span>
+                    <span className='font-medium text-yellow-600'>
+                      Chưa nộp
+                    </span>
+                  </div>
+                </div>
+
+                <div className='p-4 border border-gray-200 rounded-lg'>
+                  <div className='flex items-center justify-between mb-3'>
+                    <h4 className='font-medium text-gray-900'>
+                      Bài tập Unit 7
+                    </h4>
+                    <span className='px-3 py-1 text-sm font-medium bg-gray-100 text-gray-800 rounded-full'>
+                      Sắp tới
+                    </span>
+                  </div>
+                  <p className='text-sm text-gray-600 mb-3'>
+                    Thuyết trình về chủ đề tự chọn
+                  </p>
+                  <div className='flex items-center justify-between text-sm text-gray-500'>
+                    <span>Hạn nộp: 30/01/2024</span>
+                    <span className='font-medium text-gray-600'>Chưa mở</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'schedule' && (
+            <div className='space-y-6'>
+              <h3 className='text-lg font-semibold text-gray-900'>Lịch học</h3>
+              <div className='space-y-4'>
+                <div className='p-4 bg-purple-50 border border-purple-200 rounded-lg'>
+                  <div className='flex items-center gap-3 mb-2'>
+                    <Calendar className='w-5 h-5 text-purple-600' />
+                    <span className='font-medium text-gray-900'>
+                      Lịch học cố định
+                    </span>
+                  </div>
+                  <p className='text-sm text-gray-600'>
+                    {classData.schedule.days} - {classData.schedule.time}
+                  </p>
+                </div>
+
+                <div className='space-y-3'>
+                  <h4 className='font-medium text-gray-900'>
+                    Các buổi học sắp tới
+                  </h4>
+                  <div className='space-y-2'>
+                    <div className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'>
+                      <div>
+                        <p className='font-medium text-gray-900'>
+                          Buổi 25 - Unit 5
+                        </p>
+                        <p className='text-sm text-gray-600'>
+                          Thứ 2, 22/01/2024 - 9:00 AM
+                        </p>
+                      </div>
+                      <span className='px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full'>
+                        Sắp tới
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'>
+                      <div>
+                        <p className='font-medium text-gray-900'>
+                          Buổi 26 - Unit 5
+                        </p>
+                        <p className='text-sm text-gray-600'>
+                          Thứ 4, 24/01/2024 - 9:00 AM
+                        </p>
+                      </div>
+                      <span className='px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full'>
+                        Chưa đến
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ClassDetailPage;

@@ -1,16 +1,21 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Edit, Trash2, Plus } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, Eye } from 'lucide-react';
 import { mockCourses } from '../../../data';
 import { Course } from '../../../types';
 import CreateCourseModal, { CourseFormData } from './_components/create-course';
+import EditCourseModal from './_components/edit-course';
+import ViewCourseModal from './_components/view-course';
 
 const CourseManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState('All Levels');
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
   const getLevel = (level: string) => {
     switch (level) {
@@ -29,22 +34,20 @@ const CourseManagement = () => {
 
   // Use mock courses data
   const courses = mockCourses.map((course: Course) => ({
-    id: course.id,
-    name: course.name,
-    description: course.description,
-    level: getLevel(course.level),
-    duration: `${course.duration}`,
-    startDate: new Date(course.startDate).toLocaleDateString('vi-VN', {
+    ...course,
+    displayLevel: getLevel(course.level),
+    displayDuration: `${course.duration}`,
+    displayStartDate: new Date(course.startDate).toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: 'numeric',
       day: 'numeric',
     }),
-    endDate: new Date(course.endDate).toLocaleDateString('vi-VN', {
+    displayEndDate: new Date(course.endDate).toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: 'numeric',
       day: 'numeric',
     }),
-    status:
+    displayStatus:
       course.status === 'active'
         ? 'Đang hoạt động'
         : course.status === 'completed'
@@ -104,6 +107,55 @@ const CourseManagement = () => {
     } catch (error) {
       console.error('Error creating course:', error);
       alert('Có lỗi xảy ra khi tạo khóa học!');
+    }
+  };
+
+  const handleViewCourse = (course: any) => {
+    // Find the original course data from mockCourses
+    const originalCourse = mockCourses.find((c) => c.id === course.id);
+    if (originalCourse) {
+      setSelectedCourse(originalCourse);
+      setIsViewModalOpen(true);
+    }
+  };
+
+  const handleCloseViewModal = () => {
+    setIsViewModalOpen(false);
+    setSelectedCourse(null);
+  };
+
+  const handleEditCourse = (course: any) => {
+    // Find the original course data from mockCourses
+    const originalCourse = mockCourses.find((c) => c.id === course.id);
+    if (originalCourse) {
+      setSelectedCourse(originalCourse);
+      setIsEditModalOpen(true);
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedCourse(null);
+  };
+
+  const handleUpdateCourse = async (
+    courseId: string,
+    courseData: CourseFormData
+  ) => {
+    try {
+      // Here you would typically make an API call to update the course
+      console.log('Updating course:', courseId, courseData);
+
+      // For now, we'll just show a success message
+      alert('Khóa học đã được cập nhật thành công!');
+
+      // In a real application, you would:
+      // 1. Make API call to update course
+      // 2. Update the courses list
+      // 3. Show success notification
+    } catch (error) {
+      console.error('Error updating course:', error);
+      alert('Có lỗi xảy ra khi cập nhật khóa học!');
     }
   };
 
@@ -239,33 +291,44 @@ const CourseManagement = () => {
                     <td className='px-6 py-4 whitespace-nowrap'>
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getLevelBadgeColor(
-                          course.level
+                          course.displayLevel
                         )}`}
                       >
-                        {course.level}
+                        {course.displayLevel}
                       </span>
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                      {course.duration}
+                      {course.displayDuration}
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                      {course.startDate}
+                      {course.displayStartDate}
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                      {course.endDate}
+                      {course.displayEndDate}
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap'>
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(
-                          course.status
+                          course.displayStatus
                         )}`}
                       >
-                        {course.status}
+                        {course.displayStatus}
                       </span>
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                       <div className='flex space-x-2'>
-                        <button className='text-blue-600 hover:text-blue-900 transition-colors'>
+                        <button
+                          onClick={() => handleViewCourse(course)}
+                          className='text-green-600 hover:text-green-900 transition-colors'
+                          title='Xem chi tiết'
+                        >
+                          <Eye size={18} />
+                        </button>
+                        <button
+                          onClick={() => handleEditCourse(course)}
+                          className='text-blue-600 hover:text-blue-900 transition-colors'
+                          title='Chỉnh sửa'
+                        >
                           <Edit size={18} />
                         </button>
                         <button className='text-red-600 hover:text-red-900 transition-colors'>
@@ -310,6 +373,21 @@ const CourseManagement = () => {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onCreateCourse={handleCreateCourse}
+      />
+
+      {/* View Course Modal */}
+      <ViewCourseModal
+        isOpen={isViewModalOpen}
+        onClose={handleCloseViewModal}
+        course={selectedCourse}
+      />
+
+      {/* Edit Course Modal */}
+      <EditCourseModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onUpdateCourse={handleUpdateCourse}
+        course={selectedCourse}
       />
     </div>
   );

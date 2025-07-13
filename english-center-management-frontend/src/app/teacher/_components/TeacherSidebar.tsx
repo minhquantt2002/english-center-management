@@ -41,18 +41,6 @@ const TeacherSidebar: React.FC = () => {
       icon: <School className='w-5 h-5' />,
       badge: '4',
     },
-    {
-      name: 'Nhập điểm',
-      href: '/teacher/score-entry',
-      icon: <ClipboardCheck className='w-5 h-5' />,
-      badge: '8',
-    },
-    {
-      name: 'Nhận xét học viên',
-      href: '/teacher/student-feedback',
-      icon: <MessageSquare className='w-5 h-5' />,
-      badge: '3',
-    },
   ];
 
   const isActive = (href: string) => {

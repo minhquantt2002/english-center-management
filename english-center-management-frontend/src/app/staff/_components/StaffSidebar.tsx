@@ -11,7 +11,6 @@ import {
   School,
   Calendar,
   Receipt,
-  ClipboardList,
   ChevronRight,
 } from 'lucide-react';
 
@@ -56,22 +55,7 @@ const StaffSidebar: React.FC = () => {
       badge: '8',
     },
     {
-      name: 'Phân công học viên',
-      href: '/staff/assign-student',
-      icon: <ClipboardList className='w-5 h-5' />,
-    },
-    {
-      name: 'Tạo lịch học',
-      href: '/staff/create-schedule',
-      icon: <Calendar className='w-5 h-5' />,
-    },
-    {
-      name: 'Lịch giảng dạy',
-      href: '/staff/teaching-schedule',
-      icon: <Calendar className='w-5 h-5' />,
-    },
-    {
-      name: 'Hóa đơn học viên',
+      name: 'Tạo hóa đơn học viên',
       href: '/staff/create-student-invoice',
       icon: <Receipt className='w-5 h-5' />,
     },

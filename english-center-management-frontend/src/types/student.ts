@@ -85,3 +85,19 @@ export interface StudentClass {
   color?: string;
   bgColor?: string;
 }
+
+// Student schedule interface
+export interface StudentSchedule extends BaseEntity {
+  id: string;
+  title: string;
+  time: string;
+  date: string;
+  day: string;
+  teacher: string;
+  room: string;
+  type: 'class' | 'exam' | 'extra';
+  status: 'upcoming' | 'completed' | 'cancelled';
+  topic?: string;
+  color: string;
+  textColor: string;
+}

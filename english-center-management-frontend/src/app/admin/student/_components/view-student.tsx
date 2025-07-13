@@ -1,0 +1,353 @@
+'use client';
+
+import React from 'react';
+import {
+  X,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  User,
+  BookOpen,
+  Clock,
+  AlertCircle,
+} from 'lucide-react';
+import { Student } from '../../../../types';
+
+interface ViewStudentModalProps {
+  student: Student | null;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
+  student,
+  isOpen,
+  onClose,
+}) => {
+  if (!isOpen || !student) return null;
+
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'inactive':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-yellow-100 text-yellow-800';
+    }
+  };
+
+  const getLevelBadgeColor = (level: string) => {
+    switch (level) {
+      case 'beginner':
+        return 'bg-green-100 text-green-700';
+      case 'intermediate':
+        return 'bg-blue-100 text-blue-700';
+      case 'advanced':
+        return 'bg-purple-100 text-purple-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return 'Chưa cập nhật';
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const calculateAge = (dateOfBirth: string | undefined) => {
+    if (!dateOfBirth) return null;
+
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+
+  return (
+    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
+      <div className='bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto'>
+        {/* Header */}
+        <div className='flex items-center justify-between p-6 border-b border-gray-200'>
+          <div className='flex items-center space-x-3'>
+            <div className='h-12 w-12 flex-shrink-0'>
+              <img
+                className='h-12 w-12 rounded-full object-cover'
+                src={
+                  student.avatar ||
+                  'https://images.unsplash.com/photo-1494790108755-2616b612b3fd?w=150&h=150&fit=crop&crop=face'
+                }
+                alt={student.name}
+              />
+            </div>
+            <div>
+              <h2 className='text-xl font-semibold text-gray-900'>
+                {student.name}
+              </h2>
+              <p className='text-sm text-gray-500'>
+                Mã số: {student.studentId}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className='text-gray-400 hover:text-gray-600 transition-colors'
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className='p-6 space-y-6'>
+          {/* Personal Information */}
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div className='space-y-4'>
+              <h3 className='text-lg font-medium text-gray-900 flex items-center gap-2'>
+                <User size={20} className='text-blue-500' />
+                Thông tin cá nhân
+              </h3>
+
+              <div className='space-y-3'>
+                <div>
+                  <label className='text-sm font-medium text-gray-500'>
+                    Họ và tên
+                  </label>
+                  <p className='text-sm text-gray-900 mt-1'>{student.name}</p>
+                </div>
+
+                <div>
+                  <label className='text-sm font-medium text-gray-500'>
+                    Ngày sinh
+                  </label>
+                  <div className='flex items-center gap-2 mt-1'>
+                    <Calendar size={16} className='text-gray-400' />
+                    <p className='text-sm text-gray-900'>
+                      {student.dateOfBirth
+                        ? formatDate(student.dateOfBirth)
+                        : 'Chưa cập nhật'}
+                      {student.dateOfBirth &&
+                        calculateAge(student.dateOfBirth) && (
+                          <span className='text-gray-500 ml-2'>
+                            ({calculateAge(student.dateOfBirth)} tuổi)
+                          </span>
+                        )}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className='text-sm font-medium text-gray-500'>
+                    Địa chỉ
+                  </label>
+                  <div className='flex items-start gap-2 mt-1'>
+                    <MapPin size={16} className='text-gray-400 mt-0.5' />
+                    <p className='text-sm text-gray-900'>
+                      {student.address || 'Chưa cập nhật'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Information */}
+            <div className='space-y-4'>
+              <h3 className='text-lg font-medium text-gray-900 flex items-center gap-2'>
+                <Phone size={20} className='text-green-500' />
+                Thông tin liên hệ
+              </h3>
+
+              <div className='space-y-3'>
+                <div>
+                  <label className='text-sm font-medium text-gray-500'>
+                    Email
+                  </label>
+                  <div className='flex items-center gap-2 mt-1'>
+                    <Mail size={16} className='text-gray-400' />
+                    <p className='text-sm text-gray-900'>{student.email}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className='text-sm font-medium text-gray-500'>
+                    Số điện thoại
+                  </label>
+                  <div className='flex items-center gap-2 mt-1'>
+                    <Phone size={16} className='text-gray-400' />
+                    <p className='text-sm text-gray-900'>{student.phone}</p>
+                  </div>
+                </div>
+
+                {student.parentContact && (
+                  <div>
+                    <label className='text-sm font-medium text-gray-500'>
+                      Liên hệ phụ huynh
+                    </label>
+                    <div className='flex items-center gap-2 mt-1'>
+                      <Phone size={16} className='text-gray-400' />
+                      <p className='text-sm text-gray-900'>
+                        {student.parentContact}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Academic Information */}
+          <div className='space-y-4'>
+            <h3 className='text-lg font-medium text-gray-900 flex items-center gap-2'>
+              <BookOpen size={20} className='text-purple-500' />
+              Thông tin học tập
+            </h3>
+
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+              <div className='bg-gray-50 p-4 rounded-lg'>
+                <label className='text-sm font-medium text-gray-500'>
+                  Trình độ
+                </label>
+                <div className='mt-2'>
+                  <span
+                    className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getLevelBadgeColor(
+                      student.level
+                    )}`}
+                  >
+                    {student.level.charAt(0).toUpperCase() +
+                      student.level.slice(1)}
+                  </span>
+                </div>
+              </div>
+
+              <div className='bg-gray-50 p-4 rounded-lg'>
+                <label className='text-sm font-medium text-gray-500'>
+                  Lớp hiện tại
+                </label>
+                <p className='text-sm text-gray-900 mt-2'>
+                  {student.currentClass || 'Chưa phân lớp'}
+                </p>
+              </div>
+
+              <div className='bg-gray-50 p-4 rounded-lg'>
+                <label className='text-sm font-medium text-gray-500'>
+                  Trạng thái
+                </label>
+                <div className='mt-2'>
+                  <span
+                    className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusBadgeColor(
+                      student.status
+                    )}`}
+                  >
+                    {student.status === 'active' ? 'Đang học' : 'Tạm nghỉ'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div className='bg-gray-50 p-4 rounded-lg'>
+                <label className='text-sm font-medium text-gray-500'>
+                  Ngày đăng ký
+                </label>
+                <div className='flex items-center gap-2 mt-2'>
+                  <Clock size={16} className='text-gray-400' />
+                  <p className='text-sm text-gray-900'>
+                    {formatDate(student.enrollmentDate)}
+                  </p>
+                </div>
+              </div>
+
+              <div className='bg-gray-50 p-4 rounded-lg'>
+                <label className='text-sm font-medium text-gray-500'>
+                  Ngày cập nhật
+                </label>
+                <div className='flex items-center gap-2 mt-2'>
+                  <Clock size={16} className='text-gray-400' />
+                  <p className='text-sm text-gray-900'>
+                    {formatDate(student.updatedAt)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Emergency Contact */}
+          {student.emergencyContact && (
+            <div className='space-y-4'>
+              <h3 className='text-lg font-medium text-gray-900 flex items-center gap-2'>
+                <AlertCircle size={20} className='text-red-500' />
+                Liên hệ khẩn cấp
+              </h3>
+
+              <div className='bg-red-50 p-4 rounded-lg'>
+                <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+                  <div>
+                    <label className='text-sm font-medium text-gray-500'>
+                      Tên
+                    </label>
+                    <p className='text-sm text-gray-900 mt-1'>
+                      {student.emergencyContact.name}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className='text-sm font-medium text-gray-500'>
+                      Số điện thoại
+                    </label>
+                    <p className='text-sm text-gray-900 mt-1'>
+                      {student.emergencyContact.phone}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className='text-sm font-medium text-gray-500'>
+                      Mối quan hệ
+                    </label>
+                    <p className='text-sm text-gray-900 mt-1'>
+                      {student.emergencyContact.relationship}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Notes */}
+          {student.notes && (
+            <div className='space-y-4'>
+              <h3 className='text-lg font-medium text-gray-900'>Ghi chú</h3>
+              <div className='bg-yellow-50 p-4 rounded-lg'>
+                <p className='text-sm text-gray-900'>{student.notes}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className='flex justify-end gap-3 p-6 border-t border-gray-200'>
+          <button
+            onClick={onClose}
+            className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+          >
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ViewStudentModal;

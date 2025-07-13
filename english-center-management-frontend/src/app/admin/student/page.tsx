@@ -1,14 +1,21 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Edit, Trash2, Plus, Mail, Phone } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, Mail, Phone, Eye } from 'lucide-react';
 import { mockStudents } from '../../../data';
-import { Student } from '../../../types';
+import { Student, StudentProfile } from '../../../types';
+import ViewStudentModal from './_components/view-student';
+import EditStudentModal from './_components/edit-student';
+import CreateStudentModal from './_components/create-student';
 
 const StudentManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState('All Levels');
   const [statusFilter, setStatusFilter] = useState('All Status');
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Use mock students data
   const students = mockStudents;
@@ -49,6 +56,52 @@ const StudentManagement = () => {
       student.status === statusFilter.toLowerCase();
     return matchesSearch && matchesLevel && matchesStatus;
   });
+
+  const handleViewStudent = (student: Student) => {
+    setSelectedStudent(student);
+    setIsViewModalOpen(true);
+  };
+
+  const handleCloseViewModal = () => {
+    setIsViewModalOpen(false);
+    setSelectedStudent(null);
+  };
+
+  const handleEditStudent = (student: Student) => {
+    setSelectedStudent(student);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedStudent(null);
+  };
+
+  const handleSaveStudent = (updatedStudent: Student) => {
+    // In a real application, you would make an API call here
+    console.log('Saving updated student:', updatedStudent);
+
+    // For now, we'll just update the local state
+    // In a real app, you would update the students array with the new data
+    // setStudents(students.map(s => s.id === updatedStudent.id ? updatedStudent : s));
+
+    // Show success message (you can add a toast notification here)
+    alert('Thông tin học viên đã được cập nhật thành công!');
+  };
+
+  const handleCreateStudent = async (
+    newStudent: Omit<StudentProfile, 'id' | 'createdAt' | 'updatedAt'>
+  ) => {
+    // In a real application, you would make an API call here
+    console.log('Creating new student:', newStudent);
+
+    // For now, we'll just show a success message
+    // In a real app, you would add the new student to the students array
+    // setStudents([...students, { ...newStudent, id: generateId() }]);
+
+    // Show success message (you can add a toast notification here)
+    alert('Học viên mới đã được tạo thành công!');
+  };
 
   return (
     <div className='min-h-screen bg-gray-50 p-6'>
@@ -100,6 +153,15 @@ const StudentManagement = () => {
             <option>Đang học</option>
             <option>Tạm nghỉ</option>
           </select>
+
+          {/* Create Student Button */}
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className='px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center space-x-2 transition-colors'
+          >
+            <Plus className='h-5 w-5' />
+            <span>Thêm học viên</span>
+          </button>
         </div>
 
         {/* Students Table */}
@@ -188,7 +250,18 @@ const StudentManagement = () => {
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                       <div className='flex space-x-2'>
-                        <button className='text-indigo-600 hover:text-indigo-900'>
+                        <button
+                          onClick={() => handleViewStudent(student)}
+                          className='text-blue-600 hover:text-blue-900'
+                          title='Xem chi tiết'
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleEditStudent(student)}
+                          className='text-indigo-600 hover:text-indigo-900'
+                          title='Chỉnh sửa'
+                        >
                           <Edit size={16} />
                         </button>
                         <button className='text-red-600 hover:text-red-900'>
@@ -203,6 +276,28 @@ const StudentManagement = () => {
           </div>
         </div>
       </div>
+
+      {/* View Student Modal */}
+      <ViewStudentModal
+        student={selectedStudent}
+        isOpen={isViewModalOpen}
+        onClose={handleCloseViewModal}
+      />
+
+      {/* Edit Student Modal */}
+      <EditStudentModal
+        student={selectedStudent}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveStudent}
+      />
+
+      {/* Create Student Modal */}
+      <CreateStudentModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSave={handleCreateStudent}
+      />
     </div>
   );
 };

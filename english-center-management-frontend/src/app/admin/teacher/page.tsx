@@ -1,17 +1,29 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Edit, Trash2, Plus } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, Eye } from 'lucide-react';
 import { mockTeachers } from '../../../data';
 import { Teacher } from '../../../types';
+import CreateTeacherModal, {
+  TeacherFormData,
+} from './_components/create-teacher';
+import ViewTeacherModal from './_components/view-teacher';
+import EditTeacherModal, {
+  TeacherFormData as EditTeacherFormData,
+} from './_components/edit-teacher';
 
 const TeacherManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [subjectFilter, setSubjectFilter] = useState('All Subjects');
   const [statusFilter, setStatusFilter] = useState('All Status');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+  const [teachers, setTeachers] = useState(mockTeachers);
 
-  // Use mock teachers data
-  const teachers = mockTeachers.map((teacher: Teacher) => ({
+  // Use teachers data from state
+  const teachersList = teachers.map((teacher: Teacher) => ({
     id: teacher.id,
     name: teacher.name,
     specialization: teacher.specialization,
@@ -52,7 +64,7 @@ const TeacherManagement = () => {
     return colors[className.length % colors.length];
   };
 
-  const filteredTeachers = teachers.filter((teacher) => {
+  const filteredTeachers = teachersList.filter((teacher) => {
     const matchesSearch =
       teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       teacher.specialization.toLowerCase().includes(searchTerm.toLowerCase());
@@ -60,6 +72,67 @@ const TeacherManagement = () => {
       statusFilter === 'All Status' || teacher.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const handleCreateTeacher = (teacherData: TeacherFormData) => {
+    // Tạo ID mới cho giáo viên
+    const newId = Math.max(...teachers.map((t) => parseInt(t.id))) + 1;
+
+    // Tạo đối tượng Teacher mới từ form data
+    const newTeacher: Teacher = {
+      id: newId.toString(),
+      teacherId: `T${newId.toString().padStart(3, '0')}`,
+      name: teacherData.name,
+      email: teacherData.email,
+      phone: teacherData.phone,
+      role: 'teacher',
+      specialization: teacherData.specialization,
+      qualification: teacherData.qualification,
+      experience: teacherData.experience,
+      hourlyRate: teacherData.hourlyRate,
+      status: 'active',
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        teacherData.name
+      )}&background=0D9488&color=fff`,
+      assignedClasses: [],
+    };
+
+    // Thêm giáo viên mới vào danh sách
+    setTeachers((prev) => [...prev, newTeacher]);
+  };
+
+  const handleViewTeacher = (teacher: Teacher) => {
+    setSelectedTeacher(teacher);
+    setIsViewModalOpen(true);
+  };
+
+  const handleEditTeacher = (teacher: Teacher) => {
+    setSelectedTeacher(teacher);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateTeacher = (teacherData: EditTeacherFormData) => {
+    if (selectedTeacher) {
+      // Cập nhật thông tin giáo viên
+      const updatedTeacher: Teacher = {
+        ...selectedTeacher,
+        name: teacherData.name,
+        email: teacherData.email,
+        phone: teacherData.phone,
+        specialization: teacherData.specialization,
+        qualification: teacherData.qualification,
+        experience: teacherData.experience,
+        hourlyRate: teacherData.hourlyRate,
+        status: teacherData.status,
+      };
+
+      // Cập nhật danh sách giáo viên
+      setTeachers((prev) =>
+        prev.map((teacher) =>
+          teacher.id === selectedTeacher.id ? updatedTeacher : teacher
+        )
+      );
+    }
+  };
 
   return (
     <div className='min-h-screen bg-gray-50 p-6'>
@@ -117,7 +190,10 @@ const TeacherManagement = () => {
           </select>
 
           {/* Add Teacher Button */}
-          <button className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors whitespace-nowrap'>
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors whitespace-nowrap'
+          >
             <Plus size={20} />
             Thêm giáo viên
           </button>
@@ -159,7 +235,14 @@ const TeacherManagement = () => {
                           />
                         </div>
                         <div className='ml-4'>
-                          <div className='text-sm font-medium text-gray-900'>
+                          <div
+                            className='text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors'
+                            onClick={() =>
+                              handleViewTeacher(
+                                teachers.find((t) => t.id === teacher.id)!
+                              )
+                            }
+                          >
                             {teacher.name}
                           </div>
                           <div className='text-sm text-gray-500'>
@@ -201,7 +284,26 @@ const TeacherManagement = () => {
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                       <div className='flex space-x-3'>
-                        <button className='text-blue-600 hover:text-blue-900 transition-colors'>
+                        <button
+                          onClick={() =>
+                            handleViewTeacher(
+                              teachers.find((t) => t.id === teacher.id)!
+                            )
+                          }
+                          className='text-green-600 hover:text-green-900 transition-colors'
+                          title='Xem chi tiết'
+                        >
+                          <Eye size={18} />
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleEditTeacher(
+                              teachers.find((t) => t.id === teacher.id)!
+                            )
+                          }
+                          className='text-blue-600 hover:text-blue-900 transition-colors'
+                          title='Chỉnh sửa'
+                        >
                           <Edit size={18} />
                         </button>
                         <button className='text-red-600 hover:text-red-900 transition-colors'>
@@ -218,7 +320,8 @@ const TeacherManagement = () => {
           {/* Pagination */}
           <div className='bg-gray-50 px-6 py-3 flex items-center justify-between border-t border-gray-200'>
             <div className='text-sm text-gray-700'>
-              Hiển thị 1 đến 4 trong tổng số 12 giáo viên
+              Hiển thị 1 đến {filteredTeachers.length} trong tổng số{' '}
+              {teachers.length} giáo viên
             </div>
             <div className='flex items-center space-x-2'>
               <button className='px-3 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors'>
@@ -239,6 +342,34 @@ const TeacherManagement = () => {
             </div>
           </div>
         </div>
+
+        {/* Create Teacher Modal */}
+        <CreateTeacherModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onCreateTeacher={handleCreateTeacher}
+        />
+
+        {/* View Teacher Modal */}
+        <ViewTeacherModal
+          isOpen={isViewModalOpen}
+          onClose={() => {
+            setIsViewModalOpen(false);
+            setSelectedTeacher(null);
+          }}
+          teacher={selectedTeacher}
+        />
+
+        {/* Edit Teacher Modal */}
+        <EditTeacherModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedTeacher(null);
+          }}
+          onUpdateTeacher={handleUpdateTeacher}
+          teacher={selectedTeacher}
+        />
       </div>
     </div>
   );

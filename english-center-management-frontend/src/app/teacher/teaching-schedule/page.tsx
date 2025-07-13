@@ -3,7 +3,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  Plus,
   Clock,
   Calendar,
   Users,
@@ -112,40 +111,38 @@ const TeachingSchedule = () => {
   };
 
   return (
-    <div className='min-h-screen bg-gray-50 p-6'>
+    <div className='min-h-screen bg-gray-50 p-4'>
       <div className='max-w-7xl mx-auto'>
         {/* Header */}
-        <div className='flex justify-between items-center mb-8'>
-          <div>
-            <h1 className='text-2xl font-semibold text-gray-900 mb-1'>
-              Lịch giảng dạy
-            </h1>
-            <p className='text-gray-500'>
-              Quản lý và xem lịch giảng dạy hàng tuần
-            </p>
-          </div>
-          <button className='inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors'>
-            <Plus className='w-4 h-4 mr-2' />
-            Thêm lớp
-          </button>
+        <div className='mb-6'>
+          <h1 className='text-2xl font-bold text-gray-900 mb-2'>
+            Lịch giảng dạy
+          </h1>
+          <p className='text-gray-600 text-base'>
+            Quản lý và xem lịch giảng dạy hàng tuần
+          </p>
         </div>
 
         {/* Stats Cards */}
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
               <div
                 key={index}
-                className={`${stat.bgColor} rounded-lg p-6 border border-gray-200`}
+                className={`${stat.bgColor} rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow`}
               >
                 <div className='flex items-center'>
-                  <Icon className={`w-8 h-8 ${stat.iconColor} mr-3`} />
+                  <div className={`p-2 rounded-lg bg-white shadow-sm mr-3`}>
+                    <Icon className={`w-6 h-6 ${stat.iconColor}`} />
+                  </div>
                   <div>
-                    <p className='text-2xl font-bold text-gray-900'>
+                    <p className='text-2xl font-bold text-gray-900 mb-1'>
                       {stat.value}
                     </p>
-                    <p className='text-sm text-gray-600'>{stat.label}</p>
+                    <p className='text-sm font-medium text-gray-600'>
+                      {stat.label}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -155,39 +152,39 @@ const TeachingSchedule = () => {
 
         {/* Week Navigation */}
         <div className='flex justify-between items-center mb-6'>
-          <div className='flex items-center space-x-4'>
-            <button className='p-2 rounded-full hover:bg-gray-200 transition-colors'>
+          <div className='flex items-center space-x-3'>
+            <button className='p-2 rounded-full hover:bg-white hover:shadow-sm transition-all duration-200'>
               <ChevronLeft className='w-5 h-5 text-gray-600' />
             </button>
-            <h2 className='text-lg font-medium text-gray-900'>{currentWeek}</h2>
-            <button className='p-2 rounded-full hover:bg-gray-200 transition-colors'>
+            <h2 className='text-lg font-semibold text-gray-900'>
+              {currentWeek}
+            </h2>
+            <button className='p-2 rounded-full hover:bg-white hover:shadow-sm transition-all duration-200'>
               <ChevronRight className='w-5 h-5 text-gray-600' />
             </button>
           </div>
           <div className='flex items-center space-x-2'>
-            <button className='inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'>
+            <button className='inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200'>
               Xem theo tuần
-              <ChevronDown className='w-4 h-4 ml-1' />
+              <ChevronDown className='w-4 h-4 ml-1.5' />
             </button>
           </div>
         </div>
 
         {/* Schedule Grid */}
-        <div className='bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden'>
+        <div className='bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden'>
           {/* Header Row */}
-          <div className='grid grid-cols-8 border-b border-gray-200'>
-            <div className='p-4 text-sm font-medium text-gray-500 bg-gray-50'>
-              Giờ
-            </div>
+          <div className='grid grid-cols-8 border-b border-gray-200 bg-gray-50'>
+            <div className='p-4 text-sm font-semibold text-gray-700'>Giờ</div>
             {days.map((day) => (
               <div
                 key={day.name}
-                className='p-4 text-center bg-gray-50 border-l border-gray-200'
+                className='p-4 text-center border-l border-gray-200'
               >
-                <div className='text-sm font-medium text-gray-900'>
+                <div className='text-base font-semibold text-gray-900 mb-1'>
                   {day.name}
                 </div>
-                <div className='text-xs text-gray-500'>{day.date}</div>
+                <div className='text-sm text-gray-500'>{day.date}</div>
               </div>
             ))}
           </div>
@@ -196,12 +193,12 @@ const TeachingSchedule = () => {
           {timeSlots.map((timeSlot, timeIndex) => (
             <div
               key={timeSlot}
-              className={`grid grid-cols-8 border-b border-gray-200 ${
+              className={`grid grid-cols-8 border-b border-gray-200 hover:bg-gray-50 transition-colors ${
                 timeIndex === timeSlots.length - 1 ? 'border-b-0' : ''
               }`}
             >
               {/* Time Column */}
-              <div className='p-4 text-sm font-medium text-gray-700 bg-gray-50 border-r border-gray-200'>
+              <div className='p-4 text-sm font-semibold text-gray-700 bg-gray-50 border-r border-gray-200 flex items-center'>
                 {timeSlot}
               </div>
 
@@ -211,24 +208,33 @@ const TeachingSchedule = () => {
                 return (
                   <div
                     key={`${day.name}-${timeSlot}`}
-                    className='p-2 border-l border-gray-200 min-h-[80px]'
+                    className='p-3 border-l border-gray-200 min-h-[80px] flex flex-col gap-1.5'
                   >
                     {classes.map((classItem) => (
                       <div
                         key={classItem.id}
-                        className={`${classItem.bgColor} ${classItem.color} border-l-4 rounded-r-lg p-3 mb-2 hover:shadow-sm transition-shadow cursor-pointer`}
+                        className={`${classItem.bgColor} ${classItem.color} border-l-4 rounded-lg p-3 hover:shadow-md transition-all duration-200 cursor-pointer transform hover:scale-[1.02]`}
                       >
-                        <div className='text-sm font-medium text-gray-900 mb-1'>
+                        <div className='text-xs font-semibold text-gray-900 mb-1'>
                           {classItem.title}
                         </div>
-                        <div className='text-xs text-gray-600'>
-                          {classItem.room}
-                        </div>
-                        <div className='text-xs text-gray-500'>
-                          {classItem.time}
+                        <div className='flex items-center justify-between text-xs text-gray-600'>
+                          <span className='flex items-center'>
+                            <Users className='w-3 h-3 mr-1' />
+                            {classItem.room}
+                          </span>
+                          <span className='flex items-center'>
+                            <Clock className='w-3 h-3 mr-1' />
+                            {classItem.time}
+                          </span>
                         </div>
                       </div>
                     ))}
+                    {classes.length === 0 && (
+                      <div className='text-gray-400 text-xs text-center py-2'>
+                        Không có lớp
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -237,22 +243,31 @@ const TeachingSchedule = () => {
         </div>
 
         {/* Class Legend */}
-        <div className='mt-6 flex flex-wrap gap-4'>
-          <div className='flex items-center'>
-            <div className='w-4 h-4 bg-blue-50 border-l-4 border-blue-400 rounded-r mr-2'></div>
-            <span className='text-sm text-gray-600'>English 101</span>
-          </div>
-          <div className='flex items-center'>
-            <div className='w-4 h-4 bg-green-50 border-l-4 border-green-400 rounded-r mr-2'></div>
-            <span className='text-sm text-gray-600'>Conversation</span>
-          </div>
-          <div className='flex items-center'>
-            <div className='w-4 h-4 bg-purple-50 border-l-4 border-purple-400 rounded-r mr-2'></div>
-            <span className='text-sm text-gray-600'>Grammar</span>
-          </div>
-          <div className='flex items-center'>
-            <div className='w-4 h-4 bg-orange-50 border-l-4 border-orange-400 rounded-r mr-2'></div>
-            <span className='text-sm text-gray-600'>Writing</span>
+        <div className='mt-6 p-3 bg-white rounded-xl shadow-sm border border-gray-200'>
+          <h3 className='text-base font-semibold text-gray-900 mb-2'>
+            Chú thích
+          </h3>
+          <div className='flex flex-wrap gap-4'>
+            <div className='flex items-center'>
+              <div className='w-4 h-4 bg-blue-50 border-l-4 border-blue-400 rounded-r mr-2'></div>
+              <span className='text-xs font-medium text-gray-700'>
+                English 101
+              </span>
+            </div>
+            <div className='flex items-center'>
+              <div className='w-4 h-4 bg-green-50 border-l-4 border-green-400 rounded-r mr-2'></div>
+              <span className='text-xs font-medium text-gray-700'>
+                Conversation
+              </span>
+            </div>
+            <div className='flex items-center'>
+              <div className='w-4 h-4 bg-purple-50 border-l-4 border-purple-400 rounded-r mr-2'></div>
+              <span className='text-xs font-medium text-gray-700'>Grammar</span>
+            </div>
+            <div className='flex items-center'>
+              <div className='w-4 h-4 bg-orange-50 border-l-4 border-orange-400 rounded-r mr-2'></div>
+              <span className='text-xs font-medium text-gray-700'>Writing</span>
+            </div>
           </div>
         </div>
       </div>

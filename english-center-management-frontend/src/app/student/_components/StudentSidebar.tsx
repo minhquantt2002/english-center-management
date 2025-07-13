@@ -30,27 +30,16 @@ const StudentSidebar: React.FC = () => {
       icon: <LayoutDashboard className='w-5 h-5' />,
     },
     {
-      name: 'Lịch học',
-      href: '/student/studying-schedule',
-      icon: <Calendar className='w-5 h-5' />,
-      badge: '8',
-    },
-    {
-      name: 'Kết quả kiểm tra',
-      href: '/student/result',
-      icon: <BarChart3 className='w-5 h-5' />,
-      badge: '12',
-    },
-    {
-      name: 'Khóa học',
-      href: '/student/courses',
+      name: 'Lớp học',
+      href: '/student/classroom',
       icon: <BookOpen className='w-5 h-5' />,
       badge: '3',
     },
     {
-      name: 'Thành tích',
-      href: '/student/achievements',
-      icon: <Award className='w-5 h-5' />,
+      name: 'Lịch học',
+      href: '/student/studying-schedule',
+      icon: <Calendar className='w-5 h-5' />,
+      badge: '8',
     },
   ];
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import {
   Search,
   Users,
@@ -245,9 +246,12 @@ const MyClassesDashboard = () => {
                     {classItem.students} học viên
                   </span>
                 </div>
-                <button className='text-blue-600 hover:text-blue-700 text-sm font-medium'>
+                <Link
+                  href={`/teacher/classroom/${classItem.id}`}
+                  className='text-blue-600 hover:text-blue-700 hover:bg-blue-200/60 px-4 py-2 rounded-lg text-sm font-medium'
+                >
                   Xem chi tiết
-                </button>
+                </Link>
               </div>
             </div>
           ))}
