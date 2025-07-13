@@ -1,41 +1,63 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Calendar, BarChart3 } from 'lucide-react';
-import { mockStaffStats } from '../../data/staff/stats';
+import { useStaffApi } from './_hooks/use-api';
 
 const Dashboard = () => {
-  // Use mock data from staff module
-  const statsData = [
-    {
-      title: 'Học viên mới đăng ký',
-      value: String(mockStaffStats.newRegistrations),
-      change: '+18% so với tháng qua',
-      changeType: 'positive',
-      icon: Users,
-      color: 'bg-blue-500',
-    },
-    {
-      title: 'Lớp đang hoạt động',
-      value: String(mockStaffStats.activeClasses),
-      change: '— Không đổi so với tuần trước',
-      changeType: 'neutral',
-      icon: Calendar,
-      color: 'bg-orange-500',
-    },
-    {
-      title: 'Lịch học hôm nay',
-      value: String(mockStaffStats.todaySchedule),
-      change: '5 lớp đang diễn ra',
-      changeType: 'info',
-      icon: BarChart3,
-      color: 'bg-purple-500',
-    },
-  ];
+  const [statsData, setStatsData] = useState<any[]>([]);
+  const [recentRegistrations, setRecentRegistrations] = useState<any[]>([]);
+  const [todaySchedule, setTodaySchedule] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const recentRegistrations = mockStaffStats.recentRegistrations.slice(0, 3);
+  const { loading, error, getStaffStats } = useStaffApi();
 
-  const todaySchedule = mockStaffStats.todayScheduleDetails.slice(0, 3);
+  // Fetch staff stats on component mount
+  useEffect(() => {
+    fetchStaffStats();
+  }, []);
+
+  const fetchStaffStats = async () => {
+    try {
+      const data = await getStaffStats();
+
+      // Transform the data for display
+      const transformedStats = [
+        {
+          title: 'Học viên mới đăng ký',
+          value: String(data.newRegistrations || 0),
+          change: '+18% so với tháng qua',
+          changeType: 'positive',
+          icon: Users,
+          color: 'bg-blue-500',
+        },
+        {
+          title: 'Lớp đang hoạt động',
+          value: String(data.activeClasses || 0),
+          change: '— Không đổi so với tuần trước',
+          changeType: 'neutral',
+          icon: Calendar,
+          color: 'bg-orange-500',
+        },
+        {
+          title: 'Lịch học hôm nay',
+          value: String(data.todaySchedule || 0),
+          change: '5 lớp đang diễn ra',
+          changeType: 'info',
+          icon: BarChart3,
+          color: 'bg-purple-500',
+        },
+      ];
+
+      setStatsData(transformedStats);
+      setRecentRegistrations(data.recentRegistrations || []);
+      setTodaySchedule(data.todayScheduleDetails || []);
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Failed to fetch staff stats:', err);
+      setIsLoading(false);
+    }
+  };
 
   const quickActions = [
     {
@@ -72,6 +94,33 @@ const Dashboard = () => {
   ];
 
   const maxValue = Math.max(...weeklyStats.map((stat) => stat.value));
+
+  if (isLoading) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='flex items-center gap-2'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+          <span className='text-gray-600'>Đang tải dữ liệu...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center'>
+          <p className='text-red-600 mb-2'>Có lỗi xảy ra khi tải dữ liệu</p>
+          <button
+            onClick={fetchStaffStats}
+            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

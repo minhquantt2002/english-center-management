@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, Eye, Edit } from 'lucide-react';
-import { mockStudents } from '../../../data';
 import { Student, StudentProfile } from '../../../types';
 import CreateStudentModal, {
   StudentFormData,
 } from './_components/create-student-modal';
 import EditStudentModal from './_components/edit-student-modal';
 import ViewStudentModal from './_components/view-student-modal';
+import { useStaffApi } from '../_hooks/use-api';
 
 export default function StudentManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,8 +20,29 @@ export default function StudentManagement() {
   const [selectedStudent, setSelectedStudent] = useState<StudentProfile | null>(
     null
   );
+  const [students, setStudents] = useState<Student[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const students = mockStudents.map((student: Student) => ({
+  const { loading, error, getStudents, createStudent, updateStudent } =
+    useStaffApi();
+
+  // Fetch students on component mount
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      const data = await getStudents();
+      setStudents(data);
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Failed to fetch students:', err);
+      setIsLoading(false);
+    }
+  };
+
+  const studentsWithDisplay = students.map((student: Student) => ({
     id: student.id,
     name: student.name,
     phone: student.phone || 'N/A',
@@ -32,24 +53,153 @@ export default function StudentManagement() {
     role: student.role,
     studentId: student.studentId,
     enrollmentDate: student.enrollmentDate,
+    enrollmentStatus: student.status as 'active' | 'inactive' | 'pending',
+    createdAt: student.createdAt || '2024-01-15T08:00:00Z',
+    updatedAt: student.updatedAt || '2024-01-15T08:00:00Z',
   }));
 
-  // Filter students based on search term, level, and status
-  const filteredStudents = students.filter((student) => {
+  const filteredStudents = studentsWithDisplay.filter((student) => {
     const matchesSearch =
-      searchTerm === '' ||
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase());
-
+      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.studentId.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesLevel =
       selectedLevel === 'all' || student.level.toLowerCase() === selectedLevel;
-
     const matchesStatus =
       selectedStatus === 'all' || student.status === selectedStatus;
-
     return matchesSearch && matchesLevel && matchesStatus;
   });
+
+  const handleCreateStudent = async (studentData: StudentFormData) => {
+    try {
+      await createStudent(studentData);
+      setIsCreateModalOpen(false);
+      await fetchStudents(); // Refresh the list
+      alert('Học viên mới đã được tạo thành công!');
+    } catch (error) {
+      console.error('Error creating student:', error);
+      alert('Có lỗi xảy ra khi tạo học viên mới!');
+    }
+  };
+
+  const handleUpdateStudent = async (
+    studentId: string,
+    studentData: StudentFormData
+  ) => {
+    try {
+      await updateStudent(studentId, studentData);
+      setIsEditModalOpen(false);
+      setSelectedStudent(null);
+      await fetchStudents(); // Refresh the list
+      alert('Thông tin học viên đã được cập nhật thành công!');
+    } catch (error) {
+      console.error('Error updating student:', error);
+      alert('Có lỗi xảy ra khi cập nhật thông tin học viên!');
+    }
+  };
+
+  const handleViewStudent = (student: any) => {
+    // Convert student data to StudentProfile format for the modal
+    const studentProfile: StudentProfile = {
+      id: student.id,
+      studentId: student.studentId || `ST${student.id.padStart(3, '0')}`,
+      name: student.name,
+      email: student.email,
+      phone: student.phone,
+      level: student.level.toLowerCase() as any,
+      currentClass: student.currentClass,
+      enrollmentDate: student.enrollmentDate || '2024-01-15',
+      enrollmentStatus: student.status as any,
+      createdAt: student.createdAt || '2024-01-15T08:00:00Z',
+      updatedAt: student.updatedAt || '2024-01-15T08:00:00Z',
+    };
+
+    setSelectedStudent(studentProfile);
+    setIsViewModalOpen(true);
+  };
+
+  const handleEditStudent = (student: any) => {
+    // Convert student data to StudentProfile format for the modal
+    const studentProfile: StudentProfile = {
+      id: student.id,
+      studentId: student.studentId || `ST${student.id.padStart(3, '0')}`,
+      name: student.name,
+      email: student.email,
+      phone: student.phone,
+      level: student.level.toLowerCase() as any,
+      currentClass: student.currentClass,
+      enrollmentDate: student.enrollmentDate || '2024-01-15',
+      enrollmentStatus: student.status as any,
+      createdAt: student.createdAt || '2024-01-15T08:00:00Z',
+      updatedAt: student.updatedAt || '2024-01-15T08:00:00Z',
+    };
+
+    setSelectedStudent(studentProfile);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseViewModal = () => {
+    setIsViewModalOpen(false);
+    setSelectedStudent(null);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedStudent(null);
+  };
+
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'inactive':
+        return 'bg-gray-100 text-gray-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getLevelBadgeColor = (level: string) => {
+    switch (level.toLowerCase()) {
+      case 'beginner':
+        return 'bg-green-100 text-green-700';
+      case 'intermediate':
+        return 'bg-blue-100 text-blue-700';
+      case 'advanced':
+        return 'bg-purple-100 text-purple-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='flex items-center gap-2'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+          <span className='text-gray-600'>Đang tải dữ liệu...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center'>
+          <p className='text-red-600 mb-2'>Có lỗi xảy ra khi tải dữ liệu</p>
+          <button
+            onClick={fetchStudents}
+            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const levelColors = {
     Beginner: 'bg-green-100 text-green-800',
@@ -76,79 +226,6 @@ export default function StudentManagement() {
       .map((n) => n[0])
       .join('')
       .toUpperCase();
-  };
-
-  const handleCreateStudent = async (studentData: StudentFormData) => {
-    // TODO: Implement API call to create student
-    console.log('Creating student:', studentData);
-
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Simulate API call success
-    // In a real application, you would make an API call here
-    // and then update the students list with the new student
-
-    // For now, we'll just show a success message
-    alert('Học viên đã được tạo thành công!');
-  };
-
-  const handleUpdateStudent = async (
-    studentId: string,
-    studentData: StudentFormData
-  ) => {
-    // TODO: Implement API call to update student
-    console.log('Updating student:', studentId, studentData);
-
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Simulate API call success
-    // In a real application, you would make an API call here
-    // and then update the students list with the updated student
-
-    // For now, we'll just show a success message
-    alert('Thông tin học viên đã được cập nhật thành công!');
-  };
-
-  const handleViewStudent = (student: any) => {
-    // Convert student data to StudentProfile format for the modal
-    const studentProfile: StudentProfile = {
-      id: student.id,
-      studentId: student.studentId || `ST${student.id.padStart(3, '0')}`,
-      name: student.name,
-      email: student.email,
-      phone: student.phone,
-      level: student.level.toLowerCase() as any,
-      currentClass: student.currentClass,
-      enrollmentDate: student.enrollmentDate || '2024-01-15',
-      enrollmentStatus: student.status as any,
-      createdAt: '2024-01-15T08:00:00Z',
-      updatedAt: '2024-01-15T08:00:00Z',
-    };
-
-    setSelectedStudent(studentProfile);
-    setIsViewModalOpen(true);
-  };
-
-  const handleEditStudent = (student: any) => {
-    // Convert student data to StudentProfile format for the modal
-    const studentProfile: StudentProfile = {
-      id: student.id,
-      studentId: student.studentId || `ST${student.id.padStart(3, '0')}`,
-      name: student.name,
-      email: student.email,
-      phone: student.phone,
-      level: student.level.toLowerCase() as any,
-      currentClass: student.currentClass,
-      enrollmentDate: student.enrollmentDate || '2024-01-15',
-      enrollmentStatus: student.status as any,
-      createdAt: '2024-01-15T08:00:00Z',
-      updatedAt: '2024-01-15T08:00:00Z',
-    };
-
-    setSelectedStudent(studentProfile);
-    setIsEditModalOpen(true);
   };
 
   return (
@@ -364,20 +441,14 @@ export default function StudentManagement() {
       {/* View Student Modal */}
       <ViewStudentModal
         isOpen={isViewModalOpen}
-        onClose={() => {
-          setIsViewModalOpen(false);
-          setSelectedStudent(null);
-        }}
+        onClose={handleCloseViewModal}
         student={selectedStudent}
       />
 
       {/* Edit Student Modal */}
       <EditStudentModal
         isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedStudent(null);
-        }}
+        onClose={handleCloseEditModal}
         onUpdateStudent={handleUpdateStudent}
         student={selectedStudent}
       />

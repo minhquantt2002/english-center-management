@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Edit, Trash2, Plus, Eye } from 'lucide-react';
-import { mockTeachers } from '../../../data';
 import { Teacher } from '../../../types';
 import CreateTeacherModal, {
   TeacherFormData,
@@ -11,6 +10,7 @@ import ViewTeacherModal from './_components/view-teacher';
 import EditTeacherModal, {
   TeacherFormData as EditTeacherFormData,
 } from './_components/edit-teacher';
+import { useTeacherApi } from './_hooks/use-api';
 
 const TeacherManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,9 +20,34 @@ const TeacherManagement = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
-  const [teachers, setTeachers] = useState(mockTeachers);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
 
-  // Use teachers data from state
+  const {
+    loading,
+    error,
+    createTeacher,
+    updateTeacher,
+    deleteTeacher,
+    getTeachers,
+    getTeacherById,
+    getTeacherSchedule,
+  } = useTeacherApi();
+
+  // Fetch teachers on component mount
+  useEffect(() => {
+    fetchTeachers();
+  }, []);
+
+  const fetchTeachers = async () => {
+    try {
+      const data = await getTeachers();
+      setTeachers(data);
+    } catch (err) {
+      console.error('Failed to fetch teachers:', err);
+    }
+  };
+
+  // Use teachers data from API
   const teachersList = teachers.map((teacher: Teacher) => ({
     id: teacher.id,
     name: teacher.name,
@@ -73,31 +98,16 @@ const TeacherManagement = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const handleCreateTeacher = (teacherData: TeacherFormData) => {
-    // Tạo ID mới cho giáo viên
-    const newId = Math.max(...teachers.map((t) => parseInt(t.id))) + 1;
-
-    // Tạo đối tượng Teacher mới từ form data
-    const newTeacher: Teacher = {
-      id: newId.toString(),
-      teacherId: `T${newId.toString().padStart(3, '0')}`,
-      name: teacherData.name,
-      email: teacherData.email,
-      phone: teacherData.phone,
-      role: 'teacher',
-      specialization: teacherData.specialization,
-      qualification: teacherData.qualification,
-      experience: teacherData.experience,
-      hourlyRate: teacherData.hourlyRate,
-      status: 'active',
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-        teacherData.name
-      )}&background=0D9488&color=fff`,
-      assignedClasses: [],
-    };
-
-    // Thêm giáo viên mới vào danh sách
-    setTeachers((prev) => [...prev, newTeacher]);
+  const handleCreateTeacher = async (teacherData: TeacherFormData) => {
+    try {
+      await createTeacher(teacherData);
+      setIsCreateModalOpen(false);
+      await fetchTeachers(); // Refresh the list
+      alert('Giáo viên mới đã được tạo thành công!');
+    } catch (error) {
+      console.error('Error creating teacher:', error);
+      alert('Có lỗi xảy ra khi tạo giáo viên mới!');
+    }
   };
 
   const handleViewTeacher = (teacher: Teacher) => {
@@ -110,27 +120,31 @@ const TeacherManagement = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateTeacher = (teacherData: EditTeacherFormData) => {
-    if (selectedTeacher) {
-      // Cập nhật thông tin giáo viên
-      const updatedTeacher: Teacher = {
-        ...selectedTeacher,
-        name: teacherData.name,
-        email: teacherData.email,
-        phone: teacherData.phone,
-        specialization: teacherData.specialization,
-        qualification: teacherData.qualification,
-        experience: teacherData.experience,
-        hourlyRate: teacherData.hourlyRate,
-        status: teacherData.status,
-      };
+  const handleUpdateTeacher = async (teacherData: EditTeacherFormData) => {
+    if (!selectedTeacher) return;
 
-      // Cập nhật danh sách giáo viên
-      setTeachers((prev) =>
-        prev.map((teacher) =>
-          teacher.id === selectedTeacher.id ? updatedTeacher : teacher
-        )
-      );
+    try {
+      await updateTeacher(selectedTeacher.id, teacherData);
+      setIsEditModalOpen(false);
+      setSelectedTeacher(null);
+      await fetchTeachers(); // Refresh the list
+      alert('Thông tin giáo viên đã được cập nhật thành công!');
+    } catch (error) {
+      console.error('Error updating teacher:', error);
+      alert('Có lỗi xảy ra khi cập nhật thông tin giáo viên!');
+    }
+  };
+
+  const handleDeleteTeacher = async (teacherId: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa giáo viên này?')) {
+      try {
+        await deleteTeacher(teacherId);
+        await fetchTeachers(); // Refresh the list
+        alert('Giáo viên đã được xóa thành công!');
+      } catch (error) {
+        console.error('Error deleting teacher:', error);
+        alert('Có lỗi xảy ra khi xóa giáo viên!');
+      }
     }
   };
 
@@ -306,7 +320,11 @@ const TeacherManagement = () => {
                         >
                           <Edit size={18} />
                         </button>
-                        <button className='text-red-600 hover:text-red-900 transition-colors'>
+                        <button
+                          onClick={() => handleDeleteTeacher(teacher.id)}
+                          className='text-red-600 hover:text-red-900 transition-colors'
+                          title='Xóa'
+                        >
                           <Trash2 size={18} />
                         </button>
                       </div>

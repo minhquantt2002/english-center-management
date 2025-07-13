@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   Users,
@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useTeacherApi } from '../../_hooks/use-api';
 import {
   ClassOverview,
   StudentList,
@@ -24,127 +25,39 @@ import {
   MaterialsManagement,
 } from './_components';
 
-// Mock data for class details
-const mockClassDetails = {
-  id: 'class_1',
-  name: 'Tiếng Anh Cơ Bản A1',
-  level: 'Beginner',
-  teacher: 'Sarah Johnson',
-  room: 'Room A101',
-  building: 'Building A',
-  schedule: 'Thứ 2, 4, 6 - 9:00 AM - 10:30 AM',
-  totalStudents: 24,
-  maxStudents: 30,
-  currentUnit: 'Unit 3: Daily Conversations',
-  description:
-    'Khóa học tiếng Anh cơ bản dành cho người mới bắt đầu, tập trung vào kỹ năng giao tiếp hàng ngày.',
-  startDate: '2024-01-15',
-  endDate: '2024-04-15',
-  status: 'active',
-  levelColor: 'bg-green-100 text-green-700',
-};
-
-const mockStudents = [
-  {
-    id: 'student_1',
-    name: 'Nguyễn Thị Mai',
-    email: 'mai.nguyen@email.com',
-    phone: '+84 987 654 321',
-    avatar:
-      'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150&h=150&fit=crop&crop=face',
-    level: 'Beginner',
-    attendanceRate: 95,
-    lastScore: 85,
-    status: 'active',
-    joinDate: '2024-01-15',
-  },
-  {
-    id: 'student_2',
-    name: 'Trần Văn Hùng',
-    email: 'hung.tran@email.com',
-    phone: '+84 987 654 322',
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-    level: 'Beginner',
-    attendanceRate: 88,
-    lastScore: 78,
-    status: 'active',
-    joinDate: '2024-01-10',
-  },
-  {
-    id: 'student_3',
-    name: 'Lê Thị Hoa',
-    email: 'hoa.le@email.com',
-    phone: '+84 987 654 323',
-    avatar:
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
-    level: 'Beginner',
-    attendanceRate: 92,
-    lastScore: 90,
-    status: 'active',
-    joinDate: '2024-01-05',
-  },
-  {
-    id: 'student_4',
-    name: 'Phạm Văn Nam',
-    email: 'nam.pham@email.com',
-    phone: '+84 987 654 324',
-    avatar:
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-    level: 'Beginner',
-    attendanceRate: 85,
-    lastScore: 72,
-    status: 'active',
-    joinDate: '2024-01-12',
-  },
-];
-
-const mockSchedule: Array<{
-  id: string;
-  date: string;
-  day: string;
-  time: string;
-  topic: string;
-  status: 'completed' | 'upcoming' | 'cancelled';
-  attendance: number;
-  totalStudents: number;
-}> = [
-  {
-    id: 'session_1',
-    date: '2024-01-22',
-    day: 'Thứ 2',
-    time: '9:00 AM - 10:30 AM',
-    topic: 'Unit 3: Daily Conversations - Lesson 1',
-    status: 'completed',
-    attendance: 22,
-    totalStudents: 24,
-  },
-  {
-    id: 'session_2',
-    date: '2024-01-24',
-    day: 'Thứ 4',
-    time: '9:00 AM - 10:30 AM',
-    topic: 'Unit 3: Daily Conversations - Lesson 2',
-    status: 'upcoming',
-    attendance: 0,
-    totalStudents: 24,
-  },
-  {
-    id: 'session_3',
-    date: '2024-01-26',
-    day: 'Thứ 6',
-    time: '9:00 AM - 10:30 AM',
-    topic: 'Unit 3: Daily Conversations - Lesson 3',
-    status: 'upcoming',
-    attendance: 0,
-    totalStudents: 24,
-  },
-];
-
 const ClassDetailPage = () => {
   const params = useParams();
   const classId = params.id as string;
+  const {
+    loading,
+    error,
+    getClassDetails,
+    getClassStudents,
+    getClassSchedule,
+  } = useTeacherApi();
   const [activeTab, setActiveTab] = useState('overview');
+  const [classDetails, setClassDetails] = useState<any>(null);
+  const [students, setStudents] = useState<any[]>([]);
+  const [schedule, setSchedule] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchClassData = async () => {
+      try {
+        const [classData, studentsData, scheduleData] = await Promise.all([
+          getClassDetails(classId),
+          getClassStudents(classId),
+          getClassSchedule(classId),
+        ]);
+        setClassDetails(classData);
+        setStudents(studentsData);
+        setSchedule(scheduleData);
+      } catch (err) {
+        console.error('Error fetching class data:', err);
+      }
+    };
+
+    fetchClassData();
+  }, [classId, getClassDetails, getClassStudents, getClassSchedule]);
 
   const tabs = [
     { id: 'overview', label: 'Tổng quan', icon: Book },
@@ -154,6 +67,36 @@ const ClassDetailPage = () => {
     { id: 'grades', label: 'Điểm số', icon: BarChart3 },
     { id: 'materials', label: 'Tài liệu', icon: FileText },
   ];
+
+  if (loading) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto'></div>
+          <p className='mt-4 text-gray-600'>Đang tải thông tin lớp...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center'>
+          <h2 className='text-2xl font-bold text-gray-900 mb-4'>
+            Có lỗi xảy ra
+          </h2>
+          <p className='text-gray-600 mb-6'>{error}</p>
+          <Link
+            href='/teacher/classroom'
+            className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors'
+          >
+            Quay lại
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen bg-gray-50'>
@@ -169,10 +112,10 @@ const ClassDetailPage = () => {
             </Link>
             <div>
               <h1 className='text-xl font-semibold text-gray-900'>
-                {mockClassDetails.name}
+                {classDetails.name}
               </h1>
               <p className='text-sm text-gray-500'>
-                {mockClassDetails.teacher} • {mockClassDetails.room}
+                {classDetails.teacher} • {classDetails.room}
               </p>
             </div>
           </div>
@@ -192,10 +135,10 @@ const ClassDetailPage = () => {
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
         {/* Class Stats */}
         <ClassStats
-          totalStudents={mockClassDetails.totalStudents}
-          maxStudents={mockClassDetails.maxStudents}
-          room={mockClassDetails.room}
-          currentUnit={mockClassDetails.currentUnit}
+          totalStudents={classDetails.totalStudents}
+          maxStudents={classDetails.maxStudents}
+          room={classDetails.room}
+          currentUnit={classDetails.currentUnit}
         />
 
         {/* Tabs */}
@@ -225,16 +168,12 @@ const ClassDetailPage = () => {
           {/* Tab Content */}
           <div className='p-6'>
             {activeTab === 'overview' && (
-              <ClassOverview classDetails={mockClassDetails} />
+              <ClassOverview classDetails={classDetails} />
             )}
 
-            {activeTab === 'students' && (
-              <StudentList students={mockStudents} />
-            )}
+            {activeTab === 'students' && <StudentList students={students} />}
 
-            {activeTab === 'schedule' && (
-              <ClassSchedule sessions={mockSchedule} />
-            )}
+            {activeTab === 'schedule' && <ClassSchedule sessions={schedule} />}
 
             {activeTab === 'attendance' && <AttendanceManagement />}
 

@@ -31,7 +31,15 @@ def create_user(db: Session, user_data: UserCreate, hashed_password: str) -> Use
         bio=user_data.bio,
         date_of_birth=user_data.date_of_birth,
         phone_number=user_data.phone_number,
-        input_level=user_data.input_level
+        input_level=user_data.input_level,
+        specialization=user_data.specialization,
+        address=user_data.address,
+        education=user_data.education,
+        experience_years=user_data.experience_years,
+        level=user_data.level,
+        parent_name=user_data.parent_name,
+        parent_phone=user_data.parent_phone,
+        student_id=user_data.student_id
     )
     db.add(db_user)
     db.commit()

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Users,
   GraduationCap,
@@ -12,8 +12,7 @@ import {
   BarChart3,
   ArrowUp,
 } from 'lucide-react';
-import { mockStatCards, mockStudents } from '../../data';
-import { Student } from '../../types';
+import { useAdminApi, StatCard, DashboardStats } from './_hooks/use-api';
 
 interface StatCardProps {
   title: string;
@@ -44,20 +43,43 @@ interface SystemStatusProps {
 }
 
 const AdminDashboard: React.FC = () => {
-  const stats = mockStatCards.map((stat) => ({
-    ...stat,
-    value: String(stat.value),
-    icon:
-      stat.icon === 'Users' ? (
-        <Users size={24} />
-      ) : stat.icon === 'GraduationCap' ? (
-        <GraduationCap size={24} />
-      ) : stat.icon === 'BookOpen' ? (
-        <BookOpen size={24} />
-      ) : (
-        <PlayCircle size={24} />
-      ),
-  }));
+  const { loading, error, getDashboardStats, getStatCards } = useAdminApi();
+  const [stats, setStats] = useState<StatCard[]>([]);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
+    null
+  );
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsData, dashboardData] = await Promise.all([
+          getStatCards(),
+          getDashboardStats(),
+        ]);
+        setStats(statsData);
+        setDashboardStats(dashboardData);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+      }
+    };
+
+    fetchData();
+  }, [getStatCards, getDashboardStats]);
+
+  const getIconComponent = (iconName: string) => {
+    switch (iconName) {
+      case 'Users':
+        return <Users size={24} />;
+      case 'GraduationCap':
+        return <GraduationCap size={24} />;
+      case 'BookOpen':
+        return <BookOpen size={24} />;
+      case 'PlayCircle':
+        return <PlayCircle size={24} />;
+      default:
+        return <Users size={24} />;
+    }
+  };
 
   const quickActions = [
     {
@@ -85,18 +107,6 @@ const AdminDashboard: React.FC = () => {
       iconBg: 'bg-orange-100 text-orange-600',
     },
   ];
-
-  // Lấy danh sách đăng ký gần đây từ dữ liệu học viên
-  const recentEnrollments = mockStudents
-    .slice(0, 3)
-    .map((student: Student) => ({
-      name: student.name,
-      course: student.currentClass || 'Tiếng Anh cơ bản',
-      time: '2 giờ trước',
-      avatar:
-        student.avatar ||
-        'https://images.unsplash.com/photo-1494790108755-2616b612b3fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80',
-    }));
 
   const StatCard: React.FC<StatCardProps> = ({
     title,
@@ -182,10 +192,29 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <>
+      {/* Loading state */}
+      {loading && (
+        <div className='flex justify-center items-center py-8'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && (
+        <div className='bg-red-50 border border-red-200 rounded-lg p-4 mb-6'>
+          <p className='text-red-800'>{error}</p>
+        </div>
+      )}
+
       {/* Thống kê */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
         {stats.map((stat, index) => (
-          <StatCard key={index} {...stat} />
+          <StatCard
+            key={index}
+            {...stat}
+            icon={getIconComponent(stat.icon)}
+            iconBg='bg-blue-100 text-blue-600'
+          />
         ))}
       </div>
 
@@ -210,9 +239,13 @@ const AdminDashboard: React.FC = () => {
           </button>
         </div>
         <div className='space-y-1'>
-          {recentEnrollments.map((enrollment, index) => (
+          {dashboardStats?.recentEnrollments?.map((enrollment, index) => (
             <EnrollmentItem key={index} {...enrollment} />
-          ))}
+          )) || (
+            <p className='text-gray-500 text-center py-4'>
+              Không có đăng ký gần đây
+            </p>
+          )}
         </div>
       </div>
     </>

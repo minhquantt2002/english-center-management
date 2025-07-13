@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, MapPin, User, Check } from 'lucide-react';
 import { ClassData } from '../../../../../types/admin';
 import { TimeSlot } from '../../../../../types/common';
+import { useStaffApi } from '../../../_hooks/use-api';
 
 interface CreateScheduleModalProps {
   isOpen: boolean;
@@ -43,18 +44,6 @@ const timeSlots = [
   { id: '8', startTime: '20:00', endTime: '21:30', label: '20:00 - 21:30' },
 ];
 
-const rooms = [
-  'Phòng 101',
-  'Phòng 102',
-  'Phòng 103',
-  'Phòng 201',
-  'Phòng 202',
-  'Phòng 203',
-  'Phòng Lab 1',
-  'Phòng Lab 2',
-  'Online',
-];
-
 export default function CreateScheduleModal({
   isOpen,
   onClose,
@@ -64,10 +53,32 @@ export default function CreateScheduleModal({
   const [formData, setFormData] = useState({
     day: 'monday',
     timeSlot: { startTime: '07:00', endTime: '08:30' },
-    room: 'Phòng 101',
+    room: '',
     teacher: classroom?.teacher.name || '',
     notes: '',
   });
+
+  const [rooms, setRooms] = useState<any[]>([]);
+  const { loading, error, getRooms } = useStaffApi();
+
+  useEffect(() => {
+    if (isOpen) {
+      loadRooms();
+    }
+  }, [isOpen]);
+
+  const loadRooms = async () => {
+    try {
+      const response = await getRooms();
+      setRooms(response);
+      // Set default room if available
+      if (response.length > 0 && !formData.room) {
+        setFormData((prev) => ({ ...prev, room: response[0].id }));
+      }
+    } catch (err) {
+      console.error('Error loading rooms:', err);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +93,7 @@ export default function CreateScheduleModal({
         id: `session_${Date.now()}`,
         day: formData.day,
         timeSlot: formData.timeSlot,
-        room: formData.room,
+        room: formData.room, // This will be room ID
         teacher: formData.teacher,
         status: 'scheduled',
         notes: formData.notes,
@@ -98,7 +109,7 @@ export default function CreateScheduleModal({
     setFormData({
       day: 'monday',
       timeSlot: { startTime: '07:00', endTime: '08:30' },
-      room: 'Phòng 101',
+      room: '',
       teacher: classroom?.teacher.name || '',
       notes: '',
     });
@@ -130,6 +141,12 @@ export default function CreateScheduleModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className='p-6'>
+          {error && (
+            <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4'>
+              <p>Lỗi: {error}</p>
+            </div>
+          )}
+
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             {/* Day Selection */}
             <div>
@@ -195,10 +212,12 @@ export default function CreateScheduleModal({
                 }
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
                 required
+                disabled={loading}
               >
+                <option value=''>Chọn phòng học</option>
                 {rooms.map((room) => (
-                  <option key={room} value={room}>
-                    {room}
+                  <option key={room.id} value={room.id}>
+                    {room.name}
                   </option>
                 ))}
               </select>
@@ -219,6 +238,7 @@ export default function CreateScheduleModal({
                 placeholder='Tên giáo viên'
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
                 required
+                disabled={loading}
               />
             </div>
           </div>
@@ -236,6 +256,7 @@ export default function CreateScheduleModal({
               placeholder='Ghi chú về buổi học...'
               rows={3}
               className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
+              disabled={loading}
             />
           </div>
 
@@ -278,15 +299,21 @@ export default function CreateScheduleModal({
               type='button'
               onClick={handleClose}
               className='px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'
+              disabled={loading}
             >
               Hủy
             </button>
             <button
               type='submit'
-              className='px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors flex items-center space-x-2'
+              disabled={loading}
+              className='px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 disabled:bg-gray-400 transition-colors flex items-center space-x-2'
             >
-              <Check className='w-4 h-4' />
-              <span>Tạo lịch học</span>
+              {loading ? (
+                <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+              ) : (
+                <Check className='w-4 h-4' />
+              )}
+              <span>{loading ? 'Đang tạo...' : 'Tạo lịch học'}</span>
             </button>
           </div>
         </form>

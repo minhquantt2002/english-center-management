@@ -40,7 +40,7 @@ async def get_current_admin_user(
     """
     Dependency để lấy current admin user
     """
-    if current_user.role.value != "admin":
+    if current_user.role_name != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Không có quyền truy cập"
@@ -53,7 +53,7 @@ async def get_current_teacher_user(
     """
     Dependency để lấy current teacher user (admin hoặc teacher)
     """
-    if current_user.role.value not in ["admin", "teacher"]:
+    if current_user.role_name not in ["admin", "teacher"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Không có quyền truy cập"
@@ -66,7 +66,7 @@ async def get_current_staff_user(
     """
     Dependency để lấy current staff user (admin hoặc staff)
     """
-    if current_user.role.value not in ["admin", "staff"]:
+    if current_user.role_name not in ["admin", "staff"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Không có quyền truy cập"
@@ -79,7 +79,7 @@ async def get_current_student_user(
     """
     Dependency để lấy current student user
     """
-    if current_user.role.value != "student":
+    if current_user.role_name != "student":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Không có quyền truy cập"

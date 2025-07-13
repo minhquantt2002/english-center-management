@@ -11,6 +11,8 @@ class ScoreBase(BaseSchema):
     speaking: Optional[float] = None
     writing: Optional[float] = None
     total_score: Optional[float] = None
+    grade: Optional[str] = None  # A, B, C, D, F
+    comments: Optional[str] = None  # Nhận xét của giáo viên
 
 class ScoreCreate(ScoreBase):
     pass
@@ -23,6 +25,8 @@ class ScoreUpdate(BaseSchema):
     speaking: Optional[float] = None
     writing: Optional[float] = None
     total_score: Optional[float] = None
+    grade: Optional[str] = None
+    comments: Optional[str] = None
 
 class ScoreResponse(ScoreBase):
     id: UUID

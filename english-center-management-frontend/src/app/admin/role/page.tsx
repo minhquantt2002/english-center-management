@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Search,
   Plus,
@@ -12,9 +12,9 @@ import {
   GraduationCap,
   UserCheck,
 } from 'lucide-react';
-import { mockUsers } from '../../../data';
 import { User, UserStatus } from '../../../types';
 import CreateUserModal, { UserFormData } from './_components/create-user';
+import { useRoleApi } from './_hooks/use-api';
 
 interface Permission {
   id: string;
@@ -28,7 +28,31 @@ const UserRolePermissionManagement = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedRole, setSelectedRole] = useState('admin');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+
+  const {
+    loading,
+    error,
+    createUser,
+    updateUser,
+    deleteUser,
+    getUsers,
+    updateUserRole,
+  } = useRoleApi();
+
+  // Fetch users on component mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const data = await getUsers();
+      setUsers(data);
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+    }
+  };
 
   const [permissions, setPermissions] = useState<Permission[]>([
     { id: 'user-management', name: 'Quản lý người dùng', checked: true },
@@ -138,49 +162,57 @@ const UserRolePermissionManagement = () => {
     );
   };
 
-  const handleCreateUser = (userData: UserFormData) => {
-    // Create new user object
-    const newUser: User = {
-      id: `user_${Date.now()}`, // Generate unique ID
-      name: userData.name,
-      email: userData.email,
-      phone: userData.phone,
-      role: userData.role,
-      status: userData.status,
-      avatar: `https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face`, // Default avatar
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    // Add to users list
-    setUsers((prevUsers) => [...prevUsers, newUser]);
-
-    // Show success message
-    alert('Người dùng đã được tạo thành công!');
-
-    // Close modal
-    setIsCreateModalOpen(false);
-  };
-
-  const handleDeleteUser = (userId: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
-      if (selectedUser?.id === userId) {
-        setSelectedUser(null);
-      }
-      alert('Người dùng đã được xóa thành công!');
+  const handleCreateUser = async (userData: UserFormData) => {
+    try {
+      await createUser(userData);
+      setIsCreateModalOpen(false);
+      await fetchUsers(); // Refresh the list
+      alert('Người dùng đã được tạo thành công!');
+    } catch (error) {
+      console.error('Error creating user:', error);
+      alert('Có lỗi xảy ra khi tạo người dùng!');
     }
   };
 
-  const handleUpdateUserStatus = (userId: string, newStatus: UserStatus) => {
-    setUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        user.id === userId
-          ? { ...user, status: newStatus, updatedAt: new Date().toISOString() }
-          : user
-      )
-    );
-    alert('Trạng thái người dùng đã được cập nhật thành công!');
+  const handleDeleteUser = async (userId: string) => {
+    if (confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
+      try {
+        await deleteUser(userId);
+        if (selectedUser?.id === userId) {
+          setSelectedUser(null);
+        }
+        await fetchUsers(); // Refresh the list
+        alert('Người dùng đã được xóa thành công!');
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        alert('Có lỗi xảy ra khi xóa người dùng!');
+      }
+    }
+  };
+
+  const handleUpdateUserStatus = async (
+    userId: string,
+    newStatus: UserStatus
+  ) => {
+    try {
+      await updateUser(userId, { status: newStatus });
+      await fetchUsers(); // Refresh the list
+      alert('Trạng thái người dùng đã được cập nhật thành công!');
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      alert('Có lỗi xảy ra khi cập nhật trạng thái người dùng!');
+    }
+  };
+
+  const handleUpdateUserRole = async (userId: string, newRole: string) => {
+    try {
+      await updateUserRole(userId, newRole);
+      await fetchUsers(); // Refresh the list
+      alert('Vai trò người dùng đã được cập nhật thành công!');
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      alert('Có lỗi xảy ra khi cập nhật vai trò người dùng!');
+    }
   };
 
   return (
@@ -490,18 +522,7 @@ const UserRolePermissionManagement = () => {
                     <button
                       onClick={() => {
                         if (selectedUser) {
-                          setUsers((prevUsers) =>
-                            prevUsers.map((user) =>
-                              user.id === selectedUser.id
-                                ? {
-                                    ...user,
-                                    role: selectedRole as any,
-                                    updatedAt: new Date().toISOString(),
-                                  }
-                                : user
-                            )
-                          );
-                          alert('Vai trò đã được cập nhật thành công!');
+                          handleUpdateUserRole(selectedUser.id, selectedRole);
                         }
                       }}
                       className='w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors'

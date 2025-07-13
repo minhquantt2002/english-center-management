@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Clock,
@@ -12,54 +12,11 @@ import {
   Edit,
   UserPlus,
 } from 'lucide-react';
-import { mockClasses } from '../../../data/admin/classes';
 import { ClassData } from '../../../types';
 import EditClassroomModal from './_components/edit-classroom';
 import CreateClassroomModal from './_components/create-classroom';
 import AssignStudentModal from './_components/assign-student';
-
-// Use mock classes data
-const courses = mockClasses.map((classItem: ClassData) => ({
-  id: classItem.id,
-  status:
-    classItem.status === 'active'
-      ? 'active'
-      : ('upcoming' as 'active' | 'upcoming' | 'full'),
-  statusText:
-    classItem.status === 'active' ? 'Đang hoạt động' : 'Sắp khai giảng',
-  time: classItem.schedule.time,
-  instructor: classItem.teacher.name,
-  students: `${classItem.students}/${classItem.maxStudents || 20} học viên`,
-  room: classItem.room || 'Phòng A101',
-  day: classItem.schedule.time,
-}));
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'active':
-      return 'bg-green-100 text-green-800';
-    case 'upcoming':
-      return 'bg-orange-100 text-orange-800';
-    case 'full':
-      return 'bg-red-100 text-red-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
-
-const getProgressColor = (students: string) => {
-  const [current, total] = students.split('/').map((n) => parseInt(n));
-  const percentage = (current / total) * 100;
-
-  if (percentage >= 90) return 'bg-red-500';
-  if (percentage >= 70) return 'bg-orange-500';
-  return 'bg-blue-500';
-};
-
-const getProgressPercentage = (students: string) => {
-  const [current, total] = students.split('/').map((n) => parseInt(n));
-  return (current / total) * 100;
-};
+import { useStaffApi } from '../_hooks/use-api';
 
 export default function EnglishCourseInterface() {
   const router = useRouter();
@@ -69,68 +26,29 @@ export default function EnglishCourseInterface() {
   const [selectedClassroom, setSelectedClassroom] = useState<ClassData | null>(
     null
   );
-  const [classrooms, setClassrooms] = useState<ClassData[]>(mockClasses);
+  const [classrooms, setClassrooms] = useState<ClassData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleEditClassroom = (classroom: ClassData) => {
-    setSelectedClassroom(classroom);
-    setIsEditModalOpen(true);
+  const { loading, error, getClassrooms, createClassroom, updateClassroom } =
+    useStaffApi();
+
+  // Fetch classrooms on component mount
+  useEffect(() => {
+    fetchClassrooms();
+  }, []);
+
+  const fetchClassrooms = async () => {
+    try {
+      const data = await getClassrooms();
+      setClassrooms(data);
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Failed to fetch classrooms:', err);
+      setIsLoading(false);
+    }
   };
 
-  const handleSaveClassroom = (updatedClassroom: ClassData) => {
-    setClassrooms((prev) =>
-      prev.map((cls) =>
-        cls.id === updatedClassroom.id ? updatedClassroom : cls
-      )
-    );
-    // In a real app, you would also save to the backend here
-  };
-
-  const handleCreateClassroom = (classData: Partial<ClassData>) => {
-    const newClassroom: ClassData = {
-      id: `class_${Date.now()}`,
-      name: classData.name || '',
-      level: classData.level || 'beginner',
-      teacher: classData.teacher || { id: '', name: '' },
-      students: 0,
-      maxStudents: classData.maxStudents || 20,
-      schedule: classData.schedule || { days: '', time: '' },
-      room: classData.room || '',
-      courseId: classData.courseId || '',
-      status: classData.status || 'active',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    setClassrooms((prev) => [...prev, newClassroom]);
-    // In a real app, you would also save to the backend here
-  };
-
-  const handleAssignStudents = async (
-    classroomId: string,
-    studentIds: string[]
-  ) => {
-    // Update the classroom with new student count
-    setClassrooms((prev) =>
-      prev.map((cls) =>
-        cls.id === classroomId
-          ? { ...cls, students: cls.students + studentIds.length }
-          : cls
-      )
-    );
-
-    // In a real app, you would make an API call here to assign students
-    console.log(
-      `Assigning ${studentIds.length} students to classroom ${classroomId}:`,
-      studentIds
-    );
-
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    alert(`Đã phân công ${studentIds.length} học viên vào lớp thành công!`);
-  };
-
-  // Update courses data from classrooms state
+  // Use classrooms data from API
   const courses = classrooms.map((classItem: ClassData) => ({
     id: classItem.id,
     name: classItem.name,
@@ -146,6 +64,127 @@ export default function EnglishCourseInterface() {
     room: classItem.room || 'Phòng A101',
     day: classItem.schedule.time,
   }));
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'upcoming':
+        return 'bg-orange-100 text-orange-800';
+      case 'full':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getProgressColor = (students: string) => {
+    const [current, total] = students.split('/').map((n) => parseInt(n));
+    const percentage = (current / total) * 100;
+
+    if (percentage >= 90) return 'bg-red-500';
+    if (percentage >= 70) return 'bg-orange-500';
+    return 'bg-blue-500';
+  };
+
+  const getProgressPercentage = (students: string) => {
+    const [current, total] = students.split('/').map((n) => parseInt(n));
+    return (current / total) * 100;
+  };
+
+  const handleEditClassroom = (classroom: ClassData) => {
+    setSelectedClassroom(classroom);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveClassroom = async (updatedClassroom: ClassData) => {
+    try {
+      await updateClassroom(updatedClassroom.id, updatedClassroom);
+      setIsEditModalOpen(false);
+      setSelectedClassroom(null);
+      await fetchClassrooms(); // Refresh the list
+      alert('Thông tin lớp học đã được cập nhật thành công!');
+    } catch (error) {
+      console.error('Error updating classroom:', error);
+      alert('Có lỗi xảy ra khi cập nhật thông tin lớp học!');
+    }
+  };
+
+  const handleCreateClassroom = async (classData: Partial<ClassData>) => {
+    try {
+      await createClassroom(classData);
+      setIsCreateModalOpen(false);
+      await fetchClassrooms(); // Refresh the list
+      alert('Lớp học mới đã được tạo thành công!');
+    } catch (error) {
+      console.error('Error creating classroom:', error);
+      alert('Có lỗi xảy ra khi tạo lớp học mới!');
+    }
+  };
+
+  const handleAssignStudent = (classroom: ClassData) => {
+    setSelectedClassroom(classroom);
+    setIsAssignModalOpen(true);
+  };
+
+  const handleAssignStudents = async (
+    classroomId: string,
+    studentIds: string[]
+  ) => {
+    try {
+      // In a real app, you would make an API call here to assign students
+      console.log(
+        `Assigning ${studentIds.length} students to classroom ${classroomId}:`,
+        studentIds
+      );
+
+      alert(`Đã phân công ${studentIds.length} học viên vào lớp thành công!`);
+    } catch (error) {
+      console.error('Error assigning students:', error);
+      alert('Có lỗi xảy ra khi phân công học viên!');
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedClassroom(null);
+  };
+
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
+  };
+
+  const handleCloseAssignModal = () => {
+    setIsAssignModalOpen(false);
+    setSelectedClassroom(null);
+  };
+
+  if (isLoading) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='flex items-center gap-2'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+          <span className='text-gray-600'>Đang tải dữ liệu...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center'>
+          <p className='text-red-600 mb-2'>Có lỗi xảy ra khi tải dữ liệu</p>
+          <button
+            onClick={fetchClassrooms}
+            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen bg-gray-50'>

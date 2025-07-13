@@ -1,6 +1,6 @@
 from typing import List, Optional
 from uuid import UUID
-from datetime import time
+from datetime import time, date
 from sqlalchemy.orm import Session
 from ..cruds import schedule as schedule_crud
 from ..schemas.schedule import ScheduleCreate, ScheduleUpdate
@@ -21,6 +21,22 @@ def get_schedules_by_classroom(db: Session, class_id: UUID) -> List[Schedule]:
 def get_schedules_by_student(db: Session, student_id: UUID) -> List[Schedule]:
     """Get schedules for specific student (through enrollments)"""
     return schedule_crud.get_schedules_by_student(db, student_id)
+
+def get_schedules_by_teacher(db: Session, teacher_id: UUID) -> List[Schedule]:
+    """Get schedules for specific teacher"""
+    return schedule_crud.get_schedules_by_teacher(db, teacher_id)
+
+def get_today_schedules_by_student(db: Session, student_id: UUID) -> List[Schedule]:
+    """Get today's schedules for specific student"""
+    today = date.today()
+    weekday = today.strftime("%A").upper()
+    return schedule_crud.get_schedules_by_student_weekday(db, student_id, weekday)
+
+def get_today_schedules_by_teacher(db: Session, teacher_id: UUID) -> List[Schedule]:
+    """Get today's schedules for specific teacher"""
+    today = date.today()
+    weekday = today.strftime("%A").upper()
+    return schedule_crud.get_schedules_by_teacher_weekday(db, teacher_id, weekday)
 
 def get_schedules_by_room(db: Session, room_id: UUID) -> List[Schedule]:
     """Get schedules for specific room"""

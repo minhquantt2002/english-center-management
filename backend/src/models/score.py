@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Float, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -17,6 +17,8 @@ class Score(Base):
     speaking = Column(Float)
     writing = Column(Float)
     total_score = Column(Float)
+    grade = Column(String(10))  # A, B, C, D, F
+    comments = Column(Text)  # Nhận xét của giáo viên
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships

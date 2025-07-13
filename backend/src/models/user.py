@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, Date, DateTime
+from sqlalchemy import Column, String, Text, Date, DateTime, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -18,6 +18,19 @@ class User(Base):
     date_of_birth = Column(Date)
     phone_number = Column(String(20))
     input_level = Column(String(50))
+    
+    # Teacher specific fields
+    specialization = Column(String(255))
+    address = Column(Text)
+    education = Column(String(255))
+    experience_years = Column(Integer)
+    
+    # Student specific fields
+    level = Column(String(50))
+    parent_name = Column(String(255))
+    parent_phone = Column(String(20))
+    student_id = Column(String(50), unique=True)  # Student ID for frontend compatibility
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
@@ -34,4 +47,7 @@ class User(Base):
     given_feedbacks = relationship("Feedback", foreign_keys="Feedback.teacher_id", back_populates="teacher")
     
     # Feedbacks received by student
-    received_feedbacks = relationship("Feedback", foreign_keys="Feedback.student_id", back_populates="student") 
+    received_feedbacks = relationship("Feedback", foreign_keys="Feedback.student_id", back_populates="student")
+    
+    # Student achievements (if student)
+    achievements = relationship("Achievement", back_populates="student") 

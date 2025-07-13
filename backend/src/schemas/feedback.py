@@ -8,6 +8,8 @@ class FeedbackBase(BaseSchema):
     student_id: UUID
     class_id: UUID
     content: Optional[str] = None
+    rating: Optional[int] = None  # Đánh giá từ 1-5
+    feedback_type: Optional[str] = None  # academic, behavior, attendance
 
 class FeedbackCreate(FeedbackBase):
     pass
@@ -17,6 +19,8 @@ class FeedbackUpdate(BaseSchema):
     student_id: Optional[UUID] = None
     class_id: Optional[UUID] = None
     content: Optional[str] = None
+    rating: Optional[int] = None
+    feedback_type: Optional[str] = None
 
 class FeedbackResponse(FeedbackBase):
     id: UUID

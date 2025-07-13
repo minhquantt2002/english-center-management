@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, MessageCircle, Calendar, FileText } from 'lucide-react';
-import { mockClassSessions } from '../../data';
+import { useTeacherApi } from './_hooks/use-api';
 
 interface Student {
   id: string;
@@ -12,6 +12,82 @@ interface Student {
 }
 
 const TeacherDashboard = () => {
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [todaysClasses, setTodaysClasses] = useState<any[]>([]);
+  const [studentsByClass, setStudentsByClass] = useState<{
+    [key: string]: Student[];
+  }>({});
+  const [isLoading, setIsLoading] = useState(true);
+
+  const { loading, error, getTeacherDashboard, getTeacherClasses } =
+    useTeacherApi();
+
+  // Fetch teacher data on component mount
+  useEffect(() => {
+    fetchTeacherData();
+  }, []);
+
+  const fetchTeacherData = async () => {
+    try {
+      const [dashboard, classes] = await Promise.all([
+        getTeacherDashboard(),
+        getTeacherClasses(),
+      ]);
+
+      setDashboardData(dashboard);
+
+      // Transform classes data for display
+      const transformedClasses = classes.slice(0, 3).map((classItem: any) => ({
+        id: classItem.id,
+        title: classItem.className || classItem.title || 'Lớp tiếng Anh',
+        level: `Cấp độ ${classItem.level || 'B1'}`,
+        room: classItem.room || 'Phòng 101',
+        studentCount: classItem.studentsCount || 15,
+        time: `${classItem.startTime || '9:00'} - ${
+          classItem.endTime || '10:30'
+        }`,
+        status: 'Đang diễn ra' as 'Đang diễn ra' | 'Sắp tới',
+      }));
+
+      setTodaysClasses(transformedClasses);
+
+      // Create simple students by class mapping for display
+      const studentsMapping: { [key: string]: Student[] } = {
+        'Intermediate B1': [
+          {
+            id: '1',
+            name: 'John Martinez',
+            avatar:
+              'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face',
+            status: 'Có mặt',
+          },
+          {
+            id: '2',
+            name: 'Emma Chen',
+            avatar:
+              'https://images.unsplash.com/photo-1494790108755-2616b612b29c?w=40&h=40&fit=crop&crop=face',
+            status: 'Có mặt',
+          },
+        ],
+        'Advanced C1': [
+          {
+            id: '4',
+            name: 'Sophie Williams',
+            avatar:
+              'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face',
+            status: 'Sắp tới',
+          },
+        ],
+      };
+
+      setStudentsByClass(studentsMapping);
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Failed to fetch teacher data:', err);
+      setIsLoading(false);
+    }
+  };
+
   const actionCards = [
     {
       title: 'Nhập điểm kiểm tra',
@@ -39,46 +115,6 @@ const TeacherDashboard = () => {
     },
   ];
 
-  // Use mock data for today's classes
-  const todaysClasses = mockClassSessions.slice(0, 3).map((classItem: any) => ({
-    id: classItem.id,
-    title: classItem.className || classItem.title || 'Lớp tiếng Anh',
-    level: `Cấp độ ${classItem.level || 'B1'}`,
-    room: classItem.room || 'Phòng 101',
-    studentCount: classItem.studentsCount || 15,
-    time: `${classItem.startTime || '9:00'} - ${classItem.endTime || '10:30'}`,
-    status: 'Đang diễn ra' as 'Đang diễn ra' | 'Sắp tới',
-  }));
-
-  // Create simple students by class mapping for display
-  const studentsByClass: { [key: string]: Student[] } = {
-    'Intermediate B1': [
-      {
-        id: '1',
-        name: 'John Martinez',
-        avatar:
-          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face',
-        status: 'Có mặt',
-      },
-      {
-        id: '2',
-        name: 'Emma Chen',
-        avatar:
-          'https://images.unsplash.com/photo-1494790108755-2616b612b29c?w=40&h=40&fit=crop&crop=face',
-        status: 'Có mặt',
-      },
-    ],
-    'Advanced C1': [
-      {
-        id: '4',
-        name: 'Sophie Williams',
-        avatar:
-          'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face',
-        status: 'Sắp tới',
-      },
-    ],
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Có mặt':
@@ -103,6 +139,33 @@ const TeacherDashboard = () => {
     [11, 12, 13, 14, 15, 16, 17],
     [18, 19, 20, 21, 22, 23, 24],
   ];
+
+  if (isLoading) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='flex items-center gap-2'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+          <span className='text-gray-600'>Đang tải dữ liệu...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center'>
+          <p className='text-red-600 mb-2'>Có lỗi xảy ra khi tải dữ liệu</p>
+          <button
+            onClick={fetchTeacherData}
+            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

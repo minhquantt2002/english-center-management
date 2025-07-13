@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -7,38 +7,57 @@ import {
   MapPin,
   X,
 } from 'lucide-react';
-import { mockTeachers, mockSchedules } from '../../../../data';
+import { useStaffApi } from '../../_hooks/use-api';
 import { Schedule } from '../../../../types';
 
 interface TeachingScheduleModalProps {
+  isOpen: boolean;
+  onClose: () => void;
   teacherId: string;
   teacherName: string;
-  onClose: () => void;
 }
 
 export default function TeachingScheduleModal({
+  isOpen,
+  onClose,
   teacherId,
   teacherName,
-  onClose,
 }: TeachingScheduleModalProps) {
+  const [schedule, setSchedule] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { getTeacherSchedule } = useStaffApi();
+
+  // Fetch teacher schedule when modal opens
+  useEffect(() => {
+    if (isOpen && teacherId) {
+      const fetchTeacherSchedule = async () => {
+        setLoading(true);
+        try {
+          const scheduleData = await getTeacherSchedule(teacherId);
+          setSchedule(scheduleData);
+        } catch (error) {
+          console.error('Error fetching teacher schedule:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchTeacherSchedule();
+    }
+  }, [isOpen, teacherId, getTeacherSchedule]);
+
   const currentWeek = '23/12/2024 - 29/12/2024';
 
-  // Find teacher from mock data
-  const teacher = mockTeachers.find((t) => t.id === teacherId);
-  const teacherInfo = teacher || {
+  // Teacher info from props
+  const teacherInfo = {
     name: teacherName,
     specialization: 'Giáo viên tiếng Anh',
     id: teacherId,
     status: 'active' as const,
   };
 
-  // Get schedules for this specific teacher
-  const teacherSchedules = mockSchedules.filter(
-    (schedule) => schedule.teacherId === teacherId
-  );
-
   // Convert schedules to session format for display
-  const sessions = teacherSchedules.map((schedule: Schedule, index: number) => {
+  const sessions = schedule.map((scheduleItem: any, index: number) => {
     const typeMap = {
       'English Basics A1': 'basic',
       'Grammar Fundamentals': 'grammar',
@@ -48,18 +67,17 @@ export default function TeachingScheduleModal({
       'IELTS Preparation': 'ielts',
     } as const;
 
-    const type = typeMap[schedule.className as keyof typeof typeMap] || 'basic';
+    const type =
+      typeMap[scheduleItem.className as keyof typeof typeMap] || 'basic';
 
     return {
-      id: schedule.id,
-      name: schedule.className,
-      room: schedule.room,
+      id: scheduleItem.id,
+      name: scheduleItem.className,
+      room: scheduleItem.room,
       type: type,
-      time: schedule.timeSlot.startTime,
-      day:
-        Object.entries(schedule.daysOfWeek).findIndex(([_, value]) => value) +
-        2, // Convert to day number
-      endTime: schedule.timeSlot.endTime,
+      time: scheduleItem.timeSlot?.startTime || '9:00',
+      day: scheduleItem.day || 2,
+      endTime: scheduleItem.timeSlot?.endTime || '10:30',
     };
   });
 
@@ -224,36 +242,36 @@ export default function TeachingScheduleModal({
           </div>
 
           {/* Summary */}
-          {teacherSchedules.length > 0 && (
+          {schedule.length > 0 && (
             <div className='bg-white rounded-xl shadow-lg p-6 mt-6 border border-gray-200'>
               <h3 className='text-xl font-bold text-gray-900 mb-6 flex items-center gap-2'>
                 <div className='w-2 h-8 bg-blue-600 rounded-full'></div>
                 Tóm tắt lịch giảng dạy
               </h3>
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                {teacherSchedules.map((schedule) => (
+                {schedule.map((scheduleItem) => (
                   <div
-                    key={schedule.id}
+                    key={scheduleItem.id}
                     className='border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-gray-50 to-white'
                   >
                     <h4 className='font-bold text-gray-900 mb-2 text-lg'>
-                      {schedule.className}
+                      {scheduleItem.className}
                     </h4>
                     <div className='space-y-2'>
                       <div className='flex items-center gap-2 text-sm text-gray-600'>
                         <MapPin className='w-4 h-4 text-blue-600' />
-                        <span>{schedule.room}</span>
+                        <span>{scheduleItem.room}</span>
                       </div>
                       <div className='flex items-center gap-2 text-sm text-gray-600'>
                         <Clock className='w-4 h-4 text-green-600' />
                         <span>
-                          {schedule.timeSlot.startTime} -{' '}
-                          {schedule.timeSlot.endTime}
+                          {scheduleItem.timeSlot?.startTime} -{' '}
+                          {scheduleItem.timeSlot?.endTime}
                         </span>
                       </div>
                       <div className='flex items-center gap-2 text-sm text-gray-600'>
                         <Calendar className='w-4 h-4 text-purple-600' />
-                        <span>{schedule.sessionsPerWeek} buổi/tuần</span>
+                        <span>{scheduleItem.sessionsPerWeek} buổi/tuần</span>
                       </div>
                     </div>
                   </div>

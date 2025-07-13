@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Users,
@@ -13,6 +13,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { ClassData, CourseLevel } from '../../../../types';
+import { useStaffApi } from '../../_hooks/use-api';
 
 interface CreateClassroomModalProps {
   isOpen: boolean;
@@ -52,8 +53,37 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [teachers, setTeachers] = useState<any[]>([]);
+  const [rooms, setRooms] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { getTeachers, getRooms, getCourses } = useStaffApi();
 
-  // Mock data for dropdowns
+  // Fetch data for dropdowns
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [teachersData, roomsData, coursesData] = await Promise.all([
+          getTeachers(),
+          getRooms(),
+          getCourses(),
+        ]);
+        setTeachers(teachersData);
+        setRooms(roomsData);
+        setCourses(coursesData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchData();
+    }
+  }, [isOpen, getTeachers, getRooms, getCourses]);
+
   const courseLevels: { value: CourseLevel; label: string }[] = [
     { value: 'beginner', label: 'Cơ bản (Beginner)' },
     { value: 'elementary', label: 'Sơ cấp (Elementary)' },
@@ -64,36 +94,6 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
     },
     { value: 'advanced', label: 'Cao cấp (Advanced)' },
     { value: 'proficiency', label: 'Thành thạo (Proficiency)' },
-  ];
-
-  const mockTeachers = [
-    { id: 'teacher_1', name: 'Sarah Johnson' },
-    { id: 'teacher_2', name: 'Michael Chen' },
-    { id: 'teacher_3', name: 'Emma Wilson' },
-    { id: 'teacher_4', name: 'David Rodriguez' },
-  ];
-
-  const mockRooms = [
-    'Phòng A101',
-    'Phòng A102',
-    'Phòng A201',
-    'Phòng A202',
-    'Phòng B101',
-    'Phòng B102',
-    'Phòng B201',
-    'Phòng B202',
-    'Phòng C101',
-    'Phòng C102',
-    'Phòng C201',
-    'Phòng C202',
-  ];
-
-  const mockCourses = [
-    { id: 'course_1', name: 'Tiếng Anh Cơ Bản' },
-    { id: 'course_2', name: 'Tiếng Anh Thương Mại' },
-    { id: 'course_3', name: 'Tiếng Anh Nâng Cao' },
-    { id: 'course_4', name: 'Tiếng Anh Giao Tiếp' },
-    { id: 'course_5', name: 'Luyện Thi IELTS' },
   ];
 
   const timeSlots = [
@@ -156,9 +156,7 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
       return;
     }
 
-    const selectedTeacher = mockTeachers.find(
-      (t) => t.id === formData.teacherId
-    );
+    const selectedTeacher = teachers.find((t) => t.id === formData.teacherId);
 
     const classData: Partial<ClassData> = {
       name: formData.name,
@@ -283,7 +281,7 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                 }`}
               >
                 <option value=''>Chọn giáo viên</option>
-                {mockTeachers.map((teacher) => (
+                {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
                     {teacher.name}
                   </option>
@@ -404,7 +402,7 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                   }`}
                 >
                   <option value=''>Chọn phòng học</option>
-                  {mockRooms.map((room) => (
+                  {rooms.map((room) => (
                     <option key={room} value={room}>
                       {room}
                     </option>
@@ -429,7 +427,7 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
                 >
                   <option value=''>Chọn khóa học (tùy chọn)</option>
-                  {mockCourses.map((course) => (
+                  {courses.map((course) => (
                     <option key={course.id} value={course.id}>
                       {course.name}
                     </option>

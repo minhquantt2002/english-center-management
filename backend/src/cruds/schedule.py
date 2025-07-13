@@ -53,7 +53,11 @@ def create_schedule(db: Session, schedule_data: ScheduleCreate) -> Schedule:
         room_id=schedule_data.room_id,
         weekday=schedule_data.weekday,
         start_time=schedule_data.start_time,
-        end_time=schedule_data.end_time
+        end_time=schedule_data.end_time,
+        title=schedule_data.title,
+        description=schedule_data.description,
+        status=schedule_data.status,
+        notes=schedule_data.notes
     )
     db.add(db_schedule)
     db.commit()
@@ -86,4 +90,28 @@ def delete_schedule(db: Session, schedule_id: UUID) -> bool:
 
 def count_schedules_by_classroom(db: Session, class_id: UUID) -> int:
     """Count schedules for a classroom"""
-    return db.query(Schedule).filter(Schedule.class_id == class_id).count() 
+    return db.query(Schedule).filter(Schedule.class_id == class_id).count()
+
+def get_schedules_by_teacher(db: Session, teacher_id: UUID) -> List[Schedule]:
+    """Get schedules for specific teacher"""
+    return db.query(Schedule)\
+        .join(Class, Schedule.class_id == Class.id)\
+        .filter(Class.teacher_id == teacher_id)\
+        .all()
+
+def get_schedules_by_student_weekday(db: Session, student_id: UUID, weekday: str) -> List[Schedule]:
+    """Get schedules for specific student on specific weekday"""
+    return db.query(Schedule)\
+        .join(Class, Schedule.class_id == Class.id)\
+        .join(Enrollment, Class.id == Enrollment.class_id)\
+        .filter(Enrollment.student_id == student_id)\
+        .filter(Schedule.weekday == weekday)\
+        .all()
+
+def get_schedules_by_teacher_weekday(db: Session, teacher_id: UUID, weekday: str) -> List[Schedule]:
+    """Get schedules for specific teacher on specific weekday"""
+    return db.query(Schedule)\
+        .join(Class, Schedule.class_id == Class.id)\
+        .filter(Class.teacher_id == teacher_id)\
+        .filter(Schedule.weekday == weekday)\
+        .all() 

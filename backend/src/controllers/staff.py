@@ -9,13 +9,104 @@ from ..schemas.classroom import ClassroomResponse, ClassroomCreate, ClassroomUpd
 from ..schemas.enrollment import EnrollmentResponse, EnrollmentCreate
 from ..schemas.schedule import ScheduleResponse, ScheduleCreate, ScheduleUpdate
 from ..schemas.room import RoomResponse, RoomCreate, RoomUpdate
+from ..schemas.student import StudentResponse, StudentCreate, StudentUpdate
+from ..schemas.teacher import TeacherResponse
 from ..services import course as course_service
 from ..services import classroom as classroom_service
 from ..services import enrollment as enrollment_service
 from ..services import schedule as schedule_service
 from ..services import room as room_service
+from ..services import student as student_service
+from ..services import teacher as teacher_service
+from ..services import user as user_service
+from ..services import achievement as achievement_service
 
 router = APIRouter()
+
+# Student Management
+@router.get("/students", response_model=List[StudentResponse])
+async def get_all_students(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy danh sách tất cả học sinh
+    """
+    students = student_service.get_students(db, skip=skip, limit=limit)
+    return students
+
+@router.get("/students/available", response_model=List[StudentResponse])
+async def get_available_students(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy danh sách học viên có sẵn (chưa được phân công vào lớp học nào)
+    """
+    students = student_service.get_available_students(db, skip=skip, limit=limit)
+    return students
+
+@router.post("/students", response_model=StudentResponse)
+async def create_student(
+    student_data: StudentCreate,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Tạo học sinh mới
+    """
+    student = student_service.create_student(db, student_data)
+    return student
+
+@router.put("/students/{student_id}", response_model=StudentResponse)
+async def update_student(
+    student_id: str,
+    student_data: StudentUpdate,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Cập nhật thông tin học sinh
+    """
+    student = student_service.get_student(db, student_id)
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Học sinh không tồn tại"
+        )
+    
+    updated_student = student_service.update_student(db, student_id, student_data)
+    return updated_student
+
+# Teacher Management
+@router.get("/teachers", response_model=List[TeacherResponse])
+async def get_all_teachers(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy danh sách tất cả giáo viên
+    """
+    teachers = teacher_service.get_teachers(db, skip=skip, limit=limit)
+    return teachers
+
+@router.get("/teachers/{teacher_id}/schedule")
+async def get_teacher_schedule(
+    teacher_id: str,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy lịch dạy của giáo viên
+    """
+    schedules = schedule_service.get_schedules_by_teacher(db, teacher_id)
+    return schedules
 
 # Course Management
 @router.get("/courses", response_model=List[CourseResponse])
@@ -96,6 +187,23 @@ async def get_all_classrooms(
     classrooms = classroom_service.get_classrooms(db, skip=skip, limit=limit)
     return classrooms
 
+@router.get("/classrooms/{classroom_id}", response_model=ClassroomResponse)
+async def get_classroom_by_id(
+    classroom_id: str,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy thông tin lớp học theo ID
+    """
+    classroom = classroom_service.get_classroom(db, classroom_id)
+    if not classroom:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Lớp học không tồn tại"
+        )
+    return classroom
+
 @router.post("/classrooms", response_model=ClassroomResponse)
 async def create_classroom(
     classroom_data: ClassroomCreate,
@@ -128,6 +236,115 @@ async def update_classroom(
     updated_classroom = classroom_service.update_classroom(db, classroom_id, classroom_data)
     return updated_classroom
 
+@router.post("/classrooms/{classroom_id}/students")
+async def assign_student_to_classroom(
+    classroom_id: str,
+    student_data: dict,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Gán học sinh vào lớp học
+    """
+    student_id = student_data.get("studentId")
+    if not student_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="studentId là bắt buộc"
+        )
+    
+    # Kiểm tra xem học sinh đã đăng ký lớp này chưa
+    existing_enrollment = enrollment_service.get_enrollment_by_student_classroom(
+        db, student_id, classroom_id
+    )
+    if existing_enrollment:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Học sinh đã đăng ký lớp học này"
+        )
+    
+    # Tạo enrollment mới
+    enrollment_data = {
+        "student_id": student_id,
+        "class_id": classroom_id,
+        "enrollment_date": "2024-01-01"  # Có thể lấy ngày hiện tại
+    }
+    enrollment = enrollment_service.create_enrollment(db, enrollment_data)
+    return {"message": "Gán học sinh thành công", "enrollment": enrollment}
+
+@router.post("/classrooms/{classroom_id}/students/bulk")
+async def assign_multiple_students_to_classroom(
+    classroom_id: str,
+    student_data: dict,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Gán nhiều học sinh vào lớp học cùng lúc
+    """
+    student_ids = student_data.get("studentIds", [])
+    if not student_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="studentIds là bắt buộc và phải là một mảng"
+        )
+    
+    # Kiểm tra xem lớp học có tồn tại không
+    classroom = classroom_service.get_classroom(db, classroom_id)
+    if not classroom:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Lớp học không tồn tại"
+        )
+    
+    # Kiểm tra số lượng học sinh có thể thêm vào
+    current_students = classroom.current_students or 0
+    max_students = classroom.max_students or 20
+    available_slots = max_students - current_students
+    
+    if len(student_ids) > available_slots:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Lớp chỉ còn {available_slots} chỗ trống. Không thể thêm {len(student_ids)} học sinh."
+        )
+    
+    successful_enrollments = []
+    failed_enrollments = []
+    
+    for student_id in student_ids:
+        try:
+            # Kiểm tra xem học sinh đã đăng ký lớp này chưa
+            existing_enrollment = enrollment_service.get_enrollment_by_student_classroom(
+                db, student_id, classroom_id
+            )
+            if existing_enrollment:
+                failed_enrollments.append({
+                    "student_id": student_id,
+                    "reason": "Học sinh đã đăng ký lớp học này"
+                })
+                continue
+            
+            # Tạo enrollment mới
+            enrollment_data = {
+                "student_id": student_id,
+                "class_id": classroom_id,
+                "enrollment_date": "2024-01-01"  # Có thể lấy ngày hiện tại
+            }
+            enrollment = enrollment_service.create_enrollment(db, enrollment_data)
+            successful_enrollments.append(enrollment)
+            
+        except Exception as e:
+            failed_enrollments.append({
+                "student_id": student_id,
+                "reason": str(e)
+            })
+    
+    return {
+        "message": f"Đã gán {len(successful_enrollments)} học sinh thành công",
+        "successful_enrollments": successful_enrollments,
+        "failed_enrollments": failed_enrollments
+    }
+
 # Room Management  
 @router.get("/rooms", response_model=List[RoomResponse])
 async def get_all_rooms(
@@ -141,6 +358,23 @@ async def get_all_rooms(
     """
     rooms = room_service.get_rooms(db, skip=skip, limit=limit)
     return rooms
+
+@router.get("/rooms/{room_id}", response_model=RoomResponse)
+async def get_room_by_id(
+    room_id: str,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy thông tin phòng học theo ID
+    """
+    room = room_service.get_room(db, room_id)
+    if not room:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Phòng học không tồn tại"
+        )
+    return room
 
 @router.post("/rooms", response_model=RoomResponse)
 async def create_room(
@@ -281,19 +515,8 @@ async def create_schedule(
     db: Session = Depends(get_db)
 ):
     """
-    Tạo lịch học mới cho lớp học
+    Tạo lịch học mới
     """
-    # Kiểm tra xem đã có lịch học cho lớp này vào thời gian này chưa
-    existing_schedule = schedule_service.get_schedule_by_classroom_time(
-        db, schedule_data.class_id, schedule_data.weekday, 
-        schedule_data.start_time, schedule_data.end_time
-    )
-    if existing_schedule:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Đã có lịch học cho lớp này vào thời gian này"
-        )
-    
     schedule = schedule_service.create_schedule(db, schedule_data)
     return schedule
 
@@ -343,7 +566,117 @@ async def get_classroom_schedules(
     db: Session = Depends(get_db)
 ):
     """
-    Lấy danh sách lịch học của một lớp học
+    Lấy lịch học của một lớp học
     """
     schedules = schedule_service.get_schedules_by_classroom(db, classroom_id)
-    return schedules 
+    return schedules
+
+@router.get("/classrooms/{classroom_id}/students", response_model=List[StudentResponse])
+async def get_classroom_students(
+    classroom_id: str,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy danh sách học sinh trong lớp học
+    """
+    students = student_service.get_students_by_classroom(db, classroom_id)
+    return students
+
+# Invoice Management
+@router.post("/invoices")
+async def create_invoice(
+    invoice_data: dict,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Tạo hóa đơn mới
+    """
+    # TODO: Implement invoice service
+    return {"message": "Tạo hóa đơn thành công"}
+
+@router.get("/invoices")
+async def get_invoices(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy danh sách hóa đơn
+    """
+    # TODO: Implement invoice service
+    invoices = []
+    return invoices
+
+# Stats and dashboard data
+@router.get("/stats")
+async def get_staff_stats(
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy thống kê cho staff dashboard
+    """
+    # TODO: Implement stats service
+    stats = {
+        "total_students": 0,
+        "total_teachers": 0,
+        "total_classrooms": 0,
+        "total_courses": 0,
+        "recent_registrations": [],
+        "today_schedule": []
+    }
+    return stats
+
+# Student Achievements and Invoices
+@router.get("/students/{student_id}/achievements")
+async def get_student_achievements(
+    student_id: str,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy thành tích học tập của học sinh
+    """
+    achievements = achievement_service.get_achievements_by_student(db, student_id)
+    return achievements
+
+@router.get("/students/{student_id}/invoices")
+async def get_student_invoices(
+    student_id: str,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy hóa đơn của học sinh
+    """
+    # TODO: Implement invoice service
+    invoices = [
+        {
+            "id": "1",
+            "studentId": student_id,
+            "amount": 5000000,
+            "paidAmount": 3000000,
+            "remainingAmount": 2000000,
+            "paymentStatus": "partial",
+            "dueDate": "2024-03-15",
+            "invoiceNumber": "INV-2024-001",
+            "description": "Học phí khóa học Tiếng Anh Cơ bản",
+            "createdAt": "2024-01-01",
+        },
+        {
+            "id": "2",
+            "studentId": student_id,
+            "amount": 3000000,
+            "paidAmount": 0,
+            "remainingAmount": 3000000,
+            "paymentStatus": "pending",
+            "dueDate": "2024-04-15",
+            "invoiceNumber": "INV-2024-002",
+            "description": "Học phí khóa học Tiếng Anh Trung cấp",
+            "createdAt": "2024-02-01",
+        },
+    ]
+    return invoices 

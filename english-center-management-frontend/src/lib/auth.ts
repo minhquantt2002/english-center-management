@@ -1,8 +1,8 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { LoginData, AuthResponse } from '@/types/auth';
+import { LoginData, AuthResponse, TokenResponse } from '@/types/auth';
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = 'http://localhost:8000';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -22,7 +22,6 @@ export const authOptions: NextAuthOptions = {
             email: credentials.email,
             password: credentials.password,
           };
-
           const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: {
@@ -35,18 +34,35 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
-          const result: AuthResponse = await response.json();
+          const result: TokenResponse = await response.json();
 
-          if (result.success && result.user) {
+          // Get user info using the token
+          const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+            headers: {
+              Authorization: `Bearer ${result.access_token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
             return {
-              id: result.user.id,
-              email: result.user.email,
-              name: result.user.name,
-              accessToken: result.token,
+              id: userData.id,
+              email: userData.email,
+              name: userData.name,
+              role_name: userData.role_name,
+              accessToken: result.access_token,
             };
           }
 
-          return null;
+          // Fallback if user info fetch fails
+          return {
+            id: credentials.email,
+            email: credentials.email,
+            name: credentials.email,
+            role_name: 'admin', // Default role
+            accessToken: result.access_token,
+          };
         } catch (error) {
           console.error('Auth error:', error);
           return null;

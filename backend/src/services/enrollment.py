@@ -25,8 +25,12 @@ def get_enrollment_by_student_classroom(db: Session, student_id: UUID, class_id:
     """Get specific enrollment by student and classroom"""
     return enrollment_crud.get_enrollment_by_student_classroom(db, student_id, class_id)
 
-def create_enrollment(db: Session, enrollment_data: EnrollmentCreate) -> Enrollment:
+def create_enrollment(db: Session, enrollment_data: EnrollmentCreate | dict) -> Enrollment:
     """Create new enrollment"""
+    if isinstance(enrollment_data, dict):
+        # Convert dict to EnrollmentCreate
+        enrollment_create = EnrollmentCreate(**enrollment_data)
+        return enrollment_crud.create_enrollment(db, enrollment_create)
     return enrollment_crud.create_enrollment(db, enrollment_data)
 
 def delete_enrollment(db: Session, enrollment_id: UUID) -> bool:

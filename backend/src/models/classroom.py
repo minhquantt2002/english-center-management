@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Enum, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -24,6 +24,9 @@ class Class(Base):
     duration = Column(Integer)  # Số buổi hoặc tuần
     start_date = Column(Date)
     end_date = Column(Date)
+    description = Column(Text)  # Mô tả lớp học
+    max_students = Column(Integer)  # Số học sinh tối đa
+    current_students = Column(Integer, default=0)  # Số học sinh hiện tại
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
@@ -32,4 +35,6 @@ class Class(Base):
     enrollments = relationship("Enrollment", back_populates="class_")
     exams = relationship("Exam", back_populates="class_")
     feedbacks = relationship("Feedback", back_populates="class_")
-    schedules = relationship("Schedule", back_populates="class_") 
+    schedules = relationship("Schedule", back_populates="class_")
+    materials = relationship("Material", back_populates="class_")
+    assignments = relationship("Assignment", back_populates="class_") 

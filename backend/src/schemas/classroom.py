@@ -12,6 +12,9 @@ class ClassroomBase(BaseSchema):
     duration: Optional[int] = None  # Số buổi hoặc tuần
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+    description: Optional[str] = None  # Mô tả lớp học
+    max_students: Optional[int] = None  # Số học sinh tối đa
+    current_students: Optional[int] = 0  # Số học sinh hiện tại
 
 class ClassroomCreate(ClassroomBase):
     pass
@@ -24,6 +27,9 @@ class ClassroomUpdate(BaseSchema):
     duration: Optional[int] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+    description: Optional[str] = None
+    max_students: Optional[int] = None
+    current_students: Optional[int] = None
 
 class ClassroomResponse(ClassroomBase):
     id: UUID

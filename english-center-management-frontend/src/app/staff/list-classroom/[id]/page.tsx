@@ -17,8 +17,7 @@ import {
   Eye,
   Settings,
 } from 'lucide-react';
-import { mockClasses } from '../../../../data/admin/classes';
-import { mockStudents } from '../../../../data/common/users';
+import { useStaffApi } from '../../_hooks/use-api';
 import { ClassData, Student } from '../../../../types';
 import AssignStudentModal from './_components/create-student';
 import ViewStudentModal from './_components/view-student';
@@ -30,6 +29,7 @@ export default function ClassroomDetailPage() {
   const params = useParams();
   const router = useRouter();
   const classroomId = params.id as string;
+  const { loading, error, getClassroomById, getStudents } = useStaffApi();
 
   const [classroom, setClassroom] = useState<ClassData | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
@@ -45,28 +45,28 @@ export default function ClassroomDetailPage() {
     useState(false);
 
   useEffect(() => {
-    // Simulate loading
     const loadData = async () => {
       setIsLoading(true);
+      try {
+        // Fetch classroom details
+        const classroomData = await getClassroomById(classroomId);
+        setClassroom(classroomData);
 
-      // Find classroom by ID
-      const foundClassroom = mockClasses.find((cls) => cls.id === classroomId);
-      if (foundClassroom) {
-        setClassroom(foundClassroom);
-
-        // Simulate getting students for this classroom
-        // In real app, you would fetch students assigned to this classroom
-        const classroomStudents = mockStudents.filter(
-          (student) => student.currentClass === foundClassroom.name
+        // Fetch students for this classroom
+        const studentsData = await getStudents();
+        const classroomStudents = studentsData.filter(
+          (student: Student) => student.currentClass === classroomData.name
         );
         setStudents(classroomStudents);
+      } catch (err) {
+        console.error('Error loading classroom data:', err);
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     loadData();
-  }, [classroomId]);
+  }, [classroomId, getClassroomById, getStudents]);
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
@@ -82,7 +82,7 @@ export default function ClassroomDetailPage() {
   const handleAssignStudent = async (studentId: string[]) => {
     try {
       // Find the student to assign
-      const studentToAssign = mockStudents.filter((student) =>
+      const studentToAssign = students.filter((student: Student) =>
         studentId.includes(student.id)
       );
 
@@ -166,12 +166,31 @@ export default function ClassroomDetailPage() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || loading) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
         <div className='text-center'>
           <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto'></div>
           <p className='mt-4 text-gray-600'>Đang tải thông tin lớp...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center'>
+          <h2 className='text-2xl font-bold text-gray-900 mb-4'>
+            Có lỗi xảy ra
+          </h2>
+          <p className='text-gray-600 mb-6'>{error}</p>
+          <button
+            onClick={() => router.back()}
+            className='bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-lg transition-colors'
+          >
+            Quay lại
+          </button>
         </div>
       </div>
     );

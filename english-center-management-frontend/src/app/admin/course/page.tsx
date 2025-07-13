@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Edit, Trash2, Plus, Eye } from 'lucide-react';
-import { mockCourses } from '../../../data';
 import { Course } from '../../../types';
 import CreateCourseModal, { CourseFormData } from './_components/create-course';
 import EditCourseModal from './_components/edit-course';
 import ViewCourseModal from './_components/view-course';
+import { useCourseApi } from './_hooks/use-api';
 
 const CourseManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,6 +16,31 @@ const CourseManagement = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+
+  const {
+    loading,
+    error,
+    createCourse,
+    updateCourse,
+    deleteCourse,
+    getCourses,
+    getCourseById,
+  } = useCourseApi();
+
+  // Fetch courses on component mount
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    try {
+      const data = await getCourses();
+      setCourses(data);
+    } catch (err) {
+      console.error('Failed to fetch courses:', err);
+    }
+  };
 
   const getLevel = (level: string) => {
     switch (level) {
@@ -32,8 +57,8 @@ const CourseManagement = () => {
     }
   };
 
-  // Use mock courses data
-  const courses = mockCourses.map((course: Course) => ({
+  // Use courses data from API
+  const coursesWithDisplay = courses.map((course: Course) => ({
     ...course,
     displayLevel: getLevel(course.level),
     displayDuration: `${course.duration}`,
@@ -81,7 +106,7 @@ const CourseManagement = () => {
     }
   };
 
-  const filteredCourses = courses.filter((course) => {
+  const filteredCourses = coursesWithDisplay.filter((course) => {
     const matchesSearch = course.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
@@ -94,16 +119,10 @@ const CourseManagement = () => {
 
   const handleCreateCourse = async (courseData: CourseFormData) => {
     try {
-      // Here you would typically make an API call to create the course
-      console.log('Creating course:', courseData);
-
-      // For now, we'll just show a success message
+      await createCourse(courseData);
+      setIsCreateModalOpen(false);
+      await fetchCourses(); // Refresh the list
       alert('Khóa học đã được tạo thành công!');
-
-      // In a real application, you would:
-      // 1. Make API call to create course
-      // 2. Update the courses list
-      // 3. Show success notification
     } catch (error) {
       console.error('Error creating course:', error);
       alert('Có lỗi xảy ra khi tạo khóa học!');
@@ -111,12 +130,8 @@ const CourseManagement = () => {
   };
 
   const handleViewCourse = (course: any) => {
-    // Find the original course data from mockCourses
-    const originalCourse = mockCourses.find((c) => c.id === course.id);
-    if (originalCourse) {
-      setSelectedCourse(originalCourse);
-      setIsViewModalOpen(true);
-    }
+    setSelectedCourse(course);
+    setIsViewModalOpen(true);
   };
 
   const handleCloseViewModal = () => {
@@ -125,12 +140,8 @@ const CourseManagement = () => {
   };
 
   const handleEditCourse = (course: any) => {
-    // Find the original course data from mockCourses
-    const originalCourse = mockCourses.find((c) => c.id === course.id);
-    if (originalCourse) {
-      setSelectedCourse(originalCourse);
-      setIsEditModalOpen(true);
-    }
+    setSelectedCourse(course);
+    setIsEditModalOpen(true);
   };
 
   const handleCloseEditModal = () => {
@@ -143,19 +154,27 @@ const CourseManagement = () => {
     courseData: CourseFormData
   ) => {
     try {
-      // Here you would typically make an API call to update the course
-      console.log('Updating course:', courseId, courseData);
-
-      // For now, we'll just show a success message
+      await updateCourse(courseId, courseData);
+      setIsEditModalOpen(false);
+      setSelectedCourse(null);
+      await fetchCourses(); // Refresh the list
       alert('Khóa học đã được cập nhật thành công!');
-
-      // In a real application, you would:
-      // 1. Make API call to update course
-      // 2. Update the courses list
-      // 3. Show success notification
     } catch (error) {
       console.error('Error updating course:', error);
       alert('Có lỗi xảy ra khi cập nhật khóa học!');
+    }
+  };
+
+  const handleDeleteCourse = async (courseId: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa khóa học này?')) {
+      try {
+        await deleteCourse(courseId);
+        await fetchCourses(); // Refresh the list
+        alert('Khóa học đã được xóa thành công!');
+      } catch (error) {
+        console.error('Error deleting course:', error);
+        alert('Có lỗi xảy ra khi xóa khóa học!');
+      }
     }
   };
 
@@ -331,7 +350,11 @@ const CourseManagement = () => {
                         >
                           <Edit size={18} />
                         </button>
-                        <button className='text-red-600 hover:text-red-900 transition-colors'>
+                        <button
+                          onClick={() => handleDeleteCourse(course.id)}
+                          className='text-red-600 hover:text-red-900 transition-colors'
+                          title='Xóa'
+                        >
                           <Trash2 size={18} />
                         </button>
                       </div>

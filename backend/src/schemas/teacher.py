@@ -2,25 +2,20 @@ from typing import Optional
 from datetime import datetime
 from uuid import UUID
 from .base import BaseSchema
+from .user import UserBase, UserCreate, UserUpdate, UserResponse
 
-class TeacherBase(BaseSchema):
-    user_id: UUID
-    specialization: Optional[str] = None
-    phone: Optional[str] = None
-    address: Optional[str] = None
-    education: Optional[str] = None
-    experience_years: Optional[int] = None
-
-class TeacherCreate(TeacherBase):
+class TeacherBase(UserBase):
+    # Teacher specific fields are already in UserBase
     pass
 
-class TeacherUpdate(BaseSchema):
-    specialization: Optional[str] = None
-    phone: Optional[str] = None
-    address: Optional[str] = None
-    education: Optional[str] = None
-    experience_years: Optional[int] = None
+class TeacherCreate(UserCreate):
+    # Ensure role_name is set to teacher
+    role_name: str = "teacher"
 
-class TeacherResponse(TeacherBase):
-    id: UUID
-    created_at: datetime
+class TeacherUpdate(UserUpdate):
+    # Teacher specific fields are already in UserUpdate
+    pass
+
+class TeacherResponse(UserResponse):
+    # Teacher specific fields are already in UserResponse
+    pass

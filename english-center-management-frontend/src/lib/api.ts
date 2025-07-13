@@ -1,68 +1,95 @@
-import { LoginData, RegisterData, AuthResponse } from '@/types/auth';
+import {
+  LoginData,
+  RegisterData,
+  AuthResponse,
+  TokenResponse,
+  User,
+} from '@/types/auth';
+import { getSession } from 'next-auth/react';
 
 const API_BASE_URL = 'http://localhost:8000';
 
-export const authAPI = {
-  async login(data: LoginData): Promise<AuthResponse> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+// Helper function to get auth token
+const getAuthToken = async () => {
+  if (typeof window !== 'undefined') {
+    // Client-side: try to get from localStorage first, then session
+    const localToken = localStorage.getItem('token');
+    if (localToken) return localToken;
+  }
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+  // Server-side or fallback: get from session
+  const session = await getSession();
+  return session?.accessToken;
+};
 
-      return await response.json();
-    } catch (error) {
-      console.error('Login error:', error);
-      return {
-        success: false,
-        message: 'Đã xảy ra lỗi khi đăng nhập',
-      };
+// Generic API client
+export const api = {
+  async get(endpoint: string) {
+    const token = await getAuthToken();
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    return response.json();
   },
 
-  async register(data: RegisterData): Promise<AuthResponse> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+  async post(endpoint: string, data?: any) {
+    const token = await getAuthToken();
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+        'Content-Type': 'application/json',
+      },
+      body: data ? JSON.stringify(data) : undefined,
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Register error:', error);
-      return {
-        success: false,
-        message: 'Đã xảy ra lỗi khi đăng ký',
-      };
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    return response.json();
   },
 
-  async logout(): Promise<void> {
-    try {
-      await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-    } catch (error) {
-      console.error('Logout error:', error);
+  async put(endpoint: string, data?: any) {
+    const token = await getAuthToken();
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'PUT',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+        'Content-Type': 'application/json',
+      },
+      body: data ? JSON.stringify(data) : undefined,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    return response.json();
+  },
+
+  async delete(endpoint: string) {
+    const token = await getAuthToken();
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'DELETE',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
   },
 };

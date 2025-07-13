@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Text, DateTime, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -14,6 +14,8 @@ class Feedback(Base):
     student_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     class_id = Column(UUID(as_uuid=True), ForeignKey("classes.id"), nullable=False)
     content = Column(Text)
+    rating = Column(Integer)  # Đánh giá từ 1-5
+    feedback_type = Column(String(50))  # academic, behavior, attendance
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   BookOpen,
@@ -12,10 +12,36 @@ import {
   TrendingUp,
   ArrowRight,
 } from 'lucide-react';
-import { mockStudentClasses } from '@/data/student/classes';
+import { useStudentApi } from '../_hooks/use-api';
 
 const StudentClassroomPage: React.FC = () => {
   const router = useRouter();
+  const { loading, error, getStudentClasses, getStudentDashboard } =
+    useStudentApi();
+  const [classes, setClasses] = useState([]);
+  const [stats, setStats] = useState({
+    totalClasses: 0,
+    inProgress: 0,
+    completed: 0,
+    averageProgress: 0,
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [classesData, dashboardData] = await Promise.all([
+          getStudentClasses(),
+          getStudentDashboard(),
+        ]);
+        setClasses(classesData);
+        setStats(dashboardData);
+      } catch (err) {
+        console.error('Error fetching student data:', err);
+      }
+    };
+
+    fetchData();
+  }, [getStudentClasses, getStudentDashboard]);
 
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -53,6 +79,20 @@ const StudentClassroomPage: React.FC = () => {
 
   return (
     <div className='space-y-6'>
+      {/* Loading state */}
+      {loading && (
+        <div className='flex justify-center items-center py-8'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600'></div>
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && (
+        <div className='bg-red-50 border border-red-200 rounded-lg p-4 mb-6'>
+          <p className='text-red-800'>{error}</p>
+        </div>
+      )}
+
       {/* Header */}
       <div className='flex items-center justify-between'>
         <div>
@@ -64,7 +104,7 @@ const StudentClassroomPage: React.FC = () => {
         <div className='flex items-center gap-3'>
           <div className='flex items-center gap-2 text-sm text-gray-600'>
             <BookOpen className='w-4 h-4' />
-            <span>{mockStudentClasses.length} lớp học</span>
+            <span>{classes.length} lớp học</span>
           </div>
         </div>
       </div>
@@ -79,7 +119,7 @@ const StudentClassroomPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Tổng số lớp</p>
               <p className='text-xl font-bold text-gray-900'>
-                {mockStudentClasses.length}
+                {classes.length}
               </p>
             </div>
           </div>
@@ -93,10 +133,7 @@ const StudentClassroomPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Đang học</p>
               <p className='text-xl font-bold text-gray-900'>
-                {
-                  mockStudentClasses.filter((c) => c.status === 'In Progress')
-                    .length
-                }
+                {classes.filter((c: any) => c.status === 'In Progress').length}
               </p>
             </div>
           </div>
@@ -110,10 +147,7 @@ const StudentClassroomPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Hoàn thành</p>
               <p className='text-xl font-bold text-gray-900'>
-                {
-                  mockStudentClasses.filter((c) => c.status === 'Completed')
-                    .length
-                }
+                {classes.filter((c: any) => c.status === 'Completed').length}
               </p>
             </div>
           </div>
@@ -128,7 +162,7 @@ const StudentClassroomPage: React.FC = () => {
               <p className='text-sm text-gray-600'>Tiến độ TB</p>
               <p className='text-xl font-bold text-gray-900'>
                 {Math.round(
-                  mockStudentClasses.reduce((acc, c) => {
+                  classes.reduce((acc: number, c: any) => {
                     if (c.sessionsCompleted && c.totalSessions) {
                       return (
                         acc +
@@ -139,7 +173,7 @@ const StudentClassroomPage: React.FC = () => {
                       );
                     }
                     return acc;
-                  }, 0) / mockStudentClasses.length
+                  }, 0) / classes.length
                 )}
                 %
               </p>
@@ -150,7 +184,7 @@ const StudentClassroomPage: React.FC = () => {
 
       {/* Classes Grid */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-        {mockStudentClasses.map((classItem) => (
+        {classes.map((classItem: any) => (
           <div
             key={classItem.id}
             className='bg-white rounded-lg border border-gray-200 p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-purple-300 group'
@@ -267,7 +301,7 @@ const StudentClassroomPage: React.FC = () => {
       </div>
 
       {/* Empty State */}
-      {mockStudentClasses.length === 0 && (
+      {classes.length === 0 && (
         <div className='text-center py-12'>
           <BookOpen className='w-16 h-16 text-gray-300 mx-auto mb-4' />
           <h3 className='text-lg font-medium text-gray-900 mb-2'>

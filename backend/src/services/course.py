@@ -32,3 +32,7 @@ def delete_course(db: Session, course_id: UUID) -> bool:
 def count_total_courses(db: Session) -> int:
     """Count total courses"""
     return course_crud.count_total_courses(db)
+
+def count_courses(db: Session) -> int:
+    """Count total courses (alias for count_total_courses)"""
+    return course_crud.count_total_courses(db)

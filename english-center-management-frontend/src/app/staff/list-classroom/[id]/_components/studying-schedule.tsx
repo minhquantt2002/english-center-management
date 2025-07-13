@@ -15,6 +15,7 @@ import {
 import { ClassData } from '../../../../../types/admin';
 import { TimeSlot } from '../../../../../types/common';
 import CreateScheduleModal from './create-schedule';
+import { useStaffApi } from '../../../_hooks/use-api';
 
 interface StudyingScheduleModalProps {
   isOpen: boolean;
@@ -79,41 +80,72 @@ export default function StudyingScheduleModal({
   );
   const [isCreateScheduleOpen, setIsCreateScheduleOpen] = useState(false);
 
+  const {
+    loading,
+    error,
+    getClassroomSchedules,
+    createSchedule,
+    updateSchedule,
+    deleteSchedule,
+  } = useStaffApi();
+
   useEffect(() => {
     if (classroom && isOpen) {
-      // Generate mock sessions based on classroom schedule
-      const mockSessions: ScheduleSession[] = [];
-      const scheduleDays = classroom.schedule.days.split(', ');
-
-      scheduleDays.forEach((day, index) => {
-        const dayKey = day.toLowerCase() as keyof typeof dayNames;
-        if (dayNames[dayKey]) {
-          mockSessions.push({
-            id: `session_${index + 1}`,
-            day: dayKey,
-            timeSlot: {
-              startTime: classroom.schedule.time.split(' - ')[0] || '07:00',
-              endTime: classroom.schedule.time.split(' - ')[1] || '08:30',
-            },
-            room: classroom.room || 'Phòng 101',
-            teacher: classroom.teacher.name,
-            status: 'scheduled',
-            notes: `Buổi học ${index + 1}`,
-          });
-        }
-      });
-
-      setSessions(mockSessions);
+      loadSchedules();
     }
   }, [classroom, isOpen]);
+
+  const loadSchedules = async () => {
+    if (!classroom?.id) return;
+
+    try {
+      const response = await getClassroomSchedules(classroom.id);
+      const scheduleSessions: ScheduleSession[] = response.map(
+        (schedule: any) => ({
+          id: schedule.id,
+          day: schedule.weekday,
+          timeSlot: {
+            startTime: schedule.start_time,
+            endTime: schedule.end_time,
+          },
+          room: schedule.room?.name || 'Chưa phân công',
+          teacher: classroom.teacher.name,
+          status: schedule.status,
+          notes: schedule.notes,
+        })
+      );
+      setSessions(scheduleSessions);
+    } catch (err) {
+      console.error('Error loading schedules:', err);
+    }
+  };
 
   const handleCreateSchedule = () => {
     setIsCreateScheduleOpen(true);
   };
 
-  const handleScheduleCreated = (newSchedule: ScheduleSession) => {
-    setSessions((prev) => [...prev, newSchedule]);
-    setIsCreateScheduleOpen(false);
+  const handleScheduleCreated = async (newSchedule: ScheduleSession) => {
+    if (!classroom?.id) return;
+
+    try {
+      const scheduleData = {
+        class_id: classroom.id,
+        room_id: newSchedule.room, // This is room ID from the form
+        weekday: newSchedule.day,
+        start_time: newSchedule.timeSlot.startTime,
+        end_time: newSchedule.timeSlot.endTime,
+        title: newSchedule.notes,
+        description: newSchedule.notes,
+        status: newSchedule.status,
+        notes: newSchedule.notes,
+      };
+
+      await createSchedule(scheduleData);
+      await loadSchedules(); // Reload schedules
+      setIsCreateScheduleOpen(false);
+    } catch (err) {
+      console.error('Error creating schedule:', err);
+    }
   };
 
   const handleCreateScheduleClose = () => {
@@ -125,20 +157,33 @@ export default function StudyingScheduleModal({
     setIsEditing(true);
   };
 
-  const handleSaveEdit = () => {
-    if (editingSession) {
-      setSessions((prev) =>
-        prev.map((session) =>
-          session.id === editingSession.id ? editingSession : session
-        )
-      );
+  const handleSaveEdit = async () => {
+    if (!editingSession) return;
+
+    try {
+      // For now, we'll keep the room name as is since we don't have room ID mapping
+      // In a real implementation, you'd want to map room names to IDs
+      const scheduleData = {
+        status: editingSession.status,
+        notes: editingSession.notes,
+      };
+
+      await updateSchedule(editingSession.id, scheduleData);
+      await loadSchedules(); // Reload schedules
       setEditingSession(null);
       setIsEditing(false);
+    } catch (err) {
+      console.error('Error updating schedule:', err);
     }
   };
 
-  const handleDeleteSession = (sessionId: string) => {
-    setSessions((prev) => prev.filter((session) => session.id !== sessionId));
+  const handleDeleteSession = async (sessionId: string) => {
+    try {
+      await deleteSchedule(sessionId);
+      await loadSchedules(); // Reload schedules
+    } catch (err) {
+      console.error('Error deleting schedule:', err);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -202,6 +247,20 @@ export default function StudyingScheduleModal({
 
         {/* Content */}
         <div className='p-6 overflow-y-auto max-h-[calc(90vh-140px)]'>
+          {/* Loading and Error States */}
+          {loading && (
+            <div className='text-center py-4'>
+              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500 mx-auto'></div>
+              <p className='text-gray-600 mt-2'>Đang tải...</p>
+            </div>
+          )}
+
+          {error && (
+            <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4'>
+              <p>Lỗi: {error}</p>
+            </div>
+          )}
+
           {/* Class Info */}
           <div className='bg-gray-50 rounded-lg p-4 mb-6'>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
@@ -239,7 +298,8 @@ export default function StudyingScheduleModal({
           <div className='mb-6'>
             <button
               onClick={handleCreateSchedule}
-              className='bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors font-medium'
+              disabled={loading}
+              className='bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors font-medium'
             >
               <Plus className='w-5 h-5' />
               <span>Tạo lịch học</span>
@@ -341,7 +401,8 @@ export default function StudyingScheduleModal({
                                   <div className='flex space-x-1'>
                                     <button
                                       onClick={handleSaveEdit}
-                                      className='text-xs bg-green-500 text-white px-1 py-1 rounded'
+                                      disabled={loading}
+                                      className='text-xs bg-green-500 text-white px-1 py-1 rounded disabled:bg-gray-400'
                                     >
                                       ✓
                                     </button>
@@ -374,7 +435,8 @@ export default function StudyingScheduleModal({
                                   <div className='absolute top-1 right-1 flex space-x-1'>
                                     <button
                                       onClick={() => handleEditSession(session)}
-                                      className='text-blue-600 hover:text-blue-800 text-xs'
+                                      disabled={loading}
+                                      className='text-blue-600 hover:text-blue-800 text-xs disabled:text-gray-400'
                                     >
                                       <Edit className='w-3 h-3' />
                                     </button>
@@ -382,7 +444,8 @@ export default function StudyingScheduleModal({
                                       onClick={() =>
                                         handleDeleteSession(session.id)
                                       }
-                                      className='text-red-600 hover:text-red-800 text-xs'
+                                      disabled={loading}
+                                      className='text-red-600 hover:text-red-800 text-xs disabled:text-gray-400'
                                     >
                                       <Trash2 className='w-3 h-3' />
                                     </button>

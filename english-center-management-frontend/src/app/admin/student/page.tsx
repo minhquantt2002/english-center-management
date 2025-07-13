@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Edit, Trash2, Plus, Mail, Phone, Eye } from 'lucide-react';
-import { mockStudents } from '../../../data';
 import { Student, StudentProfile } from '../../../types';
 import ViewStudentModal from './_components/view-student';
 import EditStudentModal from './_components/edit-student';
 import CreateStudentModal from './_components/create-student';
+import { useStudentApi } from './_hooks/use-api';
 
 const StudentManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,9 +16,30 @@ const StudentManagement = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [students, setStudents] = useState<Student[]>([]);
 
-  // Use mock students data
-  const students = mockStudents;
+  const {
+    loading,
+    error,
+    createStudent,
+    updateStudent,
+    deleteStudent,
+    getStudents,
+  } = useStudentApi();
+
+  // Fetch students on component mount
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      const data = await getStudents();
+      setStudents(data);
+    } catch (err) {
+      console.error('Failed to fetch students:', err);
+    }
+  };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -77,30 +98,44 @@ const StudentManagement = () => {
     setSelectedStudent(null);
   };
 
-  const handleSaveStudent = (updatedStudent: Student) => {
-    // In a real application, you would make an API call here
-    console.log('Saving updated student:', updatedStudent);
-
-    // For now, we'll just update the local state
-    // In a real app, you would update the students array with the new data
-    // setStudents(students.map(s => s.id === updatedStudent.id ? updatedStudent : s));
-
-    // Show success message (you can add a toast notification here)
-    alert('Thông tin học viên đã được cập nhật thành công!');
+  const handleSaveStudent = async (updatedStudent: Student) => {
+    try {
+      await updateStudent(updatedStudent.id, updatedStudent);
+      setIsEditModalOpen(false);
+      setSelectedStudent(null);
+      await fetchStudents(); // Refresh the list
+      alert('Thông tin học viên đã được cập nhật thành công!');
+    } catch (error) {
+      console.error('Error updating student:', error);
+      alert('Có lỗi xảy ra khi cập nhật thông tin học viên!');
+    }
   };
 
   const handleCreateStudent = async (
     newStudent: Omit<StudentProfile, 'id' | 'createdAt' | 'updatedAt'>
   ) => {
-    // In a real application, you would make an API call here
-    console.log('Creating new student:', newStudent);
+    try {
+      await createStudent(newStudent);
+      setIsCreateModalOpen(false);
+      await fetchStudents(); // Refresh the list
+      alert('Học viên mới đã được tạo thành công!');
+    } catch (error) {
+      console.error('Error creating student:', error);
+      alert('Có lỗi xảy ra khi tạo học viên mới!');
+    }
+  };
 
-    // For now, we'll just show a success message
-    // In a real app, you would add the new student to the students array
-    // setStudents([...students, { ...newStudent, id: generateId() }]);
-
-    // Show success message (you can add a toast notification here)
-    alert('Học viên mới đã được tạo thành công!');
+  const handleDeleteStudent = async (studentId: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa học viên này?')) {
+      try {
+        await deleteStudent(studentId);
+        await fetchStudents(); // Refresh the list
+        alert('Học viên đã được xóa thành công!');
+      } catch (error) {
+        console.error('Error deleting student:', error);
+        alert('Có lỗi xảy ra khi xóa học viên!');
+      }
+    }
   };
 
   return (
@@ -264,7 +299,11 @@ const StudentManagement = () => {
                         >
                           <Edit size={16} />
                         </button>
-                        <button className='text-red-600 hover:text-red-900'>
+                        <button
+                          onClick={() => handleDeleteStudent(student.id)}
+                          className='text-red-600 hover:text-red-900'
+                          title='Xóa'
+                        >
                           <Trash2 size={16} />
                         </button>
                       </div>

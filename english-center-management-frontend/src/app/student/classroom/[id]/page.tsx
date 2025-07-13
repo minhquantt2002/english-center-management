@@ -21,27 +21,33 @@ import {
   Download,
   Eye,
 } from 'lucide-react';
-import { mockStudentClasses } from '@/data/student/classes';
+import { useStudentApi } from '../../_hooks/use-api';
 import { StudentClass } from '@/types/student';
 
 const ClassDetailPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
+  const { loading, error, getClassDetails } = useStudentApi();
   const [classData, setClassData] = useState<StudentClass | null>(null);
   const [activeTab, setActiveTab] = useState<
     'overview' | 'materials' | 'assignments' | 'schedule'
   >('overview');
 
   useEffect(() => {
-    const classId = params.id as string;
-    const foundClass = mockStudentClasses.find((c) => c.id === classId);
-    if (foundClass) {
-      setClassData(foundClass);
-    } else {
-      // Redirect to classroom list if class not found
-      router.push('/student/classroom');
-    }
-  }, [params.id, router]);
+    const fetchClassData = async () => {
+      try {
+        const classId = params.id as string;
+        const classDetails = await getClassDetails(classId);
+        setClassData(classDetails);
+      } catch (err) {
+        console.error('Error fetching class details:', err);
+        // Redirect to classroom list if class not found
+        router.push('/student/classroom');
+      }
+    };
+
+    fetchClassData();
+  }, [params.id, router, getClassDetails]);
 
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -73,10 +79,53 @@ const ClassDetailPage: React.FC = () => {
     return Math.round((completed / total) * 100);
   };
 
+  if (loading) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto'></div>
+          <p className='mt-4 text-gray-600'>Đang tải thông tin lớp...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center'>
+          <h2 className='text-2xl font-bold text-gray-900 mb-4'>
+            Có lỗi xảy ra
+          </h2>
+          <p className='text-gray-600 mb-6'>{error}</p>
+          <button
+            onClick={() => router.push('/student/classroom')}
+            className='bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors'
+          >
+            Quay lại
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!classData) {
     return (
-      <div className='flex items-center justify-center h-64'>
-        <div className='text-gray-500'>Đang tải...</div>
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center'>
+          <h2 className='text-2xl font-bold text-gray-900 mb-4'>
+            Không tìm thấy lớp
+          </h2>
+          <p className='text-gray-600 mb-6'>
+            Lớp bạn đang tìm kiếm không tồn tại.
+          </p>
+          <button
+            onClick={() => router.push('/student/classroom')}
+            className='bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors'
+          >
+            Quay lại
+          </button>
+        </div>
       </div>
     );
   }

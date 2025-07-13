@@ -7,6 +7,7 @@ from ..config import settings
 from ..cruds import user as user_crud
 from ..models.user import User
 from ..schemas.auth import TokenData
+from ..schemas.user import UserCreate
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -19,14 +20,45 @@ def get_password_hash(password: str) -> str:
     """Hash a password"""
     return pwd_context.hash(password)
 
+def register_user(db: Session, user_data) -> Optional[User]:
+    """Register a new user"""
+    # Check if user already exists
+    existing_user = user_crud.get_user_by_email(db, user_data.email)
+    if existing_user:
+        return None
+    
+    # Hash the password
+    hashed_password = get_password_hash(user_data.password)
+    
+    # Create user data for CRUD
+    user_create_data = UserCreate(
+        name=user_data.name,
+        email=user_data.email,
+        password=hashed_password,
+        role_name=user_data.role_name,
+        bio=user_data.bio,
+        date_of_birth=user_data.date_of_birth,
+        phone_number=user_data.phone_number,
+        input_level=user_data.input_level,
+        specialization=getattr(user_data, 'specialization', None),
+        address=getattr(user_data, 'address', None),
+        education=getattr(user_data, 'education', None),
+        experience_years=getattr(user_data, 'experience_years', None),
+        level=getattr(user_data, 'level', None),
+        parent_name=getattr(user_data, 'parent_name', None),
+        parent_phone=getattr(user_data, 'parent_phone', None),
+        student_id=getattr(user_data, 'student_id', None)
+    )
+    
+    # Create the user
+    return user_crud.create_user(db, user_create_data, hashed_password)
+
 def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
     """Authenticate user with email and password"""
     user = user_crud.get_user_by_email(db, email)
     if not user:
         return None
-    if not verify_password(password, user.hashed_password):
-        return None
-    if not user.is_active:
+    if not verify_password(password, user.password):
         return None
     return user
 
@@ -47,7 +79,7 @@ def verify_token(token: str) -> Optional[TokenData]:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         email: str = payload.get("sub")
-        user_id: int = payload.get("user_id")
+        user_id: str = payload.get("user_id")
         role: str = payload.get("role")
         
         if email is None:
@@ -68,4 +100,8 @@ def get_current_user(db: Session, token: str) -> Optional[User]:
     if user is None:
         return None
     
-    return user 
+    return user
+
+def get_user_by_email(db: Session, email: str) -> Optional[User]:
+    """Get user by email"""
+    return user_crud.get_user_by_email(db, email) 

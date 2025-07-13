@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Video,
   MessageCircle,
@@ -17,48 +17,83 @@ import {
   CheckCircle,
   AlertCircle,
 } from 'lucide-react';
-import {
-  mockStudentProfiles,
-  mockStudentClasses,
-  mockTestResults,
-  mockStudentSchedules,
-  mockStudentScores,
-} from '../../data';
+import { useStudentApi } from './_hooks/use-api';
 
 const StudentDashboard = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().getDate());
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [studentProfile, setStudentProfile] = useState<any>(null);
+  const [upcomingClasses, setUpcomingClasses] = useState<any[]>([]);
+  const [recentResults, setRecentResults] = useState<any[]>([]);
+  const [todaySchedule, setTodaySchedule] = useState<any[]>([]);
+  const [upcomingSchedule, setUpcomingSchedule] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Get student profile data
-  const studentProfile = mockStudentProfiles[0];
+  const {
+    loading,
+    error,
+    getStudentDashboard,
+    getStudentClasses,
+    getStudentSchedule,
+    getStudentScores,
+  } = useStudentApi();
 
-  // Get upcoming classes (next 3 classes)
-  const upcomingClasses = mockStudentClasses
-    .filter((cls) => cls.status === 'In Progress')
-    .slice(0, 3);
+  // Fetch student data on component mount
+  useEffect(() => {
+    fetchStudentData();
+  }, []);
 
-  // Get recent test results
-  const recentResults = mockTestResults.slice(0, 3);
+  const fetchStudentData = async () => {
+    try {
+      const [dashboard, classes, schedule, scores] = await Promise.all([
+        getStudentDashboard(),
+        getStudentClasses(),
+        getStudentSchedule(),
+        getStudentScores(),
+      ]);
 
-  // Get today's schedule
-  const today = new Date();
-  const todaySchedule = mockStudentSchedules.filter(
-    (schedule) =>
-      new Date(schedule.date).toDateString() === today.toDateString()
-  );
+      setDashboardData(dashboard);
+      setStudentProfile(dashboard.profile || dashboard.studentProfile);
 
-  // Get upcoming schedule (next 7 days)
-  const upcomingSchedule = mockStudentSchedules
-    .filter((schedule) => {
-      const scheduleDate = new Date(schedule.date);
-      const nextWeek = new Date();
-      nextWeek.setDate(today.getDate() + 7);
-      return (
-        scheduleDate >= today &&
-        scheduleDate <= nextWeek &&
-        schedule.status === 'upcoming'
+      // Get upcoming classes (next 3 classes)
+      const upcoming = classes
+        .filter((cls: any) => cls.status === 'In Progress')
+        .slice(0, 3);
+      setUpcomingClasses(upcoming);
+
+      // Get recent test results
+      const recent = scores.slice(0, 3);
+      setRecentResults(recent);
+
+      // Get today's schedule
+      const today = new Date();
+      const todaySched = schedule.filter(
+        (sched: any) =>
+          new Date(sched.date).toDateString() === today.toDateString()
       );
-    })
-    .slice(0, 5);
+      setTodaySchedule(todaySched);
+
+      // Get upcoming schedule (next 7 days)
+      const upcomingSched = schedule
+        .filter((sched: any) => {
+          const scheduleDate = new Date(sched.date);
+          const nextWeek = new Date();
+          nextWeek.setDate(today.getDate() + 7);
+          return (
+            scheduleDate >= today &&
+            scheduleDate <= nextWeek &&
+            sched.status === 'upcoming'
+          );
+        })
+        .slice(0, 5);
+      setUpcomingSchedule(upcomingSched);
+
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Failed to fetch student data:', err);
+      setIsLoading(false);
+    }
+  };
 
   // Generate calendar days for current month
   const generateCalendarDays = () => {
@@ -102,12 +137,12 @@ const StudentDashboard = () => {
   ];
 
   // Calculate overall progress
-  const overallScore = mockStudentScores
+  const overallScore = studentProfile?.scores
     ? Math.round(
-        (Number(mockStudentScores.listening) +
-          Number(mockStudentScores.speaking) +
-          Number(mockStudentScores.reading) +
-          Number(mockStudentScores.writing)) /
+        (Number(studentProfile.scores.listening) +
+          Number(studentProfile.scores.speaking) +
+          Number(studentProfile.scores.reading) +
+          Number(studentProfile.scores.writing)) /
           4
       )
     : 0;
@@ -121,6 +156,33 @@ const StudentDashboard = () => {
     };
     return levelMap[level] || level;
   };
+
+  if (isLoading) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='flex items-center gap-2'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+          <span className='text-gray-600'>Đang tải dữ liệu...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center'>
+          <p className='text-red-600 mb-2'>Có lỗi xảy ra khi tải dữ liệu</p>
+          <button
+            onClick={fetchStudentData}
+            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
@@ -173,7 +235,7 @@ const StudentDashboard = () => {
                 Lịch hôm nay
               </h2>
               <span className='text-sm text-gray-500'>
-                {today.toLocaleDateString('vi-VN', {
+                {new Date().toLocaleDateString('vi-VN', {
                   weekday: 'long',
                   year: 'numeric',
                   month: 'long',

@@ -21,6 +21,18 @@ def get_scores_by_exam(db: Session, exam_id: UUID) -> List[Score]:
     """Get scores for specific exam"""
     return score_crud.get_scores_by_exam(db, exam_id)
 
+def get_scores_by_classroom(db: Session, classroom_id: UUID) -> List[Score]:
+    """Get scores for specific classroom"""
+    return score_crud.get_scores_by_classroom(db, classroom_id)
+
+def get_scores_by_student_classroom(db: Session, student_id: UUID, classroom_id: UUID) -> List[Score]:
+    """Get scores for specific student in specific classroom"""
+    return score_crud.get_scores_by_student_classroom(db, student_id, classroom_id)
+
+def get_recent_scores_by_student(db: Session, student_id: UUID, limit: int = 5) -> List[Score]:
+    """Get recent scores for specific student"""
+    return score_crud.get_recent_scores_by_student(db, student_id, limit)
+
 def get_score_by_student_exam(db: Session, student_id: UUID, exam_id: UUID) -> Optional[Score]:
     """Get specific score by student and exam"""
     return score_crud.get_score_by_student_exam(db, student_id, exam_id)

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -13,13 +13,28 @@ import {
   Eye,
   Info,
 } from 'lucide-react';
-import { mockStudentSchedules } from '../../../data/student/schedules';
+import { useStudentApi } from '../_hooks/use-api';
 import { StudentSchedule } from '../../../types/student';
 
 const StudyingSchedule: React.FC = () => {
+  const { loading, error, getStudentSchedule } = useStudentApi();
   const [currentWeek, setCurrentWeek] = useState(new Date(2024, 0, 22)); // January 22, 2024
   const [selectedSchedule, setSelectedSchedule] =
     useState<StudentSchedule | null>(null);
+  const [schedules, setSchedules] = useState<StudentSchedule[]>([]);
+
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      try {
+        const schedulesData = await getStudentSchedule();
+        setSchedules(schedulesData);
+      } catch (err) {
+        console.error('Error fetching schedules:', err);
+      }
+    };
+
+    fetchSchedules();
+  }, [getStudentSchedule]);
 
   // Time slots for the timetable
   const timeSlots = [
@@ -86,7 +101,7 @@ const StudyingSchedule: React.FC = () => {
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
 
-    return mockStudentSchedules.filter((schedule) => {
+    return schedules.filter((schedule: StudentSchedule) => {
       const scheduleDate = new Date(schedule.date);
       return scheduleDate >= startOfWeek && scheduleDate <= endOfWeek;
     });
@@ -179,6 +194,20 @@ const StudyingSchedule: React.FC = () => {
   return (
     <div className='min-h-screen bg-gray-50 p-6'>
       <div className='max-w-7xl mx-auto'>
+        {/* Loading state */}
+        {loading && (
+          <div className='flex justify-center items-center py-8'>
+            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+          </div>
+        )}
+
+        {/* Error state */}
+        {error && (
+          <div className='bg-red-50 border border-red-200 rounded-lg p-4 mb-6'>
+            <p className='text-red-800'>{error}</p>
+          </div>
+        )}
+
         {/* Header */}
         <div className='mb-8'>
           <h1 className='text-3xl font-bold text-gray-900 mb-2'>

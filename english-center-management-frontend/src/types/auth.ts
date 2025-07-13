@@ -2,6 +2,8 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  role_name: string;
+  accessToken?: string;
 }
 
 export interface LoginData {
@@ -14,6 +16,12 @@ export interface RegisterData {
   email: string;
   password: string;
   confirmPassword?: string;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
 }
 
 export interface AuthResponse {

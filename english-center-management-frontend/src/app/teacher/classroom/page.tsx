@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Search,
@@ -10,7 +10,7 @@ import {
   Book,
   ChevronDown,
 } from 'lucide-react';
-import { mockClasses, mockStudents } from '../../../data';
+import { useTeacherApi } from '../_hooks/use-api';
 import { ClassData } from '../../../types';
 
 interface Student {
@@ -33,18 +33,21 @@ interface LocalClassData {
 }
 
 const MyClassesDashboard = () => {
-  const stats = [
+  const { loading, error, getTeacherClasses, getTeacherDashboard } =
+    useTeacherApi();
+  const [classes, setClasses] = useState<LocalClassData[]>([]);
+  const [stats, setStats] = useState([
     {
       icon: Book,
       label: 'Total Classes',
-      value: mockClasses.length.toString(),
+      value: '0',
       bgColor: 'bg-blue-50',
       iconColor: 'text-blue-500',
     },
     {
       icon: Users,
       label: 'Total Students',
-      value: mockStudents.length.toString(),
+      value: '0',
       bgColor: 'bg-green-50',
       iconColor: 'text-green-500',
     },
@@ -62,51 +65,83 @@ const MyClassesDashboard = () => {
       bgColor: 'bg-purple-50',
       iconColor: 'text-purple-500',
     },
-  ];
+  ]);
 
-  // Use mock classes data
-  const classes: LocalClassData[] = mockClasses.map(
-    (classItem: ClassData, index: number) => {
-      const levelMap = {
-        beginner: 'Beginner' as const,
-        intermediate: 'Intermediate' as const,
-        advanced: 'Advanced' as const,
-        upper_intermediate: 'Advanced' as const,
-      };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [classesData, dashboardData] = await Promise.all([
+          getTeacherClasses(),
+          getTeacherDashboard(),
+        ]);
 
-      const colorMap = {
-        beginner: 'bg-green-100 text-green-700',
-        intermediate: 'bg-blue-100 text-blue-700',
-        advanced: 'bg-purple-100 text-purple-700',
-        upper_intermediate: 'bg-orange-100 text-orange-700',
-      };
+        // Process classes data
+        const processedClasses: LocalClassData[] = classesData.map(
+          (classItem: ClassData, index: number) => {
+            const levelMap = {
+              beginner: 'Beginner' as const,
+              intermediate: 'Intermediate' as const,
+              advanced: 'Advanced' as const,
+              upper_intermediate: 'Advanced' as const,
+            };
 
-      // Get first 3 students as avatars
-      const studentAvatars = mockStudents
-        .slice(index * 3, index * 3 + 3)
-        .map((student) => ({
-          id: student.id,
-          name: student.name,
-          avatar: student.avatar || '',
-        }));
+            const colorMap = {
+              beginner: 'bg-green-100 text-green-700',
+              intermediate: 'bg-blue-100 text-blue-700',
+              advanced: 'bg-purple-100 text-purple-700',
+              upper_intermediate: 'bg-orange-100 text-orange-700',
+            };
 
-      return {
-        id: classItem.id,
-        title: classItem.name,
-        level:
-          levelMap[classItem.level as keyof typeof levelMap] || 'Intermediate',
-        students: classItem.students,
-        schedule: classItem.schedule.time,
-        room: classItem.room || 'Room 101',
-        building: 'Building A',
-        unit: `Unit ${index + 1}: Course Content`,
-        studentAvatars,
-        levelColor:
-          colorMap[classItem.level as keyof typeof colorMap] ||
-          'bg-blue-100 text-blue-700',
-      };
-    }
-  );
+            // Get first 3 students as avatars
+            const studentAvatars = classItem.students
+              ? Array.from(
+                  { length: Math.min(3, classItem.students) },
+                  (_, i) => ({
+                    id: `student-${i}`,
+                    name: `Student ${i + 1}`,
+                    avatar: '',
+                  })
+                )
+              : [];
+
+            return {
+              id: classItem.id,
+              title: classItem.name,
+              level:
+                levelMap[classItem.level as keyof typeof levelMap] ||
+                'Intermediate',
+              students: classItem.students,
+              schedule: classItem.schedule?.time || 'TBD',
+              room: classItem.room || 'Room 101',
+              building: 'Building A',
+              unit: `Unit ${index + 1}: Course Content`,
+              studentAvatars,
+              levelColor:
+                colorMap[classItem.level as keyof typeof colorMap] ||
+                'bg-blue-100 text-blue-700',
+            };
+          }
+        );
+
+        setClasses(processedClasses);
+
+        // Update stats
+        setStats((prevStats) => [
+          { ...prevStats[0], value: classesData.length.toString() },
+          {
+            ...prevStats[1],
+            value: dashboardData.totalStudents?.toString() || '0',
+          },
+          prevStats[2],
+          prevStats[3],
+        ]);
+      } catch (err) {
+        console.error('Error fetching teacher data:', err);
+      }
+    };
+
+    fetchData();
+  }, [getTeacherClasses, getTeacherDashboard]);
 
   const renderStudentAvatars = (students: Student[], totalCount: number) => {
     const visibleStudents = students.slice(0, 3);
@@ -136,6 +171,20 @@ const MyClassesDashboard = () => {
   return (
     <div className='min-h-screen bg-gray-50 p-6'>
       <div className='max-w-7xl mx-auto'>
+        {/* Loading state */}
+        {loading && (
+          <div className='flex justify-center items-center py-8'>
+            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+          </div>
+        )}
+
+        {/* Error state */}
+        {error && (
+          <div className='bg-red-50 border border-red-200 rounded-lg p-4 mb-6'>
+            <p className='text-red-800'>{error}</p>
+          </div>
+        )}
+
         {/* Header */}
         <div className='flex justify-between items-start mb-8'>
           <div>

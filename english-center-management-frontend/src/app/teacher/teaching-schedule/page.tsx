@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -7,7 +7,7 @@ import {
   Calendar,
   Users,
 } from 'lucide-react';
-import { mockClassSessions } from '../../../data';
+import { useTeacherApi } from '../_hooks/use-api';
 import { ClassSession } from '../../../types';
 
 interface ClassItem {
@@ -24,9 +24,46 @@ interface DaySchedule {
 }
 
 const TeachingSchedule = () => {
-  const currentWeek = 'March 18 - 24, 2024';
+  const { loading, error, getTeachingScheduleDetails } = useTeacherApi();
+  const [sessions, setSessions] = useState<ClassSession[]>([]);
+  const [scheduleDetails, setScheduleDetails] = useState<any>(null);
 
-  const timeSlots = ['8:00 AM', '10:00 AM', '1:00 PM', '3:00 PM', '5:00 PM'];
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const scheduleData = await getTeachingScheduleDetails();
+        setScheduleDetails(scheduleData);
+
+        // Convert schedule data to sessions format
+        const convertedSessions =
+          scheduleData.schedule?.map((item: any, index: number) => ({
+            id: item.id,
+            title: item.classroom_name,
+            room: item.room,
+            time: `${item.time}`,
+            day: item.day,
+            status: item.status,
+          })) || [];
+
+        setSessions(convertedSessions);
+      } catch (err) {
+        console.error('Error fetching sessions:', err);
+      }
+    };
+
+    fetchSessions();
+  }, [getTeachingScheduleDetails]);
+
+  const currentWeek = '18/12/2024 - 24/12/2024';
+
+  const timeSlots = [
+    '08:00 - 09:30',
+    '09:45 - 11:15',
+    '13:30 - 15:00',
+    '15:15 - 16:45',
+    '18:00 - 19:30',
+    '19:45 - 21:15',
+  ];
 
   const days = [
     { name: 'Mon', date: '18' },
@@ -38,7 +75,7 @@ const TeachingSchedule = () => {
     { name: 'Sun', date: '24' },
   ];
 
-  // Generate schedule from mock data
+  // Generate schedule from API data
   const schedule: DaySchedule = {};
 
   // Initialize empty schedule
@@ -49,50 +86,48 @@ const TeachingSchedule = () => {
     });
   });
 
-  // Populate schedule with mock class sessions
-  mockClassSessions
-    .slice(0, 10)
-    .forEach((session: ClassSession, index: number) => {
-      const dayIndex = index % 7;
-      const timeIndex = index % timeSlots.length;
-      const day = days[dayIndex];
-      const timeSlot = timeSlots[timeIndex];
-      const key = `${day.name}-${timeSlot}`;
+  // Populate schedule with class sessions
+  sessions.forEach((session: ClassSession, index: number) => {
+    const dayIndex = index % 7;
+    const timeIndex = index % timeSlots.length;
+    const day = days[dayIndex];
+    const timeSlot = timeSlots[timeIndex];
+    const key = `${day.name}-${timeSlot}`;
 
-      const colors = [
-        { color: 'border-blue-400', bgColor: 'bg-blue-50' },
-        { color: 'border-green-400', bgColor: 'bg-green-50' },
-        { color: 'border-purple-400', bgColor: 'bg-purple-50' },
-        { color: 'border-orange-400', bgColor: 'bg-orange-50' },
-        { color: 'border-red-400', bgColor: 'bg-red-50' },
-      ];
+    const colors = [
+      { color: 'border-blue-400', bgColor: 'bg-blue-50' },
+      { color: 'border-green-400', bgColor: 'bg-green-50' },
+      { color: 'border-purple-400', bgColor: 'bg-purple-50' },
+      { color: 'border-orange-400', bgColor: 'bg-orange-50' },
+      { color: 'border-red-400', bgColor: 'bg-red-50' },
+    ];
 
-      const colorSet = colors[index % colors.length];
+    const colorSet = colors[index % colors.length];
 
-      if (schedule[key]) {
-        schedule[key].push({
-          id: session.id,
-          title: session.title,
-          room: session.room,
-          time: session.time,
-          color: colorSet.color,
-          bgColor: colorSet.bgColor,
-        });
-      }
-    });
+    if (schedule[key]) {
+      schedule[key].push({
+        id: session.id,
+        title: session.title,
+        room: session.room,
+        time: session.time,
+        color: colorSet.color,
+        bgColor: colorSet.bgColor,
+      });
+    }
+  });
 
   const stats = [
     {
       icon: Clock,
       label: 'Tổng giờ',
-      value: mockClassSessions.length.toString(),
+      value: sessions.length.toString(),
       bgColor: 'bg-blue-50',
       iconColor: 'text-blue-500',
     },
     {
       icon: Calendar,
       label: 'Lớp học',
-      value: mockClassSessions.length.toString(),
+      value: sessions.length.toString(),
       bgColor: 'bg-green-50',
       iconColor: 'text-green-500',
     },
@@ -113,6 +148,20 @@ const TeachingSchedule = () => {
   return (
     <div className='min-h-screen bg-gray-50 p-4'>
       <div className='max-w-7xl mx-auto'>
+        {/* Loading state */}
+        {loading && (
+          <div className='flex justify-center items-center py-8'>
+            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+          </div>
+        )}
+
+        {/* Error state */}
+        {error && (
+          <div className='bg-red-50 border border-red-200 rounded-lg p-4 mb-6'>
+            <p className='text-red-800'>{error}</p>
+          </div>
+        )}
+
         {/* Header */}
         <div className='mb-6'>
           <h1 className='text-2xl font-bold text-gray-900 mb-2'>

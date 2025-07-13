@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   User,
@@ -18,6 +18,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { Student, Invoice, Payment } from '../../../../../types';
+import { useStaffApi } from '../../../_hooks/use-api';
 
 interface ViewStudentModalProps {
   isOpen: boolean;
@@ -33,6 +34,33 @@ export default function ViewStudentModal({
   const [activeTab, setActiveTab] = useState<
     'details' | 'achievements' | 'debt'
   >('details');
+  const [achievements, setAchievements] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { getStudentAchievements, getStudentInvoices } = useStaffApi();
+
+  // Fetch student data when modal opens
+  useEffect(() => {
+    if (isOpen && student) {
+      const fetchStudentData = async () => {
+        setLoading(true);
+        try {
+          const [achievementsData, invoicesData] = await Promise.all([
+            getStudentAchievements(student.id),
+            getStudentInvoices(student.id),
+          ]);
+          setAchievements(achievementsData);
+          setInvoices(invoicesData);
+        } catch (error) {
+          console.error('Error fetching student data:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchStudentData();
+    }
+  }, [isOpen, student, getStudentAchievements, getStudentInvoices]);
 
   if (!isOpen || !student) return null;
 
@@ -126,54 +154,9 @@ export default function ViewStudentModal({
     }
   };
 
-  // Mock data for achievements and debt (replace with real data later)
-  const mockAchievements = [
-    {
-      id: '1',
-      courseName: 'Tiếng Anh Cơ bản A1',
-      testType: 'final',
-      date: '2024-01-15',
-      overall: 85,
-      gradeLevel: 'A',
-      teacherName: 'Nguyễn Thị Hoa',
-    },
-    {
-      id: '2',
-      courseName: 'Tiếng Anh Trung cấp B1',
-      testType: 'midterm',
-      date: '2024-02-20',
-      overall: 78,
-      gradeLevel: 'B',
-      teacherName: 'Trần Văn Minh',
-    },
-  ];
-
-  const mockInvoices = [
-    {
-      id: '1',
-      studentId: student.studentId,
-      amount: 5000000,
-      paidAmount: 3000000,
-      remainingAmount: 2000000,
-      paymentStatus: 'partial',
-      dueDate: '2024-03-15',
-      invoiceNumber: 'INV-2024-001',
-      description: 'Học phí khóa học Tiếng Anh Cơ bản',
-      createdAt: '2024-01-01',
-    },
-    {
-      id: '2',
-      studentId: student.studentId,
-      amount: 3000000,
-      paidAmount: 0,
-      remainingAmount: 3000000,
-      paymentStatus: 'pending',
-      dueDate: '2024-04-15',
-      invoiceNumber: 'INV-2024-002',
-      description: 'Học phí khóa học Tiếng Anh Trung cấp',
-      createdAt: '2024-02-01',
-    },
-  ];
+  // Student achievements and invoices data
+  const studentAchievements = achievements;
+  const studentInvoices = invoices;
 
   const renderDetailsTab = () => (
     <div className='space-y-6'>
@@ -392,9 +375,9 @@ export default function ViewStudentModal({
           <span>Thành tích học tập</span>
         </h3>
 
-        {mockAchievements.length > 0 ? (
+        {studentAchievements.length > 0 ? (
           <div className='space-y-4'>
-            {mockAchievements.map((achievement) => (
+            {studentAchievements.map((achievement) => (
               <div
                 key={achievement.id}
                 className='bg-white rounded-lg p-4 border border-gray-200'
@@ -466,7 +449,7 @@ export default function ViewStudentModal({
 
         {mockInvoices.length > 0 ? (
           <div className='space-y-4'>
-            {mockInvoices.map((invoice) => (
+            {studentInvoices.map((invoice) => (
               <div
                 key={invoice.id}
                 className='bg-white rounded-lg p-4 border border-gray-200'

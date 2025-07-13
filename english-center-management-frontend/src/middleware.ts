@@ -1,8 +1,17 @@
 import { withAuth } from 'next-auth/middleware';
+import { NextResponse } from 'next/server';
 
 export default withAuth(
   function middleware(req) {
     console.log('Token:', req.nextauth.token);
+
+    const { pathname } = req.nextUrl;
+    const token = req.nextauth.token;
+
+    // Nếu có token và đang ở trang auth, redirect về trang chủ
+    if (token && pathname.startsWith('/auth')) {
+      return NextResponse.redirect(new URL('/', req.url));
+    }
   },
   {
     callbacks: {
@@ -11,13 +20,12 @@ export default withAuth(
         const { pathname } = req.nextUrl;
 
         // Cho phép truy cập các route public
-        if (pathname.startsWith('/auth') || pathname === '/') {
+        if ((pathname.startsWith('/auth') || pathname === '/') && !token) {
           return true;
         }
 
         // Yêu cầu authentication cho các route khác
-        // return !!token;
-        return true;
+        return !!token;
       },
     },
   }
@@ -25,9 +33,10 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/profile/:path*',
-    '/settings/:path*',
-    // Thêm các protected routes khác ở đây
+    '/admin/:path*',
+    '/staff/:path*',
+    '/teacher/:path*',
+    '/student/:path*',
+    '/auth/:path*',
   ],
 };

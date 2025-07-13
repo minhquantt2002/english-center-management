@@ -25,6 +25,14 @@ def get_classrooms_by_student(db: Session, student_id: UUID) -> List[Class]:
     """Get classrooms where student is enrolled"""
     return classroom_crud.get_classrooms_by_student(db, student_id)
 
+def get_upcoming_classes_by_student(db: Session, student_id: UUID) -> List[Class]:
+    """Get upcoming classes for student"""
+    return classroom_crud.get_upcoming_classes_by_student(db, student_id)
+
+def get_upcoming_classes_by_teacher(db: Session, teacher_id: UUID) -> List[Class]:
+    """Get upcoming classes for teacher"""
+    return classroom_crud.get_upcoming_classes_by_teacher(db, teacher_id)
+
 def create_classroom(db: Session, classroom_data: ClassroomCreate) -> Class:
     """Create new classroom"""
     return classroom_crud.create_classroom(db, classroom_data)
@@ -39,4 +47,8 @@ def delete_classroom(db: Session, classroom_id: UUID) -> bool:
 
 def count_total_classrooms(db: Session) -> int:
     """Count total classrooms"""
+    return classroom_crud.count_total_classrooms(db)
+
+def count_classrooms(db: Session) -> int:
+    """Count total classrooms (alias for count_total_classrooms)"""
     return classroom_crud.count_total_classrooms(db) 

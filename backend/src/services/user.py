@@ -47,3 +47,7 @@ def count_total_users(db: Session) -> int:
 def count_users_by_role(db: Session, role_name: str) -> int:
     """Count users by role name"""
     return user_crud.count_users_by_role(db, role_name)
+
+def update_user_role(db: Session, user_id: UUID, new_role: str) -> Optional[User]:
+    """Update user role"""
+    return user_crud.update_user_role(db, user_id, new_role)

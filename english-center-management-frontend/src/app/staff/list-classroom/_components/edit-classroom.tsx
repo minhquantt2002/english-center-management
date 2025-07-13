@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, Users, MapPin, User } from 'lucide-react';
 import { ClassData } from '@/types';
-import { mockRooms } from '@/data/common/rooms';
+import { useStaffApi } from '../../_hooks/use-api';
 
 interface EditClassroomModalProps {
   isOpen: boolean;
@@ -40,15 +40,6 @@ const courseLevels = [
   { value: 'proficiency', label: 'Thành thạo' },
 ];
 
-// Mock teachers data
-const mockTeachers = [
-  { id: 'teacher_1', name: 'Nguyễn Thị Anh', avatar: '/avatars/teacher1.jpg' },
-  { id: 'teacher_2', name: 'Trần Văn Bình', avatar: '/avatars/teacher2.jpg' },
-  { id: 'teacher_3', name: 'Lê Thị Cẩm', avatar: '/avatars/teacher3.jpg' },
-  { id: 'teacher_4', name: 'Phạm Văn Dũng', avatar: '/avatars/teacher4.jpg' },
-  { id: 'teacher_5', name: 'Hoàng Thị Em', avatar: '/avatars/teacher5.jpg' },
-];
-
 export default function EditClassroomModal({
   isOpen,
   onClose,
@@ -67,6 +58,33 @@ export default function EditClassroomModal({
   });
 
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [teachers, setTeachers] = useState<any[]>([]);
+  const [rooms, setRooms] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { getTeachers, getRooms } = useStaffApi();
+
+  // Fetch data for dropdowns
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [teachersData, roomsData] = await Promise.all([
+          getTeachers(),
+          getRooms(),
+        ]);
+        setTeachers(teachersData);
+        setRooms(roomsData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchData();
+    }
+  }, [isOpen, getTeachers, getRooms]);
 
   useEffect(() => {
     if (classroom) {
@@ -121,7 +139,7 @@ export default function EditClassroomModal({
   };
 
   const handleTeacherChange = (teacherId: string) => {
-    const teacher = mockTeachers.find((t) => t.id === teacherId);
+    const teacher = teachers.find((t) => t.id === teacherId);
     if (teacher) {
       setFormData((prev) => ({
         ...prev,
@@ -217,7 +235,7 @@ export default function EditClassroomModal({
                 required
               >
                 <option value=''>Chọn giáo viên</option>
-                {mockTeachers.map((teacher) => (
+                {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
                     {teacher.name}
                   </option>
@@ -294,7 +312,7 @@ export default function EditClassroomModal({
                 required
               >
                 <option value=''>Chọn phòng học</option>
-                {mockRooms
+                {rooms
                   .filter(
                     (room) =>
                       room.status === 'available' || room.status === 'occupied'

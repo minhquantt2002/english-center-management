@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Calendar, X } from 'lucide-react';
-import { mockTeachers } from '../../../data';
 import { Teacher } from '../../../types';
 import TeachingScheduleModal from './_components/teaching-schedule-modal';
+import { useStaffApi } from '../_hooks/use-api';
 
 export default function TeacherManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -12,30 +12,60 @@ export default function TeacherManagement() {
   const [subjectFilter, setSubjectFilter] = useState('Tất cả môn học');
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Use mock teachers data
-  const teachers = mockTeachers.map((teacher: Teacher, index: number) => ({
-    id: teacher.id,
-    name: teacher.name,
-    role: teacher.experience
-      ? `${teacher.experience} năm kinh nghiệm`
-      : 'Giáo viên',
-    phone: teacher.phone || 'N/A',
-    email: teacher.email,
-    subject: teacher.specialization,
-    subjectColor:
-      index % 2 === 0
-        ? 'bg-blue-100 text-blue-800'
-        : 'bg-purple-100 text-purple-800',
-    level: 'A1 - C1', // Default level range
-    levelColor: 'bg-green-100 text-green-800',
-  }));
+  const { loading, error, getTeachers, getTeacherSchedule } = useStaffApi();
 
-  const handleSchedule = (teacherId: string) => {
-    const teacher = mockTeachers.find((t) => t.id === teacherId);
-    if (teacher) {
-      setSelectedTeacher(teacher);
-      setShowScheduleModal(true);
+  // Fetch teachers on component mount
+  useEffect(() => {
+    fetchTeachers();
+  }, []);
+
+  const fetchTeachers = async () => {
+    try {
+      const data = await getTeachers();
+      setTeachers(data);
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Failed to fetch teachers:', err);
+      setIsLoading(false);
+    }
+  };
+
+  // Use teachers data from API
+  const teachersWithDisplay = teachers.map(
+    (teacher: Teacher, index: number) => ({
+      id: teacher.id,
+      name: teacher.name,
+      role: teacher.experience
+        ? `${teacher.experience} năm kinh nghiệm`
+        : 'Giáo viên',
+      phone: teacher.phone || 'N/A',
+      email: teacher.email,
+      subject: teacher.specialization,
+      subjectColor:
+        index % 2 === 0
+          ? 'bg-blue-100 text-blue-800'
+          : 'bg-purple-100 text-purple-800',
+      level: 'A1 - C1', // Default level range
+      levelColor: 'bg-green-100 text-green-800',
+    })
+  );
+
+  const handleSchedule = async (teacherId: string) => {
+    try {
+      const teacher = teachers.find((t) => t.id === teacherId);
+      if (teacher) {
+        const schedule = await getTeacherSchedule(teacherId);
+        setSelectedTeacher({ ...teacher, schedule } as Teacher & {
+          schedule: any;
+        });
+        setShowScheduleModal(true);
+      }
+    } catch (error) {
+      console.error('Error fetching teacher schedule:', error);
+      alert('Có lỗi xảy ra khi tải lịch giảng dạy!');
     }
   };
 
@@ -44,20 +74,42 @@ export default function TeacherManagement() {
     setSelectedTeacher(null);
   };
 
-  // Filter teachers based on search and filters
-  const filteredTeachers = teachers.filter((teacher) => {
+  const filteredTeachers = teachersWithDisplay.filter((teacher) => {
     const matchesSearch =
       teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.phone.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesLevel =
-      levelFilter === 'Tất cả trình độ' || teacher.level === levelFilter;
+      teacher.subject.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLevel = levelFilter === 'Tất cả trình độ';
     const matchesSubject =
       subjectFilter === 'Tất cả môn học' || teacher.subject === subjectFilter;
-
     return matchesSearch && matchesLevel && matchesSubject;
   });
+
+  if (isLoading) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='flex items-center gap-2'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+          <span className='text-gray-600'>Đang tải dữ liệu...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center'>
+          <p className='text-red-600 mb-2'>Có lỗi xảy ra khi tải dữ liệu</p>
+          <button
+            onClick={fetchTeachers}
+            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen bg-gray-50'>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   User,
   Book,
@@ -9,8 +9,8 @@ import {
   CreditCard,
   FileText,
 } from 'lucide-react';
-import { mockStudents, mockCourses, mockClasses } from '../../../data';
 import Link from 'next/link';
+import { useStaffApi } from '../_hooks/use-api';
 
 export default function CreateInvoicePage() {
   const [selectedStudent, setSelectedStudent] = useState('');
@@ -19,25 +19,100 @@ export default function CreateInvoicePage() {
   const [tuitionFee, setTuitionFee] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [notes, setNotes] = useState('');
+  const [students, setStudents] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [classrooms, setClassrooms] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Use mock data
-  const students = mockStudents.slice(0, 5).map((student) => student.name);
-  const courses = mockCourses.map((course) => course.name);
-  const classes = mockClasses.map(
-    (classItem) => `${classItem.id} (${classItem.schedule.time})`
-  );
+  const {
+    loading,
+    error,
+    getStudents,
+    getCourses,
+    getClassrooms,
+    createInvoice,
+  } = useStaffApi();
 
-  const handleSubmit = () => {
-    console.log('Creating invoice with data:', {
-      selectedStudent,
-      selectedCourse,
-      selectedClass,
-      tuitionFee,
-      paymentMethod,
-      notes,
-    });
-    // Handle form submission here
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [studentsData, coursesData, classroomsData] = await Promise.all([
+        getStudents(),
+        getCourses(),
+        getClassrooms(),
+      ]);
+
+      setStudents(studentsData.slice(0, 5).map((student: any) => student.name));
+      setCourses(coursesData.map((course: any) => course.name));
+      setClassrooms(
+        classroomsData.map(
+          (classItem: any) => `${classItem.id} (${classItem.schedule.time})`
+        )
+      );
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Failed to fetch data:', err);
+      setIsLoading(false);
+    }
   };
+
+  const handleSubmit = async () => {
+    try {
+      const invoiceData = {
+        studentId: selectedStudent,
+        courseId: selectedCourse,
+        classId: selectedClass,
+        tuitionFee: parseFloat(tuitionFee),
+        paymentMethod,
+        notes,
+      };
+
+      await createInvoice(invoiceData);
+      alert('Hóa đơn đã được tạo thành công!');
+
+      // Reset form
+      setSelectedStudent('');
+      setSelectedCourse('');
+      setSelectedClass('');
+      setTuitionFee('');
+      setPaymentMethod('cash');
+      setNotes('');
+    } catch (error) {
+      console.error('Error creating invoice:', error);
+      alert('Có lỗi xảy ra khi tạo hóa đơn!');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='flex items-center gap-2'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+          <span className='text-gray-600'>Đang tải dữ liệu...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center'>
+          <p className='text-red-600 mb-2'>Có lỗi xảy ra khi tải dữ liệu</p>
+          <button
+            onClick={fetchData}
+            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen bg-gray-50'>
@@ -111,7 +186,7 @@ export default function CreateInvoicePage() {
                 required
               >
                 <option value=''>-- Chọn lớp --</option>
-                {classes.map((classItem, index) => (
+                {classrooms.map((classItem, index) => (
                   <option key={index} value={classItem}>
                     {classItem}
                   </option>

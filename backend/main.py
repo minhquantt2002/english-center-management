@@ -23,7 +23,7 @@ app.add_middleware(
 init_dependencies()
 
 # Include API routes
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router)
 
 if __name__ == "__main__":
     import uvicorn

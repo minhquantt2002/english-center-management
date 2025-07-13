@@ -2,25 +2,21 @@ from typing import Optional
 from datetime import datetime, date
 from uuid import UUID
 from .base import BaseSchema
+from .user import UserBase, UserCreate, UserUpdate, UserResponse
 
-class StudentBase(BaseSchema):
-    user_id: UUID
-    level: Optional[str] = None
-    phone: Optional[str] = None
-    address: Optional[str] = None
-    parent_name: Optional[str] = None
-    parent_phone: Optional[str] = None
+class StudentBase(UserBase):
+    # Student specific fields are already in UserBase
+    student_id: Optional[str] = None  # Student ID for frontend compatibility
 
-class StudentCreate(StudentBase):
-    pass
+class StudentCreate(UserCreate):
+    # Ensure role_name is set to student
+    role_name: str = "student"
+    student_id: Optional[str] = None
 
-class StudentUpdate(BaseSchema):
-    level: Optional[str] = None
-    phone: Optional[str] = None
-    address: Optional[str] = None
-    parent_name: Optional[str] = None
-    parent_phone: Optional[str] = None
+class StudentUpdate(UserUpdate):
+    # Student specific fields are already in StudentUpdate
+    student_id: Optional[str] = None
 
-class StudentResponse(StudentBase):
-    id: UUID
-    created_at: datetime
+class StudentResponse(UserResponse):
+    # Student specific fields are already in UserResponse
+    student_id: Optional[str] = None

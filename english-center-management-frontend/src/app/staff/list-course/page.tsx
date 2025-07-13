@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Search,
   BookOpen,
@@ -10,15 +10,29 @@ import {
   MessageCircle,
   Award,
 } from 'lucide-react';
-import { mockCourses } from '../../../data';
+import { useStaffApi } from '../_hooks/use-api';
 import { Course } from '../../../types';
 
 export default function CourseManagement() {
+  const { loading, error, getCourses } = useStaffApi();
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState('all');
+  const [courses, setCourses] = useState<Course[]>([]);
 
-  // Use mock courses data
-  const courses = mockCourses.map((course: Course, index: number) => ({
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const coursesData = await getCourses();
+        setCourses(coursesData);
+      } catch (err) {
+        console.error('Error fetching courses:', err);
+      }
+    };
+
+    fetchCourses();
+  }, [getCourses]);
+
+  const processedCourses = courses.map((course: Course, index: number) => ({
     id: course.id,
     title: course.name,
     description: course.description,
@@ -66,7 +80,7 @@ export default function CourseManagement() {
     }
   };
 
-  const filteredCourses = courses.filter((course) => {
+  const filteredCourses = processedCourses.filter((course) => {
     const matchesSearch =
       course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       course.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -89,6 +103,20 @@ export default function CourseManagement() {
             Danh sách khóa học
           </h2>
         </div>
+
+        {/* Loading state */}
+        {loading && (
+          <div className='flex justify-center items-center py-8'>
+            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600'></div>
+          </div>
+        )}
+
+        {/* Error state */}
+        {error && (
+          <div className='bg-red-50 border border-red-200 rounded-lg p-4 mb-6'>
+            <p className='text-red-800'>{error}</p>
+          </div>
+        )}
 
         {/* Filters */}
         <div className='flex gap-4 mb-6'>

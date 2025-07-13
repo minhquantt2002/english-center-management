@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Search, Users, Check } from 'lucide-react';
 import { Student } from '../../../../../types';
+import { useStaffApi } from '../../../_hooks/use-api';
 
 interface AssignStudentModalProps {
   isOpen: boolean;
@@ -24,84 +25,28 @@ export default function AssignStudentModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [availableStudents, setAvailableStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const { getAvailableStudents, loading, error } = useStaffApi();
 
-  // Mock data - replace with actual API call
+  // Fetch available students from API
   useEffect(() => {
-    const mockStudents: Student[] = [
-      {
-        id: '1',
-        studentId: 'ST001',
-        name: 'Nguyễn Văn An',
-        email: 'an.nguyen@email.com',
-        phone: '0123456789',
-        dateOfBirth: '2005-03-15',
-        level: 'intermediate',
-        currentClass: '',
-        enrollmentDate: '2024-01-15',
-        role: 'student',
-        status: 'active',
-      },
-      {
-        id: '2',
-        studentId: 'ST002',
-        name: 'Trần Thị Bình',
-        email: 'binh.tran@email.com',
-        phone: '0987654321',
-        dateOfBirth: '2006-07-22',
-        level: 'elementary',
-        currentClass: '',
-        enrollmentDate: '2024-02-01',
-        role: 'student',
-        status: 'active',
-      },
-      {
-        id: '3',
-        studentId: 'ST003',
-        name: 'Lê Hoàng Cường',
-        email: 'cuong.le@email.com',
-        phone: '0369852147',
-        dateOfBirth: '2004-11-08',
-        level: 'advanced',
-        currentClass: 'Lớp A1',
-        enrollmentDate: '2023-09-10',
-        role: 'student',
-        status: 'active',
-      },
-      {
-        id: '4',
-        studentId: 'ST004',
-        name: 'Phạm Thị Dung',
-        email: 'dung.pham@email.com',
-        phone: '0521478963',
-        dateOfBirth: '2005-05-30',
-        level: 'beginner',
-        currentClass: '',
-        enrollmentDate: '2024-03-05',
-        role: 'student',
-        status: 'active',
-      },
-      {
-        id: '5',
-        studentId: 'ST005',
-        name: 'Hoàng Văn Em',
-        email: 'em.hoang@email.com',
-        phone: '0741258963',
-        dateOfBirth: '2006-01-12',
-        level: 'upper-intermediate',
-        currentClass: 'Lớp B2',
-        enrollmentDate: '2023-12-20',
-        role: 'student',
-        status: 'active',
-      },
-    ];
+    const fetchAvailableStudents = async () => {
+      try {
+        const students = await getAvailableStudents();
+        // Filter out students already in this classroom
+        const available = students.filter(
+          (student: Student) => !existingStudentIds.includes(student.id)
+        );
+        setAvailableStudents(available);
+        setFilteredStudents(available);
+      } catch (err) {
+        console.error('Error fetching available students:', err);
+      }
+    };
 
-    // Filter out students already in this classroom
-    const available = mockStudents.filter(
-      (student) => !existingStudentIds.includes(student.id)
-    );
-    setAvailableStudents(available);
-    setFilteredStudents(available);
-  }, [existingStudentIds]);
+    if (isOpen) {
+      fetchAvailableStudents();
+    }
+  }, [isOpen, existingStudentIds, getAvailableStudents]);
 
   // Filter students based on search term
   useEffect(() => {
@@ -220,7 +165,19 @@ export default function AssignStudentModal({
               )}
             </div>
 
-            {filteredStudents.length === 0 ? (
+            {loading ? (
+              <div className='text-center py-8'>
+                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600 mx-auto'></div>
+                <p className='text-gray-600 mt-2'>
+                  Đang tải danh sách học viên...
+                </p>
+              </div>
+            ) : error ? (
+              <div className='text-center py-8 text-red-600'>
+                <p>Có lỗi xảy ra khi tải danh sách học viên</p>
+                <p className='text-sm'>{error}</p>
+              </div>
+            ) : filteredStudents.length === 0 ? (
               <div className='text-center py-8 text-gray-500'>
                 {searchTerm
                   ? 'Không tìm thấy học viên phù hợp'
@@ -248,24 +205,28 @@ export default function AssignStudentModal({
                           </div>
                         </div>
                         <div className='flex items-center space-x-3'>
-                          <div className='w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center'>
-                            <User className='w-5 h-5 text-cyan-600' />
+                          <div className='w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center'>
+                            <User className='w-5 h-5 text-gray-600' />
                           </div>
                           <div>
                             <h4 className='font-medium text-gray-900'>
                               {student.name}
                             </h4>
                             <p className='text-sm text-gray-600'>
-                              {student.email} •{' '}
-                              {student.phone || 'Chưa có số điện thoại'}
+                              {student.email}
                             </p>
-                            <p className='text-xs text-gray-500'>
-                              Trình độ: {student.level}
-                              {student.currentClass &&
-                                ` • Lớp hiện tại: ${student.currentClass}`}
-                            </p>
+                            {student.phone && (
+                              <p className='text-sm text-gray-500'>
+                                {student.phone}
+                              </p>
+                            )}
                           </div>
                         </div>
+                      </div>
+                      <div className='text-right'>
+                        <span className='text-sm text-gray-600'>
+                          {student.studentId}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -274,44 +235,23 @@ export default function AssignStudentModal({
             )}
           </div>
 
-          {/* Selected Count */}
-          {selectedStudentIds.length > 0 && (
-            <div className='bg-cyan-50 border border-cyan-200 rounded-lg p-3'>
-              <p className='text-sm text-cyan-800'>
-                Đã chọn{' '}
-                <span className='font-semibold'>
-                  {selectedStudentIds.length}
-                </span>{' '}
-                học viên
-              </p>
-            </div>
-          )}
-
           {/* Actions */}
-          <div className='flex items-center justify-end space-x-3 pt-6 border-t border-gray-200'>
+          <div className='flex justify-end space-x-3 pt-4 border-t border-gray-200'>
             <button
               type='button'
               onClick={onClose}
-              className='px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors'
+              className='px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors'
             >
               Hủy
             </button>
             <button
               type='submit'
-              disabled={isSubmitting || selectedStudentIds.length === 0}
-              className='px-6 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2'
+              disabled={selectedStudentIds.length === 0 || isSubmitting}
+              className='px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
             >
-              {isSubmitting ? (
-                <>
-                  <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
-                  <span>Đang thêm...</span>
-                </>
-              ) : (
-                <>
-                  <Users className='w-4 h-4' />
-                  <span>Thêm học viên ({selectedStudentIds.length})</span>
-                </>
-              )}
+              {isSubmitting
+                ? 'Đang thêm...'
+                : `Thêm ${selectedStudentIds.length} học viên`}
             </button>
           </div>
         </form>

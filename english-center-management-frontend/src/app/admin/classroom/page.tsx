@@ -1,13 +1,56 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, ChevronDown } from 'lucide-react';
-import { mockClasses } from '../../../data';
-import { ClassData } from '../../../types';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit2, Trash2, ChevronDown, Loader2 } from 'lucide-react';
+import { useClassroomApi } from './_hooks/use-api';
+
+interface Classroom {
+  id: string;
+  name: string;
+  level: string;
+  teacher: {
+    name: string;
+    avatar: string;
+  };
+  students: number;
+  schedule: {
+    days: string;
+    time: string;
+  };
+}
 
 const ClassManagement: React.FC = () => {
   const [levelFilter, setLevelFilter] = useState('All Levels');
   const [teacherFilter, setTeacherFilter] = useState('All Teachers');
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedClassroom, setSelectedClassroom] = useState<Classroom | null>(
+    null
+  );
+
+  const {
+    loading,
+    error,
+    getClassrooms,
+    createClassroom,
+    updateClassroom,
+    deleteClassroom,
+  } = useClassroomApi();
+
+  // Fetch classrooms on component mount
+  useEffect(() => {
+    fetchClassrooms();
+  }, []);
+
+  const fetchClassrooms = async () => {
+    try {
+      const data = await getClassrooms();
+      setClassrooms(data);
+    } catch (err) {
+      console.error('Failed to fetch classrooms:', err);
+    }
+  };
 
   const getLevel = (level: string) => {
     switch (level) {
@@ -24,22 +67,6 @@ const ClassManagement: React.FC = () => {
     }
   };
 
-  // Use mock classes data
-  const classes = mockClasses.map((classItem: ClassData) => ({
-    id: classItem.id,
-    name: classItem.name,
-    level: getLevel(classItem.level),
-    teacher: {
-      name: classItem.teacher.name,
-      avatar: classItem.teacher.avatar,
-    },
-    students: classItem.students,
-    schedule: {
-      days: classItem.schedule.days,
-      time: classItem.schedule.time,
-    },
-  }));
-
   const getLevelBadgeColor = (level: string) => {
     switch (level) {
       case 'Sơ cấp':
@@ -54,16 +81,68 @@ const ClassManagement: React.FC = () => {
   };
 
   const handleAddClass = () => {
-    console.log('Add new class');
+    setShowCreateModal(true);
   };
 
-  const handleEditClass = (classId: string) => {
-    console.log('Edit class:', classId);
+  const handleEditClass = (classroom: Classroom) => {
+    setSelectedClassroom(classroom);
+    setShowEditModal(true);
   };
 
-  const handleDeleteClass = (classId: string) => {
-    console.log('Delete class:', classId);
+  const handleDeleteClass = async (classId: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa lớp học này?')) {
+      try {
+        await deleteClassroom(classId);
+        await fetchClassrooms(); // Refresh the list
+      } catch (err) {
+        console.error('Failed to delete classroom:', err);
+      }
+    }
   };
+
+  const handleCreateClassroom = async (classroomData: any) => {
+    try {
+      await createClassroom(classroomData);
+      setShowCreateModal(false);
+      await fetchClassrooms(); // Refresh the list
+    } catch (err) {
+      console.error('Failed to create classroom:', err);
+    }
+  };
+
+  const handleUpdateClassroom = async (classroomData: any) => {
+    if (!selectedClassroom) return;
+
+    try {
+      await updateClassroom(selectedClassroom.id, classroomData);
+      setShowEditModal(false);
+      setSelectedClassroom(null);
+      await fetchClassrooms(); // Refresh the list
+    } catch (err) {
+      console.error('Failed to update classroom:', err);
+    }
+  };
+
+  // Filter classrooms based on selected filters
+  const filteredClassrooms = classrooms.filter((classroom) => {
+    const levelMatch =
+      levelFilter === 'All Levels' || classroom.level === levelFilter;
+    const teacherMatch =
+      teacherFilter === 'All Teachers' ||
+      classroom.teacher.name === teacherFilter;
+    return levelMatch && teacherMatch;
+  });
+
+  if (loading && classrooms.length === 0) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='flex items-center gap-2'>
+          <Loader2 className='animate-spin' size={24} />
+          <span className='text-gray-600'>Đang tải dữ liệu...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen bg-gray-50 p-6'>
@@ -77,6 +156,13 @@ const ClassManagement: React.FC = () => {
             Quản lý và tổ chức tất cả các lớp học trong hệ thống đào tạo Zenlish
           </p>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className='mb-6 bg-red-50 border border-red-200 rounded-lg p-4'>
+            <p className='text-red-700'>{error}</p>
+          </div>
+        )}
 
         {/* Filters and Add Button */}
         <div className='flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-8'>
@@ -131,9 +217,14 @@ const ClassManagement: React.FC = () => {
           {/* Add Class Button */}
           <button
             onClick={handleAddClass}
-            className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors duration-200 font-medium'
+            disabled={loading}
+            className='bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors duration-200 font-medium'
           >
-            <Plus size={16} />
+            {loading ? (
+              <Loader2 className='animate-spin' size={16} />
+            ) : (
+              <Plus size={16} />
+            )}
             Thêm lớp học
           </button>
         </div>
@@ -154,16 +245,16 @@ const ClassManagement: React.FC = () => {
 
           {/* Table Body */}
           <div className='divide-y divide-gray-200'>
-            {classes.map((classItem) => (
+            {filteredClassrooms.map((classroom) => (
               <div
-                key={classItem.id}
+                key={classroom.id}
                 className='px-6 py-4 hover:bg-gray-50 transition-colors duration-150'
               >
                 <div className='grid grid-cols-12 gap-4 items-center'>
                   {/* Class Name */}
                   <div className='col-span-3'>
                     <p className='font-medium text-gray-900'>
-                      {classItem.name}
+                      {classroom.name}
                     </p>
                   </div>
 
@@ -171,10 +262,10 @@ const ClassManagement: React.FC = () => {
                   <div className='col-span-2'>
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${getLevelBadgeColor(
-                        classItem.level || ''
+                        classroom.level || ''
                       )}`}
                     >
-                      {classItem.level}
+                      {classroom.level}
                     </span>
                   </div>
 
@@ -182,12 +273,12 @@ const ClassManagement: React.FC = () => {
                   <div className='col-span-2'>
                     <div className='flex items-center gap-2'>
                       <img
-                        src={classItem.teacher.avatar}
-                        alt={classItem.teacher.name}
+                        src={classroom.teacher.avatar}
+                        alt={classroom.teacher.name}
                         className='w-8 h-8 rounded-full object-cover'
                       />
                       <span className='text-gray-700'>
-                        {classItem.teacher.name}
+                        {classroom.teacher.name}
                       </span>
                     </div>
                   </div>
@@ -195,7 +286,7 @@ const ClassManagement: React.FC = () => {
                   {/* Students */}
                   <div className='col-span-1'>
                     <span className='text-gray-900 font-medium'>
-                      {classItem.students}
+                      {classroom.students}
                     </span>
                   </div>
 
@@ -203,9 +294,9 @@ const ClassManagement: React.FC = () => {
                   <div className='col-span-3'>
                     <div className='text-sm'>
                       <p className='text-gray-900 font-medium'>
-                        {classItem.schedule.days}
+                        {classroom.schedule.days}
                       </p>
-                      <p className='text-gray-500'>{classItem.schedule.time}</p>
+                      <p className='text-gray-500'>{classroom.schedule.time}</p>
                     </div>
                   </div>
 
@@ -213,15 +304,17 @@ const ClassManagement: React.FC = () => {
                   <div className='col-span-1'>
                     <div className='flex items-center gap-2'>
                       <button
-                        onClick={() => handleEditClass(classItem.id)}
-                        className='p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors duration-150'
+                        onClick={() => handleEditClass(classroom)}
+                        disabled={loading}
+                        className='p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors duration-150 disabled:opacity-50'
                         title='Sửa lớp học'
                       >
                         <Edit2 size={16} />
                       </button>
                       <button
-                        onClick={() => handleDeleteClass(classItem.id)}
-                        className='p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors duration-150'
+                        onClick={() => handleDeleteClass(classroom.id)}
+                        disabled={loading}
+                        className='p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors duration-150 disabled:opacity-50'
                         title='Xóa lớp học'
                       >
                         <Trash2 size={16} />
@@ -235,7 +328,7 @@ const ClassManagement: React.FC = () => {
         </div>
 
         {/* Empty State (if no classes) */}
-        {classes.length === 0 && (
+        {filteredClassrooms.length === 0 && !loading && (
           <div className='bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center'>
             <div className='text-gray-400 mb-4'>
               <Plus size={48} className='mx-auto' />
@@ -248,10 +341,69 @@ const ClassManagement: React.FC = () => {
             </p>
             <button
               onClick={handleAddClass}
-              className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors duration-200'
+              disabled={loading}
+              className='bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-2 rounded-lg transition-colors duration-200'
             >
               Thêm lớp học
             </button>
+          </div>
+        )}
+
+        {/* Create Modal Placeholder */}
+        {showCreateModal && (
+          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+            <div className='bg-white rounded-lg p-6 w-full max-w-md'>
+              <h2 className='text-xl font-bold mb-4'>Tạo lớp học mới</h2>
+              <p className='text-gray-600 mb-4'>
+                Modal tạo lớp học sẽ được implement ở đây
+              </p>
+              <div className='flex gap-2 justify-end'>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className='px-4 py-2 text-gray-600 hover:text-gray-800'
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
+                >
+                  Tạo
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Modal Placeholder */}
+        {showEditModal && selectedClassroom && (
+          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+            <div className='bg-white rounded-lg p-6 w-full max-w-md'>
+              <h2 className='text-xl font-bold mb-4'>Sửa lớp học</h2>
+              <p className='text-gray-600 mb-4'>
+                Modal sửa lớp học sẽ được implement ở đây
+              </p>
+              <div className='flex gap-2 justify-end'>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedClassroom(null);
+                  }}
+                  className='px-4 py-2 text-gray-600 hover:text-gray-800'
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedClassroom(null);
+                  }}
+                  className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
+                >
+                  Lưu
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

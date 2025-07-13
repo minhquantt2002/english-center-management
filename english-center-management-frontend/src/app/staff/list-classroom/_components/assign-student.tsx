@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Search, Users, User, Check, AlertCircle } from 'lucide-react';
-import { mockStudents } from '../../../../data';
+import { useStaffApi } from '../../_hooks/use-api';
 import { Student, ClassData } from '../../../../types';
 
 interface AssignStudentModalProps {
@@ -27,18 +27,40 @@ export default function AssignStudentModal({
   const [selectedLevel, setSelectedLevel] = useState('all');
   const [students, setStudents] = useState<StudentWithSelection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingStudents, setIsFetchingStudents] = useState(false);
+
+  const {
+    getAvailableStudents,
+    assignMultipleStudentsToClassroom,
+    loading,
+    error,
+  } = useStaffApi();
 
   // Initialize students with selection state
   useEffect(() => {
-    if (isOpen && classroom) {
-      const studentsWithSelection = mockStudents.map((student) => ({
-        ...student,
-        isSelected: false,
-        isAssigned: false, // This would be determined by backend in real app
-      }));
-      setStudents(studentsWithSelection);
-    }
-  }, [isOpen, classroom]);
+    const fetchStudents = async () => {
+      if (isOpen && classroom) {
+        setIsFetchingStudents(true);
+        try {
+          const availableStudents = await getAvailableStudents();
+          const studentsWithSelection = availableStudents.map(
+            (student: Student) => ({
+              ...student,
+              isSelected: false,
+              isAssigned: false,
+            })
+          );
+          setStudents(studentsWithSelection);
+        } catch (error) {
+          console.error('Error fetching students:', error);
+        } finally {
+          setIsFetchingStudents(false);
+        }
+      }
+    };
+
+    fetchStudents();
+  }, [isOpen, classroom, getAvailableStudents]);
 
   // Filter students based on search and level
   const filteredStudents = students.filter((student) => {
@@ -102,6 +124,23 @@ export default function AssignStudentModal({
 
     setIsLoading(true);
     try {
+      // Assign multiple students at once
+      const result = await assignMultipleStudentsToClassroom(
+        classroom.id,
+        selectedStudentIds
+      );
+
+      // Show success/failure messages
+      if (result.failed_enrollments && result.failed_enrollments.length > 0) {
+        const failedCount = result.failed_enrollments.length;
+        const successCount = result.successful_enrollments.length;
+        alert(
+          `Đã phân công ${successCount} học viên thành công. ${failedCount} học viên không thể phân công.`
+        );
+      } else {
+        alert(`Đã phân công ${selectedStudentIds.length} học viên thành công!`);
+      }
+
       await onAssignStudents(classroom.id, selectedStudentIds);
       onClose();
     } catch (error) {
@@ -196,7 +235,18 @@ export default function AssignStudentModal({
 
         {/* Student List */}
         <div className='flex-1 overflow-y-auto max-h-96'>
-          {filteredStudents.length === 0 ? (
+          {isFetchingStudents ? (
+            <div className='p-8 text-center text-gray-500'>
+              <div className='w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
+              <p>Đang tải danh sách học viên...</p>
+            </div>
+          ) : error ? (
+            <div className='p-8 text-center text-red-500'>
+              <AlertCircle className='w-12 h-12 mx-auto mb-4' />
+              <p>Có lỗi xảy ra khi tải danh sách học viên</p>
+              <p className='text-sm mt-2'>{error}</p>
+            </div>
+          ) : filteredStudents.length === 0 ? (
             <div className='p-8 text-center text-gray-500'>
               <Users className='w-12 h-12 mx-auto mb-4 text-gray-300' />
               <p>Không tìm thấy học viên nào phù hợp</p>
@@ -315,7 +365,9 @@ export default function AssignStudentModal({
               </button>
               <button
                 onClick={handleAssignStudents}
-                disabled={selectedCount === 0 || isLoading}
+                disabled={
+                  selectedCount === 0 || isLoading || isFetchingStudents
+                }
                 className='px-6 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center space-x-2'
               >
                 {isLoading ? (

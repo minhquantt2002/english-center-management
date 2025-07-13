@@ -12,6 +12,18 @@ class UserBase(BaseSchema):
     date_of_birth: Optional[date] = None
     phone_number: Optional[str] = None
     input_level: Optional[str] = None
+    
+    # Teacher specific fields
+    specialization: Optional[str] = None
+    address: Optional[str] = None
+    education: Optional[str] = None
+    experience_years: Optional[int] = None
+    
+    # Student specific fields
+    level: Optional[str] = None
+    parent_name: Optional[str] = None
+    parent_phone: Optional[str] = None
+    student_id: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str
@@ -25,6 +37,18 @@ class UserUpdate(BaseSchema):
     date_of_birth: Optional[date] = None
     phone_number: Optional[str] = None
     input_level: Optional[str] = None
+    
+    # Teacher specific fields
+    specialization: Optional[str] = None
+    address: Optional[str] = None
+    education: Optional[str] = None
+    experience_years: Optional[int] = None
+    
+    # Student specific fields
+    level: Optional[str] = None
+    parent_name: Optional[str] = None
+    parent_phone: Optional[str] = None
+    student_id: Optional[str] = None
 
 class UserResponse(UserBase):
     id: UUID
