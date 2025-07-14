@@ -7,8 +7,6 @@ from .exam import Exam
 from .enrollment import Enrollment
 from .feedback import Feedback
 
-from .achievement import Achievement
-
 __all__ = [
     "User",
     "Course", 
@@ -20,6 +18,4 @@ __all__ = [
     "Exam",
     "Enrollment",
     "Feedback",
-
-    "Achievement"
 ] 

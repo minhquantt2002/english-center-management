@@ -13,7 +13,7 @@ class User(Base):
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)
-    role_name = Column(String(50), nullable=False)  # admin, receptionist, teacher, student
+    role_name = Column(String(50), nullable=False)  # admin, staff, teacher, student
     bio = Column(Text)
     date_of_birth = Column(Date)
     phone_number = Column(String(20))
@@ -26,10 +26,8 @@ class User(Base):
     experience_years = Column(Integer)
     
     # Student specific fields
-    level = Column(String(50))
     parent_name = Column(String(255))
     parent_phone = Column(String(20))
-    student_id = Column(String(50), unique=True)  # Student ID for frontend compatibility
     status = Column(String(50), default="active")  # active, inactive, suspended, graduated
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -49,6 +47,3 @@ class User(Base):
     
     # Feedbacks received by student
     received_feedbacks = relationship("Feedback", foreign_keys="Feedback.student_id", back_populates="student")
-    
-    # Student achievements (if student)
-    achievements = relationship("Achievement", back_populates="student") 

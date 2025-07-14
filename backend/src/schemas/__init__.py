@@ -10,7 +10,6 @@ from .feedback import FeedbackBase, FeedbackCreate, FeedbackUpdate, FeedbackResp
 from .teacher import TeacherBase, TeacherCreate, TeacherUpdate, TeacherResponse
 from .student import StudentBase, StudentCreate, StudentUpdate, StudentResponse
 
-from .achievement import AchievementBase, AchievementCreate, AchievementUpdate, AchievementResponse
 
 __all__ = [
     "UserBase", "UserCreate", "UserUpdate", "UserResponse", "UserInDB",
@@ -24,6 +23,4 @@ __all__ = [
     "FeedbackBase", "FeedbackCreate", "FeedbackUpdate", "FeedbackResponse",
     "TeacherBase", "TeacherCreate", "TeacherUpdate", "TeacherResponse",
     "StudentBase", "StudentCreate", "StudentUpdate", "StudentResponse",
-
-    "AchievementBase", "AchievementCreate", "AchievementUpdate", "AchievementResponse"
 ] 

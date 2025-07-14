@@ -1,103 +1,20 @@
-import { BaseEntity, CourseLevel, UserStatus } from './common';
-
-// Student profile interface
-export interface StudentProfile extends BaseEntity {
-  studentId: string;
-  name: string;
-  email: string;
-  phone?: string;
-  avatar?: string;
-  dateOfBirth?: string;
-  level: CourseLevel;
-  currentClass?: string;
-  enrollmentDate: string;
-  enrollmentStatus: UserStatus;
-  streak?: number;
-  address?: string;
-  emergencyContact?: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
-}
-
-// Personal information form for students
-export interface PersonalInfo {
-  fullName: string;
-  dateOfBirth: string;
-  email: string;
-  phoneNumber: string;
-  currentClass: string;
-  enrollmentStatus: UserStatus;
-  avatar?: string;
-  address?: string;
-  emergencyContact?: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
-}
-
-// Test scores interface
-export interface StudentScores {
-  listening: number | string;
-  speaking: number | string;
-  reading: number | string;
-  writing: number | string;
-}
-
-// Test result interface for students
-export interface TestResult extends BaseEntity {
-  studentId: string;
-  courseId: string;
-  courseName: string;
-  testType: 'quiz' | 'midterm' | 'final' | 'practice';
-  date: string;
-  scores: StudentScores;
-  overall: number;
-  feedback?: string;
-  teacherId: string;
-  teacherName: string;
-  maxScore?: number;
-  gradeLevel?: string; // A, B, C, D, F
-}
-
-// Class information for student view
-export interface StudentClass {
+export interface StudentResponse {
   id: string;
   name: string;
-  level: CourseLevel;
-  teacher: {
-    id: string;
-    name: string;
-    avatar?: string;
-    specialization?: string;
-  };
-  schedule: {
-    days: string;
-    time: string;
-  };
-  room: string;
-  status: 'In Progress' | 'Upcoming' | 'Completed';
-  nextSession?: string;
-  sessionsCompleted?: number;
-  totalSessions?: number;
-  color?: string;
-  bgColor?: string;
-}
-
-// Student schedule interface
-export interface StudentSchedule extends BaseEntity {
-  id: string;
-  title: string;
-  time: string;
-  date: string;
-  day: string;
-  teacher: string;
-  room: string;
-  type: 'class' | 'exam' | 'extra';
-  status: 'upcoming' | 'completed' | 'cancelled';
-  topic?: string;
-  color: string;
-  textColor: string;
+  email: string;
+  role_name: string;
+  bio: string;
+  date_of_birth: string;
+  phone_number: string;
+  input_level: string;
+  specialization: string;
+  address: string;
+  education: string;
+  experience_years: string;
+  level: string;
+  parent_name: string;
+  parent_phone: string;
+  student_id: string;
+  status: string;
+  created_at: string;
 }

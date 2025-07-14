@@ -12,13 +12,15 @@ class Score(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     student_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     exam_id = Column(UUID(as_uuid=True), ForeignKey("exams.id"), nullable=False)
+    
     listening = Column(Float)
     reading = Column(Float)
     speaking = Column(Float)
     writing = Column(Float)
+
     total_score = Column(Float)
-    grade = Column(String(10))  # A, B, C, D, F
-    comments = Column(Text)  # Nhận xét của giáo viên
+    grade = Column(String(10))
+    comments = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships

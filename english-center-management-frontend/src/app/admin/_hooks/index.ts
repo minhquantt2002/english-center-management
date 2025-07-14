@@ -1,9 +1,5 @@
 // Dashboard hooks
-export {
-  useDashboardApi,
-  type DashboardStats,
-  type StatCard,
-} from './use-dashboard';
+export { useDashboardApi } from './use-dashboard';
 
 // Classroom hooks
 export { useClassroomApi } from './use-classroom';

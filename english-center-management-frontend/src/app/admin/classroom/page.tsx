@@ -1,14 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, ChevronDown, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Loader2 } from 'lucide-react';
 import { useClassroomApi } from '../_hooks';
 import { CreateClassroomModal, EditClassroomModal } from './_components';
 import { ClassroomResponse } from '../../../types/classroom';
 
 const ClassManagement: React.FC = () => {
-  const [levelFilter, setLevelFilter] = useState('All Levels');
-  const [teacherFilter, setTeacherFilter] = useState('All Teachers');
   const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -104,26 +102,6 @@ const ClassManagement: React.FC = () => {
     }
   };
 
-  // Get unique teachers for filter
-  const uniqueTeachers = Array.from(
-    new Set(classrooms.map((classroom) => classroom.teacher.name))
-  );
-
-  // Get unique levels for filter
-  const uniqueLevels = Array.from(
-    new Set(classrooms.map((classroom) => classroom.course.level))
-  );
-
-  // Filter classrooms based on selected filters
-  const filteredClassrooms = classrooms.filter((classroom) => {
-    const levelMatch =
-      levelFilter === 'All Levels' || classroom.course.level === levelFilter;
-    const teacherMatch =
-      teacherFilter === 'All Teachers' ||
-      classroom.teacher.name === teacherFilter;
-    return levelMatch && teacherMatch;
-  });
-
   if (loading && classrooms.length === 0) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
@@ -157,58 +135,6 @@ const ClassManagement: React.FC = () => {
 
         {/* Filters and Add Button */}
         <div className='flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-8'>
-          <div className='flex flex-col sm:flex-row gap-4'>
-            {/* Level Filter */}
-            <div className='relative'>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Lọc theo cấp độ
-              </label>
-              <div className='relative'>
-                <select
-                  value={levelFilter}
-                  onChange={(e) => setLevelFilter(e.target.value)}
-                  className='appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px]'
-                >
-                  <option>Tất cả cấp độ</option>
-                  {uniqueLevels.map((level) => (
-                    <option key={level} value={level}>
-                      {level}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown
-                  className='absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400'
-                  size={16}
-                />
-              </div>
-            </div>
-
-            {/* Teacher Filter */}
-            <div className='relative'>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Lọc theo giáo viên
-              </label>
-              <div className='relative'>
-                <select
-                  value={teacherFilter}
-                  onChange={(e) => setTeacherFilter(e.target.value)}
-                  className='appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px]'
-                >
-                  <option>Tất cả giáo viên</option>
-                  {uniqueTeachers.map((teacher) => (
-                    <option key={teacher} value={teacher}>
-                      {teacher}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown
-                  className='absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400'
-                  size={16}
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Add Class Button */}
           <button
             onClick={handleAddClass}
@@ -240,7 +166,7 @@ const ClassManagement: React.FC = () => {
 
           {/* Table Body */}
           <div className='divide-y divide-gray-200'>
-            {filteredClassrooms.map((classroom) => (
+            {classrooms.map((classroom) => (
               <div
                 key={classroom.id}
                 className='px-6 py-4 hover:bg-gray-50 transition-colors duration-150'
@@ -335,7 +261,7 @@ const ClassManagement: React.FC = () => {
         </div>
 
         {/* Empty State (if no classes) */}
-        {filteredClassrooms.length === 0 && !loading && (
+        {classrooms.length === 0 && !loading && (
           <div className='bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center'>
             <div className='text-gray-400 mb-4'>
               <Plus size={48} className='mx-auto' />

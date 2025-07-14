@@ -7,7 +7,6 @@ import {
   Eye,
   Edit,
   Users,
-  Filter,
   Mail,
   Phone,
   BookOpen,
@@ -15,25 +14,22 @@ import {
   GraduationCap,
   AlertCircle,
 } from 'lucide-react';
-import { Student, StudentProfile } from '../../../types';
 import CreateStudentModal, {
   StudentFormData,
 } from './_components/create-student-modal';
 import EditStudentModal from './_components/edit-student-modal';
 import ViewStudentModal from './_components/view-student-modal';
 import { useStaffStudentApi } from '../_hooks';
+import { StudentResponse } from '../../../types';
 
 export default function StudentManagement() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedLevel, setSelectedLevel] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<StudentProfile | null>(
-    null
-  );
-  const [students, setStudents] = useState<Student[]>([]);
+  const [selectedStudent, setSelectedStudent] =
+    useState<StudentResponse | null>(null);
+  const [students, setStudents] = useState<StudentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const { error, getStudents, createStudent, updateStudent } =
@@ -57,22 +53,21 @@ export default function StudentManagement() {
     }
   };
 
-  const studentsWithDisplay = students.map((student: Student) => ({
+  const studentsWithDisplay = students.map((student: StudentResponse) => ({
     id: student.id,
     name: student.name,
-    phone: student.phone || 'N/A',
+    phone: student.phone_number || 'N/A',
     email: student.email,
     level:
       (student.level || 'beginner').charAt(0).toUpperCase() +
       (student.level || 'beginner').slice(1),
     currentClass: student.currentClass || 'Chưa phân lớp',
     status: student.status as 'active' | 'inactive' | 'pending',
-    role: student.role,
-    studentId: student.studentId,
+    role: student.role_name,
+    studentId: student.id,
     enrollmentDate: student.enrollmentDate,
     enrollmentStatus: student.status as 'active' | 'inactive' | 'pending',
-    createdAt: student.createdAt || '2024-01-15T08:00:00Z',
-    updatedAt: student.updatedAt || '2024-01-15T08:00:00Z',
+    createdAt: student.created_at,
   }));
 
   const filteredStudents = studentsWithDisplay.filter((student) => {
@@ -80,12 +75,7 @@ export default function StudentManagement() {
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.studentId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLevel =
-      selectedLevel === 'all' || student.level.toLowerCase() === selectedLevel;
-    const matchesStatus =
-      selectedStatus === 'all' ||
-      (student.status || 'active') === selectedStatus;
-    return matchesSearch && matchesLevel && matchesStatus;
+    return matchesSearch;
   });
 
   const handleCreateStudent = async (studentData: StudentFormData) => {
@@ -333,36 +323,6 @@ export default function StudentManagement() {
             />
           </div>
 
-          {/* Level Filter */}
-          <div className='relative'>
-            <select
-              value={selectedLevel}
-              onChange={(e) => setSelectedLevel(e.target.value)}
-              className='px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent min-w-[150px] appearance-none bg-white'
-            >
-              <option value='all'>Tất cả trình độ</option>
-              <option value='beginner'>Sơ cấp</option>
-              <option value='intermediate'>Trung cấp</option>
-              <option value='advanced'>Cao cấp</option>
-            </select>
-            <Filter className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none' />
-          </div>
-
-          {/* Status Filter */}
-          <div className='relative'>
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className='px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent min-w-[140px] appearance-none bg-white'
-            >
-              <option value='all'>Tất cả trạng thái</option>
-              <option value='active'>Đang học</option>
-              <option value='suspended'>Chờ phân lớp</option>
-              <option value='inactive'>Tạm nghỉ</option>
-            </select>
-            <Filter className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none' />
-          </div>
-
           {/* Add Student Button */}
           <button
             onClick={() => setIsCreateModalOpen(true)}
@@ -491,21 +451,6 @@ export default function StudentManagement() {
             <h3 className='text-lg font-medium text-gray-900 mb-2'>
               Không tìm thấy học viên
             </h3>
-            <p className='text-gray-500 mb-6'>
-              {searchTerm || selectedLevel !== 'all' || selectedStatus !== 'all'
-                ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm'
-                : 'Bắt đầu bằng cách thêm học viên mới'}
-            </p>
-            {!searchTerm &&
-              selectedLevel === 'all' &&
-              selectedStatus === 'all' && (
-                <button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className='px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors'
-                >
-                  Thêm học viên đầu tiên
-                </button>
-              )}
           </div>
         )}
       </div>

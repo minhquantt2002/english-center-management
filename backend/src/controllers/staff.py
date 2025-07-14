@@ -17,7 +17,6 @@ from ..services import enrollment as enrollment_service
 from ..services import schedule as schedule_service
 from ..services import student as student_service
 from ..services import teacher as teacher_service
-from ..services import achievement as achievement_service
 
 router = APIRouter()
 
@@ -612,19 +611,6 @@ async def get_staff_stats(
         "today_schedule": []
     }
     return stats
-
-# Student Achievements and Invoices
-@router.get("/students/{student_id}/achievements")
-async def get_student_achievements(
-    student_id: str,
-    current_user: User = Depends(get_current_staff_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy thành tích học tập của học sinh
-    """
-    achievements = achievement_service.get_achievements_by_student(db, student_id)
-    return achievements
 
 @router.get("/students/{student_id}/invoices")
 async def get_student_invoices(

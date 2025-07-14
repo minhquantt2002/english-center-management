@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 from .controllers import auth, admin, teacher, staff, student
-# from .controllers import users, courses, classes  # Uncomment when these controllers are implemented
 
 api_router = APIRouter()
 
