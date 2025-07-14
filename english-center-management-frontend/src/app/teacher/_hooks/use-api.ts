@@ -1,101 +1,5 @@
 import { useState, useCallback } from 'react';
 import { api } from '../../../lib/api';
-import {
-  TeacherDashboard,
-  ClassSession,
-  StudentInClass,
-  StudentScore,
-  TeachingSchedule,
-  AttendanceEntry,
-  GradeBook,
-} from '../../../types';
-
-// Additional types for API requests and responses
-export interface AttendanceData {
-  sessionId: string;
-  sessionDate: string;
-  attendance: {
-    studentId: string;
-    status: 'present' | 'absent' | 'late' | 'excused';
-    arrivalTime?: string;
-    notes?: string;
-  }[];
-}
-
-export interface ScoreData {
-  studentId: string;
-  testType: 'quiz' | 'midterm' | 'final' | 'assignment';
-  testDate: string;
-  scores: {
-    listening?: number;
-    speaking?: number;
-    reading?: number;
-    writing?: number;
-    grammar?: number;
-    vocabulary?: number;
-  };
-  maxScores?: {
-    listening?: number;
-    speaking?: number;
-    reading?: number;
-    writing?: number;
-    grammar?: number;
-    vocabulary?: number;
-  };
-  comments?: string;
-}
-
-export interface GradesData {
-  assignmentId: string;
-  grades: {
-    studentId: string;
-    score: number;
-    feedback?: string;
-  }[];
-}
-
-export interface ClassDetails {
-  id: string;
-  name: string;
-  level: string;
-  room: string;
-  maxStudents: number;
-  totalStudents: number;
-  currentUnit: string;
-  schedule: {
-    day: string;
-    time: string;
-  };
-  teacher: {
-    id: string;
-    name: string;
-  };
-  status: 'active' | 'completed' | 'cancelled';
-}
-
-export interface StudentData {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  avatar?: string;
-  level: string;
-  status: 'active' | 'inactive';
-  joinDate: string;
-  attendanceRate?: number;
-  averageScore?: number;
-}
-
-export interface ScheduleData {
-  id: string;
-  classId: string;
-  className: string;
-  day: string;
-  time: string;
-  room: string;
-  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
-  topic?: string;
-}
 
 // Teacher API hooks
 export const useTeacherApi = () => {
@@ -364,7 +268,6 @@ export const useTeacherApi = () => {
     createStudentScore,
     updateStudentScore,
     updateGrades,
-
     getTeachingScheduleDetails,
     getClassSchedule,
   };

@@ -810,58 +810,49 @@ async def generate_fake_data_complete(
     Tạo dữ liệu mẫu hoàn chỉnh cho hệ thống (chỉ admin)
     """
     from faker import Faker
-    from datetime import date, timedelta
+    from datetime import date, timedelta, time
     import random
     from ..cruds import user as user_crud
     from ..cruds import course as course_crud
-    from ..cruds import room as room_crud
     from ..cruds import classroom as classroom_crud
     from ..cruds import schedule as schedule_crud
     from ..cruds import enrollment as enrollment_crud
     from ..utils.auth import get_password_hash
+    from ..models.schedule import Weekday, Schedule
+    from ..models.classroom import CourseLevel
     
     fake = Faker(['vi_VN'])
     
     try:
-        # Xóa dữ liệu mẫu trước khi tạo mới để tránh trùng email
-        from fastapi import Request
-        request = None  # Không có request thực, chỉ cần truyền current_user và db
-        # clear_fake_data(current_user, db)
-        
         # 1. Tạo khóa học mẫu
         courses_data = [
             {
                 "course_name": "Tiếng Anh Cơ Bản A1",
                 "description": "Khóa học tiếng Anh cơ bản cho người mới bắt đầu",
-                "duration": 12,
                 "price": 2000000,
                 "level": "A1"
             },
             {
                 "course_name": "Tiếng Anh Sơ Cấp A2",
                 "description": "Khóa học tiếng Anh sơ cấp",
-                "duration": 12,
                 "price": 2200000,
                 "level": "A2"
             },
             {
                 "course_name": "Tiếng Anh Trung Cấp B1",
                 "description": "Khóa học tiếng Anh trung cấp",
-                "duration": 16,
                 "price": 2500000,
                 "level": "B1"
             },
             {
                 "course_name": "Tiếng Anh Trung Cao Cấp B2",
                 "description": "Khóa học tiếng Anh trung cao cấp",
-                "duration": 16,
                 "price": 2800000,
                 "level": "B2"
             },
             {
                 "course_name": "Tiếng Anh Nâng Cao C1",
                 "description": "Khóa học tiếng Anh nâng cao",
-                "duration": 20,
                 "price": 3200000,
                 "level": "C1"
             }
@@ -874,23 +865,16 @@ async def generate_fake_data_complete(
             course = course_crud.create_course(db, course_create)
             created_courses.append(course)
         
-        # 2. Tạo phòng học mẫu
-        rooms_data = [
-            {"name": "Phòng A101", "capacity": 25, "equipment": "Máy chiếu, loa, điều hòa"},
-            {"name": "Phòng A102", "capacity": 25, "equipment": "Máy chiếu, loa, điều hòa"},
-            {"name": "Phòng A103", "capacity": 20, "equipment": "Máy chiếu, loa, điều hòa"},
-            {"name": "Phòng B201", "capacity": 30, "equipment": "Máy chiếu, loa, điều hòa, bảng tương tác"},
-            {"name": "Phòng B202", "capacity": 30, "equipment": "Máy chiếu, loa, điều hòa, bảng tương tác"},
-            {"name": "Phòng Lab 1", "capacity": 20, "equipment": "Máy tính, loa, điều hòa"},
-            {"name": "Phòng Lab 2", "capacity": 20, "equipment": "Máy tính, loa, điều hòa"}
+        # 2. Danh sách phòng học mẫu
+        room_names = [
+            "Phòng A101",
+            "Phòng A102", 
+            "Phòng A103",
+            "Phòng B201",
+            "Phòng B202",
+            "Phòng Lab 1",
+            "Phòng Lab 2"
         ]
-        
-        created_rooms = []
-        for room_data in rooms_data:
-            from ..schemas.room import RoomCreate
-            room_create = RoomCreate(**room_data)
-            room = room_crud.create_room(db, room_create)
-            created_rooms.append(room)
         
         # 3. Tạo giáo viên mẫu
         teachers_data = [
@@ -943,33 +927,52 @@ async def generate_fake_data_complete(
                 "experience_years": 7,
                 "education": "Tiến sĩ Ngôn ngữ học",
                 "phone_number": "0901234571"
-            },
-            {
-                "name": "Hoàng Thị Mai",
-                "email": f"admin@example.com",
-                "password": "123123123",
-                "role_name": "admin",
-                "specialization": "Tiếng Anh Học thuật",
-                "experience_years": 7,
-                "education": "Tiến sĩ Ngôn ngữ học",
-                "phone_number": "0901234567"
             }
         ]
         
         created_teachers = []
         for teacher_data in teachers_data:
+            # Kiểm tra email đã tồn tại chưa
+            existing_user = user_crud.get_user_by_email(db, teacher_data["email"])
+            if existing_user:
+                continue  # Bỏ qua nếu email đã tồn tại
+            
             hashed_password = get_password_hash(teacher_data["password"])
             from ..schemas.user import UserCreate
             user_create = UserCreate(**teacher_data)
             teacher = user_crud.create_user(db, user_create, hashed_password)
             created_teachers.append(teacher)
         
+        # Tạo admin nếu chưa tồn tại
+        admin_email = "admin@example.com"
+        existing_admin = user_crud.get_user_by_email(db, admin_email)
+        if not existing_admin:
+            admin_data = {
+                "name": "Admin User",
+                "email": admin_email,
+                "password": "123123123",
+                "role_name": "admin",
+                "phone_number": "0901234567"
+            }
+            hashed_password = get_password_hash(admin_data["password"])
+            from ..schemas.user import UserCreate
+            user_create = UserCreate(**admin_data)
+            admin = user_crud.create_user(db, user_create, hashed_password)
+            created_teachers.append(admin)
+        
         # 4. Tạo học sinh mẫu
         students_data = []
         for i in range(50):  # Tạo 50 học sinh
+            student_email = fake.unique.email()
+            
+            # Kiểm tra email đã tồn tại chưa
+            existing_user = user_crud.get_user_by_email(db, student_email)
+            if existing_user:
+                continue  # Bỏ qua nếu email đã tồn tại
+            
             student_data = {
                 "name": fake.name(),
-                "email": fake.unique.email(),
+                "email": student_email,
                 "password": "password123",
                 "role_name": "student",
                 "date_of_birth": fake.date_of_birth(minimum_age=8, maximum_age=25),
@@ -987,22 +990,24 @@ async def generate_fake_data_complete(
         
         # 5. Tạo lớp học mẫu
         classrooms_data = []
+        course_levels = [CourseLevel.BEGINNER, CourseLevel.ELEMENTARY, CourseLevel.INTERMEDIATE, CourseLevel.UPPER_INTERMEDIATE, CourseLevel.ADVANCED]
+        
         for i in range(15):  # Tạo 15 lớp học
             course = random.choice(created_courses)
-            teacher = random.choice(created_teachers)
+            teacher = random.choice([t for t in created_teachers if t.role_name == "teacher"])
             start_date = date.today() + timedelta(days=random.randint(-30, 30))
-            # Kiểm tra duration có tồn tại không
-            duration_weeks = getattr(course, 'duration', 12) or 12
-            end_date = start_date + timedelta(weeks=duration_weeks)
+            end_date = start_date + timedelta(weeks=12)
+            course_level = random.choice(course_levels)
+            room_name = random.choice(room_names)
             
             classroom_data = {
                 "class_name": f"{course.course_name} - Lớp {i+1}",
                 "course_id": course.id,
                 "teacher_id": teacher.id,
+                "room": room_name,
+                "course_level": course_level,
                 "start_date": start_date,
-                "end_date": end_date,
-                "max_students": random.randint(15, 25),
-                "description": f"Lớp học {course.course_name} được giảng dạy bởi {teacher.name}"
+                "end_date": end_date
             }
             from ..schemas.classroom import ClassroomCreate
             classroom_create = ClassroomCreate(**classroom_data)
@@ -1010,12 +1015,12 @@ async def generate_fake_data_complete(
             classrooms_data.append(classroom)
         
         # 6. Tạo lịch học mẫu
-        weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+        weekdays = [Weekday.MONDAY, Weekday.TUESDAY, Weekday.WEDNESDAY, Weekday.THURSDAY, Weekday.FRIDAY, Weekday.SATURDAY, Weekday.SUNDAY]
         time_slots = [
-            ("09:00", "10:30"),
-            ("14:00", "15:30"),
-            ("18:00", "19:30"),
-            ("19:30", "21:00")
+            (time(9, 0), time(10, 30)),
+            (time(14, 0), time(15, 30)),
+            (time(18, 0), time(19, 30)),
+            (time(19, 30), time(21, 0))
         ]
         
         schedules_created = 0
@@ -1025,24 +1030,29 @@ async def generate_fake_data_complete(
             for _ in range(num_schedules):
                 weekday = random.choice(weekdays)
                 start_time, end_time = random.choice(time_slots)
-                room = random.choice(created_rooms)
                 
                 schedule_data = {
-                    "class_id": classroom.id,
-                    "room_id": room.id,
                     "weekday": weekday,
                     "start_time": start_time,
-                    "end_time": end_time,
-                    "title": f"Buổi học {weekday}",
-                    "description": f"Lịch học thường xuyên vào {weekday}",
-                    "status": "scheduled"
+                    "end_time": end_time
                 }
                 from ..schemas.schedule import ScheduleCreate
                 schedule_create = ScheduleCreate(**schedule_data)
-                schedule_crud.create_schedule(db, schedule_create)
+                
+                # Tạo schedule với class_id riêng biệt
+                db_schedule = Schedule(
+                    class_id=classroom.id,
+                    weekday=schedule_create.weekday,
+                    start_time=schedule_create.start_time,
+                    end_time=schedule_create.end_time
+                )
+                db.add(db_schedule)
+                db.commit()
+                db.refresh(db_schedule)
                 schedules_created += 1
         
         # 7. Tạo đăng ký học mẫu
+        from ..models.enrollment import Enrollment
         enrollments_created = 0
         for classroom in classrooms_data:
             # Mỗi lớp có 15-20 học sinh đăng ký
@@ -1050,22 +1060,25 @@ async def generate_fake_data_complete(
             selected_students = random.sample(students_data, num_students)
             
             for student in selected_students:
-                enrollment_data = {
-                    "student_id": student.id,
-                    "class_id": classroom.id,
-                    "enrollment_date": fake.date_between(start_date=date.today() - timedelta(days=180), end_date=date.today())
-                }
-                from ..schemas.enrollment import EnrollmentCreate
-                enrollment_create = EnrollmentCreate(**enrollment_data)
-                enrollment_crud.create_enrollment(db, enrollment_create)
+                enrollment_date = fake.date_between(start_date=date.today() - timedelta(days=180), end_date=date.today())
+                
+                # Tạo enrollment với class_id và student_id riêng biệt
+                db_enrollment = Enrollment(
+                    student_id=student.id,
+                    class_id=classroom.id,
+                    enrollment_at=enrollment_date,
+                    status="active"
+                )
+                db.add(db_enrollment)
+                db.commit()
+                db.refresh(db_enrollment)
                 enrollments_created += 1
         
         return {
             "message": "Tạo dữ liệu mẫu hoàn chỉnh thành công!",
             "summary": {
                 "courses_created": len(created_courses),
-                "rooms_created": len(created_rooms),
-                "teachers_created": len(created_teachers),
+                "teachers_created": len([t for t in created_teachers if t.role_name == "teacher"]),
                 "students_created": len(students_data),
                 "classrooms_created": len(classrooms_data),
                 "schedules_created": schedules_created,
@@ -1074,11 +1087,11 @@ async def generate_fake_data_complete(
             "login_credentials": {
                 "admin": {
                     "email": "admin@example.com",
-                    "password": "admin123"
+                    "password": "123123123"
                 },
                 "teachers": [
                     {"email": teacher.email, "password": "password123"} 
-                    for teacher in created_teachers[:3]
+                    for teacher in created_teachers[:3] if teacher.role_name == "teacher"
                 ],
                 "students": [
                     {"email": student.email, "password": "password123"} 

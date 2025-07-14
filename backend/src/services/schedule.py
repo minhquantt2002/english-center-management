@@ -11,7 +11,7 @@ def _schedule_to_dict(schedule: Schedule) -> Dict[str, Any]:
     schedule_dict = {
         "id": schedule.id,
         "class_id": schedule.class_id,
-        "room_id": schedule.room_id,
+        "room": schedule.room,
         "weekday": schedule.weekday,
         "start_time": schedule.start_time,
         "end_time": schedule.end_time,
@@ -20,22 +20,8 @@ def _schedule_to_dict(schedule: Schedule) -> Dict[str, Any]:
         "status": schedule.status,
         "notes": schedule.notes,
         "created_at": schedule.created_at,
-        "room": None,
         "class_": None
     }
-    
-    # Convert room to dict if loaded
-    if schedule.room:
-        schedule_dict["room"] = {
-            "id": schedule.room.id,
-            "name": schedule.room.name,
-            "capacity": schedule.room.capacity,
-            "address": schedule.room.address,
-            "description": schedule.room.description,
-            "equipment": schedule.room.equipment,
-            "status": schedule.room.status,
-            "created_at": schedule.room.created_at
-        }
     
     # Convert class to dict if loaded
     if schedule.class_:
@@ -44,6 +30,7 @@ def _schedule_to_dict(schedule: Schedule) -> Dict[str, Any]:
             "class_name": schedule.class_.class_name,
             "course_id": schedule.class_.course_id,
             "teacher_id": schedule.class_.teacher_id,
+            "room": schedule.class_.room,
             "status": schedule.class_.status,
             "duration": schedule.class_.duration,
             "start_date": schedule.class_.start_date,
@@ -95,9 +82,9 @@ def get_today_schedules_by_teacher(db: Session, teacher_id: UUID) -> List[Dict[s
     schedules = schedule_crud.get_schedules_by_teacher_weekday(db, teacher_id, weekday)
     return [_schedule_to_dict(schedule) for schedule in schedules]
 
-def get_schedules_by_room(db: Session, room_id: UUID) -> List[Dict[str, Any]]:
+def get_schedules_by_room(db: Session, room: str) -> List[Dict[str, Any]]:
     """Get schedules for specific room"""
-    schedules = schedule_crud.get_schedules_by_room(db, room_id)
+    schedules = schedule_crud.get_schedules_by_room(db, room)
     return [_schedule_to_dict(schedule) for schedule in schedules]
 
 def get_schedule_by_classroom_time(

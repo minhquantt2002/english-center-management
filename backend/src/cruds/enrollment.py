@@ -35,7 +35,10 @@ def create_enrollment(db: Session, enrollment_data: EnrollmentCreate) -> Enrollm
     """Create new enrollment"""
     db_enrollment = Enrollment(
         student_id=enrollment_data.student_id,
-        class_id=enrollment_data.class_id
+        class_id=enrollment_data.class_id,
+        enrollment_at=enrollment_data.enrollment_date,
+        status=enrollment_data.status,
+        notes=enrollment_data.notes
     )
     db.add(db_enrollment)
     db.commit()

@@ -3,4 +3,3 @@ export * from './common';
 export * from './admin';
 export * from './staff';
 export * from './student';
-export * from './teacher';

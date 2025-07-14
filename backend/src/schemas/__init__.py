@@ -4,7 +4,7 @@ from .classroom import ClassroomBase, ClassroomCreate, ClassroomUpdate, Classroo
 from .schedule import ScheduleBase, ScheduleCreate, ScheduleUpdate, ScheduleResponse
 from .score import ScoreBase, ScoreCreate, ScoreUpdate, ScoreResponse
 from .exam import ExamBase, ExamCreate, ExamUpdate, ExamResponse
-from .room import RoomBase, RoomCreate, RoomUpdate, RoomResponse
+
 from .enrollment import EnrollmentBase, EnrollmentCreate, EnrollmentResponse
 from .feedback import FeedbackBase, FeedbackCreate, FeedbackUpdate, FeedbackResponse
 from .teacher import TeacherBase, TeacherCreate, TeacherUpdate, TeacherResponse
@@ -19,7 +19,7 @@ __all__ = [
     "ScheduleBase", "ScheduleCreate", "ScheduleUpdate", "ScheduleResponse",
     "ScoreBase", "ScoreCreate", "ScoreUpdate", "ScoreResponse",
     "ExamBase", "ExamCreate", "ExamUpdate", "ExamResponse",
-    "RoomBase", "RoomCreate", "RoomUpdate", "RoomResponse",
+
     "EnrollmentBase", "EnrollmentCreate", "EnrollmentResponse",
     "FeedbackBase", "FeedbackCreate", "FeedbackUpdate", "FeedbackResponse",
     "TeacherBase", "TeacherCreate", "TeacherUpdate", "TeacherResponse",

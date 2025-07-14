@@ -68,8 +68,9 @@ def create_classroom(db: Session, classroom_data: ClassroomCreate) -> Class:
         class_name=classroom_data.class_name,
         course_id=classroom_data.course_id,
         teacher_id=classroom_data.teacher_id,
+        room=classroom_data.room,
         status=classroom_data.status,
-        duration=classroom_data.duration,
+        course_level=classroom_data.course_level,
         start_date=classroom_data.start_date,
         end_date=classroom_data.end_date
     )

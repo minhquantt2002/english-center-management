@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react';
 import { api } from '../../../lib/api';
-import { Course } from '../../../types';
+import { CourseResponse } from '../../../types/course';
 
 export const useStaffCourseApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getCourses = useCallback(async (): Promise<Course[]> => {
+  const getCourses = useCallback(async (): Promise<CourseResponse[]> => {
     setLoading(true);
     setError(null);
     try {

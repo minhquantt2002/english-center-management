@@ -49,7 +49,7 @@ export default function StudentManagement() {
   const fetchStudents = async () => {
     try {
       const data = await getStudents();
-      setStudents(data.data);
+      setStudents(data);
       setIsLoading(false);
     } catch (err) {
       console.error('Failed to fetch students:', err);

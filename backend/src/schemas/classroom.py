@@ -1,22 +1,25 @@
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime, date
 from uuid import UUID
 from .base import BaseSchema
 from .course import CourseResponse
 from .teacher import TeacherResponse
-from ..models.classroom import ClassStatus
+from .schedule import ScheduleCreate, ScheduleResponseInClassroom
+from ..models.classroom import ClassStatus, CourseLevel
 
 class ClassroomBase(BaseSchema):
     class_name: str
     course_id: UUID
     teacher_id: UUID
+    room: Optional[str] = None
+
     status: Optional[ClassStatus] = ClassStatus.ACTIVE
-    duration: Optional[int] = None  # Số buổi hoặc tuần
+    course_level: Optional[CourseLevel] = CourseLevel.BEGINNER
+
+    schedules: List[ScheduleCreate] = []
+
     start_date: Optional[date] = None
     end_date: Optional[date] = None
-    description: Optional[str] = None  # Mô tả lớp học
-    max_students: Optional[int] = None  # Số học sinh tối đa
-    current_students: Optional[int] = 0  # Số học sinh hiện tại
 
 class ClassroomCreate(ClassroomBase):
     pass
@@ -25,16 +28,20 @@ class ClassroomUpdate(BaseSchema):
     class_name: Optional[str] = None
     course_id: Optional[UUID] = None
     teacher_id: Optional[UUID] = None
+    room: Optional[str] = None
+    
     status: Optional[ClassStatus] = None
-    duration: Optional[int] = None
+    course_level: Optional[CourseLevel] = None
+
+    schedules: List[ScheduleCreate] = []
+
     start_date: Optional[date] = None
     end_date: Optional[date] = None
-    description: Optional[str] = None
-    max_students: Optional[int] = None
-    current_students: Optional[int] = None
 
 class ClassroomResponse(ClassroomBase):
     id: UUID
     created_at: datetime
     course: Optional[CourseResponse] = None
-    teacher: Optional[TeacherResponse] = None 
+    teacher: Optional[TeacherResponse] = None
+    schedules: List[ScheduleResponseInClassroom] = []
+    

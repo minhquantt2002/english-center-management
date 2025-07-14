@@ -18,13 +18,14 @@ import {
   Settings,
 } from 'lucide-react';
 import { useStaffClassroomApi, useStaffStudentApi } from '../../_hooks';
-import { ClassData, Student } from '../../../../types';
 import AssignStudentModal from './_components/create-student';
 import ViewStudentModal from './_components/view-student';
 import EditStudentModal from './_components/edit-student';
 import StudyingScheduleModal from './_components/studying-schedule';
 import EditClassroomInfoModal from './_components/edit-classroom-info';
-import Image from 'next/image';
+import { ClassroomResponse } from '../../../../types/classroom';
+import { CourseLevel } from '../../../../types';
+import { UserResponse } from '../../../../types/user';
 
 export default function ClassroomDetailPage() {
   const params = useParams();
@@ -41,13 +42,15 @@ export default function ClassroomDetailPage() {
     getStudents,
   } = useStaffStudentApi();
 
-  const [classroom, setClassroom] = useState<ClassData | null>(null);
-  const [students, setStudents] = useState<Student[]>([]);
+  const [classroom, setClassroom] = useState<ClassroomResponse | null>(null);
+  const [students, setStudents] = useState<UserResponse[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterLevel, setFilterLevel] = useState<string>('all');
+  const [filterLevel, setFilterLevel] = useState<CourseLevel>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<UserResponse | null>(
+    null
+  );
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
@@ -65,8 +68,8 @@ export default function ClassroomDetailPage() {
         // Fetch students for this classroom
         const studentsData = await getStudents();
         const classroomStudents = studentsData.data.filter(
-          (student: Student) =>
-            student.currentClass === classroomData.class_name
+          (student: UserResponse) =>
+            student.current_class === classroomData.class_name
         );
         setStudents(classroomStudents);
       } catch (err) {
@@ -84,7 +87,7 @@ export default function ClassroomDetailPage() {
     const matchesSearch =
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.studentId.toLowerCase().includes(searchTerm.toLowerCase());
+      student.student_id.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesLevel = filterLevel === 'all' || student.level === filterLevel;
 
@@ -94,7 +97,7 @@ export default function ClassroomDetailPage() {
   const handleAssignStudent = async (studentId: string[]) => {
     try {
       // Find the student to assign
-      const studentToAssign = students.filter((student: Student) =>
+      const studentToAssign = students.filter((student: UserResponse) =>
         studentId.includes(student.id)
       );
 
@@ -102,7 +105,7 @@ export default function ClassroomDetailPage() {
         // Update the student's current class
         const updatedStudent = {
           ...studentToAssign,
-          currentClass: classroom?.name || '',
+          currentClass: classroom?.class_name || '',
         };
 
         // Add to students list
@@ -114,7 +117,7 @@ export default function ClassroomDetailPage() {
             prev
               ? {
                   ...prev,
-                  students: prev.students + 1,
+                  current_students: prev.current_students + 1,
                 }
               : null
           );
@@ -129,12 +132,12 @@ export default function ClassroomDetailPage() {
     }
   };
 
-  const handleEditStudent = (student: Student) => {
+  const handleEditStudent = (student: UserResponse) => {
     setSelectedStudent(student);
     setIsEditModalOpen(true);
   };
 
-  const handleSaveStudent = (updatedStudent: Student) => {
+  const handleSaveStudent = (updatedStudent: UserResponse) => {
     setStudents((prev) =>
       prev.map((student) =>
         student.id === updatedStudent.id ? updatedStudent : student
@@ -142,7 +145,7 @@ export default function ClassroomDetailPage() {
     );
   };
 
-  const handleSaveClassroom = (updatedClassroom: ClassData) => {
+  const handleSaveClassroom = (updatedClassroom: ClassroomResponse) => {
     setClassroom(updatedClassroom);
     // In a real app, you would make an API call here to save the changes
     console.log('Classroom updated:', updatedClassroom);
@@ -245,7 +248,7 @@ export default function ClassroomDetailPage() {
           <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 relative'>
             <div className='flex items-center justify-between mb-4'>
               <h1 className='text-3xl font-bold text-gray-900'>
-                {classroom.name}
+                {classroom.class_name}
               </h1>
               <div className='flex items-center space-x-3'>
                 <span
@@ -285,7 +288,9 @@ export default function ClassroomDetailPage() {
                 <div>
                   <p className='text-sm text-gray-600'>Lịch học</p>
                   <p className='font-medium text-gray-900'>
-                    {classroom.schedule?.time || 'Chưa có lịch học'}
+                    {classroom.schedules
+                      ?.map((schedule) => schedule.weekday)
+                      .join(', ') || 'Chưa có lịch học'}
                   </p>
                 </div>
               </div>
@@ -305,7 +310,8 @@ export default function ClassroomDetailPage() {
                 <div>
                   <p className='text-sm text-gray-600'>Sĩ số</p>
                   <p className='font-medium text-gray-900'>
-                    {classroom.students}/{classroom.maxStudents || 20} học viên
+                    {/* {classroom.current_students}/{classroom.max_students || 20}{' '} */}
+                    100 học viên
                   </p>
                 </div>
               </div>
@@ -353,7 +359,7 @@ export default function ClassroomDetailPage() {
 
               <select
                 value={filterLevel}
-                onChange={(e) => setFilterLevel(e.target.value)}
+                onChange={(e) => setFilterLevel(e.target.value as CourseLevel)}
                 className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
               >
                 <option value='all'>Tất cả trình độ</option>
@@ -409,12 +415,9 @@ export default function ClassroomDetailPage() {
                     <tr key={student.id} className='hover:bg-gray-50'>
                       <td className='px-6 py-4 whitespace-nowrap'>
                         <div className='flex items-center'>
-                          <Image
+                          <img
                             className='h-10 w-10 rounded-full'
-                            src={
-                              student.avatar ||
-                              `https://ui-avatars.com/api/?name=${student.name}&background=0D9488&color=fff`
-                            }
+                            src={`https://ui-avatars.com/api/?name=${student.name}&background=0D9488&color=fff`}
                             alt={student.name}
                           />
                           <div className='ml-4'>
@@ -428,7 +431,7 @@ export default function ClassroomDetailPage() {
                         </div>
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                        {student.studentId}
+                        {student.student_id}
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap'>
                         <span
@@ -443,20 +446,20 @@ export default function ClassroomDetailPage() {
                         <div className='text-sm text-gray-900'>
                           <div className='flex items-center space-x-1'>
                             <Phone className='w-3 h-3 text-gray-400' />
-                            <span>{student.phone}</span>
+                            <span>{student.phone_number}</span>
                           </div>
-                          {student.parentContact && (
+                          {student.parent_contact && (
                             <div className='flex items-center space-x-1 mt-1'>
                               <Mail className='w-3 h-3 text-gray-400' />
                               <span className='text-xs text-gray-500'>
-                                PH: {student.parentContact}
+                                PH: {student.parent_contact}
                               </span>
                             </div>
                           )}
                         </div>
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                        {new Date(student.enrollmentDate).toLocaleDateString(
+                        {new Date(student.enrollment_at).toLocaleDateString(
                           'vi-VN'
                         )}
                       </td>
@@ -496,7 +499,7 @@ export default function ClassroomDetailPage() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onAssign={handleAssignStudent}
-        classroomName={classroom?.name || ''}
+        classroomName={classroom?.class_name || ''}
         existingStudentIds={students.map((student) => student.id)}
       />
 

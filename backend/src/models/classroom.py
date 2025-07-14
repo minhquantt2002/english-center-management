@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Enum, Text
+from sqlalchemy import Column, String, Date, DateTime, ForeignKey, Enum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -12,6 +12,13 @@ class ClassStatus(enum.Enum):
     COMPLETED = "completed"
     CANCELLED = "cancelled"
 
+class CourseLevel(enum.Enum):
+    BEGINNER = "beginner"
+    ELEMENTARY = "elementary" 
+    INTERMEDIATE = "intermediate"
+    UPPER_INTERMEDIATE = "upper-intermediate"
+    ADVANCED = "advanced"
+    PROFICIENCY = "proficiency"
 
 class Class(Base):
     __tablename__ = "classes"
@@ -20,13 +27,14 @@ class Class(Base):
     class_name = Column(String(255), nullable=False)
     course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id"), nullable=False)
     teacher_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    room = Column(String(255)) 
+
+    course_level = Column(Enum(CourseLevel), nullable=False, default=CourseLevel.BEGINNER)
     status = Column(Enum(ClassStatus), nullable=False, default=ClassStatus.ACTIVE)
-    duration = Column(Integer)  # Số buổi hoặc tuần
+    
     start_date = Column(Date)
     end_date = Column(Date)
-    description = Column(Text)  # Mô tả lớp học
-    max_students = Column(Integer)  # Số học sinh tối đa
-    current_students = Column(Integer, default=0)  # Số học sinh hiện tại
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships

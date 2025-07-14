@@ -9,17 +9,14 @@ from ..schemas.course import CourseResponse, CourseCreate, CourseUpdate
 from ..schemas.classroom import ClassroomResponse, ClassroomCreate, ClassroomUpdate
 from ..schemas.enrollment import EnrollmentResponse, EnrollmentCreate
 from ..schemas.schedule import ScheduleResponse, ScheduleCreate, ScheduleUpdate
-from ..schemas.room import RoomResponse, RoomCreate, RoomUpdate
 from ..schemas.student import StudentResponse, StudentCreate, StudentUpdate
 from ..schemas.teacher import TeacherResponse
 from ..services import course as course_service
 from ..services import classroom as classroom_service
 from ..services import enrollment as enrollment_service
 from ..services import schedule as schedule_service
-from ..services import room as room_service
 from ..services import student as student_service
 from ..services import teacher as teacher_service
-from ..services import user as user_service
 from ..services import achievement as achievement_service
 
 router = APIRouter()
@@ -387,86 +384,7 @@ async def assign_multiple_students_to_classroom(
     }
 
 # Room Management  
-@router.get("/rooms", response_model=List[RoomResponse])
-async def get_all_rooms(
-    skip: int = 0,
-    limit: int = 100,
-    current_user: User = Depends(get_current_staff_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy danh sách tất cả phòng học
-    """
-    rooms = room_service.get_rooms(db, skip=skip, limit=limit)
-    return rooms
 
-@router.get("/rooms/{room_id}", response_model=RoomResponse)
-async def get_room_by_id(
-    room_id: str,
-    current_user: User = Depends(get_current_staff_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy thông tin phòng học theo ID
-    """
-    room = room_service.get_room(db, room_id)
-    if not room:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Phòng học không tồn tại"
-        )
-    return room
-
-@router.post("/rooms", response_model=RoomResponse)
-async def create_room(
-    room_data: RoomCreate,
-    current_user: User = Depends(get_current_staff_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Tạo phòng học mới
-    """
-    room = room_service.create_room(db, room_data)
-    return room
-
-@router.put("/rooms/{room_id}", response_model=RoomResponse)
-async def update_room(
-    room_id: str,
-    room_data: RoomUpdate,
-    current_user: User = Depends(get_current_staff_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Cập nhật thông tin phòng học
-    """
-    room = room_service.get_room(db, room_id)
-    if not room:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Phòng học không tồn tại"
-        )
-    
-    updated_room = room_service.update_room(db, room_id, room_data)
-    return updated_room
-
-@router.delete("/rooms/{room_id}")
-async def delete_room(
-    room_id: str,
-    current_user: User = Depends(get_current_staff_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Xóa phòng học
-    """
-    room = room_service.get_room(db, room_id)
-    if not room:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Phòng học không tồn tại"
-        )
-    
-    room_service.delete_room(db, room_id)
-    return {"message": "Xóa phòng học thành công"}
 
 # Enrollment Management
 @router.get("/enrollments", response_model=List[EnrollmentResponse])

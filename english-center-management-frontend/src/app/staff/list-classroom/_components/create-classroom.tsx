@@ -8,34 +8,24 @@ import {
   Calendar,
   User,
   BookOpen,
-  Clock,
   Save,
   Plus,
 } from 'lucide-react';
-import { ClassData, CourseLevel } from '../../../../types';
+import { useStaffCourseApi, useStaffTeacherApi } from '../../_hooks';
 import {
-  useStaffCourseApi,
-  useStaffTeacherApi,
-  useStaffStatsApi,
-} from '../../_hooks';
+  ClassroomCreate,
+  ClassStatus,
+  courseLevels,
+  weekdayOptions,
+} from '../../../../types/classroom';
+import { CourseLevel } from '../../../../types';
+import { CourseResponse } from '../../../../types/course';
+import { UserResponse } from '../../../../types/user';
 
 interface CreateClassroomModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (classData: Partial<ClassData>) => void;
-}
-
-interface FormData {
-  name: string;
-  level: CourseLevel;
-  teacherId: string;
-  teacherName: string;
-  maxStudents: number;
-  scheduleDays: string;
-  scheduleTime: string;
-  room: string;
-  courseId: string;
-  status: 'active' | 'inactive';
+  onSubmit: (classData: Partial<ClassroomCreate>) => void;
 }
 
 const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
@@ -43,73 +33,47 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    level: 'beginner',
-    teacherId: '',
-    teacherName: '',
-    maxStudents: 20,
-    scheduleDays: '',
-    scheduleTime: '',
-    room: '',
-    courseId: '',
-    status: 'active',
+  const [formData, setFormData] = useState<ClassroomCreate>({
+    class_name: '',
+    course_id: '',
+    teacher_id: '',
+    status: ClassStatus.ACTIVE,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [teachers, setTeachers] = useState<any[]>([]);
-  const [rooms, setRooms] = useState<any[]>([]);
-  const [courses, setCourses] = useState<any[]>([]);
+  const [teachers, setTeachers] = useState<UserResponse[]>([]);
+  const [courses, setCourses] = useState<CourseResponse[]>([]);
   const { getCourses } = useStaffCourseApi();
+  const [schedules, setSchedules] = useState([
+    { weekday: '', start_time: '', end_time: '' },
+  ]);
+  const [scheduleErrors, setScheduleErrors] = useState<string[]>([]);
   const { getTeachers } = useStaffTeacherApi();
-  const { getRooms } = useStaffStatsApi();
 
   // Fetch data for dropdowns
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [teachersData, roomsData, coursesData] = await Promise.all([
+        const [teachersData, coursesData] = await Promise.all([
           getTeachers(),
-          getRooms(),
           getCourses(),
         ]);
         setTeachers(teachersData);
-        setRooms(roomsData);
         setCourses(coursesData);
       } catch (error) {
         console.error('Error fetching data:', error);
-      } finally {
       }
     };
 
     if (isOpen) {
       fetchData();
     }
-  }, [isOpen, getTeachers, getRooms, getCourses]);
+  }, [isOpen, getTeachers, getCourses]);
 
-  const courseLevels: { value: CourseLevel; label: string }[] = [
-    { value: 'beginner', label: 'Cơ bản (Beginner)' },
-    { value: 'elementary', label: 'Sơ cấp (Elementary)' },
-    { value: 'intermediate', label: 'Trung cấp (Intermediate)' },
-    {
-      value: 'upper-intermediate',
-      label: 'Trung cao cấp (Upper-Intermediate)',
-    },
-    { value: 'advanced', label: 'Cao cấp (Advanced)' },
-    { value: 'proficiency', label: 'Thành thạo (Proficiency)' },
-  ];
-
-  const timeSlots = [
-    '8:00 AM - 9:30 AM',
-    '9:00 AM - 10:30 AM',
-    '10:00 AM - 11:30 AM',
-    '2:00 PM - 3:30 PM',
-    '3:00 PM - 4:30 PM',
-    '6:00 PM - 7:30 PM',
-    '7:00 PM - 8:30 PM',
-  ];
-
-  const handleInputChange = (field: keyof FormData, value: string | number) => {
+  const handleInputChange = (
+    field: keyof ClassroomCreate,
+    value: string | number
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
@@ -121,35 +85,65 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
     }
   };
 
+  const handleScheduleChange = (idx: number, field: string, value: string) => {
+    setSchedules((prev) =>
+      prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item))
+    );
+    // Clear error for this schedule
+    setScheduleErrors((prev) => {
+      const newErrs = [...prev];
+      newErrs[idx] = '';
+      return newErrs;
+    });
+  };
+
+  const handleAddSchedule = () => {
+    setSchedules((prev) => [
+      ...prev,
+      { weekday: '', start_time: '', end_time: '' },
+    ]);
+    setScheduleErrors((prev) => [...prev, '']);
+  };
+
+  const handleRemoveSchedule = (idx: number) => {
+    setSchedules((prev) => prev.filter((_, i) => i !== idx));
+    setScheduleErrors((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
+    let valid = true;
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Tên lớp không được để trống';
+    if (!formData.class_name.trim()) {
+      newErrors.class_name = 'Tên lớp không được để trống';
     }
 
-    if (!formData.teacherId) {
-      newErrors.teacherId = 'Vui lòng chọn giáo viên';
+    if (!formData.teacher_id) {
+      newErrors.teacher_id = 'Vui lòng chọn giáo viên';
     }
 
-    if (!formData.scheduleDays.trim()) {
-      newErrors.scheduleDays = 'Vui lòng chọn ngày học';
+    if (!formData.start_date) {
+      newErrors.start_date = 'Vui lòng chọn thời gian học';
     }
 
-    if (!formData.scheduleTime) {
-      newErrors.scheduleTime = 'Vui lòng chọn thời gian học';
+    if (!formData.end_date) {
+      newErrors.end_date = 'Vui lòng chọn phòng học';
     }
 
-    if (!formData.room) {
-      newErrors.room = 'Vui lòng chọn phòng học';
-    }
-
-    if (formData.maxStudents < 1) {
-      newErrors.maxStudents = 'Số học viên tối đa phải lớn hơn 0';
-    }
+    // Validate schedules
+    const newScheduleErrors: string[] = [];
+    schedules.forEach((sch, idx) => {
+      if (!sch.weekday || !sch.start_time || !sch.end_time) {
+        newScheduleErrors[idx] = 'Vui lòng chọn đủ thông tin cho lịch học';
+        valid = false;
+      } else {
+        newScheduleErrors[idx] = '';
+      }
+    });
+    setScheduleErrors(newScheduleErrors);
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.keys(newErrors).length === 0 && valid;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -159,27 +153,18 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
       return;
     }
 
-    const selectedTeacher = teachers.find((t) => t.id === formData.teacherId);
-
-    const classData: Partial<ClassData> = {
-      name: formData.name,
-      level: formData.level,
-      teacher: {
-        id: formData.teacherId,
-        name: selectedTeacher?.name || '',
-        email: selectedTeacher?.email || '',
-        role_name: selectedTeacher?.role_name || 'teacher',
-        avatar: selectedTeacher?.avatar,
-      },
-      students: 0,
-      maxStudents: formData.maxStudents,
-      schedule: {
-        days: formData.scheduleDays,
-        time: formData.scheduleTime,
-      },
-      room: formData.room,
-      courseId: formData.courseId,
+    const classData: Partial<ClassroomCreate> & { schedules: any[] } = {
+      class_name: formData.class_name,
+      course_id: formData.course_id,
+      teacher_id: formData.teacher_id,
       status: formData.status,
+      start_date: formData.start_date,
+      end_date: formData.end_date,
+      schedules: schedules.map((sch) => ({
+        weekday: sch.weekday,
+        start_time: sch.start_time,
+        end_time: sch.end_time,
+      })),
     };
 
     onSubmit(classData);
@@ -188,18 +173,14 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
 
   const handleClose = () => {
     setFormData({
-      name: '',
-      level: 'beginner',
-      teacherId: '',
-      teacherName: '',
-      maxStudents: 20,
-      scheduleDays: '',
-      scheduleTime: '',
-      room: '',
-      courseId: '',
-      status: 'active',
+      class_name: '',
+      course_id: '',
+      teacher_id: '',
+      status: ClassStatus.ACTIVE,
     });
     setErrors({});
+    setSchedules([{ weekday: '', start_time: '', end_time: '' }]);
+    setScheduleErrors([]);
     onClose();
   };
 
@@ -240,15 +221,37 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
               </label>
               <input
                 type='text'
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                value={formData.class_name}
+                onChange={(e) =>
+                  handleInputChange('class_name', e.target.value)
+                }
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
-                  errors.name ? 'border-red-300' : 'border-gray-300'
+                  errors.class_name ? 'border-red-300' : 'border-gray-300'
                 }`}
                 placeholder='Ví dụ: Tiếng Anh Cơ Bản A1'
               />
-              {errors.name && (
-                <p className='text-red-500 text-sm mt-1'>{errors.name}</p>
+              {errors.class_name && (
+                <p className='text-red-500 text-sm mt-1'>{errors.class_name}</p>
+              )}
+            </div>
+
+            {/* Room */}
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                <MapPin className='w-4 h-4 inline mr-2' />
+                Phòng học *
+              </label>
+              <input
+                type='text'
+                value={formData.room}
+                onChange={(e) => handleInputChange('room', e.target.value)}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
+                  errors.room ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder='Ví dụ: Tiếng Anh Cơ Bản A1'
+              />
+              {errors.room && (
+                <p className='text-red-500 text-sm mt-1'>{errors.room}</p>
               )}
             </div>
 
@@ -259,9 +262,9 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                 Trình độ
               </label>
               <select
-                value={formData.level}
+                value={formData.course_id}
                 onChange={(e) =>
-                  handleInputChange('level', e.target.value as CourseLevel)
+                  handleInputChange('course_id', e.target.value as CourseLevel)
                 }
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
               >
@@ -280,10 +283,12 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                 Giáo viên phụ trách *
               </label>
               <select
-                value={formData.teacherId}
-                onChange={(e) => handleInputChange('teacherId', e.target.value)}
+                value={formData.teacher_id}
+                onChange={(e) =>
+                  handleInputChange('teacher_id', e.target.value)
+                }
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
-                  errors.teacherId ? 'border-red-300' : 'border-gray-300'
+                  errors.teacher_id ? 'border-red-300' : 'border-gray-300'
                 }`}
               >
                 <option value=''>Chọn giáo viên</option>
@@ -293,36 +298,49 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                   </option>
                 ))}
               </select>
-              {errors.teacherId && (
-                <p className='text-red-500 text-sm mt-1'>{errors.teacherId}</p>
+              {errors.teacher_id && (
+                <p className='text-red-500 text-sm mt-1'>{errors.teacher_id}</p>
               )}
             </div>
 
-            {/* Max Students */}
+            {/* Course */}
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-2'>
-                <Users className='w-4 h-4 inline mr-2' />
-                Số học viên tối đa
+                <BookOpen className='w-4 h-4 inline mr-2' />
+                Khóa học
               </label>
-              <input
-                type='number'
-                min='1'
-                value={formData.maxStudents}
+              <select
+                value={formData.course_id}
+                onChange={(e) => handleInputChange('course_id', e.target.value)}
+                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
+              >
+                <option value=''>Chọn khóa học (tùy chọn)</option>
+                {courses.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.course_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Status */}
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Trạng thái
+              </label>
+              <select
+                value={formData.status}
                 onChange={(e) =>
                   handleInputChange(
-                    'maxStudents',
-                    parseInt(e.target.value) || 0
+                    'status',
+                    e.target.value as 'active' | 'inactive'
                   )
                 }
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
-                  errors.maxStudents ? 'border-red-300' : 'border-gray-300'
-                }`}
-              />
-              {errors.maxStudents && (
-                <p className='text-red-500 text-sm mt-1'>
-                  {errors.maxStudents}
-                </p>
-              )}
+                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
+              >
+                <option value='active'>Đang hoạt động</option>
+                <option value='inactive'>Tạm ngưng</option>
+              </select>
             </div>
           </div>
 
@@ -332,134 +350,127 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
               <Calendar className='w-5 h-5 mr-2' />
               Lịch học
             </h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              {/* Schedule Days */}
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Ngày học trong tuần *
-                </label>
-                <input
-                  type='text'
-                  value={formData.scheduleDays}
-                  onChange={(e) =>
-                    handleInputChange('scheduleDays', e.target.value)
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
-                    errors.scheduleDays ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder='Ví dụ: Mon, Wed, Fri'
-                />
-                {errors.scheduleDays && (
-                  <p className='text-red-500 text-sm mt-1'>
-                    {errors.scheduleDays}
-                  </p>
-                )}
-              </div>
-
-              {/* Schedule Time */}
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  <Clock className='w-4 h-4 inline mr-2' />
-                  Thời gian học *
-                </label>
-                <select
-                  value={formData.scheduleTime}
-                  onChange={(e) =>
-                    handleInputChange('scheduleTime', e.target.value)
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
-                    errors.scheduleTime ? 'border-red-300' : 'border-gray-300'
-                  }`}
+            <div className='space-y-4'>
+              {schedules.map((sch, idx) => (
+                <div
+                  key={idx}
+                  className='grid grid-cols-1 md:grid-cols-12 gap-4 items-end border p-4 rounded-lg relative bg-gray-50'
                 >
-                  <option value=''>Chọn thời gian</option>
-                  {timeSlots.map((time) => (
-                    <option key={time} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-                {errors.scheduleTime && (
-                  <p className='text-red-500 text-sm mt-1'>
-                    {errors.scheduleTime}
-                  </p>
-                )}
-              </div>
+                  {/* Weekday */}
+                  <div className='md:col-span-4'>
+                    <label className='block text-sm font-medium text-gray-700 mb-2'>
+                      Thứ *
+                    </label>
+                    <select
+                      value={sch.weekday}
+                      onChange={(e) =>
+                        handleScheduleChange(idx, 'weekday', e.target.value)
+                      }
+                      className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
+                    >
+                      <option value=''>Chọn thứ</option>
+                      {weekdayOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* Start time */}
+                  <div className='md:col-span-4'>
+                    <label className='block text-sm font-medium text-gray-700 mb-2'>
+                      Giờ bắt đầu *
+                    </label>
+                    <input
+                      type='time'
+                      value={sch.start_time}
+                      onChange={(e) =>
+                        handleScheduleChange(idx, 'start_time', e.target.value)
+                      }
+                      className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
+                    />
+                  </div>
+                  {/* End time */}
+                  <div className='md:col-span-4'>
+                    <label className='block text-sm font-medium text-gray-700 mb-2'>
+                      Giờ kết thúc *
+                    </label>
+                    <input
+                      type='time'
+                      value={sch.end_time}
+                      onChange={(e) =>
+                        handleScheduleChange(idx, 'end_time', e.target.value)
+                      }
+                      className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
+                    />
+                  </div>
+                  {/* Remove button */}
+                  <div className='flex items-center justify-end md:col-span-12'>
+                    {schedules.length > 1 && (
+                      <button
+                        type='button'
+                        onClick={() => handleRemoveSchedule(idx)}
+                        className='text-red-500 hover:text-red-700 px-2 py-1 rounded-lg border border-red-200 bg-white ml-2'
+                      >
+                        <X className='w-4 h-4' />
+                      </button>
+                    )}
+                  </div>
+                  {/* Error message */}
+                  {scheduleErrors[idx] && (
+                    <div className='col-span-12 text-red-500 text-sm mt-1'>
+                      {scheduleErrors[idx]}
+                    </div>
+                  )}
+                </div>
+              ))}
+              <button
+                type='button'
+                onClick={handleAddSchedule}
+                className='mt-2 px-4 py-2 bg-cyan-100 text-cyan-700 rounded-lg flex items-center hover:bg-cyan-200'
+              >
+                <Plus className='w-4 h-4 mr-1' /> Thêm lịch học
+              </button>
             </div>
           </div>
 
-          {/* Location and Course */}
-          <div className='border-t pt-6'>
-            <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
-              <MapPin className='w-5 h-5 mr-2' />
-              Thông tin khác
-            </h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              {/* Room */}
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  <MapPin className='w-4 h-4 inline mr-2' />
-                  Phòng học *
-                </label>
-                <select
-                  value={formData.room}
-                  onChange={(e) => handleInputChange('room', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
-                    errors.room ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                >
-                  <option value=''>Chọn phòng học</option>
-                  {rooms.map((room) => (
-                    <option key={room} value={room}>
-                      {room}
-                    </option>
-                  ))}
-                </select>
-                {errors.room && (
-                  <p className='text-red-500 text-sm mt-1'>{errors.room}</p>
-                )}
-              </div>
-
-              {/* Course */}
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  <BookOpen className='w-4 h-4 inline mr-2' />
-                  Khóa học
-                </label>
-                <select
-                  value={formData.courseId}
-                  onChange={(e) =>
-                    handleInputChange('courseId', e.target.value)
-                  }
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
-                >
-                  <option value=''>Chọn khóa học (tùy chọn)</option>
-                  {courses.map((course) => (
-                    <option key={course.id} value={course.id}>
-                      {course.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Status */}
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Trạng thái
-                </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) =>
-                    handleInputChange(
-                      'status',
-                      e.target.value as 'active' | 'inactive'
-                    )
-                  }
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
-                >
-                  <option value='active'>Đang hoạt động</option>
-                  <option value='inactive'>Tạm ngưng</option>
-                </select>
-              </div>
+          {/* Date Information */}
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
+            {/* Start Date */}
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Ngày bắt đầu *
+              </label>
+              <input
+                type='date'
+                value={formData.start_date || ''}
+                onChange={(e) =>
+                  handleInputChange('start_date', e.target.value)
+                }
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
+                  errors.start_date ? 'border-red-300' : 'border-gray-300'
+                }`}
+              />
+              {errors.start_date && (
+                <p className='text-red-500 text-sm mt-1'>{errors.start_date}</p>
+              )}
+            </div>
+            {/* End Date */}
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Ngày kết thúc *
+              </label>
+              <input
+                type='date'
+                value={formData.end_date || ''}
+                onChange={(e) => handleInputChange('end_date', e.target.value)}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
+                  errors.end_date ? 'border-red-300' : 'border-gray-300'
+                }`}
+              />
+              {errors.end_date && (
+                <p className='text-red-500 text-sm mt-1'>{errors.end_date}</p>
+              )}
             </div>
           </div>
 

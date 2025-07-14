@@ -13,32 +13,12 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useTeacherApi } from '../_hooks/use-api';
-import { ClassSession } from '../../../types';
-import Image from 'next/image';
-
-interface Student {
-  id: string;
-  name: string;
-  avatar: string;
-}
-
-interface LocalClassData {
-  id: string;
-  title: string;
-  level: 'Beginner' | 'Intermediate' | 'Advanced' | 'Test Prep';
-  students: number;
-  schedule: string;
-  room: string;
-  building: string;
-  unit: string;
-  studentAvatars: Student[];
-  levelColor: string;
-}
+import { ClassroomResponse } from '../../../types/classroom';
 
 const MyClassesDashboard = () => {
   const { loading, error, getTeacherClasses, getTeacherDashboard } =
     useTeacherApi();
-  const [classes, setClasses] = useState<LocalClassData[]>([]);
+  const [classes, setClasses] = useState<ClassroomResponse[]>([]);
   const [stats, setStats] = useState([
     {
       icon: Book,
@@ -79,8 +59,8 @@ const MyClassesDashboard = () => {
         ]);
 
         // Process classes data
-        const processedClasses: LocalClassData[] = classesData.map(
-          (classItem: ClassSession, index: number) => {
+        const processedClasses: ClassroomResponse[] = classesData.map(
+          (classItem: ClassroomResponse, index: number) => {
             const levelMap = {
               beginner: 'Beginner' as const,
               intermediate: 'Intermediate' as const,
@@ -88,38 +68,19 @@ const MyClassesDashboard = () => {
               upper_intermediate: 'Advanced' as const,
             };
 
-            const colorMap = {
-              beginner: 'bg-green-100 text-green-700',
-              intermediate: 'bg-blue-100 text-blue-700',
-              advanced: 'bg-purple-100 text-purple-700',
-              upper_intermediate: 'bg-orange-100 text-orange-700',
-            };
-
-            // Get first 3 students as avatars
-            const studentAvatars = Array.from(
-              { length: Math.min(3, classItem.studentCount) },
-              (_, i) => ({
-                id: `student-${i}`,
-                name: `Student ${i + 1}`,
-                avatar: '',
-              })
-            );
-
             return {
               id: classItem.id,
-              title: classItem.title,
+              title: classItem.class_name,
               level:
-                levelMap[classItem.level as keyof typeof levelMap] ||
+                levelMap[classItem.course_level as keyof typeof levelMap] ||
                 'Intermediate',
-              students: classItem.studentCount,
-              schedule: classItem.time || 'TBD',
+              students: [1, 2, 3, 4],
+              schedule: classItem.schedules
+                .map((schedule) => schedule.weekday)
+                .join(', '),
               room: classItem.room || 'Room 101',
               building: 'Building A',
               unit: `Unit ${index + 1}: Course Content`,
-              studentAvatars,
-              levelColor:
-                colorMap[classItem.level as keyof typeof colorMap] ||
-                'bg-blue-100 text-blue-700',
             };
           }
         );
@@ -143,31 +104,6 @@ const MyClassesDashboard = () => {
 
     fetchData();
   }, [getTeacherClasses, getTeacherDashboard]);
-
-  const renderStudentAvatars = (students: Student[], totalCount: number) => {
-    const visibleStudents = students.slice(0, 3);
-    const remainingCount = totalCount - visibleStudents.length;
-
-    return (
-      <div className='flex items-center -space-x-2'>
-        {visibleStudents.map((student) => (
-          <Image
-            key={student.id}
-            src={student.avatar}
-            alt={student.name}
-            className='w-8 h-8 rounded-full border-2 border-white'
-          />
-        ))}
-        {remainingCount > 0 && (
-          <div className='w-8 h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center'>
-            <span className='text-xs font-medium text-gray-600'>
-              +{remainingCount}
-            </span>
-          </div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <div className='min-h-screen bg-gray-50 p-6'>
@@ -246,18 +182,19 @@ const MyClassesDashboard = () => {
               <div className='flex justify-between items-start mb-4'>
                 <div className='flex-1'>
                   <h3 className='text-lg font-semibold text-gray-900 mb-1'>
-                    {classItem.title}
+                    {classItem.class_name}
                   </h3>
                   <span
-                    className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${classItem.levelColor}`}
+                    className={`inline-block px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700`}
                   >
-                    {classItem.level}
+                    {classItem.course_level}
                   </span>
                 </div>
                 <div className='text-right'>
                   <div className='flex items-center text-sm text-gray-600 mb-1'>
                     <Users className='w-4 h-4 mr-1' />
-                    {classItem.students}
+                    {/* {classItem.course.current_students} */}
+                    100
                   </div>
                 </div>
               </div>
@@ -266,36 +203,18 @@ const MyClassesDashboard = () => {
               <div className='space-y-2 mb-4'>
                 <div className='flex items-center text-sm text-gray-600'>
                   <Calendar className='w-4 h-4 mr-2' />
-                  {classItem.schedule}
+                  {classItem.schedules
+                    .map((schedule) => schedule.weekday)
+                    .join(', ')}
                 </div>
                 <div className='flex items-center text-sm text-gray-600'>
                   <MapPin className='w-4 h-4 mr-2' />
-                  {classItem.room}, {classItem.building}
+                  {classItem.room}
                 </div>
-              </div>
-
-              {/* Current Unit */}
-              <div className='bg-gray-50 rounded-lg p-3 mb-4'>
-                <div className='flex items-center text-sm text-gray-600 mb-1'>
-                  <Book className='w-4 h-4 mr-2' />
-                  Bài học hiện tại
-                </div>
-                <p className='text-sm font-medium text-gray-900'>
-                  {classItem.unit}
-                </p>
               </div>
 
               {/* Student Avatars */}
               <div className='flex items-center justify-between'>
-                <div className='flex items-center'>
-                  {renderStudentAvatars(
-                    classItem.studentAvatars,
-                    classItem.students
-                  )}
-                  <span className='text-sm text-gray-600 ml-3'>
-                    {classItem.students} học viên
-                  </span>
-                </div>
                 <Link
                   href={`/teacher/classroom/${classItem.id}`}
                   className='text-blue-600 hover:text-blue-700 hover:bg-blue-200/60 px-4 py-2 rounded-lg text-sm font-medium'

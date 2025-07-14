@@ -3,17 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search, Users, User, Check, AlertCircle } from 'lucide-react';
 import { useStaffStudentApi, useStaffClassroomApi } from '../../_hooks';
-import { Student, ClassData } from '../../../../types';
-import Image from 'next/image';
+import { ClassroomResponse } from '../../../../types/classroom';
+import { UserResponse } from '../../../../types/user';
 
 interface AssignStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  classroom: ClassData | null;
+  classroom: ClassroomResponse | null;
   onAssignStudents: (classroomId: string, studentIds: string[]) => void;
 }
 
-interface StudentWithSelection extends Student {
+interface StudentWithSelection extends UserResponse {
   isSelected: boolean;
   isAssigned: boolean;
 }
@@ -47,7 +47,7 @@ export default function AssignStudentModal({
         try {
           const availableStudents = await getAvailableStudents();
           const studentsWithSelection = availableStudents.data.map(
-            (student: Student) => ({
+            (student: UserResponse) => ({
               ...student,
               isSelected: false,
               isAssigned: false,
@@ -69,12 +69,12 @@ export default function AssignStudentModal({
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
       searchTerm === '' ||
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.studentId.toLowerCase().includes(searchTerm.toLowerCase());
+      student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.student_id?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesLevel =
-      selectedLevel === 'all' || student.level === selectedLevel;
+      selectedLevel === 'all' || student.input_level === selectedLevel;
 
     return matchesSearch && matchesLevel;
   });
@@ -82,7 +82,7 @@ export default function AssignStudentModal({
   const handleStudentToggle = (studentId: string) => {
     setStudents((prev) =>
       prev.map((student) =>
-        student.id === studentId
+        student.id === studentId.toString()
           ? { ...student, isSelected: !student.isSelected }
           : student
       )
@@ -94,7 +94,7 @@ export default function AssignStudentModal({
     setStudents((prev) =>
       prev.map((student) => ({
         ...student,
-        isSelected: filteredStudents.some((s) => s.id === student.id)
+        isSelected: filteredStudents.some((s) => s.id === student.id.toString())
           ? !allSelected
           : student.isSelected,
       }))
@@ -106,22 +106,10 @@ export default function AssignStudentModal({
 
     const selectedStudentIds = students
       .filter((student) => student.isSelected)
-      .map((student) => student.id);
+      .map((student) => student.id.toString());
 
     if (selectedStudentIds.length === 0) {
       alert('Vui lòng chọn ít nhất một học viên để phân công.');
-      return;
-    }
-
-    // Check if classroom has capacity
-    const currentStudents = classroom.students;
-    const maxStudents = classroom.maxStudents || 20;
-    const availableSlots = maxStudents - currentStudents;
-
-    if (selectedStudentIds.length > availableSlots) {
-      alert(
-        `Lớp chỉ còn ${availableSlots} chỗ trống. Vui lòng chọn ít hơn ${availableSlots} học viên.`
-      );
       return;
     }
 
@@ -183,7 +171,6 @@ export default function AssignStudentModal({
   if (!isOpen || !classroom) return null;
 
   const selectedCount = students.filter((student) => student.isSelected).length;
-  const availableSlots = (classroom.maxStudents || 20) - classroom.students;
 
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
@@ -195,11 +182,7 @@ export default function AssignStudentModal({
               Phân công học viên
             </h2>
             <p className='text-sm text-gray-600 mt-1'>
-              Lớp: {classroom.name} - {classroom.room}
-            </p>
-            <p className='text-sm text-gray-600'>
-              Hiện tại: {classroom.students}/{classroom.maxStudents || 20} học
-              viên
+              Lớp: {classroom.class_name} - {classroom.room}
             </p>
           </div>
           <button
@@ -304,33 +287,25 @@ export default function AssignStudentModal({
                       </div>
                       <div className='flex-1 min-w-0'>
                         <div className='flex items-center space-x-2'>
-                          {student.avatar ? (
-                            <Image
-                              src={student.avatar}
-                              alt={student.name}
-                              className='w-8 h-8 rounded-full'
-                            />
-                          ) : (
-                            <div className='w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center'>
-                              <User className='w-4 h-4 text-gray-500' />
-                            </div>
-                          )}
+                          <div className='w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center'>
+                            <User className='w-4 h-4 text-gray-500' />
+                          </div>
                           <div className='flex-1 min-w-0'>
                             <p className='font-medium text-gray-900 truncate'>
                               {student.name}
                             </p>
                             <p className='text-sm text-gray-500 truncate'>
-                              {student.studentId}
+                              {student.student_id}
                             </p>
                           </div>
                         </div>
                         <div className='mt-2 flex items-center justify-between'>
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-medium ${getLevelColor(
-                              student.level
+                              student.input_level
                             )}`}
                           >
-                            {getLevelLabel(student.level)}
+                            {getLevelLabel(student.input_level)}
                           </span>
                           <span className='text-xs text-gray-500'>
                             {student.email}
@@ -349,10 +324,6 @@ export default function AssignStudentModal({
         <div className='p-6 border-t bg-gray-50'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center space-x-4'>
-              <div className='flex items-center space-x-2 text-sm text-gray-600'>
-                <AlertCircle className='w-4 h-4' />
-                <span>Còn {availableSlots} chỗ trống trong lớp</span>
-              </div>
               {selectedCount > 0 && (
                 <span className='text-sm font-medium text-cyan-600'>
                   Đã chọn {selectedCount} học viên

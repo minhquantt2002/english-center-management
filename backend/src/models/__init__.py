@@ -4,7 +4,6 @@ from .classroom import Class, ClassStatus
 from .schedule import Schedule, Weekday
 from .score import Score
 from .exam import Exam
-from .room import Room
 from .enrollment import Enrollment
 from .feedback import Feedback
 
@@ -19,7 +18,6 @@ __all__ = [
     "Weekday",
     "Score",
     "Exam",
-    "Room",
     "Enrollment",
     "Feedback",
 

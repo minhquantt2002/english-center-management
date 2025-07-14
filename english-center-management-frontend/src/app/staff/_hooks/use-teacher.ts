@@ -1,26 +1,12 @@
 import { useState, useCallback } from 'react';
 import { api } from '../../../lib/api';
-import { Teacher } from '../../../types';
-import { TeachingSchedule } from '../../../types/teacher';
-
-// API Response types
-export interface TeachersResponse {
-  data: Teacher[];
-  message?: string;
-  total?: number;
-}
-
-export interface TeacherScheduleResponse {
-  data: TeachingSchedule[];
-  message?: string;
-  teacherId: string;
-}
+import { UserResponse } from '../../../types/user';
 
 export const useStaffTeacherApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getTeachers = useCallback(async (): Promise<Teacher[]> => {
+  const getTeachers = useCallback(async (): Promise<UserResponse[]> => {
     setLoading(true);
     setError(null);
     try {

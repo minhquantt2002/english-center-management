@@ -7,19 +7,17 @@ from .base import BaseSchema
 class UserBase(BaseSchema):
     name: str
     email: EmailStr
-    role_name: str  # admin, receptionist, teacher, student
+    role_name: str
     bio: Optional[str] = None
     date_of_birth: Optional[date] = None
     phone_number: Optional[str] = None
     input_level: Optional[str] = None
     
-    # Teacher specific fields
     specialization: Optional[str] = None
     address: Optional[str] = None
     education: Optional[str] = None
     experience_years: Optional[int] = None
     
-    # Student specific fields
     level: Optional[str] = None
     parent_name: Optional[str] = None
     parent_phone: Optional[str] = None
@@ -39,13 +37,11 @@ class UserUpdate(BaseSchema):
     phone_number: Optional[str] = None
     input_level: Optional[str] = None
     
-    # Teacher specific fields
     specialization: Optional[str] = None
     address: Optional[str] = None
     education: Optional[str] = None
     experience_years: Optional[int] = None
-    
-    # Student specific fields
+
     level: Optional[str] = None
     parent_name: Optional[str] = None
     parent_phone: Optional[str] = None

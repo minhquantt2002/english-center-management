@@ -2,79 +2,27 @@ import { useState, useCallback } from 'react';
 import { api } from '../../../lib/api';
 import { User, UserRole, UserStatus } from '../../../types';
 
-// Types for API requests and responses
-export interface CreateUserRequest {
-  name: string;
-  email: string;
-  phone?: string;
-  password: string;
-  role: UserRole;
-  status: UserStatus;
-  dateOfBirth?: string;
-  address?: string;
-  specialization?: string;
-  qualification?: string;
-  experience?: number;
-  hourlyRate?: number;
-  bio?: string;
-  languages?: string[];
-  certifications?: string[];
-  studentId?: string;
-  level?: string;
-  enrollmentDate?: string;
-  parentContact?: string;
-  notes?: string;
-  currentClass?: string;
-  emergencyContact?: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
-  employeeId?: string;
-  department?: string;
-  position?: string;
-}
-
-export interface UpdateUserRequest extends Partial<CreateUserRequest> {
-  id: string;
-}
-
-export interface UpdateUserRoleRequest {
-  role: UserRole;
-}
-
-export interface UserResponse {
-  data: User[];
-  total?: number;
-  page?: number;
-  limit?: number;
-}
-
 export const useUserApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createUser = useCallback(
-    async (userData: CreateUserRequest): Promise<User> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await api.post('/admin/users', userData);
-        return response;
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Có lỗi xảy ra';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
+  const createUser = useCallback(async (userData: any): Promise<User> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.post('/admin/users', userData);
+      return response;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const updateUser = useCallback(
-    async (id: string, userData: Partial<CreateUserRequest>): Promise<User> => {
+    async (id: string, userData: any): Promise<User> => {
       setLoading(true);
       setError(null);
       try {

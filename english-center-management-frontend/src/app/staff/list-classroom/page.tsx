@@ -11,22 +11,20 @@ import {
   Edit,
   UserPlus,
 } from 'lucide-react';
-import { ClassData } from '../../../types';
 import EditClassroomModal from './_components/edit-classroom';
 import CreateClassroomModal from './_components/create-classroom';
 import AssignStudentModal from './_components/assign-student';
 import { useStaffClassroomApi } from '../_hooks';
-import { CreateClassroomData } from '../_hooks/use-classroom';
+import { ClassroomCreate, ClassroomResponse } from '../../../types/classroom';
 
 export default function EnglishCourseInterface() {
   const router = useRouter();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
-  const [selectedClassroom, setSelectedClassroom] = useState<ClassData | null>(
-    null
-  );
-  const [classrooms, setClassrooms] = useState<ClassData[]>([]);
+  const [selectedClassroom, setSelectedClassroom] =
+    useState<ClassroomResponse | null>(null);
+  const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const { error, getClassrooms, createClassroom, updateClassroom } =
@@ -41,7 +39,7 @@ export default function EnglishCourseInterface() {
   const fetchClassrooms = async () => {
     try {
       const data = await getClassrooms();
-      setClassrooms(data as ClassData[]);
+      setClassrooms(data as ClassroomResponse[]);
       setIsLoading(false);
     } catch (err) {
       console.error('Failed to fetch classrooms:', err);
@@ -50,24 +48,23 @@ export default function EnglishCourseInterface() {
   };
 
   // Use classrooms data from API
-  const courses = classrooms.map((classItem: ClassData) => {
+  const courses = classrooms.map((classItem: ClassroomResponse) => {
     return {
       id: classItem.id,
-      name: classItem.class_name || classItem.name || 'Lớp học',
-      level: classItem.course?.level || classItem.level || 'Chưa xác định',
+      name: classItem.class_name || 'Lớp học',
+      level: classItem.course?.level || 'Chưa xác định',
       status:
         classItem.status === 'active'
           ? 'active'
           : ('upcoming' as 'active' | 'upcoming' | 'full'),
       statusText:
         classItem.status === 'active' ? 'Đang hoạt động' : 'Sắp khai giảng',
-      time: classItem.schedule?.time || 'Chưa có lịch học',
+      day:
+        classItem.schedules.length > 0
+          ? classItem.schedules.map((schedule) => schedule.weekday).join(', ')
+          : 'Chưa có lịch học',
       instructor: classItem.teacher.name,
-      students: `${classItem.current_students || classItem.students || 0}/${
-        classItem.max_students || classItem.maxStudents || 20
-      } học viên`,
       room: classItem.room || 'Phòng A101',
-      day: classItem.schedule?.time || 'Chưa có lịch học',
     };
   });
 
@@ -98,12 +95,12 @@ export default function EnglishCourseInterface() {
     return (current / total) * 100;
   };
 
-  const handleEditClassroom = (classroom: ClassData) => {
+  const handleEditClassroom = (classroom: ClassroomResponse) => {
     setSelectedClassroom(classroom);
     setIsEditModalOpen(true);
   };
 
-  const handleSaveClassroom = async (updatedClassroom: ClassData) => {
+  const handleSaveClassroom = async (updatedClassroom: ClassroomResponse) => {
     try {
       await updateClassroom(updatedClassroom.id, updatedClassroom);
       setIsEditModalOpen(false);
@@ -116,7 +113,7 @@ export default function EnglishCourseInterface() {
     }
   };
 
-  const handleCreateClassroom = async (classData: CreateClassroomData) => {
+  const handleCreateClassroom = async (classData: ClassroomCreate) => {
     try {
       await createClassroom(classData);
       setIsCreateModalOpen(false);
@@ -177,25 +174,9 @@ export default function EnglishCourseInterface() {
     <div className='min-h-screen bg-gray-50'>
       <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
         <div className='flex items-center justify-between mb-8'>
-          <div>
-            <h1 className='text-3xl font-bold text-gray-900 mb-2'>
-              Khóa học: Tiếng Anh giao tiếp nâng cao
-            </h1>
-            <div className='flex items-center space-x-6 text-sm text-gray-600'>
-              <div className='flex items-center space-x-2'>
-                <Clock className='w-4 h-4' />
-                <span>Thời gian: 6 tháng</span>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <Users className='w-4 h-4' />
-                <span>Trình độ: Nâng cao</span>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <MapPin className='w-4 h-4' />
-                <span>5 lớp đang hoạt động</span>
-              </div>
-            </div>
-          </div>
+          <h1 className='text-3xl font-bold text-gray-900 mb-2'>
+            Danh sách lớp học
+          </h1>
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className='bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-colors'
@@ -223,7 +204,7 @@ export default function EnglishCourseInterface() {
                     </p>
                   </div>
                   <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                    className={`p-2 font-medium text-center rounded-full text-xs ${getStatusColor(
                       course.status
                     )}`}
                   >
@@ -242,26 +223,8 @@ export default function EnglishCourseInterface() {
                     <span>{course.instructor}</span>
                   </div>
                   <div className='flex items-center space-x-2 text-sm text-gray-600'>
-                    <Users className='w-4 h-4' />
-                    <span>{course.students}</span>
-                  </div>
-                  <div className='flex items-center space-x-2 text-sm text-gray-600'>
                     <MapPin className='w-4 h-4' />
                     <span>{course.room}</span>
-                  </div>
-                </div>
-
-                {/* Progress Bar */}
-                <div className='mt-4'>
-                  <div className='w-full bg-gray-200 rounded-full h-2'>
-                    <div
-                      className={`h-2 rounded-full ${getProgressColor(
-                        course.students
-                      )}`}
-                      style={{
-                        width: `${getProgressPercentage(course.students)}%`,
-                      }}
-                    ></div>
                   </div>
                 </div>
               </div>

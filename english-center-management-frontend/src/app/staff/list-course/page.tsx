@@ -11,13 +11,13 @@ import {
   Award,
 } from 'lucide-react';
 import { useStaffCourseApi } from '../_hooks';
-import { Course } from '../../../types';
+import { CourseResponse } from '../../../types/course';
 
 export default function CourseManagement() {
   const { loading, error, getCourses } = useStaffCourseApi();
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState('all');
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [courses, setCourses] = useState<CourseResponse[]>([]);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -32,37 +32,35 @@ export default function CourseManagement() {
     fetchCourses();
   }, [getCourses]);
 
-  const processedCourses = courses.map((course: Course, index: number) => ({
-    id: course.id,
-    title: course.name || 'Khóa học không có tên',
-    description: course.description || 'Không có mô tả',
-    classCount: 8, // Default class count
-    levels: [
-      course.level
-        ? course.level.charAt(0).toUpperCase() + course.level.slice(1)
-        : 'N/A',
-    ],
-    icon:
-      index % 4 === 0
-        ? 'book'
-        : index % 4 === 1
-        ? 'briefcase'
-        : index % 4 === 2
-        ? 'target'
-        : 'baby',
-    color:
-      index % 4 === 0
-        ? 'teal'
-        : index % 4 === 1
-        ? 'purple'
-        : index % 4 === 2
-        ? 'red'
-        : 'yellow',
-    status:
-      course.status === 'active'
-        ? 'active'
-        : ('inactive' as 'active' | 'inactive'),
-  }));
+  const processedCourses = courses.map(
+    (course: CourseResponse, index: number) => ({
+      id: course.id,
+      title: course.course_name || 'Khóa học không có tên',
+      description: course.description || 'Không có mô tả',
+      classCount: 8, // Default class count
+      levels: [
+        course.level
+          ? course.level.charAt(0).toUpperCase() + course.level.slice(1)
+          : 'N/A',
+      ],
+      icon:
+        index % 4 === 0
+          ? 'book'
+          : index % 4 === 1
+          ? 'briefcase'
+          : index % 4 === 2
+          ? 'target'
+          : 'baby',
+      color:
+        index % 4 === 0
+          ? 'teal'
+          : index % 4 === 1
+          ? 'purple'
+          : index % 4 === 2
+          ? 'red'
+          : 'yellow',
+    })
+  );
 
   const getIcon = (iconType: string) => {
     const iconProps = { className: 'w-8 h-8' };

@@ -4,65 +4,16 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, ChevronDown, Loader2 } from 'lucide-react';
 import { useClassroomApi } from '../_hooks';
 import { CreateClassroomModal, EditClassroomModal } from './_components';
-
-interface Course {
-  course_name: string;
-  description: string;
-  level: string;
-  duration: number | null;
-  price: number | null;
-  max_students: number | null;
-  id: string;
-  created_at: string;
-}
-
-interface Teacher {
-  name: string;
-  email: string;
-  role_name: string;
-  bio: string | null;
-  date_of_birth: string | null;
-  phone_number: string;
-  input_level: string | null;
-  specialization: string;
-  address: string | null;
-  education: string;
-  experience_years: number;
-  level: string | null;
-  parent_name: string | null;
-  parent_phone: string | null;
-  student_id: string | null;
-  status: string;
-  id: string;
-  created_at: string;
-}
-
-interface Classroom {
-  id: string;
-  class_name: string;
-  course_id: string;
-  teacher_id: string;
-  status: string;
-  duration: number | null;
-  start_date: string;
-  end_date: string;
-  description: string | null;
-  max_students: number | null;
-  current_students: number;
-  created_at: string;
-  course: Course;
-  teacher: Teacher;
-}
+import { ClassroomResponse } from '../../../types/classroom';
 
 const ClassManagement: React.FC = () => {
   const [levelFilter, setLevelFilter] = useState('All Levels');
   const [teacherFilter, setTeacherFilter] = useState('All Teachers');
-  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedClassroom, setSelectedClassroom] = useState<Classroom | null>(
-    null
-  );
+  const [selectedClassroom, setSelectedClassroom] =
+    useState<ClassroomResponse | null>(null);
 
   const {
     loading,
@@ -83,7 +34,7 @@ const ClassManagement: React.FC = () => {
   const fetchClassrooms = async () => {
     try {
       const data = await getClassrooms();
-      setClassrooms(data as unknown as Classroom[]);
+      setClassrooms(data);
     } catch (err) {
       console.error('Failed to fetch classrooms:', err);
     }
@@ -114,7 +65,7 @@ const ClassManagement: React.FC = () => {
     setShowCreateModal(true);
   };
 
-  const handleEditClass = (classroom: Classroom) => {
+  const handleEditClass = (classroom: ClassroomResponse) => {
     setSelectedClassroom(classroom);
     setShowEditModal(true);
   };
@@ -338,13 +289,9 @@ const ClassManagement: React.FC = () => {
                   {/* Students */}
                   <div className='col-span-1'>
                     <span className='text-gray-900 font-medium'>
-                      {classroom.current_students}
+                      {/* {classroom.course.current_students} */}
+                      100
                     </span>
-                    {classroom.max_students && (
-                      <span className='text-gray-500 text-sm'>
-                        /{classroom.max_students}
-                      </span>
-                    )}
                   </div>
 
                   {/* Schedule */}
@@ -355,9 +302,7 @@ const ClassManagement: React.FC = () => {
                         {formatDate(classroom.end_date)}
                       </p>
                       <p className='text-gray-500'>
-                        {classroom.duration
-                          ? `${classroom.duration} tuần`
-                          : 'Chưa có thông tin'}
+                        {classroom.schedules.length} buổi
                       </p>
                     </div>
                   </div>

@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader2, Calendar, Users, BookOpen } from 'lucide-react';
 import { useCourseApi, useTeacherApi } from '../../_hooks';
+import { CourseResponse } from '../../../../types/course';
+import { UserResponse } from '../../../../types/user';
+import { ClassroomCreate } from '../../../../types/classroom';
 
 interface CreateClassroomModalProps {
   isOpen: boolean;
@@ -11,39 +14,23 @@ interface CreateClassroomModalProps {
   loading?: boolean;
 }
 
-interface Course {
-  id: string;
-  course_name: string;
-  level: string;
-  duration: number | null;
-  max_students: number | null;
-}
-
-interface Teacher {
-  id: string;
-  name: string;
-  specialization: string;
-}
-
 const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
   loading = false,
 }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ClassroomCreate>({
     class_name: '',
     course_id: '',
     teacher_id: '',
     start_date: '',
     end_date: '',
-    duration: '',
-    max_students: '',
     description: '',
   });
 
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [courses, setCourses] = useState<CourseResponse[]>([]);
+  const [teachers, setTeachers] = useState<UserResponse[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { getCourses } = useCourseApi();
@@ -119,10 +106,6 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
       }
     }
 
-    if (formData.max_students && parseInt(formData.max_students) <= 0) {
-      newErrors.max_students = 'Số học viên tối đa phải lớn hơn 0';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -136,10 +119,6 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
 
     const classroomData = {
       ...formData,
-      duration: formData.duration ? parseInt(formData.duration) : null,
-      max_students: formData.max_students
-        ? parseInt(formData.max_students)
-        : null,
     };
 
     try {
@@ -151,8 +130,6 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
         teacher_id: '',
         start_date: '',
         end_date: '',
-        duration: '',
-        max_students: '',
         description: '',
       });
       setErrors({});
@@ -168,8 +145,6 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
       teacher_id: '',
       start_date: '',
       end_date: '',
-      duration: '',
-      max_students: '',
       description: '',
     });
     setErrors({});
@@ -327,54 +302,6 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
               </div>
               {errors.end_date && (
                 <p className='text-red-500 text-sm mt-1'>{errors.end_date}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Duration and Max Students */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            {/* Duration */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Thời lượng (tuần)
-              </label>
-              <input
-                type='number'
-                name='duration'
-                value={formData.duration}
-                onChange={handleInputChange}
-                min='1'
-                className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                placeholder='Nhập số tuần'
-              />
-            </div>
-
-            {/* Max Students */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Số học viên tối đa
-              </label>
-              <div className='relative'>
-                <Users
-                  className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400'
-                  size={16}
-                />
-                <input
-                  type='number'
-                  name='max_students'
-                  value={formData.max_students}
-                  onChange={handleInputChange}
-                  min='1'
-                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.max_students ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder='Nhập số học viên'
-                />
-              </div>
-              {errors.max_students && (
-                <p className='text-red-500 text-sm mt-1'>
-                  {errors.max_students}
-                </p>
               )}
             </div>
           </div>
