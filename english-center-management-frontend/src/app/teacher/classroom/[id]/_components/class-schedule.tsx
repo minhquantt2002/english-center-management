@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Calendar, Clock } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 interface ScheduleSession {
   id: string;

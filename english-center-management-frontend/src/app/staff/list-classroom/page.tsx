@@ -8,7 +8,6 @@ import {
   MapPin,
   Calendar,
   User,
-  ChevronRight,
   Edit,
   UserPlus,
 } from 'lucide-react';
@@ -16,7 +15,8 @@ import { ClassData } from '../../../types';
 import EditClassroomModal from './_components/edit-classroom';
 import CreateClassroomModal from './_components/create-classroom';
 import AssignStudentModal from './_components/assign-student';
-import { useStaffApi } from '../_hooks/use-api';
+import { useStaffClassroomApi } from '../_hooks';
+import { CreateClassroomData } from '../_hooks/use-classroom';
 
 export default function EnglishCourseInterface() {
   const router = useRouter();
@@ -29,18 +29,19 @@ export default function EnglishCourseInterface() {
   const [classrooms, setClassrooms] = useState<ClassData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { loading, error, getClassrooms, createClassroom, updateClassroom } =
-    useStaffApi();
+  const { error, getClassrooms, createClassroom, updateClassroom } =
+    useStaffClassroomApi();
 
   // Fetch classrooms on component mount
   useEffect(() => {
     fetchClassrooms();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchClassrooms = async () => {
     try {
       const data = await getClassrooms();
-      setClassrooms(data);
+      setClassrooms(data as ClassData[]);
       setIsLoading(false);
     } catch (err) {
       console.error('Failed to fetch classrooms:', err);
@@ -49,21 +50,26 @@ export default function EnglishCourseInterface() {
   };
 
   // Use classrooms data from API
-  const courses = classrooms.map((classItem: ClassData) => ({
-    id: classItem.id,
-    name: classItem.name,
-    status:
-      classItem.status === 'active'
-        ? 'active'
-        : ('upcoming' as 'active' | 'upcoming' | 'full'),
-    statusText:
-      classItem.status === 'active' ? 'Đang hoạt động' : 'Sắp khai giảng',
-    time: classItem.schedule.time,
-    instructor: classItem.teacher.name,
-    students: `${classItem.students}/${classItem.maxStudents || 20} học viên`,
-    room: classItem.room || 'Phòng A101',
-    day: classItem.schedule.time,
-  }));
+  const courses = classrooms.map((classItem: ClassData) => {
+    return {
+      id: classItem.id,
+      name: classItem.class_name || classItem.name || 'Lớp học',
+      level: classItem.course?.level || classItem.level || 'Chưa xác định',
+      status:
+        classItem.status === 'active'
+          ? 'active'
+          : ('upcoming' as 'active' | 'upcoming' | 'full'),
+      statusText:
+        classItem.status === 'active' ? 'Đang hoạt động' : 'Sắp khai giảng',
+      time: classItem.schedule?.time || 'Chưa có lịch học',
+      instructor: classItem.teacher.name,
+      students: `${classItem.current_students || classItem.students || 0}/${
+        classItem.max_students || classItem.maxStudents || 20
+      } học viên`,
+      room: classItem.room || 'Phòng A101',
+      day: classItem.schedule?.time || 'Chưa có lịch học',
+    };
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -110,7 +116,7 @@ export default function EnglishCourseInterface() {
     }
   };
 
-  const handleCreateClassroom = async (classData: Partial<ClassData>) => {
+  const handleCreateClassroom = async (classData: CreateClassroomData) => {
     try {
       await createClassroom(classData);
       setIsCreateModalOpen(false);
@@ -120,11 +126,6 @@ export default function EnglishCourseInterface() {
       console.error('Error creating classroom:', error);
       alert('Có lỗi xảy ra khi tạo lớp học mới!');
     }
-  };
-
-  const handleAssignStudent = (classroom: ClassData) => {
-    setSelectedClassroom(classroom);
-    setIsAssignModalOpen(true);
   };
 
   const handleAssignStudents = async (
@@ -143,20 +144,6 @@ export default function EnglishCourseInterface() {
       console.error('Error assigning students:', error);
       alert('Có lỗi xảy ra khi phân công học viên!');
     }
-  };
-
-  const handleCloseEditModal = () => {
-    setIsEditModalOpen(false);
-    setSelectedClassroom(null);
-  };
-
-  const handleCloseCreateModal = () => {
-    setIsCreateModalOpen(false);
-  };
-
-  const handleCloseAssignModal = () => {
-    setIsAssignModalOpen(false);
-    setSelectedClassroom(null);
   };
 
   if (isLoading) {
@@ -227,9 +214,14 @@ export default function EnglishCourseInterface() {
               {/* Card Header */}
               <div className='p-6 pb-4'>
                 <div className='flex items-center justify-between mb-3'>
-                  <h3 className='text-lg font-semibold text-gray-900'>
-                    {course.name}
-                  </h3>
+                  <div>
+                    <h3 className='text-lg font-semibold text-gray-900'>
+                      {course.name}
+                    </h3>
+                    <p className='text-sm text-gray-500 mt-1'>
+                      Cấp độ: {course.level}
+                    </p>
+                  </div>
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
                       course.status

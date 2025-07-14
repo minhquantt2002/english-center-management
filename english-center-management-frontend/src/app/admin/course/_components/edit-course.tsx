@@ -5,9 +5,7 @@ import {
   X,
   BookOpen,
   Calendar,
-  Clock,
   DollarSign,
-  Users,
   FileText,
   Plus,
   Save,
@@ -78,15 +76,15 @@ export default function EditCourseModal({
   useEffect(() => {
     if (course && isOpen) {
       setFormData({
-        name: course.name,
+        name: course.course_name || course.name || '',
         description: course.description,
         level: course.level,
-        duration: course.duration,
-        startDate: course.startDate,
-        endDate: course.endDate,
-        status: course.status,
+        duration: course.duration || '',
+        startDate: course.startDate || course.start_date || '',
+        endDate: course.endDate || course.end_date || '',
+        status: course.status || 'upcoming',
         price: course.price,
-        maxStudents: course.maxStudents,
+        maxStudents: course.maxStudents || course.max_students,
         syllabus: course.syllabus || [''],
       });
       setErrors({});
@@ -252,7 +250,7 @@ export default function EditCourseModal({
                 Chỉnh sửa khóa học
               </h2>
               <p className='text-sm text-gray-600'>
-                Cập nhật thông tin khóa học: {course.name}
+                Cập nhật thông tin khóa học: {course.course_name || course.name}
               </p>
             </div>
           </div>

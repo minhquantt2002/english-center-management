@@ -4,8 +4,9 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..schemas.auth import LoginRequest, RegisterRequest, TokenResponse
-from ..schemas.user import UserResponse
+from ..schemas.user import UserResponse, UserUpdate
 from ..services import auth as auth_service
+from ..services import user as user_service
 from ..config import settings
 
 router = APIRouter()
@@ -116,7 +117,63 @@ async def get_current_user_info(
         date_of_birth=user.date_of_birth,
         phone_number=user.phone_number,
         input_level=user.input_level,
+        specialization=user.specialization,
+        address=user.address,
+        education=user.education,
+        experience_years=user.experience_years,
+        level=user.level,
+        parent_name=user.parent_name,
+        parent_phone=user.parent_phone,
+        student_id=user.student_id,
         created_at=user.created_at
+    )
+
+@router.put("/me", response_model=UserResponse)
+async def update_current_user_info(
+    user_data: UserUpdate,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
+):
+    """
+    Cập nhật thông tin người dùng hiện tại
+    """
+    token = credentials.credentials
+    current_user = auth_service.get_current_user(db, token)
+    
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token không hợp lệ",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Update user info
+    updated_user = user_service.update_user(db, current_user.id, user_data)
+    
+    if not updated_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Không thể cập nhật thông tin người dùng"
+        )
+    
+    return UserResponse(
+        id=updated_user.id,
+        name=updated_user.name,
+        email=updated_user.email,
+        role_name=updated_user.role_name,
+        bio=updated_user.bio,
+        date_of_birth=updated_user.date_of_birth,
+        phone_number=updated_user.phone_number,
+        input_level=updated_user.input_level,
+        specialization=updated_user.specialization,
+        address=updated_user.address,
+        education=updated_user.education,
+        experience_years=updated_user.experience_years,
+        level=updated_user.level,
+        parent_name=updated_user.parent_name,
+        parent_phone=updated_user.parent_phone,
+        student_id=updated_user.student_id,
+        created_at=updated_user.created_at
     )
 
 @router.post("/register-fake-data", response_model=dict)

@@ -1,12 +1,25 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Edit, Trash2, Plus, Mail, Phone, Eye } from 'lucide-react';
+import {
+  Search,
+  Edit,
+  Trash2,
+  Plus,
+  Mail,
+  Phone,
+  Eye,
+  Users,
+  Filter,
+  Calendar,
+  BookOpen,
+} from 'lucide-react';
 import { Student, StudentProfile } from '../../../types';
 import ViewStudentModal from './_components/view-student';
 import EditStudentModal from './_components/edit-student';
 import CreateStudentModal from './_components/create-student';
-import { useStudentApi } from './_hooks/use-api';
+import { useStudentApi } from '../_hooks';
+import Image from 'next/image';
 
 const StudentManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,18 +31,13 @@ const StudentManagement = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
 
-  const {
-    loading,
-    error,
-    createStudent,
-    updateStudent,
-    deleteStudent,
-    getStudents,
-  } = useStudentApi();
+  const { createStudent, updateStudent, deleteStudent, getStudents } =
+    useStudentApi();
 
   // Fetch students on component mount
   useEffect(() => {
     fetchStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchStudents = async () => {
@@ -44,24 +52,24 @@ const StudentManagement = () => {
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 border-green-200';
       case 'inactive':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 border-gray-200';
       default:
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
     }
   };
 
   const getLevelBadgeColor = (level: string) => {
     switch (level) {
       case 'beginner':
-        return 'bg-green-100 text-green-700';
+        return 'bg-green-100 text-green-700 border-green-200';
       case 'intermediate':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'advanced':
-        return 'bg-purple-100 text-purple-700';
+        return 'bg-purple-100 text-purple-700 border-purple-200';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-gray-100 text-gray-700 border-gray-200';
     }
   };
 
@@ -74,7 +82,7 @@ const StudentManagement = () => {
       student.level === levelFilter.toLowerCase();
     const matchesStatus =
       statusFilter === 'All Status' ||
-      student.status === statusFilter.toLowerCase();
+      (student.status || 'active') === statusFilter.toLowerCase();
     return matchesSearch && matchesLevel && matchesStatus;
   });
 
@@ -139,18 +147,88 @@ const StudentManagement = () => {
   };
 
   return (
-    <div className='min-h-screen bg-gray-50 p-6'>
-      <div className='max-w-7xl mx-auto'>
-        {/* Header */}
-        <div className='mb-8'>
-          <h1 className='text-3xl font-bold text-gray-900'>Quản lý học viên</h1>
-          <p className='text-gray-600 mt-1'>
-            Quản lý và tổ chức hồ sơ học viên
-          </p>
+    <>
+      {/* Header */}
+      <div className='mb-8'>
+        <div className='flex items-center gap-4 mb-4'>
+          <div className='w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+            <Users className='w-6 h-6 text-white' />
+          </div>
+          <div>
+            <h1 className='text-3xl font-bold text-gray-900'>
+              Quản lý học viên
+            </h1>
+            <p className='text-gray-600 mt-1'>
+              Quản lý và tổ chức hồ sơ học viên của trung tâm
+            </p>
+          </div>
         </div>
 
-        {/* Filters and Search */}
-        <div className='flex flex-col sm:flex-row gap-4 mb-8'>
+        {/* Stats Cards */}
+        <div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-8'>
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>
+                  Tổng học viên
+                </p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {students.length}
+                </p>
+              </div>
+              <div className='w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center'>
+                <Users className='w-6 h-6 text-blue-600' />
+              </div>
+            </div>
+          </div>
+
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>Đang học</p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {students.filter((s) => s.status === 'active').length}
+                </p>
+              </div>
+              <div className='w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center'>
+                <BookOpen className='w-6 h-6 text-green-600' />
+              </div>
+            </div>
+          </div>
+
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>Tạm nghỉ</p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {students.filter((s) => s.status === 'inactive').length}
+                </p>
+              </div>
+              <div className='w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center'>
+                <Calendar className='w-6 h-6 text-yellow-600' />
+              </div>
+            </div>
+          </div>
+
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>
+                  Mới tháng này
+                </p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>12</p>
+              </div>
+              <div className='w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center'>
+                <Plus className='w-6 h-6 text-purple-600' />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters and Search */}
+      <div className='bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-8'>
+        <div className='flex flex-col lg:flex-row gap-4'>
           {/* Search */}
           <div className='flex-1 relative'>
             <Search
@@ -159,185 +237,229 @@ const StudentManagement = () => {
             />
             <input
               type='text'
-              placeholder='Tìm kiếm học viên...'
+              placeholder='Tìm kiếm học viên theo tên hoặc email...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+              className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             />
           </div>
 
           {/* Level Filter */}
-          <select
-            value={levelFilter}
-            onChange={(e) => setLevelFilter(e.target.value)}
-            className='px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[150px]'
-          >
-            <option>Tất cả trình độ</option>
-            <option>Sơ cấp</option>
-            <option>Trung cấp</option>
-            <option>Cao cấp</option>
-          </select>
+          <div className='relative'>
+            <select
+              value={levelFilter}
+              onChange={(e) => setLevelFilter(e.target.value)}
+              className='px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[150px] appearance-none bg-white'
+            >
+              <option>Tất cả trình độ</option>
+              <option>Sơ cấp</option>
+              <option>Trung cấp</option>
+              <option>Cao cấp</option>
+            </select>
+            <Filter className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none' />
+          </div>
 
           {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className='px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px]'
-          >
-            <option>Tất cả trạng thái</option>
-            <option>Đang học</option>
-            <option>Tạm nghỉ</option>
-          </select>
+          <div className='relative'>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className='px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px] appearance-none bg-white'
+            >
+              <option>Tất cả trạng thái</option>
+              <option>Đang học</option>
+              <option>Tạm nghỉ</option>
+            </select>
+            <Filter className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none' />
+          </div>
 
           {/* Create Student Button */}
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className='px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center space-x-2 transition-colors'
+            className='px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl'
           >
             <Plus className='h-5 w-5' />
-            <span>Thêm học viên</span>
+            <span className='font-semibold'>Thêm học viên</span>
           </button>
-        </div>
-
-        {/* Students Table */}
-        <div className='bg-white rounded-lg shadow-sm overflow-hidden'>
-          <div className='overflow-x-auto'>
-            <table className='w-full'>
-              <thead className='bg-gray-50'>
-                <tr>
-                  <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Học viên
-                  </th>
-                  <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Liên hệ
-                  </th>
-                  <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Trình độ
-                  </th>
-                  <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Lớp học hiện tại
-                  </th>
-                  <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Trạng thái
-                  </th>
-                  <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Thao tác
-                  </th>
-                </tr>
-              </thead>
-              <tbody className='bg-white divide-y divide-gray-200'>
-                {filteredStudents.map((student: Student) => (
-                  <tr key={student.id} className='hover:bg-gray-50'>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <div className='flex items-center'>
-                        <div className='h-12 w-12 flex-shrink-0'>
-                          <img
-                            className='h-12 w-12 rounded-full object-cover'
-                            src={
-                              student.avatar ||
-                              'https://images.unsplash.com/photo-1494790108755-2616b612b3fd?w=150&h=150&fit=crop&crop=face'
-                            }
-                            alt={student.name}
-                          />
-                        </div>
-                        <div className='ml-4'>
-                          <div className='text-sm font-medium text-gray-900'>
-                            {student.name}
-                          </div>
-                          <div className='text-sm text-gray-500'>
-                            Mã số: {student.studentId}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <div className='text-sm text-gray-900 flex items-center gap-1'>
-                        <Mail size={14} className='text-gray-400' />
-                        {student.email}
-                      </div>
-                      <div className='text-sm text-gray-500 flex items-center gap-1'>
-                        <Phone size={14} className='text-gray-400' />
-                        {student.phone}
-                      </div>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getLevelBadgeColor(
-                          student.level
-                        )}`}
-                      >
-                        {student.level.charAt(0).toUpperCase() +
-                          student.level.slice(1)}
-                      </span>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                      {student.currentClass || 'Chưa phân lớp'}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(
-                          student.status
-                        )}`}
-                      >
-                        {student.status.charAt(0).toUpperCase() +
-                          student.status.slice(1)}
-                      </span>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
-                      <div className='flex space-x-2'>
-                        <button
-                          onClick={() => handleViewStudent(student)}
-                          className='text-blue-600 hover:text-blue-900'
-                          title='Xem chi tiết'
-                        >
-                          <Eye size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleEditStudent(student)}
-                          className='text-indigo-600 hover:text-indigo-900'
-                          title='Chỉnh sửa'
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteStudent(student.id)}
-                          className='text-red-600 hover:text-red-900'
-                          title='Xóa'
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
       </div>
 
-      {/* View Student Modal */}
-      <ViewStudentModal
-        student={selectedStudent}
-        isOpen={isViewModalOpen}
-        onClose={handleCloseViewModal}
-      />
+      {/* Students Table */}
+      <div className='bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden'>
+        <div className='overflow-x-auto'>
+          <table className='w-full'>
+            <thead className='bg-gradient-to-r from-gray-50 to-gray-100'>
+              <tr>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Học viên
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Liên hệ
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Trình độ
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Lớp học hiện tại
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Trạng thái
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Thao tác
+                </th>
+              </tr>
+            </thead>
+            <tbody className='bg-white divide-y divide-gray-100'>
+              {filteredStudents.map((student: Student) => (
+                <tr
+                  key={student.id}
+                  className='hover:bg-gray-50 transition-colors'
+                >
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    <div className='flex items-center'>
+                      <div className='h-12 w-12 flex-shrink-0'>
+                        <Image
+                          className='h-12 w-12 rounded-full object-cover ring-2 ring-gray-100'
+                          src={
+                            student.avatar ||
+                            'https://images.unsplash.com/photo-1494790108755-2616b612b3fd?w=150&h=150&fit=crop&crop=face'
+                          }
+                          alt={student.name}
+                        />
+                      </div>
+                      <div className='ml-4'>
+                        <div className='text-sm font-semibold text-gray-900'>
+                          {student.name}
+                        </div>
+                        <div className='text-sm text-gray-500'>
+                          Mã số: {student.studentId}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    <div className='flex flex-col space-y-1'>
+                      <div className='flex items-center text-sm text-gray-900'>
+                        <Mail className='w-4 h-4 text-gray-400 mr-2' />
+                        {student.email}
+                      </div>
+                      <div className='flex items-center text-sm text-gray-500'>
+                        <Phone className='w-4 h-4 text-gray-400 mr-2' />
+                        {student.phone || 'Chưa cập nhật'}
+                      </div>
+                    </div>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    <span
+                      className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getLevelBadgeColor(
+                        student.level
+                      )}`}
+                    >
+                      {student.level === 'beginner'
+                        ? 'Sơ cấp'
+                        : student.level === 'intermediate'
+                        ? 'Trung cấp'
+                        : 'Cao cấp'}
+                    </span>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                    {student.currentClass || 'Chưa phân lớp'}
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    <span
+                      className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getStatusBadgeColor(
+                        student.status || 'active'
+                      )}`}
+                    >
+                      {student.status === 'active' ? 'Đang học' : 'Tạm nghỉ'}
+                    </span>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
+                    <div className='flex items-center space-x-2'>
+                      <button
+                        onClick={() => handleViewStudent(student)}
+                        className='text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors'
+                        title='Xem chi tiết'
+                      >
+                        <Eye className='w-4 h-4' />
+                      </button>
+                      <button
+                        onClick={() => handleEditStudent(student)}
+                        className='text-green-600 hover:text-green-900 p-1 rounded-lg hover:bg-green-50 transition-colors'
+                        title='Chỉnh sửa'
+                      >
+                        <Edit className='w-4 h-4' />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteStudent(student.id)}
+                        className='text-red-600 hover:text-red-900 p-1 rounded-lg hover:bg-red-50 transition-colors'
+                        title='Xóa'
+                      >
+                        <Trash2 className='w-4 h-4' />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-      {/* Edit Student Modal */}
-      <EditStudentModal
-        student={selectedStudent}
-        isOpen={isEditModalOpen}
-        onClose={handleCloseEditModal}
-        onSave={handleSaveStudent}
-      />
+        {/* Empty State */}
+        {filteredStudents.length === 0 && (
+          <div className='text-center py-12'>
+            <Users className='w-16 h-16 text-gray-300 mx-auto mb-4' />
+            <h3 className='text-lg font-medium text-gray-900 mb-2'>
+              Không tìm thấy học viên
+            </h3>
+            <p className='text-gray-500 mb-6'>
+              {searchTerm ||
+              levelFilter !== 'All Levels' ||
+              statusFilter !== 'All Status'
+                ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm'
+                : 'Bắt đầu bằng cách thêm học viên mới'}
+            </p>
+            {!searchTerm &&
+              levelFilter === 'All Levels' &&
+              statusFilter === 'All Status' && (
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className='px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+                >
+                  Thêm học viên đầu tiên
+                </button>
+              )}
+          </div>
+        )}
+      </div>
 
-      {/* Create Student Modal */}
-      <CreateStudentModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSave={handleCreateStudent}
-      />
-    </div>
+      {/* Modals */}
+      {isViewModalOpen && selectedStudent && (
+        <ViewStudentModal
+          student={selectedStudent}
+          isOpen={isViewModalOpen}
+          onClose={handleCloseViewModal}
+        />
+      )}
+
+      {isEditModalOpen && selectedStudent && (
+        <EditStudentModal
+          student={selectedStudent}
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          onSave={handleSaveStudent}
+        />
+      )}
+
+      {isCreateModalOpen && (
+        <CreateStudentModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onSave={handleCreateStudent}
+        />
+      )}
+    </>
   );
 };
 

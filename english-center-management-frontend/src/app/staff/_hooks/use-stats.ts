@@ -1,36 +1,16 @@
 import { useState, useCallback } from 'react';
-import { api } from '@/lib/api';
+import { api } from '../../../lib/api';
+import { StaffStats, Room } from '../../../types/staff';
 
-export interface DashboardStats {
-  totalStudents: number;
-  totalTeachers: number;
-  totalCourses: number;
-  totalClasses: number;
-  recentEnrollments: Array<{
-    id: string;
-    name: string;
-    course: string;
-    time: string;
-    avatar: string;
-  }>;
-}
-
-export interface StatCard {
-  title: string;
-  value: string;
-  change: string;
-  icon: string;
-}
-
-export const useAdminApi = () => {
+export const useStaffStatsApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getDashboardStats = useCallback(async (): Promise<DashboardStats> => {
+  const getStaffStats = useCallback(async (): Promise<StaffStats> => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get('/admin/dashboard/stats');
+      const response = await api.get('/staff/stats');
       return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
@@ -41,11 +21,11 @@ export const useAdminApi = () => {
     }
   }, []);
 
-  const getStatCards = useCallback(async (): Promise<StatCard[]> => {
+  const getRooms = useCallback(async (): Promise<Room[]> => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get('/admin/dashboard/stat-cards');
+      const response = await api.get('/staff/rooms');
       return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
@@ -59,7 +39,7 @@ export const useAdminApi = () => {
   return {
     loading,
     error,
-    getDashboardStats,
-    getStatCards,
+    getStaffStats,
+    getRooms,
   };
 };

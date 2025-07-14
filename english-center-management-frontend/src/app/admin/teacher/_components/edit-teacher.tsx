@@ -76,19 +76,6 @@ const experienceYears = [
   { value: 10, label: '10+ năm' },
 ];
 
-const commonLanguages = [
-  'Tiếng Anh',
-  'Tiếng Việt',
-  'Tiếng Trung',
-  'Tiếng Nhật',
-  'Tiếng Hàn',
-  'Tiếng Pháp',
-  'Tiếng Đức',
-  'Tiếng Tây Ban Nha',
-  'Tiếng Ý',
-  'Tiếng Nga',
-];
-
 export default function EditTeacherModal({
   isOpen,
   onClose,

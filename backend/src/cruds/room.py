@@ -12,6 +12,10 @@ def get_rooms(db: Session, skip: int = 0, limit: int = 100) -> List[Room]:
     """Get rooms with pagination"""
     return db.query(Room).offset(skip).limit(limit).all()
 
+def get_all_rooms(db: Session) -> List[Room]:
+    """Get all rooms without pagination"""
+    return db.query(Room).all()
+
 def get_rooms_by_capacity(db: Session, min_capacity: int) -> List[Room]:
     """Get rooms with minimum capacity"""
     return db.query(Room).filter(Room.capacity >= min_capacity).all()

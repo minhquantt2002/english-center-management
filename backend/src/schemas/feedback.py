@@ -9,7 +9,7 @@ class FeedbackBase(BaseSchema):
     class_id: UUID
     content: Optional[str] = None
     rating: Optional[int] = None  # Đánh giá từ 1-5
-    feedback_type: Optional[str] = None  # academic, behavior, attendance
+    feedback_type: Optional[str] = None  # academic, behavior
 
 class FeedbackCreate(FeedbackBase):
     pass

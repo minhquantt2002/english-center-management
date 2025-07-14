@@ -1,8 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Users, Calendar, BarChart3 } from 'lucide-react';
-import { useStaffApi } from './_hooks/use-api';
+import {
+  Users,
+  Calendar,
+  BarChart3,
+  TrendingUp,
+  ArrowUp,
+  AlertCircle,
+  BookOpen,
+  GraduationCap,
+  Receipt,
+  Clock,
+} from 'lucide-react';
+import { useStaffStatsApi } from './_hooks';
 
 const Dashboard = () => {
   const [statsData, setStatsData] = useState<any[]>([]);
@@ -10,11 +21,13 @@ const Dashboard = () => {
   const [todaySchedule, setTodaySchedule] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { loading, error, getStaffStats } = useStaffApi();
+  const { error, getStaffStats } = useStaffStatsApi();
 
   // Fetch staff stats on component mount
   useEffect(() => {
     fetchStaffStats();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchStaffStats = async () => {
@@ -29,7 +42,7 @@ const Dashboard = () => {
           change: '+18% so với tháng qua',
           changeType: 'positive',
           icon: Users,
-          color: 'bg-blue-500',
+          color: 'bg-gradient-to-r from-blue-500 to-blue-600',
         },
         {
           title: 'Lớp đang hoạt động',
@@ -37,7 +50,7 @@ const Dashboard = () => {
           change: '— Không đổi so với tuần trước',
           changeType: 'neutral',
           icon: Calendar,
-          color: 'bg-orange-500',
+          color: 'bg-gradient-to-r from-orange-500 to-orange-600',
         },
         {
           title: 'Lịch học hôm nay',
@@ -45,7 +58,15 @@ const Dashboard = () => {
           change: '5 lớp đang diễn ra',
           changeType: 'info',
           icon: BarChart3,
-          color: 'bg-purple-500',
+          color: 'bg-gradient-to-r from-purple-500 to-purple-600',
+        },
+        {
+          title: 'Hóa đơn chờ xử lý',
+          value: String(data.pendingInvoices || 0),
+          change: '+3 so với hôm qua',
+          changeType: 'positive',
+          icon: Receipt,
+          color: 'bg-gradient-to-r from-green-500 to-green-600',
         },
       ];
 
@@ -64,22 +85,33 @@ const Dashboard = () => {
       title: 'Thêm học viên',
       subtitle: 'Đăng ký học viên mới',
       icon: Users,
-      color: 'bg-teal-500',
+      color: 'bg-gradient-to-r from-teal-500 to-teal-600',
       textColor: 'text-white',
+      href: '/staff/list-student',
     },
     {
       title: 'Phân lớp',
       subtitle: 'Xếp lớp cho học viên',
-      icon: Users,
-      color: 'bg-green-500',
+      icon: GraduationCap,
+      color: 'bg-gradient-to-r from-green-500 to-green-600',
       textColor: 'text-white',
+      href: '/staff/list-classroom',
     },
     {
       title: 'Thời khóa biểu',
       subtitle: 'Quản lý lịch học',
       icon: Calendar,
-      color: 'bg-purple-500',
+      color: 'bg-gradient-to-r from-purple-500 to-purple-600',
       textColor: 'text-white',
+      href: '/staff/list-classroom',
+    },
+    {
+      title: 'Tạo hóa đơn',
+      subtitle: 'Tạo hóa đơn học viên',
+      icon: Receipt,
+      color: 'bg-gradient-to-r from-orange-500 to-orange-600',
+      textColor: 'text-white',
+      href: '/staff/create-student-invoice',
     },
   ];
 
@@ -97,62 +129,91 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-        <div className='flex items-center gap-2'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
-          <span className='text-gray-600'>Đang tải dữ liệu...</span>
-        </div>
+      <div className='flex justify-center items-center py-12'>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-green-600'></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-        <div className='text-center'>
-          <p className='text-red-600 mb-2'>Có lỗi xảy ra khi tải dữ liệu</p>
-          <button
-            onClick={fetchStaffStats}
-            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
-          >
-            Thử lại
-          </button>
+      <div className='bg-red-50 border border-red-200 rounded-xl p-6 mb-6'>
+        <div className='flex items-center gap-3'>
+          <AlertCircle className='w-5 h-5 text-red-500' />
+          <p className='text-red-800 font-medium'>
+            Có lỗi xảy ra khi tải dữ liệu
+          </p>
         </div>
+        <button
+          onClick={fetchStaffStats}
+          className='mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors'
+        >
+          Thử lại
+        </button>
       </div>
     );
   }
 
   return (
     <>
-      {/* Page Title */}
-      <h1 className='text-2xl font-semibold text-gray-900 mb-8'>Tổng quan</h1>
+      {/* Header */}
+      <div className='mb-8'>
+        <div className='flex items-center gap-4 mb-4'>
+          <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg'>
+            <Users className='w-6 h-6 text-white' />
+          </div>
+          <div>
+            <h1 className='text-3xl font-bold text-gray-900'>
+              Chào mừng trở lại, Staff!
+            </h1>
+            <p className='text-gray-600 mt-1'>
+              Đây là tổng quan về hoạt động của trung tâm hôm nay
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Stats Cards */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
         {statsData.map((stat, index) => (
           <div
             key={index}
-            className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'
+            className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200'
           >
             <div className='flex items-center justify-between mb-4'>
-              <div className={`${stat.color} p-3 rounded-lg text-white`}>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>
+                  {stat.title}
+                </p>
+                <p className='text-3xl font-bold text-gray-900 mt-1'>
+                  {stat.value}
+                </p>
+              </div>
+              <div
+                className={`w-14 h-14 rounded-xl flex items-center justify-center ${stat.color} text-white shadow-lg`}
+              >
                 <stat.icon className='w-6 h-6' />
               </div>
             </div>
-            <div className='text-3xl font-bold text-gray-900 mb-2'>
-              {stat.value}
-            </div>
-            <div className='text-sm text-gray-600 mb-2'>{stat.title}</div>
-            <div
-              className={`text-sm ${
-                stat.changeType === 'positive'
-                  ? 'text-green-600'
-                  : stat.changeType === 'neutral'
-                  ? 'text-gray-500'
-                  : 'text-blue-600'
-              }`}
-            >
-              {stat.change}
+            <div className='flex items-center gap-2'>
+              {stat.changeType === 'positive' ? (
+                <ArrowUp size={16} className='text-green-500' />
+              ) : stat.changeType === 'neutral' ? (
+                <TrendingUp size={16} className='text-gray-500' />
+              ) : (
+                <BarChart3 size={16} className='text-blue-500' />
+              )}
+              <span
+                className={`text-sm font-medium ${
+                  stat.changeType === 'positive'
+                    ? 'text-green-500'
+                    : stat.changeType === 'neutral'
+                    ? 'text-gray-500'
+                    : 'text-blue-500'
+                }`}
+              >
+                {stat.change}
+              </span>
             </div>
           </div>
         ))}
@@ -160,64 +221,93 @@ const Dashboard = () => {
 
       {/* Quick Actions */}
       <div className='mb-8'>
-        <h2 className='text-lg font-semibold text-gray-900 mb-4'>
+        <h2 className='text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3'>
+          <div className='w-1 h-8 bg-green-600 rounded-full'></div>
           Truy cập nhanh
         </h2>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
           {quickActions.map((action, index) => (
-            <div
+            <a
               key={index}
-              className={`${action.color} ${action.textColor} rounded-lg p-6 hover:opacity-90 transition-opacity cursor-pointer`}
+              href={action.href}
+              className={`${action.color} ${action.textColor} rounded-xl p-6 hover:shadow-lg transition-all duration-200 cursor-pointer group`}
             >
               <div className='flex items-center space-x-3'>
-                <action.icon className='w-8 h-8' />
+                <div className='w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200'>
+                  <action.icon className='w-6 h-6' />
+                </div>
                 <div>
-                  <div className='font-semibold'>{action.title}</div>
+                  <div className='font-semibold text-lg'>{action.title}</div>
                   <div className='text-sm opacity-90'>{action.subtitle}</div>
                 </div>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </div>
 
-      {/* Bottom Section */}
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
+      {/* Content Grid */}
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
         {/* Recent Registrations */}
-        <div className='bg-white rounded-lg shadow-sm border border-gray-200'>
-          <div className='p-6 border-b border-gray-200'>
-            <h3 className='text-lg font-semibold text-gray-900'>
-              Đăng ký gần đây
-            </h3>
+        <div className='lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm'>
+          <div className='p-6 border-b border-gray-100'>
+            <div className='flex items-center justify-between'>
+              <h3 className='text-xl font-bold text-gray-900 flex items-center gap-2'>
+                <Users className='w-5 h-5 text-green-600' />
+                Đăng ký gần đây
+              </h3>
+              <button className='text-green-600 text-sm font-semibold hover:text-green-700 transition-colors'>
+                Xem tất cả
+              </button>
+            </div>
           </div>
           <div className='p-6'>
             <div className='space-y-4'>
-              {recentRegistrations.map((student, index) => (
-                <div key={index} className='flex items-center space-x-4'>
-                  <div className='w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-white font-semibold'>
-                    {student.avatar}
-                  </div>
-                  <div className='flex-1'>
-                    <div className='font-medium text-gray-900'>
-                      {student.name}
-                    </div>
-                    <div className='text-sm text-gray-500'>{student.level}</div>
-                  </div>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${student.statusColor}`}
+              {recentRegistrations.length > 0 ? (
+                recentRegistrations.map((student, index) => (
+                  <div
+                    key={index}
+                    className='flex items-center space-x-4 py-3 border-b border-gray-50 last:border-b-0'
                   >
-                    {student.status}
-                  </span>
+                    <div className='w-12 h-12 bg-gradient-to-r from-teal-500 to-teal-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
+                      {student.avatar}
+                    </div>
+                    <div className='flex-1'>
+                      <div className='font-semibold text-gray-900'>
+                        {student.name}
+                      </div>
+                      <div className='text-sm text-gray-500 flex items-center gap-2'>
+                        <BookOpen className='w-4 h-4' />
+                        {student.level}
+                      </div>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold border ${student.statusColor}`}
+                    >
+                      {student.status}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className='text-center py-8'>
+                  <Users className='w-16 h-16 text-gray-300 mx-auto mb-3' />
+                  <p className='text-gray-500 font-medium'>
+                    Không có đăng ký gần đây
+                  </p>
+                  <p className='text-gray-400 text-sm'>
+                    Học viên mới sẽ xuất hiện ở đây
+                  </p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
 
         {/* Weekly Stats */}
-        <div className='bg-white rounded-lg shadow-sm border border-gray-200'>
-          <div className='p-6 border-b border-gray-200'>
-            <h3 className='text-lg font-semibold text-gray-900'>
+        <div className='bg-white rounded-xl border border-gray-100 shadow-sm'>
+          <div className='p-6 border-b border-gray-100'>
+            <h3 className='text-xl font-bold text-gray-900 flex items-center gap-2'>
+              <BarChart3 className='w-5 h-5 text-purple-600' />
               Thống kê đăng ký tuần
             </h3>
           </div>
@@ -228,15 +318,19 @@ const Dashboard = () => {
                   key={index}
                   className='flex flex-col items-center space-y-2'
                 >
-                  <div className='text-xs text-gray-600'>{stat.value}</div>
+                  <div className='text-xs text-gray-600 font-medium'>
+                    {stat.value}
+                  </div>
                   <div
-                    className='bg-teal-500 rounded-t'
+                    className='bg-gradient-to-t from-purple-500 to-purple-600 rounded-t shadow-sm'
                     style={{
                       height: `${(stat.value / maxValue) * 100}px`,
                       width: '24px',
                     }}
                   ></div>
-                  <div className='text-xs text-gray-600'>{stat.day}</div>
+                  <div className='text-xs text-gray-600 font-medium'>
+                    {stat.day}
+                  </div>
                 </div>
               ))}
             </div>
@@ -245,59 +339,53 @@ const Dashboard = () => {
       </div>
 
       {/* Today's Schedule */}
-      <div className='mt-8 bg-white rounded-lg shadow-sm border border-gray-200'>
-        <div className='p-6 border-b border-gray-200'>
-          <h3 className='text-lg font-semibold text-gray-900'>
+      <div className='mt-8 bg-white rounded-xl border border-gray-100 shadow-sm'>
+        <div className='p-6 border-b border-gray-100'>
+          <h3 className='text-xl font-bold text-gray-900 flex items-center gap-2'>
+            <Calendar className='w-5 h-5 text-orange-600' />
             Lịch học hôm nay
           </h3>
         </div>
-        <div className='overflow-x-auto'>
-          <table className='min-w-full'>
-            <thead className='bg-gray-50'>
-              <tr>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                  Thời gian
-                </th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                  Lớp
-                </th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                  Giáo viên
-                </th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                  Phòng
-                </th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                  Trạng thái
-                </th>
-              </tr>
-            </thead>
-            <tbody className='bg-white divide-y divide-gray-200'>
+        <div className='p-6'>
+          {todaySchedule.length > 0 ? (
+            <div className='space-y-4'>
               {todaySchedule.map((schedule, index) => (
-                <tr key={index}>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                    {schedule.time}
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
-                    {schedule.class}
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                    {schedule.teacher}
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                    {schedule.room}
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${schedule.statusColor}`}
-                    >
+                <div
+                  key={index}
+                  className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'
+                >
+                  <div className='flex items-center space-x-4'>
+                    <div className='w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center text-white'>
+                      <Clock className='w-5 h-5' />
+                    </div>
+                    <div>
+                      <div className='font-semibold text-gray-900'>
+                        {schedule.className}
+                      </div>
+                      <div className='text-sm text-gray-500'>
+                        {schedule.time}
+                      </div>
+                    </div>
+                  </div>
+                  <div className='flex items-center gap-2'>
+                    <span className='px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full border border-green-200'>
                       {schedule.status}
                     </span>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          ) : (
+            <div className='text-center py-8'>
+              <Calendar className='w-16 h-16 text-gray-300 mx-auto mb-3' />
+              <p className='text-gray-500 font-medium'>
+                Không có lịch học hôm nay
+              </p>
+              <p className='text-gray-400 text-sm'>
+                Tất cả lớp học đã hoàn thành
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </>

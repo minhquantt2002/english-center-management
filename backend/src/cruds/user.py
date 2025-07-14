@@ -9,6 +9,10 @@ def get_user(db: Session, user_id: UUID) -> Optional[User]:
     """Get user by UUID"""
     return db.query(User).filter(User.id == user_id).first()
 
+def get_user_by_id(db: Session, user_id: UUID) -> Optional[User]:
+    """Get user by ID (alias for get_user)"""
+    return get_user(db, user_id)
+
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     """Get user by email"""
     return db.query(User).filter(User.email == email).first()
@@ -16,6 +20,10 @@ def get_user_by_email(db: Session, email: str) -> Optional[User]:
 def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
     """Get users with pagination"""
     return db.query(User).offset(skip).limit(limit).all()
+
+def get_all_users(db: Session) -> List[User]:
+    """Get all users without pagination"""
+    return db.query(User).all()
 
 def get_users_by_role(db: Session, role_name: str) -> List[User]:
     """Get users by role name"""

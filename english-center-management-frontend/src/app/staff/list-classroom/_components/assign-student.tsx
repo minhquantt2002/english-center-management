@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Search, Users, User, Check, AlertCircle } from 'lucide-react';
-import { useStaffApi } from '../../_hooks/use-api';
+import { useStaffStudentApi, useStaffClassroomApi } from '../../_hooks';
 import { Student, ClassData } from '../../../../types';
+import Image from 'next/image';
 
 interface AssignStudentModalProps {
   isOpen: boolean;
@@ -31,10 +32,12 @@ export default function AssignStudentModal({
 
   const {
     getAvailableStudents,
-    assignMultipleStudentsToClassroom,
-    loading,
-    error,
-  } = useStaffApi();
+    loading: studentLoading,
+    error: studentError,
+  } = useStaffStudentApi();
+
+  const { assignMultipleStudentsToClassroom, loading: classroomLoading } =
+    useStaffClassroomApi();
 
   // Initialize students with selection state
   useEffect(() => {
@@ -43,7 +46,7 @@ export default function AssignStudentModal({
         setIsFetchingStudents(true);
         try {
           const availableStudents = await getAvailableStudents();
-          const studentsWithSelection = availableStudents.map(
+          const studentsWithSelection = availableStudents.data.map(
             (student: Student) => ({
               ...student,
               isSelected: false,
@@ -240,11 +243,11 @@ export default function AssignStudentModal({
               <div className='w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
               <p>Đang tải danh sách học viên...</p>
             </div>
-          ) : error ? (
+          ) : studentError ? (
             <div className='p-8 text-center text-red-500'>
               <AlertCircle className='w-12 h-12 mx-auto mb-4' />
               <p>Có lỗi xảy ra khi tải danh sách học viên</p>
-              <p className='text-sm mt-2'>{error}</p>
+              <p className='text-sm mt-2'>{studentError}</p>
             </div>
           ) : filteredStudents.length === 0 ? (
             <div className='p-8 text-center text-gray-500'>
@@ -302,7 +305,7 @@ export default function AssignStudentModal({
                       <div className='flex-1 min-w-0'>
                         <div className='flex items-center space-x-2'>
                           {student.avatar ? (
-                            <img
+                            <Image
                               src={student.avatar}
                               alt={student.name}
                               className='w-8 h-8 rounded-full'
@@ -366,7 +369,11 @@ export default function AssignStudentModal({
               <button
                 onClick={handleAssignStudents}
                 disabled={
-                  selectedCount === 0 || isLoading || isFetchingStudents
+                  selectedCount === 0 ||
+                  isLoading ||
+                  isFetchingStudents ||
+                  studentLoading ||
+                  classroomLoading
                 }
                 className='px-6 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center space-x-2'
               >

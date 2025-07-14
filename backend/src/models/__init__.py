@@ -7,10 +7,7 @@ from .exam import Exam
 from .room import Room
 from .enrollment import Enrollment
 from .feedback import Feedback
-from .material import Material
-from .assignment import Assignment, AssignmentSubmission
-from .attendance import Attendance
-from .invoice import Invoice
+
 from .achievement import Achievement
 
 __all__ = [
@@ -25,10 +22,6 @@ __all__ = [
     "Room",
     "Enrollment",
     "Feedback",
-    "Material",
-    "Assignment",
-    "AssignmentSubmission",
-    "Attendance",
-    "Invoice",
+
     "Achievement"
 ] 

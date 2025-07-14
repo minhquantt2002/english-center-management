@@ -1,18 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-  X,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-  User,
-  BookOpen,
-  Save,
-  AlertCircle,
-} from 'lucide-react';
+import { X, Phone, User, BookOpen, Save, AlertCircle } from 'lucide-react';
 import { Student } from '../../../../types';
+import Image from 'next/image';
 
 interface EditStudentModalProps {
   student: Student | null;
@@ -124,30 +115,6 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
     }
   };
 
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'inactive':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-yellow-100 text-yellow-800';
-    }
-  };
-
-  const getLevelBadgeColor = (level: string) => {
-    switch (level) {
-      case 'beginner':
-        return 'bg-green-100 text-green-700';
-      case 'intermediate':
-        return 'bg-blue-100 text-blue-700';
-      case 'advanced':
-        return 'bg-purple-100 text-purple-700';
-      default:
-        return 'bg-gray-100 text-gray-700';
-    }
-  };
-
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
       <div className='bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto'>
@@ -155,7 +122,7 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
         <div className='flex items-center justify-between p-6 border-b border-gray-200'>
           <div className='flex items-center space-x-3'>
             <div className='h-12 w-12 flex-shrink-0'>
-              <img
+              <Image
                 className='h-12 w-12 rounded-full object-cover'
                 src={
                   formData.avatar ||

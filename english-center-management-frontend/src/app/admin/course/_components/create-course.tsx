@@ -5,14 +5,12 @@ import {
   X,
   BookOpen,
   Calendar,
-  Clock,
   DollarSign,
-  Users,
   FileText,
   Plus,
   Save,
 } from 'lucide-react';
-import { Course, CourseLevel, CourseStatus } from '../../../../types';
+import { CourseLevel, CourseStatus } from '../../../../types';
 
 interface CreateCourseModalProps {
   isOpen: boolean;

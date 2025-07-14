@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   User,
@@ -10,7 +10,9 @@ import {
   Calendar,
   Edit2,
   Save,
+  Loader2,
 } from 'lucide-react';
+import { useUserInfo } from './UserInfoContext';
 
 interface PersonalInfoModalProps {
   isOpen: boolean;
@@ -29,6 +31,11 @@ interface PersonalInfo {
   specialization?: string;
   studentId?: string;
   employeeId?: string;
+  bio?: string;
+  education?: string;
+  experienceYears?: number;
+  parentName?: string;
+  parentPhone?: string;
 }
 
 const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
@@ -36,42 +43,89 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
   onClose,
   userRole = 'student',
 }) => {
+  const { userInfo, updateUserInfo, loading } = useUserInfo();
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
-    name:
-      userRole === 'student'
-        ? 'Sarah Johnson'
-        : userRole === 'teacher'
-        ? 'Mr. Anderson'
-        : userRole === 'admin'
-        ? 'John Smith'
-        : 'Emily Davis',
-    email:
-      userRole === 'student'
-        ? 'sarah.j@email.com'
-        : userRole === 'teacher'
-        ? 'anderson@zenlish.edu'
-        : userRole === 'admin'
-        ? 'john.smith@zenlish.edu'
-        : 'emily.d@zenlish.edu',
-    phone: '+1 (555) 123-4567',
-    address: '123 Main Street, City, State 12345',
-    dateOfBirth: '1995-06-15',
-    joinDate: userRole === 'student' ? '2024-09-01' : '2023-01-15',
-    level: userRole === 'student' ? 'Intermediate' : undefined,
-    specialization:
-      userRole === 'teacher' ? 'English Literature & Grammar' : undefined,
-    studentId: userRole === 'student' ? 'STU-2024-001' : undefined,
-    employeeId: userRole !== 'student' ? 'EMP-2023-015' : undefined,
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    dateOfBirth: '',
+    joinDate: '',
+    level: '',
+    specialization: '',
+    studentId: '',
+    employeeId: '',
+    bio: '',
+    education: '',
+    experienceYears: 0,
+    parentName: '',
+    parentPhone: '',
   });
 
-  const handleInputChange = (field: keyof PersonalInfo, value: string) => {
+  // Update personal info when userInfo changes
+  useEffect(() => {
+    if (userInfo) {
+      setPersonalInfo({
+        name: userInfo.name || '',
+        email: userInfo.email || '',
+        phone: userInfo.phone_number || '',
+        address: userInfo.address || '',
+        dateOfBirth: userInfo.date_of_birth || '',
+        joinDate: userInfo.created_at || '',
+        level: userInfo.level || userInfo.input_level || '',
+        specialization: userInfo.specialization || '',
+        studentId: userInfo.student_id || '',
+        employeeId: '',
+        bio: userInfo.bio || '',
+        education: userInfo.education || '',
+        experienceYears: userInfo.experience_years || 0,
+        parentName: userInfo.parent_name || '',
+        parentPhone: userInfo.parent_phone || '',
+      });
+    }
+  }, [userInfo]);
+
+  const handleInputChange = (
+    field: keyof PersonalInfo,
+    value: string | number
+  ) => {
     setPersonalInfo((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
-    // Here you would typically save to backend
-    setIsEditing(false);
+  const handleSave = async () => {
+    if (!userInfo) return;
+
+    setIsSaving(true);
+    try {
+      const updateData: any = {
+        name: personalInfo.name,
+        phone_number: personalInfo.phone,
+        address: personalInfo.address,
+        date_of_birth: personalInfo.dateOfBirth,
+        bio: personalInfo.bio,
+      };
+
+      // Add role-specific fields
+      if (userRole === 'student') {
+        updateData.level = personalInfo.level;
+        updateData.parent_name = personalInfo.parentName;
+        updateData.parent_phone = personalInfo.parentPhone;
+      } else if (userRole === 'teacher') {
+        updateData.specialization = personalInfo.specialization;
+        updateData.education = personalInfo.education;
+        updateData.experience_years = personalInfo.experienceYears;
+      }
+
+      await updateUserInfo(updateData);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating user info:', error);
+      alert('Có lỗi xảy ra khi cập nhật thông tin. Vui lòng thử lại.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -123,6 +177,19 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
 
   const theme = getThemeColors();
 
+  if (loading) {
+    return (
+      <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]'>
+        <div className='bg-white rounded-2xl p-8'>
+          <div className='flex items-center space-x-3'>
+            <Loader2 className='w-6 h-6 animate-spin' />
+            <span>Đang tải thông tin...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]'>
       <div className='bg-white rounded-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto'>
@@ -143,9 +210,14 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
               ) : (
                 <button
                   onClick={handleSave}
-                  className={`p-2 ${theme.button} text-white rounded-lg hover:opacity-90 transition-opacity`}
+                  disabled={isSaving}
+                  className={`p-2 ${theme.button} text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50`}
                 >
-                  <Save className='w-4 h-4' />
+                  {isSaving ? (
+                    <Loader2 className='w-4 h-4 animate-spin' />
+                  ) : (
+                    <Save className='w-4 h-4' />
+                  )}
                 </button>
               )}
               <button
@@ -214,16 +286,7 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
                 <Mail className='w-4 h-4 inline mr-2' />
                 Địa chỉ email
               </label>
-              {isEditing ? (
-                <input
-                  type='email'
-                  value={personalInfo.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                />
-              ) : (
-                <p className='text-gray-900'>{personalInfo.email}</p>
-              )}
+              <p className='text-gray-900'>{personalInfo.email}</p>
             </div>
 
             {/* Phone */}
@@ -240,7 +303,9 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
               ) : (
-                <p className='text-gray-900'>{personalInfo.phone}</p>
+                <p className='text-gray-900'>
+                  {personalInfo.phone || 'Chưa cập nhật'}
+                </p>
               )}
             </div>
 
@@ -261,7 +326,11 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
                 />
               ) : (
                 <p className='text-gray-900'>
-                  {new Date(personalInfo.dateOfBirth).toLocaleDateString()}
+                  {personalInfo.dateOfBirth
+                    ? new Date(personalInfo.dateOfBirth).toLocaleDateString(
+                        'vi-VN'
+                      )
+                    : 'Chưa cập nhật'}
                 </p>
               )}
             </div>
@@ -280,50 +349,167 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
               ) : (
-                <p className='text-gray-900'>{personalInfo.address}</p>
+                <p className='text-gray-900'>
+                  {personalInfo.address || 'Chưa cập nhật'}
+                </p>
+              )}
+            </div>
+
+            {/* Bio */}
+            <div className='md:col-span-2'>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Giới thiệu
+              </label>
+              {isEditing ? (
+                <textarea
+                  value={personalInfo.bio}
+                  onChange={(e) => handleInputChange('bio', e.target.value)}
+                  rows={3}
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                />
+              ) : (
+                <p className='text-gray-900'>
+                  {personalInfo.bio || 'Chưa cập nhật'}
+                </p>
               )}
             </div>
 
             {/* Role-specific fields */}
-            {userRole === 'student' && personalInfo.level && (
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Trình độ tiếng Anh
-                </label>
-                {isEditing ? (
-                  <select
-                    value={personalInfo.level}
-                    onChange={(e) => handleInputChange('level', e.target.value)}
-                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                  >
-                    <option value='Sơ cấp'>Sơ cấp</option>
-                    <option value='Trung cấp'>Trung cấp</option>
-                    <option value='Nâng cao'>Nâng cao</option>
-                  </select>
-                ) : (
-                  <p className='text-gray-900'>{personalInfo.level}</p>
-                )}
-              </div>
+            {userRole === 'student' && (
+              <>
+                <div>
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
+                    Trình độ tiếng Anh
+                  </label>
+                  {isEditing ? (
+                    <select
+                      value={personalInfo.level}
+                      onChange={(e) =>
+                        handleInputChange('level', e.target.value)
+                      }
+                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    >
+                      <option value=''>Chọn trình độ</option>
+                      <option value='Beginner'>Sơ cấp</option>
+                      <option value='Elementary'>Cơ bản</option>
+                      <option value='Intermediate'>Trung cấp</option>
+                      <option value='Upper Intermediate'>Trung cấp cao</option>
+                      <option value='Advanced'>Nâng cao</option>
+                    </select>
+                  ) : (
+                    <p className='text-gray-900'>
+                      {personalInfo.level || 'Chưa cập nhật'}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
+                    Tên phụ huynh
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type='text'
+                      value={personalInfo.parentName}
+                      onChange={(e) =>
+                        handleInputChange('parentName', e.target.value)
+                      }
+                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    />
+                  ) : (
+                    <p className='text-gray-900'>
+                      {personalInfo.parentName || 'Chưa cập nhật'}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
+                    SĐT phụ huynh
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type='tel'
+                      value={personalInfo.parentPhone}
+                      onChange={(e) =>
+                        handleInputChange('parentPhone', e.target.value)
+                      }
+                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    />
+                  ) : (
+                    <p className='text-gray-900'>
+                      {personalInfo.parentPhone || 'Chưa cập nhật'}
+                    </p>
+                  )}
+                </div>
+              </>
             )}
 
-            {userRole === 'teacher' && personalInfo.specialization && (
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Chuyên môn
-                </label>
-                {isEditing ? (
-                  <input
-                    type='text'
-                    value={personalInfo.specialization}
-                    onChange={(e) =>
-                      handleInputChange('specialization', e.target.value)
-                    }
-                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                  />
-                ) : (
-                  <p className='text-gray-900'>{personalInfo.specialization}</p>
-                )}
-              </div>
+            {userRole === 'teacher' && (
+              <>
+                <div>
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
+                    Chuyên môn
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type='text'
+                      value={personalInfo.specialization}
+                      onChange={(e) =>
+                        handleInputChange('specialization', e.target.value)
+                      }
+                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    />
+                  ) : (
+                    <p className='text-gray-900'>
+                      {personalInfo.specialization || 'Chưa cập nhật'}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
+                    Học vấn
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type='text'
+                      value={personalInfo.education}
+                      onChange={(e) =>
+                        handleInputChange('education', e.target.value)
+                      }
+                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    />
+                  ) : (
+                    <p className='text-gray-900'>
+                      {personalInfo.education || 'Chưa cập nhật'}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
+                    Số năm kinh nghiệm
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type='number'
+                      value={personalInfo.experienceYears}
+                      onChange={(e) =>
+                        handleInputChange(
+                          'experienceYears',
+                          parseInt(e.target.value) || 0
+                        )
+                      }
+                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    />
+                  ) : (
+                    <p className='text-gray-900'>
+                      {personalInfo.experienceYears || 0} năm
+                    </p>
+                  )}
+                </div>
+              </>
             )}
 
             {/* Join Date */}
@@ -333,7 +519,9 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
                 {userRole === 'student' ? 'Ngày đăng ký' : 'Ngày tham gia'}
               </label>
               <p className='text-gray-900'>
-                {new Date(personalInfo.joinDate).toLocaleDateString()}
+                {personalInfo.joinDate
+                  ? new Date(personalInfo.joinDate).toLocaleDateString('vi-VN')
+                  : 'Chưa cập nhật'}
               </p>
             </div>
           </div>
@@ -344,15 +532,18 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
           <div className='px-6 py-4 border-t border-gray-200 flex justify-end space-x-3'>
             <button
               onClick={() => setIsEditing(false)}
-              className='px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'
+              disabled={isSaving}
+              className='px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50'
             >
               Hủy
             </button>
             <button
               onClick={handleSave}
-              className={`px-4 py-2 ${theme.button} text-white rounded-lg transition-colors`}
+              disabled={isSaving}
+              className={`px-4 py-2 ${theme.button} text-white rounded-lg transition-colors disabled:opacity-50 flex items-center space-x-2`}
             >
-              Lưu thay đổi
+              {isSaving && <Loader2 className='w-4 h-4 animate-spin' />}
+              <span>{isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}</span>
             </button>
           </div>
         )}

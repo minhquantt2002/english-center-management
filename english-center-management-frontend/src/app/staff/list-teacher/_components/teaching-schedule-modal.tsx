@@ -7,8 +7,7 @@ import {
   MapPin,
   X,
 } from 'lucide-react';
-import { useStaffApi } from '../../_hooks/use-api';
-import { Schedule } from '../../../../types';
+import { useStaffTeacherApi } from '../../_hooks';
 
 interface TeachingScheduleModalProps {
   isOpen: boolean;
@@ -24,21 +23,17 @@ export default function TeachingScheduleModal({
   teacherName,
 }: TeachingScheduleModalProps) {
   const [schedule, setSchedule] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const { getTeacherSchedule } = useStaffApi();
+  const { getTeacherSchedule } = useStaffTeacherApi();
 
   // Fetch teacher schedule when modal opens
   useEffect(() => {
     if (isOpen && teacherId) {
       const fetchTeacherSchedule = async () => {
-        setLoading(true);
         try {
           const scheduleData = await getTeacherSchedule(teacherId);
           setSchedule(scheduleData);
         } catch (error) {
           console.error('Error fetching teacher schedule:', error);
-        } finally {
-          setLoading(false);
         }
       };
 
@@ -57,7 +52,7 @@ export default function TeachingScheduleModal({
   };
 
   // Convert schedules to session format for display
-  const sessions = schedule.map((scheduleItem: any, index: number) => {
+  const sessions = schedule.map((scheduleItem: any) => {
     const typeMap = {
       'English Basics A1': 'basic',
       'Grammar Fundamentals': 'grammar',

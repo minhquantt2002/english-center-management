@@ -1,31 +1,36 @@
-import {
-  LoginData,
-  RegisterData,
-  AuthResponse,
-  TokenResponse,
-  User,
-} from '@/types/auth';
 import { getSession } from 'next-auth/react';
 
 const API_BASE_URL = 'http://localhost:8000';
 
 // Helper function to get auth token
 const getAuthToken = async () => {
-  if (typeof window !== 'undefined') {
-    // Client-side: try to get from localStorage first, then session
-    const localToken = localStorage.getItem('token');
-    if (localToken) return localToken;
-  }
+  try {
+    // Get from NextAuth session first
+    const session = await getSession();
+    if (session?.accessToken) {
+      return session.accessToken;
+    }
 
-  // Server-side or fallback: get from session
-  const session = await getSession();
-  return session?.accessToken;
+    // Fallback to localStorage for backward compatibility
+    if (typeof window !== 'undefined') {
+      const localToken = localStorage.getItem('token');
+      if (localToken) {
+        return localToken;
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error getting auth token:', error);
+    return null;
+  }
 };
 
 // Generic API client
 export const api = {
   async get(endpoint: string) {
     const token = await getAuthToken();
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -34,7 +39,10 @@ export const api = {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.error('API Error:', response.status, response.statusText);
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 
     return response.json();

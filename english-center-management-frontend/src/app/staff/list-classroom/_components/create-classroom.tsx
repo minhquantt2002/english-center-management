@@ -13,7 +13,11 @@ import {
   Plus,
 } from 'lucide-react';
 import { ClassData, CourseLevel } from '../../../../types';
-import { useStaffApi } from '../../_hooks/use-api';
+import {
+  useStaffCourseApi,
+  useStaffTeacherApi,
+  useStaffStatsApi,
+} from '../../_hooks';
 
 interface CreateClassroomModalProps {
   isOpen: boolean;
@@ -56,13 +60,13 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
   const [teachers, setTeachers] = useState<any[]>([]);
   const [rooms, setRooms] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const { getTeachers, getRooms, getCourses } = useStaffApi();
+  const { getCourses } = useStaffCourseApi();
+  const { getTeachers } = useStaffTeacherApi();
+  const { getRooms } = useStaffStatsApi();
 
   // Fetch data for dropdowns
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       try {
         const [teachersData, roomsData, coursesData] = await Promise.all([
           getTeachers(),
@@ -75,7 +79,6 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
-        setLoading(false);
       }
     };
 
@@ -164,6 +167,9 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
       teacher: {
         id: formData.teacherId,
         name: selectedTeacher?.name || '',
+        email: selectedTeacher?.email || '',
+        role_name: selectedTeacher?.role_name || 'teacher',
+        avatar: selectedTeacher?.avatar,
       },
       students: 0,
       maxStudents: formData.maxStudents,

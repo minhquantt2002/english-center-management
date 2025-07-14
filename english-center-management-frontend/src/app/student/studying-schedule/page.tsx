@@ -180,17 +180,6 @@ const StudyingSchedule: React.FC = () => {
         return 'bg-gray-500';
     }
   };
-
-  const weekDays = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
-  ];
-
   return (
     <div className='min-h-screen bg-gray-50 p-6'>
       <div className='max-w-7xl mx-auto'>

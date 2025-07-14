@@ -2,21 +2,56 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, ChevronDown, Loader2 } from 'lucide-react';
-import { useClassroomApi } from './_hooks/use-api';
+import { useClassroomApi } from '../_hooks';
+import { CreateClassroomModal, EditClassroomModal } from './_components';
+
+interface Course {
+  course_name: string;
+  description: string;
+  level: string;
+  duration: number | null;
+  price: number | null;
+  max_students: number | null;
+  id: string;
+  created_at: string;
+}
+
+interface Teacher {
+  name: string;
+  email: string;
+  role_name: string;
+  bio: string | null;
+  date_of_birth: string | null;
+  phone_number: string;
+  input_level: string | null;
+  specialization: string;
+  address: string | null;
+  education: string;
+  experience_years: number;
+  level: string | null;
+  parent_name: string | null;
+  parent_phone: string | null;
+  student_id: string | null;
+  status: string;
+  id: string;
+  created_at: string;
+}
 
 interface Classroom {
   id: string;
-  name: string;
-  level: string;
-  teacher: {
-    name: string;
-    avatar: string;
-  };
-  students: number;
-  schedule: {
-    days: string;
-    time: string;
-  };
+  class_name: string;
+  course_id: string;
+  teacher_id: string;
+  status: string;
+  duration: number | null;
+  start_date: string;
+  end_date: string;
+  description: string | null;
+  max_students: number | null;
+  current_students: number;
+  created_at: string;
+  course: Course;
+  teacher: Teacher;
 }
 
 const ClassManagement: React.FC = () => {
@@ -41,43 +76,38 @@ const ClassManagement: React.FC = () => {
   // Fetch classrooms on component mount
   useEffect(() => {
     fetchClassrooms();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchClassrooms = async () => {
     try {
       const data = await getClassrooms();
-      setClassrooms(data);
+      setClassrooms(data as unknown as Classroom[]);
     } catch (err) {
       console.error('Failed to fetch classrooms:', err);
     }
   };
 
-  const getLevel = (level: string) => {
-    switch (level) {
-      case 'beginner':
-        return 'Sơ cấp';
-      case 'intermediate':
-        return 'Trung cấp';
-      case 'advanced':
-        return 'Cao cấp';
-      case 'upper-intermediate':
-        return 'Cao cấp';
-      default:
-        return 'Sơ cấp';
-    }
-  };
-
   const getLevelBadgeColor = (level: string) => {
     switch (level) {
-      case 'Sơ cấp':
+      case 'A1':
+      case 'A2':
         return 'bg-green-100 text-green-700';
-      case 'Trung cấp':
+      case 'B1':
+      case 'B2':
         return 'bg-blue-100 text-blue-700';
-      case 'Cao cấp':
+      case 'C1':
+      case 'C2':
         return 'bg-purple-100 text-purple-700';
       default:
         return 'bg-gray-100 text-gray-700';
     }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
   };
 
   const handleAddClass = () => {
@@ -123,10 +153,20 @@ const ClassManagement: React.FC = () => {
     }
   };
 
+  // Get unique teachers for filter
+  const uniqueTeachers = Array.from(
+    new Set(classrooms.map((classroom) => classroom.teacher.name))
+  );
+
+  // Get unique levels for filter
+  const uniqueLevels = Array.from(
+    new Set(classrooms.map((classroom) => classroom.course.level))
+  );
+
   // Filter classrooms based on selected filters
   const filteredClassrooms = classrooms.filter((classroom) => {
     const levelMatch =
-      levelFilter === 'All Levels' || classroom.level === levelFilter;
+      levelFilter === 'All Levels' || classroom.course.level === levelFilter;
     const teacherMatch =
       teacherFilter === 'All Teachers' ||
       classroom.teacher.name === teacherFilter;
@@ -179,9 +219,11 @@ const ClassManagement: React.FC = () => {
                   className='appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px]'
                 >
                   <option>Tất cả cấp độ</option>
-                  <option>Sơ cấp</option>
-                  <option>Trung cấp</option>
-                  <option>Cao cấp</option>
+                  {uniqueLevels.map((level) => (
+                    <option key={level} value={level}>
+                      {level}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown
                   className='absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400'
@@ -202,9 +244,11 @@ const ClassManagement: React.FC = () => {
                   className='appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px]'
                 >
                   <option>Tất cả giáo viên</option>
-                  <option>Sarah Johnson</option>
-                  <option>Michael Chen</option>
-                  <option>Emma Wilson</option>
+                  {uniqueTeachers.map((teacher) => (
+                    <option key={teacher} value={teacher}>
+                      {teacher}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown
                   className='absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400'
@@ -238,7 +282,7 @@ const ClassManagement: React.FC = () => {
               <div className='col-span-2'>Cấp độ</div>
               <div className='col-span-2'>Giáo viên phụ trách</div>
               <div className='col-span-1'>Học viên</div>
-              <div className='col-span-3'>Lịch học</div>
+              <div className='col-span-3'>Thời gian học</div>
               <div className='col-span-1'>Thao tác</div>
             </div>
           </div>
@@ -254,7 +298,10 @@ const ClassManagement: React.FC = () => {
                   {/* Class Name */}
                   <div className='col-span-3'>
                     <p className='font-medium text-gray-900'>
-                      {classroom.name}
+                      {classroom.class_name}
+                    </p>
+                    <p className='text-sm text-gray-500'>
+                      {classroom.course.course_name}
                     </p>
                   </div>
 
@@ -262,41 +309,56 @@ const ClassManagement: React.FC = () => {
                   <div className='col-span-2'>
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${getLevelBadgeColor(
-                        classroom.level || ''
+                        classroom.course.level
                       )}`}
                     >
-                      {classroom.level}
+                      {classroom.course.level}
                     </span>
                   </div>
 
                   {/* Assigned Teacher */}
                   <div className='col-span-2'>
                     <div className='flex items-center gap-2'>
-                      <img
-                        src={classroom.teacher.avatar}
-                        alt={classroom.teacher.name}
-                        className='w-8 h-8 rounded-full object-cover'
-                      />
-                      <span className='text-gray-700'>
-                        {classroom.teacher.name}
-                      </span>
+                      <div className='w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center'>
+                        <span className='text-blue-600 font-medium text-sm'>
+                          {classroom.teacher.name.charAt(0)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className='text-gray-700 font-medium'>
+                          {classroom.teacher.name}
+                        </span>
+                        <p className='text-xs text-gray-500'>
+                          {classroom.teacher.specialization}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
                   {/* Students */}
                   <div className='col-span-1'>
                     <span className='text-gray-900 font-medium'>
-                      {classroom.students}
+                      {classroom.current_students}
                     </span>
+                    {classroom.max_students && (
+                      <span className='text-gray-500 text-sm'>
+                        /{classroom.max_students}
+                      </span>
+                    )}
                   </div>
 
                   {/* Schedule */}
                   <div className='col-span-3'>
                     <div className='text-sm'>
                       <p className='text-gray-900 font-medium'>
-                        {classroom.schedule.days}
+                        {formatDate(classroom.start_date)} -{' '}
+                        {formatDate(classroom.end_date)}
                       </p>
-                      <p className='text-gray-500'>{classroom.schedule.time}</p>
+                      <p className='text-gray-500'>
+                        {classroom.duration
+                          ? `${classroom.duration} tuần`
+                          : 'Chưa có thông tin'}
+                      </p>
                     </div>
                   </div>
 
@@ -349,63 +411,25 @@ const ClassManagement: React.FC = () => {
           </div>
         )}
 
-        {/* Create Modal Placeholder */}
-        {showCreateModal && (
-          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-            <div className='bg-white rounded-lg p-6 w-full max-w-md'>
-              <h2 className='text-xl font-bold mb-4'>Tạo lớp học mới</h2>
-              <p className='text-gray-600 mb-4'>
-                Modal tạo lớp học sẽ được implement ở đây
-              </p>
-              <div className='flex gap-2 justify-end'>
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className='px-4 py-2 text-gray-600 hover:text-gray-800'
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
-                >
-                  Tạo
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Create Classroom Modal */}
+        <CreateClassroomModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onSubmit={handleCreateClassroom}
+          loading={loading}
+        />
 
-        {/* Edit Modal Placeholder */}
-        {showEditModal && selectedClassroom && (
-          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-            <div className='bg-white rounded-lg p-6 w-full max-w-md'>
-              <h2 className='text-xl font-bold mb-4'>Sửa lớp học</h2>
-              <p className='text-gray-600 mb-4'>
-                Modal sửa lớp học sẽ được implement ở đây
-              </p>
-              <div className='flex gap-2 justify-end'>
-                <button
-                  onClick={() => {
-                    setShowEditModal(false);
-                    setSelectedClassroom(null);
-                  }}
-                  className='px-4 py-2 text-gray-600 hover:text-gray-800'
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={() => {
-                    setShowEditModal(false);
-                    setSelectedClassroom(null);
-                  }}
-                  className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
-                >
-                  Lưu
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Edit Classroom Modal */}
+        <EditClassroomModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedClassroom(null);
+          }}
+          onSubmit={handleUpdateClassroom}
+          classroom={selectedClassroom}
+          loading={loading}
+        />
       </div>
     </div>
   );

@@ -2,6 +2,8 @@ from typing import Optional
 from datetime import datetime, date
 from uuid import UUID
 from .base import BaseSchema
+from .course import CourseResponse
+from .teacher import TeacherResponse
 from ..models.classroom import ClassStatus
 
 class ClassroomBase(BaseSchema):
@@ -33,4 +35,6 @@ class ClassroomUpdate(BaseSchema):
 
 class ClassroomResponse(ClassroomBase):
     id: UUID
-    created_at: datetime 
+    created_at: datetime
+    course: Optional[CourseResponse] = None
+    teacher: Optional[TeacherResponse] = None 

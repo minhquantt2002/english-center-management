@@ -1,4 +1,5 @@
 from typing import List
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..database import get_db
@@ -72,7 +73,7 @@ async def update_my_profile(
     """
     # Học sinh chỉ được cập nhật name, bio, phone_number, date_of_birth
     allowed_fields = {"name", "bio", "phone_number", "date_of_birth"}
-    update_data = {k: v for k, v in user_data.dict(exclude_unset=True).items() if k in allowed_fields}
+    update_data = {k: v for k, v in user_data.model_dump(exclude_unset=True).items() if k in allowed_fields}
     
     if not update_data:
         raise HTTPException(
@@ -115,14 +116,22 @@ async def get_classroom_detail(
     """
     Lấy chi tiết lớp học (chỉ lớp mà học sinh đã đăng ký)
     """
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
     # Kiểm tra xem học sinh có đăng ký lớp này không
-    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_id):
+    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_uuid):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Bạn chưa đăng ký lớp học này"
         )
     
-    classroom = classroom_service.get_classroom(db, classroom_id)
+    classroom = classroom_service.get_classroom(db, classroom_uuid)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -131,26 +140,7 @@ async def get_classroom_detail(
     
     return classroom
 
-# Materials and Assignments
-@router.get("/classes/{classroom_id}/materials")
-async def get_class_materials(
-    classroom_id: str,
-    current_user: User = Depends(get_current_student_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy tài liệu học tập của lớp học
-    """
-    # Kiểm tra xem học sinh có đăng ký lớp này không
-    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_id):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Bạn chưa đăng ký lớp học này"
-        )
-    
-    # TODO: Implement materials service
-    materials = []
-    return materials
+
 
 @router.get("/classes/{classroom_id}/assignments")
 async def get_class_assignments(
@@ -161,8 +151,16 @@ async def get_class_assignments(
     """
     Lấy bài tập của lớp học
     """
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
     # Kiểm tra xem học sinh có đăng ký lớp này không
-    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_id):
+    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_uuid):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Bạn chưa đăng ký lớp học này"
@@ -172,26 +170,6 @@ async def get_class_assignments(
     assignments = []
     return assignments
 
-@router.post("/classes/{classroom_id}/assignments/{assignment_id}/submit")
-async def submit_assignment(
-    classroom_id: str,
-    assignment_id: str,
-    submission_data: dict,
-    current_user: User = Depends(get_current_student_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Nộp bài tập
-    """
-    # Kiểm tra xem học sinh có đăng ký lớp này không
-    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_id):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Bạn chưa đăng ký lớp học này"
-        )
-    
-    # TODO: Implement assignment submission service
-    return {"message": "Nộp bài tập thành công"}
 
 # Academic Scores
 @router.get("/scores", response_model=List[ScoreResponse])
@@ -214,14 +192,22 @@ async def get_my_classroom_scores(
     """
     Lấy điểm số của học sinh trong một lớp học cụ thể
     """
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
     # Kiểm tra xem học sinh có đăng ký lớp này không
-    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_id):
+    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_uuid):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Bạn chưa đăng ký lớp học này"
         )
     
-    scores = score_service.get_scores_by_student_classroom(db, current_user.id, classroom_id)
+    scores = score_service.get_scores_by_student_classroom(db, current_user.id, classroom_uuid)
     return scores
 
 # Schedule Information
@@ -245,18 +231,24 @@ async def get_classroom_schedules(
     """
     Lấy lịch học của một lớp học cụ thể
     """
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
     # Kiểm tra xem học sinh có đăng ký lớp này không
-    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_id):
+    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_uuid):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Bạn chưa đăng ký lớp học này"
         )
     
-    schedules = schedule_service.get_schedules_by_classroom(db, classroom_id)
+    schedules = schedule_service.get_schedules_by_classroom(db, classroom_uuid)
     return schedules
     
-    schedules = schedule_service.get_schedules_by_classroom(db, classroom_id)
-    return schedules
 
 # Statistics for Student
 @router.get("/statistics")

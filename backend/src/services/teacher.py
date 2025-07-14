@@ -1,4 +1,5 @@
 from typing import List, Optional
+from uuid import UUID
 from sqlalchemy.orm import Session
 from ..models.user import User
 from ..schemas.teacher import TeacherCreate, TeacherUpdate, TeacherResponse
@@ -16,7 +17,12 @@ def get_teacher(db: Session, teacher_id: str) -> Optional[TeacherResponse]:
     """
     Lấy thông tin giáo viên theo ID
     """
-    teacher = user_crud.get_user(db, teacher_id)
+    try:
+        teacher_uuid = UUID(teacher_id)
+    except ValueError:
+        return None
+    
+    teacher = user_crud.get_user(db, teacher_uuid)
     return teacher
 
 def create_teacher(db: Session, teacher_data: TeacherCreate) -> TeacherResponse:
@@ -54,6 +60,11 @@ def update_teacher(db: Session, teacher_id: str, teacher_data: TeacherUpdate) ->
     """
     Cập nhật thông tin giáo viên
     """
+    try:
+        teacher_uuid = UUID(teacher_id)
+    except ValueError:
+        return None
+    
     # Convert TeacherUpdate to UserUpdate
     from ..schemas.user import UserUpdate
     
@@ -74,14 +85,19 @@ def update_teacher(db: Session, teacher_id: str, teacher_data: TeacherUpdate) ->
         student_id=teacher_data.student_id
     )
     
-    teacher = user_crud.update_user(db, teacher_id, user_data)
+    teacher = user_crud.update_user(db, teacher_uuid, user_data)
     return teacher
 
 def delete_teacher(db: Session, teacher_id: str) -> bool:
     """
     Xóa giáo viên
     """
-    return user_crud.delete_user(db, teacher_id)
+    try:
+        teacher_uuid = UUID(teacher_id)
+    except ValueError:
+        return False
+    
+    return user_crud.delete_user(db, teacher_uuid)
 
 def get_teachers_by_role(db: Session, role_name: str = "teacher") -> List[TeacherResponse]:
     """

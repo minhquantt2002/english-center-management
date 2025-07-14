@@ -41,6 +41,7 @@ export interface StaffStats {
   newRegistrations: number;
   activeClasses: number;
   todaySchedule: number;
+  pendingInvoices: number;
   weeklyRegistrations: Array<{
     day: string;
     value: number;

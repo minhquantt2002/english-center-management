@@ -17,19 +17,29 @@ import {
   Eye,
   Settings,
 } from 'lucide-react';
-import { useStaffApi } from '../../_hooks/use-api';
+import { useStaffClassroomApi, useStaffStudentApi } from '../../_hooks';
 import { ClassData, Student } from '../../../../types';
 import AssignStudentModal from './_components/create-student';
 import ViewStudentModal from './_components/view-student';
 import EditStudentModal from './_components/edit-student';
 import StudyingScheduleModal from './_components/studying-schedule';
 import EditClassroomInfoModal from './_components/edit-classroom-info';
+import Image from 'next/image';
 
 export default function ClassroomDetailPage() {
   const params = useParams();
   const router = useRouter();
   const classroomId = params.id as string;
-  const { loading, error, getClassroomById, getStudents } = useStaffApi();
+  const {
+    loading: classroomLoading,
+    error: classroomError,
+    getClassroomById,
+  } = useStaffClassroomApi();
+  const {
+    loading: studentLoading,
+    error: studentError,
+    getStudents,
+  } = useStaffStudentApi();
 
   const [classroom, setClassroom] = useState<ClassData | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
@@ -54,8 +64,9 @@ export default function ClassroomDetailPage() {
 
         // Fetch students for this classroom
         const studentsData = await getStudents();
-        const classroomStudents = studentsData.filter(
-          (student: Student) => student.currentClass === classroomData.name
+        const classroomStudents = studentsData.data.filter(
+          (student: Student) =>
+            student.currentClass === classroomData.class_name
         );
         setStudents(classroomStudents);
       } catch (err) {
@@ -66,6 +77,7 @@ export default function ClassroomDetailPage() {
     };
 
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [classroomId, getClassroomById, getStudents]);
 
   const filteredStudents = students.filter((student) => {
@@ -166,7 +178,7 @@ export default function ClassroomDetailPage() {
     }
   };
 
-  if (isLoading || loading) {
+  if (isLoading || classroomLoading || studentLoading) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
         <div className='text-center'>
@@ -177,14 +189,14 @@ export default function ClassroomDetailPage() {
     );
   }
 
-  if (error) {
+  if (classroomError || studentError) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
         <div className='text-center'>
           <h2 className='text-2xl font-bold text-gray-900 mb-4'>
             Có lỗi xảy ra
           </h2>
-          <p className='text-gray-600 mb-6'>{error}</p>
+          <p className='text-gray-600 mb-6'>{classroomError || studentError}</p>
           <button
             onClick={() => router.back()}
             className='bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-lg transition-colors'
@@ -273,7 +285,7 @@ export default function ClassroomDetailPage() {
                 <div>
                   <p className='text-sm text-gray-600'>Lịch học</p>
                   <p className='font-medium text-gray-900'>
-                    {classroom.schedule.time}
+                    {classroom.schedule?.time || 'Chưa có lịch học'}
                   </p>
                 </div>
               </div>
@@ -397,7 +409,7 @@ export default function ClassroomDetailPage() {
                     <tr key={student.id} className='hover:bg-gray-50'>
                       <td className='px-6 py-4 whitespace-nowrap'>
                         <div className='flex items-center'>
-                          <img
+                          <Image
                             className='h-10 w-10 rounded-full'
                             src={
                               student.avatar ||
@@ -514,10 +526,6 @@ export default function ClassroomDetailPage() {
         isOpen={isScheduleModalOpen}
         onClose={() => setIsScheduleModalOpen(false)}
         classroom={classroom}
-        onUpdateSchedule={(schedule) => {
-          console.log('Schedule updated:', schedule);
-          // Here you would typically update the classroom schedule
-        }}
       />
 
       {/* Edit Classroom Info Modal */}

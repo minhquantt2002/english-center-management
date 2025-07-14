@@ -8,7 +8,6 @@ import {
   Calendar,
   Edit,
   UserCheck,
-  FileText,
   BarChart3,
   Settings,
 } from 'lucide-react';
@@ -22,7 +21,6 @@ import {
   ClassStats,
   AttendanceManagement,
   GradeManagement,
-  MaterialsManagement,
 } from './_components';
 
 const ClassDetailPage = () => {
@@ -65,10 +63,9 @@ const ClassDetailPage = () => {
     { id: 'schedule', label: 'Lịch học', icon: Calendar },
     { id: 'attendance', label: 'Điểm danh', icon: UserCheck },
     { id: 'grades', label: 'Điểm số', icon: BarChart3 },
-    { id: 'materials', label: 'Tài liệu', icon: FileText },
   ];
 
-  if (loading) {
+  if (loading || !classDetails) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
         <div className='text-center'>
@@ -135,10 +132,10 @@ const ClassDetailPage = () => {
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
         {/* Class Stats */}
         <ClassStats
-          totalStudents={classDetails.totalStudents}
-          maxStudents={classDetails.maxStudents}
-          room={classDetails.room}
-          currentUnit={classDetails.currentUnit}
+          totalStudents={classDetails?.totalStudents || 0}
+          maxStudents={classDetails?.maxStudents || 0}
+          room={classDetails?.room || ''}
+          currentUnit={classDetails?.currentUnit || ''}
         />
 
         {/* Tabs */}
@@ -168,7 +165,7 @@ const ClassDetailPage = () => {
           {/* Tab Content */}
           <div className='p-6'>
             {activeTab === 'overview' && (
-              <ClassOverview classDetails={classDetails} />
+              <ClassOverview classDetails={classDetails || {}} />
             )}
 
             {activeTab === 'students' && <StudentList students={students} />}
@@ -178,8 +175,6 @@ const ClassDetailPage = () => {
             {activeTab === 'attendance' && <AttendanceManagement />}
 
             {activeTab === 'grades' && <GradeManagement />}
-
-            {activeTab === 'materials' && <MaterialsManagement />}
           </div>
         </div>
       </div>

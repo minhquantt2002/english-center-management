@@ -14,10 +14,10 @@ import {
   Award,
   DollarSign,
   TrendingUp,
-  FileText,
 } from 'lucide-react';
-import { StudentProfile } from '@/types';
-import { useStaffApi } from '../../_hooks/use-api';
+import { StudentProfile } from '../../../../types';
+import { useStaffStudentApi } from '../../_hooks';
+import Image from 'next/image';
 
 interface ViewStudentModalProps {
   isOpen: boolean;
@@ -33,32 +33,70 @@ export default function ViewStudentModal({
   const [activeTab, setActiveTab] = useState<
     'details' | 'achievements' | 'debt'
   >('details');
-  const [achievements, setAchievements] = useState<any[]>([]);
-  const [invoices, setInvoices] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const { getStudentAchievements, getStudentInvoices } = useStaffApi();
+  const { getStudentAchievements, getStudentInvoices } = useStaffStudentApi();
+
+  // Mock data for achievements and invoices
+  const mockAchievements = [
+    {
+      id: 1,
+      courseName: 'Tiếng Anh Cơ Bản',
+      testType: 'final',
+      overall: 85,
+      gradeLevel: 'A',
+      date: '2024-01-15',
+      teacherName: 'Nguyễn Thị Hoa',
+    },
+    {
+      id: 2,
+      courseName: 'Tiếng Anh Trung Cấp',
+      testType: 'midterm',
+      overall: 92,
+      gradeLevel: 'A+',
+      date: '2024-02-20',
+      teacherName: 'Trần Văn Minh',
+    },
+  ];
+
+  const mockInvoices = [
+    {
+      id: 1,
+      invoiceNumber: 'INV-2024-001',
+      description: 'Học phí tháng 1/2024',
+      amount: 2000000,
+      paidAmount: 1500000,
+      remainingAmount: 500000,
+      paymentStatus: 'partial',
+      dueDate: '2024-01-31',
+    },
+    {
+      id: 2,
+      invoiceNumber: 'INV-2024-002',
+      description: 'Học phí tháng 2/2024',
+      amount: 2000000,
+      paidAmount: 0,
+      remainingAmount: 2000000,
+      paymentStatus: 'overdue',
+      dueDate: '2024-02-28',
+    },
+  ];
 
   // Fetch student data when modal opens
   useEffect(() => {
     if (isOpen && student) {
       const fetchStudentData = async () => {
-        setLoading(true);
         try {
-          const [achievementsData, invoicesData] = await Promise.all([
-            getStudentAchievements(student.id),
-            getStudentInvoices(student.id),
-          ]);
-          setAchievements(achievementsData);
-          setInvoices(invoicesData);
+          // const [achievementsData, invoicesData] = await Promise.all([
+          //   getStudentAchievements(student.id),
+          //   getStudentInvoices(student.id),
+          // ]);
         } catch (error) {
           console.error('Error fetching student data:', error);
-        } finally {
-          setLoading(false);
         }
       };
 
       fetchStudentData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, student, getStudentAchievements, getStudentInvoices]);
 
   if (!isOpen || !student) return null;
@@ -147,17 +185,13 @@ export default function ViewStudentModal({
     }
   };
 
-  // Student achievements and invoices data
-  const studentAchievements = achievements;
-  const studentInvoices = invoices;
-
   const renderDetailsTab = () => (
     <div className='space-y-6'>
       {/* Student Header */}
       <div className='flex items-start space-x-6 mb-8'>
         <div className='flex-shrink-0'>
           {student.avatar ? (
-            <img
+            <Image
               src={student.avatar}
               alt={student.name}
               className='w-24 h-24 rounded-full object-cover border-4 border-gray-200'

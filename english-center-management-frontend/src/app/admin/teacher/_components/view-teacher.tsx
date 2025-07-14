@@ -7,19 +7,15 @@ import {
   Phone,
   Mail,
   BookOpen,
-  GraduationCap,
   Clock,
   DollarSign,
-  Globe,
-  Award,
   FileText,
-  Calendar,
   Users,
   MapPin,
-  Star,
   Edit,
 } from 'lucide-react';
 import { Teacher } from '../../../../types';
+import Image from 'next/image';
 
 interface ViewTeacherModalProps {
   isOpen: boolean;
@@ -116,7 +112,7 @@ export default function ViewTeacherModal({
           {/* Teacher Header */}
           <div className='flex items-start gap-6 p-6 bg-gradient-to-r from-teal-50 to-blue-50 rounded-lg'>
             <div className='flex-shrink-0'>
-              <img
+              <Image
                 className='h-24 w-24 rounded-full object-cover border-4 border-white shadow-lg'
                 src={teacher.avatar}
                 alt={teacher.name}

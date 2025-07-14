@@ -6,19 +6,15 @@ import {
   User,
   Mail,
   Phone,
-  Calendar,
-  MapPin,
-  Users,
   BookOpen,
   Clock,
   Award,
   Shield,
-  FileText,
   DollarSign,
-  TrendingUp,
 } from 'lucide-react';
-import { Student, Invoice, Payment } from '../../../../../types';
-import { useStaffApi } from '../../../_hooks/use-api';
+import { Student } from '../../../../../types';
+import { useStaffStudentApi } from '../../../_hooks';
+import Image from 'next/image';
 
 interface ViewStudentModalProps {
   isOpen: boolean;
@@ -36,25 +32,21 @@ export default function ViewStudentModal({
   >('details');
   const [achievements, setAchievements] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const { getStudentAchievements, getStudentInvoices } = useStaffApi();
+  const { getStudentAchievements, getStudentInvoices } = useStaffStudentApi();
 
   // Fetch student data when modal opens
   useEffect(() => {
     if (isOpen && student) {
       const fetchStudentData = async () => {
-        setLoading(true);
         try {
           const [achievementsData, invoicesData] = await Promise.all([
             getStudentAchievements(student.id),
             getStudentInvoices(student.id),
           ]);
-          setAchievements(achievementsData);
-          setInvoices(invoicesData);
+          setAchievements(achievementsData.data);
+          setInvoices(invoicesData.data);
         } catch (error) {
           console.error('Error fetching student data:', error);
-        } finally {
-          setLoading(false);
         }
       };
 
@@ -162,7 +154,7 @@ export default function ViewStudentModal({
     <div className='space-y-6'>
       {/* Student Header */}
       <div className='flex items-start space-x-6 mb-8'>
-        <img
+        <Image
           className='h-24 w-24 rounded-full border-4 border-gray-200'
           src={
             student.avatar ||
@@ -175,10 +167,10 @@ export default function ViewStudentModal({
             <h1 className='text-2xl font-bold text-gray-900'>{student.name}</h1>
             <span
               className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                student.status
+                student.status || 'active'
               )}`}
             >
-              {getStatusText(student.status)}
+              {getStatusText(student.status || 'active')}
             </span>
           </div>
           <p className='text-lg text-gray-600 mb-2'>
@@ -263,10 +255,10 @@ export default function ViewStudentModal({
                 <span className='text-gray-600'>Trạng thái:</span>
                 <span
                   className={`px-2 py-1 text-sm font-medium rounded-full ${getStatusColor(
-                    student.status
+                    student.status || 'active'
                   )}`}
                 >
-                  {getStatusText(student.status)}
+                  {getStatusText(student.status || 'active')}
                 </span>
               </div>
             </div>
@@ -447,7 +439,7 @@ export default function ViewStudentModal({
           <span>Thông tin công nợ</span>
         </h3>
 
-        {mockInvoices.length > 0 ? (
+        {studentInvoices.length > 0 ? (
           <div className='space-y-4'>
             {studentInvoices.map((invoice) => (
               <div
@@ -510,8 +502,11 @@ export default function ViewStudentModal({
                 <div>
                   <span className='text-blue-600'>Tổng nợ:</span>
                   <span className='ml-2 font-medium text-blue-900'>
-                    {mockInvoices
-                      .reduce((sum, inv) => sum + inv.remainingAmount, 0)
+                    {studentInvoices
+                      .reduce(
+                        (sum: number, inv: any) => sum + inv.remainingAmount,
+                        0
+                      )
                       .toLocaleString('vi-VN')}{' '}
                     VNĐ
                   </span>
@@ -519,8 +514,11 @@ export default function ViewStudentModal({
                 <div>
                   <span className='text-blue-600'>Đã thanh toán:</span>
                   <span className='ml-2 font-medium text-blue-900'>
-                    {mockInvoices
-                      .reduce((sum, inv) => sum + inv.paidAmount, 0)
+                    {studentInvoices
+                      .reduce(
+                        (sum: number, inv: any) => sum + inv.paidAmount,
+                        0
+                      )
                       .toLocaleString('vi-VN')}{' '}
                     VNĐ
                   </span>
@@ -528,7 +526,7 @@ export default function ViewStudentModal({
                 <div>
                   <span className='text-blue-600'>Số hóa đơn:</span>
                   <span className='ml-2 font-medium text-blue-900'>
-                    {mockInvoices.length}
+                    {studentInvoices.length}
                   </span>
                 </div>
               </div>

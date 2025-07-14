@@ -9,20 +9,15 @@ import {
   User,
   Calendar,
   CheckCircle,
-  PlayCircle,
   Award,
-  FileText,
   Video,
   MessageCircle,
   ArrowLeft,
-  Users,
   Target,
   BarChart3,
-  Download,
-  Eye,
 } from 'lucide-react';
 import { useStudentApi } from '../../_hooks/use-api';
-import { StudentClass } from '@/types/student';
+import { StudentClass } from '../../../../types';
 
 const ClassDetailPage: React.FC = () => {
   const params = useParams();
@@ -30,7 +25,7 @@ const ClassDetailPage: React.FC = () => {
   const { loading, error, getClassDetails } = useStudentApi();
   const [classData, setClassData] = useState<StudentClass | null>(null);
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'materials' | 'assignments' | 'schedule'
+    'overview' | 'assignments' | 'schedule'
   >('overview');
 
   useEffect(() => {
@@ -176,7 +171,7 @@ const ClassDetailPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Lịch học</p>
               <p className='font-medium text-gray-900'>
-                {classData.schedule.days}
+                {classData.schedule?.days || 'Chưa có lịch học'}
               </p>
             </div>
           </div>
@@ -217,7 +212,6 @@ const ClassDetailPage: React.FC = () => {
         <div className='flex border-b border-gray-200'>
           {[
             { id: 'overview', label: 'Tổng quan', icon: BookOpen },
-            { id: 'materials', label: 'Tài liệu', icon: FileText },
             { id: 'assignments', label: 'Bài tập', icon: Award },
             { id: 'schedule', label: 'Lịch học', icon: Calendar },
           ].map((tab) => (
@@ -279,7 +273,7 @@ const ClassDetailPage: React.FC = () => {
                         <div>
                           <p className='text-sm text-gray-600'>Thời gian học</p>
                           <p className='font-medium text-gray-900'>
-                            {classData.schedule.time}
+                            {classData.schedule?.time || 'Chưa có lịch học'}
                           </p>
                         </div>
                       </div>
@@ -384,7 +378,7 @@ const ClassDetailPage: React.FC = () => {
                                 })}
                               </p>
                               <p className='text-sm text-gray-600'>
-                                {classData.schedule.time}
+                                {classData.schedule?.time || 'Chưa có lịch học'}
                               </p>
                             </div>
                           </div>
@@ -438,76 +432,6 @@ const ClassDetailPage: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'materials' && (
-            <div className='space-y-6'>
-              <h3 className='text-lg font-semibold text-gray-900'>
-                Tài liệu học tập
-              </h3>
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                <div className='p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors'>
-                  <div className='flex items-center gap-3 mb-3'>
-                    <FileText className='w-6 h-6 text-blue-600' />
-                    <span className='font-medium text-gray-900'>
-                      Sách giáo khoa
-                    </span>
-                  </div>
-                  <p className='text-sm text-gray-600 mb-3'>
-                    English File Intermediate
-                  </p>
-                  <div className='flex gap-2'>
-                    <button className='flex-1 bg-purple-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1'>
-                      <Download className='w-4 h-4' />
-                      Tải xuống
-                    </button>
-                    <button className='px-3 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors'>
-                      <Eye className='w-4 h-4' />
-                    </button>
-                  </div>
-                </div>
-
-                <div className='p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors'>
-                  <div className='flex items-center gap-3 mb-3'>
-                    <Video className='w-6 h-6 text-red-600' />
-                    <span className='font-medium text-gray-900'>
-                      Video bài giảng
-                    </span>
-                  </div>
-                  <p className='text-sm text-gray-600 mb-3'>
-                    Unit 5: Communication Skills
-                  </p>
-                  <div className='flex gap-2'>
-                    <button className='flex-1 bg-purple-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1'>
-                      <PlayCircle className='w-4 h-4' />
-                      Xem video
-                    </button>
-                    <button className='px-3 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors'>
-                      <Download className='w-4 h-4' />
-                    </button>
-                  </div>
-                </div>
-
-                <div className='p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors'>
-                  <div className='flex items-center gap-3 mb-3'>
-                    <FileText className='w-6 h-6 text-green-600' />
-                    <span className='font-medium text-gray-900'>Bài tập</span>
-                  </div>
-                  <p className='text-sm text-gray-600 mb-3'>
-                    Unit 5 - Practice Exercises
-                  </p>
-                  <div className='flex gap-2'>
-                    <button className='flex-1 bg-purple-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1'>
-                      <Download className='w-4 h-4' />
-                      Tải xuống
-                    </button>
-                    <button className='px-3 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors'>
-                      <Eye className='w-4 h-4' />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {activeTab === 'assignments' && (
             <div className='space-y-6'>
               <h3 className='text-lg font-semibold text-gray-900'>Bài tập</h3>
@@ -542,7 +466,7 @@ const ClassDetailPage: React.FC = () => {
                     </span>
                   </div>
                   <p className='text-sm text-gray-600 mb-3'>
-                    Viết bài luận về chủ đề "Technology in Education"
+                    Viết bài luận về chủ đề &quot;Technology in Education&quot;
                   </p>
                   <div className='flex items-center justify-between text-sm text-gray-500'>
                     <span>Hạn nộp: 25/01/2024</span>
@@ -585,7 +509,8 @@ const ClassDetailPage: React.FC = () => {
                     </span>
                   </div>
                   <p className='text-sm text-gray-600'>
-                    {classData.schedule.days} - {classData.schedule.time}
+                    {classData.schedule?.days || 'Chưa có lịch học'} -{' '}
+                    {classData.schedule?.time || ''}
                   </p>
                 </div>
 

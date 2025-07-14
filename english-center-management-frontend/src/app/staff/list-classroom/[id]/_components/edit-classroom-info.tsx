@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Clock, Users, MapPin, User, Save } from 'lucide-react';
+import { X, Save } from 'lucide-react';
 import { ClassData, CourseLevel } from '../../../../../types';
-import { useStaffApi } from '../../../_hooks/use-api';
+import { useStaffTeacherApi, useStaffStatsApi } from '../../../_hooks';
 
 interface EditClassroomInfoModalProps {
   isOpen: boolean;
@@ -21,7 +21,7 @@ export default function EditClassroomInfoModal({
   const [formData, setFormData] = useState<Partial<ClassData>>({
     name: '',
     level: 'intermediate',
-    teacher: { id: '', name: '' },
+    teacher: { id: '', name: '', email: '', role_name: 'teacher' },
     students: 0,
     maxStudents: 20,
     schedule: { days: '', time: '' },
@@ -33,13 +33,12 @@ export default function EditClassroomInfoModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [teachers, setTeachers] = useState<any[]>([]);
   const [rooms, setRooms] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const { getTeachers, getRooms } = useStaffApi();
+  const { getTeachers } = useStaffTeacherApi();
+  const { getRooms } = useStaffStatsApi();
 
   // Fetch data for dropdowns
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       try {
         const [teachersData, roomsData] = await Promise.all([
           getTeachers(),
@@ -50,7 +49,6 @@ export default function EditClassroomInfoModal({
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
-        setLoading(false);
       }
     };
 
@@ -95,11 +93,14 @@ export default function EditClassroomInfoModal({
     if (classroom) {
       setFormData({
         ...classroom,
-        schedule: { ...classroom.schedule },
+        schedule: {
+          days: classroom.schedule?.days || '',
+          time: classroom.schedule?.time || '',
+        },
         teacher: { ...classroom.teacher },
       });
       // Parse days from schedule.days if it exists
-      if (classroom.schedule.days) {
+      if (classroom.schedule?.days) {
         setSelectedDays(
           classroom.schedule.days.split(',').map((day) => day.trim())
         );
@@ -156,7 +157,12 @@ export default function EditClassroomInfoModal({
     if (teacher) {
       setFormData((prev) => ({
         ...prev,
-        teacher: { id: teacher.id, name: teacher.name },
+        teacher: {
+          id: teacher.id,
+          name: teacher.name,
+          email: teacher.email || '',
+          role_name: teacher.role_name || 'teacher',
+        },
       }));
     }
   };

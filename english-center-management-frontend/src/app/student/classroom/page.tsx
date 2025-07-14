@@ -13,43 +13,37 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { useStudentApi } from '../_hooks/use-api';
+import { StudentClass } from '../../../types/student';
 
 const StudentClassroomPage: React.FC = () => {
   const router = useRouter();
-  const { loading, error, getStudentClasses, getStudentDashboard } =
-    useStudentApi();
-  const [classes, setClasses] = useState([]);
-  const [stats, setStats] = useState({
-    totalClasses: 0,
-    inProgress: 0,
-    completed: 0,
-    averageProgress: 0,
-  });
+  const { loading, error, getStudentClasses } = useStudentApi();
+  const [classes, setClasses] = useState<StudentClass[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [classesData, dashboardData] = await Promise.all([
-          getStudentClasses(),
-          getStudentDashboard(),
-        ]);
+        const classesData = await getStudentClasses();
         setClasses(classesData);
-        setStats(dashboardData);
       } catch (err) {
         console.error('Error fetching student data:', err);
       }
     };
 
     fetchData();
-  }, [getStudentClasses, getStudentDashboard]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getLevelColor = (level: string) => {
-    switch (level) {
-      case 'beginner':
+    switch (level?.toLowerCase()) {
+      case 'a1':
+      case 'a2':
         return 'bg-green-100 text-green-800';
-      case 'intermediate':
+      case 'b1':
+      case 'b2':
         return 'bg-yellow-100 text-yellow-800';
-      case 'advanced':
+      case 'c1':
+      case 'c2':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -57,20 +51,54 @@ const StudentClassroomPage: React.FC = () => {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'In Progress':
+    switch (status?.toLowerCase()) {
+      case 'in progress':
         return 'bg-blue-100 text-blue-800';
-      case 'Upcoming':
+      case 'upcoming':
         return 'bg-yellow-100 text-yellow-800';
-      case 'Completed':
+      case 'completed':
         return 'bg-green-100 text-green-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getProgressPercentage = (completed: number, total: number) => {
-    return Math.round((completed / total) * 100);
+  const getStatusText = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'in progress':
+        return 'Đang học';
+      case 'upcoming':
+        return 'Sắp tới';
+      case 'completed':
+        return 'Hoàn thành';
+      default:
+        return status || 'Không xác định';
+    }
+  };
+
+  const getLevelText = (level: string) => {
+    switch (level?.toLowerCase()) {
+      case 'a1':
+        return 'Cơ bản A1';
+      case 'a2':
+        return 'Cơ bản A2';
+      case 'b1':
+        return 'Trung cấp B1';
+      case 'b2':
+        return 'Trung cấp B2';
+      case 'c1':
+        return 'Nâng cao C1';
+      case 'c2':
+        return 'Nâng cao C2';
+      default:
+        return level || 'Không xác định';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
   };
 
   const handleClassClick = (classId: string) => {
@@ -133,7 +161,7 @@ const StudentClassroomPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Đang học</p>
               <p className='text-xl font-bold text-gray-900'>
-                {classes.filter((c: any) => c.status === 'In Progress').length}
+                {classes.filter((c) => c.status === 'In Progress').length}
               </p>
             </div>
           </div>
@@ -147,7 +175,7 @@ const StudentClassroomPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Hoàn thành</p>
               <p className='text-xl font-bold text-gray-900'>
-                {classes.filter((c: any) => c.status === 'Completed').length}
+                {classes.filter((c) => c.status === 'Completed').length}
               </p>
             </div>
           </div>
@@ -159,23 +187,9 @@ const StudentClassroomPage: React.FC = () => {
               <TrendingUp className='w-5 h-5 text-orange-600' />
             </div>
             <div>
-              <p className='text-sm text-gray-600'>Tiến độ TB</p>
+              <p className='text-sm text-gray-600'>Sắp tới</p>
               <p className='text-xl font-bold text-gray-900'>
-                {Math.round(
-                  classes.reduce((acc: number, c: any) => {
-                    if (c.sessionsCompleted && c.totalSessions) {
-                      return (
-                        acc +
-                        getProgressPercentage(
-                          c.sessionsCompleted,
-                          c.totalSessions
-                        )
-                      );
-                    }
-                    return acc;
-                  }, 0) / classes.length
-                )}
-                %
+                {classes.filter((c) => c.status === 'Upcoming').length}
               </p>
             </div>
           </div>
@@ -184,7 +198,7 @@ const StudentClassroomPage: React.FC = () => {
 
       {/* Classes Grid */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-        {classes.map((classItem: any) => (
+        {classes.map((classItem) => (
           <div
             key={classItem.id}
             className='bg-white rounded-lg border border-gray-200 p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-purple-300 group'
@@ -202,50 +216,38 @@ const StudentClassroomPage: React.FC = () => {
                       classItem.level
                     )}`}
                   >
-                    {classItem.level === 'beginner' && 'Cơ bản'}
-                    {classItem.level === 'intermediate' && 'Trung cấp'}
-                    {classItem.level === 'advanced' && 'Nâng cao'}
+                    {getLevelText(classItem.level)}
                   </span>
                   <span
                     className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
                       classItem.status
                     )}`}
                   >
-                    {classItem.status === 'In Progress' && 'Đang học'}
-                    {classItem.status === 'Upcoming' && 'Sắp tới'}
-                    {classItem.status === 'Completed' && 'Hoàn thành'}
+                    {getStatusText(classItem.status)}
                   </span>
                 </div>
               </div>
-              <div
-                className={`w-12 h-12 rounded-lg flex items-center justify-center ${classItem.bgColor} group-hover:scale-110 transition-transform`}
-              >
-                <BookOpen className={`w-6 h-6 text-${classItem.color}-600`} />
+              <div className='w-12 h-12 rounded-lg flex items-center justify-center bg-purple-100 group-hover:scale-110 transition-transform'>
+                <BookOpen className='w-6 h-6 text-purple-600' />
               </div>
             </div>
 
             {/* Teacher Info */}
             <div className='flex items-center gap-3 mb-4'>
               <div className='w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center'>
-                {classItem.teacher.avatar ? (
-                  <img
-                    src={classItem.teacher.avatar}
-                    alt={classItem.teacher.name}
-                    className='w-8 h-8 rounded-full object-cover'
-                  />
-                ) : (
-                  <User className='w-4 h-4 text-gray-600' />
-                )}
+                <User className='w-4 h-4 text-gray-600' />
               </div>
               <div>
                 <p className='text-sm font-medium text-gray-900'>
                   {classItem.teacher.name}
                 </p>
-                <p className='text-xs text-gray-500'>Giáo viên</p>
+                <p className='text-xs text-gray-500'>
+                  {classItem.teacher.specialization || 'Giáo viên'}
+                </p>
               </div>
             </div>
 
-            {/* Schedule & Room */}
+            {/* Schedule Info */}
             <div className='space-y-2 mb-4'>
               <div className='flex items-center gap-2 text-sm text-gray-600'>
                 <Clock className='w-4 h-4' />
@@ -255,39 +257,30 @@ const StudentClassroomPage: React.FC = () => {
               </div>
               <div className='flex items-center gap-2 text-sm text-gray-600'>
                 <MapPin className='w-4 h-4' />
-                <span>{classItem.room}</span>
+                <span>Phòng {classItem.room}</span>
               </div>
             </div>
 
-            {/* Progress */}
-            {classItem.sessionsCompleted && classItem.totalSessions && (
-              <div className='mb-4'>
-                <div className='flex items-center justify-between text-sm mb-1'>
-                  <span className='text-gray-600'>Tiến độ</span>
-                  <span className='font-medium text-gray-900'>
-                    {classItem.sessionsCompleted}/{classItem.totalSessions} buổi
+            {/* Progress Info */}
+            <div className='mb-4'>
+              <div className='flex items-center justify-between text-sm'>
+                <span className='text-gray-600'>Tiến độ học tập</span>
+                <span className='font-medium text-gray-900'>
+                  {classItem.sessionsCompleted || 0}
+                  {classItem.totalSessions &&
+                    `/${classItem.totalSessions}`}{' '}
+                  buổi
+                </span>
+              </div>
+              {classItem.nextSession && (
+                <div className='flex items-center gap-2 text-sm text-gray-600 mt-1'>
+                  <Clock className='w-4 h-4' />
+                  <span>
+                    Buổi tiếp theo: {formatDate(classItem.nextSession)}
                   </span>
                 </div>
-                <div className='w-full bg-gray-200 rounded-full h-2'>
-                  <div
-                    className='bg-purple-600 h-2 rounded-full transition-all duration-300'
-                    style={{
-                      width: `${getProgressPercentage(
-                        classItem.sessionsCompleted,
-                        classItem.totalSessions
-                      )}%`,
-                    }}
-                  />
-                </div>
-                <p className='text-xs text-gray-500 mt-1'>
-                  {getProgressPercentage(
-                    classItem.sessionsCompleted,
-                    classItem.totalSessions
-                  )}
-                  % hoàn thành
-                </p>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Action Buttons */}
             <div className='flex items-center justify-end'>
@@ -301,7 +294,7 @@ const StudentClassroomPage: React.FC = () => {
       </div>
 
       {/* Empty State */}
-      {classes.length === 0 && (
+      {classes.length === 0 && !loading && (
         <div className='text-center py-12'>
           <BookOpen className='w-16 h-16 text-gray-300 mx-auto mb-4' />
           <h3 className='text-lg font-medium text-gray-900 mb-2'>

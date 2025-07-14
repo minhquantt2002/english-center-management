@@ -12,6 +12,10 @@ def get_enrollments(db: Session, skip: int = 0, limit: int = 100) -> List[Enroll
     """Get enrollments with pagination"""
     return db.query(Enrollment).offset(skip).limit(limit).all()
 
+def get_all_enrollments(db: Session) -> List[Enrollment]:
+    """Get all enrollments without pagination"""
+    return db.query(Enrollment).all()
+
 def get_enrollments_by_student(db: Session, student_id: UUID) -> List[Enrollment]:
     """Get enrollments for specific student"""
     return db.query(Enrollment).filter(Enrollment.student_id == student_id).all()

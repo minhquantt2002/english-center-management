@@ -1,10 +1,21 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar, X } from 'lucide-react';
+import {
+  Search,
+  Calendar,
+  GraduationCap,
+  Filter,
+  Mail,
+  Phone,
+  BookOpen,
+  Clock,
+  Users,
+  AlertCircle,
+} from 'lucide-react';
 import { Teacher } from '../../../types';
 import TeachingScheduleModal from './_components/teaching-schedule-modal';
-import { useStaffApi } from '../_hooks/use-api';
+import { useStaffTeacherApi } from '../_hooks';
 
 export default function TeacherManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,11 +26,12 @@ export default function TeacherManagement() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { loading, error, getTeachers, getTeacherSchedule } = useStaffApi();
+  const { error, getTeachers, getTeacherSchedule } = useStaffTeacherApi();
 
   // Fetch teachers on component mount
   useEffect(() => {
     fetchTeachers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchTeachers = async () => {
@@ -46,10 +58,10 @@ export default function TeacherManagement() {
       subject: teacher.specialization,
       subjectColor:
         index % 2 === 0
-          ? 'bg-blue-100 text-blue-800'
-          : 'bg-purple-100 text-purple-800',
+          ? 'bg-blue-100 text-blue-800 border-blue-200'
+          : 'bg-purple-100 text-purple-800 border-purple-200',
       level: 'A1 - C1', // Default level range
-      levelColor: 'bg-green-100 text-green-800',
+      levelColor: 'bg-green-100 text-green-800 border-green-200',
     })
   );
 
@@ -86,212 +98,298 @@ export default function TeacherManagement() {
 
   if (isLoading) {
     return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-        <div className='flex items-center gap-2'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
-          <span className='text-gray-600'>Đang tải dữ liệu...</span>
-        </div>
+      <div className='flex justify-center items-center py-12'>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-green-600'></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-        <div className='text-center'>
-          <p className='text-red-600 mb-2'>Có lỗi xảy ra khi tải dữ liệu</p>
-          <button
-            onClick={fetchTeachers}
-            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
-          >
-            Thử lại
-          </button>
+      <div className='bg-red-50 border border-red-200 rounded-xl p-6 mb-6'>
+        <div className='flex items-center gap-3'>
+          <AlertCircle className='w-5 h-5 text-red-500' />
+          <p className='text-red-800 font-medium'>
+            Có lỗi xảy ra khi tải dữ liệu
+          </p>
         </div>
+        <button
+          onClick={fetchTeachers}
+          className='mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors'
+        >
+          Thử lại
+        </button>
       </div>
     );
   }
 
-  return (
-    <div className='min-h-screen bg-gray-50'>
-      <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-        {/* Page Title */}
-        <div className='mb-8'>
-          <h2 className='text-3xl font-bold text-gray-900 mb-2'>
-            Danh sách giáo viên
-          </h2>
-        </div>
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase();
+  };
 
-        {/* Filters */}
-        <div className='bg-white rounded-lg shadow-sm p-6 mb-6'>
-          <div className='flex flex-col lg:flex-row gap-4'>
-            <div className='flex-1'>
-              <div className='relative'>
-                <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5' />
-                <input
-                  type='text'
-                  placeholder='Tìm kiếm theo tên, email hoặc số điện thoại...'
-                  className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className='flex gap-4'>
-              <select
-                className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
-                value={levelFilter}
-                onChange={(e) => setLevelFilter(e.target.value)}
-              >
-                <option>Tất cả trình độ</option>
-                <option>A1 - A2</option>
-                <option>A2 - B2</option>
-                <option>B1 - C1</option>
-                <option>B2 - C2</option>
-              </select>
-              <select
-                className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
-                value={subjectFilter}
-                onChange={(e) => setSubjectFilter(e.target.value)}
-              >
-                <option>Tất cả môn học</option>
-                <option>IELTS</option>
-                <option>TOEIC</option>
-                <option>Business English</option>
-                <option>Ngữ pháp</option>
-                <option>Giao tiếp cơ bản</option>
-              </select>
-            </div>
+  return (
+    <>
+      {/* Header */}
+      <div className='mb-8'>
+        <div className='flex items-center gap-4 mb-4'>
+          <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg'>
+            <GraduationCap className='w-6 h-6 text-white' />
+          </div>
+          <div>
+            <h1 className='text-3xl font-bold text-gray-900'>
+              Danh sách giáo viên
+            </h1>
+            <p className='text-gray-600 mt-1'>
+              Quản lý và theo dõi thông tin giáo viên của trung tâm
+            </p>
           </div>
         </div>
 
-        {/* Teachers Table */}
-        <div className='bg-white rounded-lg shadow-sm overflow-hidden'>
-          <div className='overflow-x-auto'>
-            <table className='w-full'>
-              <thead className='bg-gray-50 border-b border-gray-200'>
-                <tr>
-                  <th className='text-left py-4 px-6 font-medium text-gray-700'>
-                    Họ và tên
-                  </th>
-                  <th className='text-left py-4 px-6 font-medium text-gray-700'>
-                    Số điện thoại
-                  </th>
-                  <th className='text-left py-4 px-6 font-medium text-gray-700'>
-                    Email
-                  </th>
-                  <th className='text-left py-4 px-6 font-medium text-gray-700'>
-                    Môn phụ trách
-                  </th>
-                  <th className='text-left py-4 px-6 font-medium text-gray-700'>
-                    Trình độ
-                  </th>
-                  <th className='text-left py-4 px-6 font-medium text-gray-700'>
-                    Thao tác
-                  </th>
-                </tr>
-              </thead>
-              <tbody className='divide-y divide-gray-200'>
-                {filteredTeachers.map((teacher) => (
-                  <tr key={teacher.id} className='hover:bg-gray-50'>
-                    <td className='py-4 px-6'>
-                      <div className='flex items-center space-x-3'>
-                        <div className='w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center'>
-                          <span className='text-sm font-medium text-gray-600'>
-                            {teacher.name.charAt(0)}
-                          </span>
-                        </div>
-                        <div>
-                          <div className='font-medium text-gray-900'>
-                            {teacher.name}
-                          </div>
-                          <div className='text-sm text-gray-500'>
-                            {teacher.role}
-                          </div>
+        {/* Stats Cards */}
+        <div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-8'>
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>
+                  Tổng giáo viên
+                </p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {teachers.length}
+                </p>
+              </div>
+              <div className='w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center'>
+                <GraduationCap className='w-6 h-6 text-green-600' />
+              </div>
+            </div>
+          </div>
+
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>
+                  Đang giảng dạy
+                </p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {teachers.filter((t) => t.status === 'active').length}
+                </p>
+              </div>
+              <div className='w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center'>
+                <BookOpen className='w-6 h-6 text-blue-600' />
+              </div>
+            </div>
+          </div>
+
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>
+                  Lớp đang dạy
+                </p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {teachers.length * 2} {/* Mock data */}
+                </p>
+              </div>
+              <div className='w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center'>
+                <Users className='w-6 h-6 text-purple-600' />
+              </div>
+            </div>
+          </div>
+
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>
+                  Giờ dạy tuần
+                </p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {teachers.length * 20} {/* Mock data */}
+                </p>
+              </div>
+              <div className='w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center'>
+                <Clock className='w-6 h-6 text-orange-600' />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters and Search */}
+      <div className='bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-8'>
+        <div className='flex flex-col lg:flex-row gap-4'>
+          {/* Search */}
+          <div className='flex-1 relative'>
+            <Search
+              className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400'
+              size={20}
+            />
+            <input
+              type='text'
+              placeholder='Tìm kiếm giáo viên theo tên, email hoặc chuyên môn...'
+              className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {/* Level Filter */}
+          <div className='relative'>
+            <select
+              className='px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent min-w-[150px] appearance-none bg-white'
+              value={levelFilter}
+              onChange={(e) => setLevelFilter(e.target.value)}
+            >
+              <option>Tất cả trình độ</option>
+              <option>A1 - A2</option>
+              <option>A2 - B2</option>
+              <option>B1 - C1</option>
+              <option>B2 - C2</option>
+            </select>
+            <Filter className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none' />
+          </div>
+
+          {/* Subject Filter */}
+          <div className='relative'>
+            <select
+              className='px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent min-w-[160px] appearance-none bg-white'
+              value={subjectFilter}
+              onChange={(e) => setSubjectFilter(e.target.value)}
+            >
+              <option>Tất cả môn học</option>
+              <option>IELTS</option>
+              <option>TOEIC</option>
+              <option>Business English</option>
+              <option>Ngữ pháp</option>
+              <option>Giao tiếp cơ bản</option>
+            </select>
+            <Filter className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none' />
+          </div>
+        </div>
+      </div>
+
+      {/* Teachers Table */}
+      <div className='bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden'>
+        <div className='overflow-x-auto'>
+          <table className='w-full'>
+            <thead className='bg-gradient-to-r from-gray-50 to-gray-100'>
+              <tr>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Giáo viên
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Liên hệ
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Chuyên môn
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Trình độ
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Lớp đang dạy
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Thao tác
+                </th>
+              </tr>
+            </thead>
+            <tbody className='bg-white divide-y divide-gray-100'>
+              {filteredTeachers.map((teacher) => (
+                <tr
+                  key={teacher.id}
+                  className='hover:bg-gray-50 transition-colors'
+                >
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    <div className='flex items-center'>
+                      <div className='h-12 w-12 flex-shrink-0'>
+                        <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
+                          {getInitials(teacher.name)}
                         </div>
                       </div>
-                    </td>
-                    <td className='py-4 px-6 text-gray-900'>{teacher.phone}</td>
-                    <td className='py-4 px-6 text-gray-900'>{teacher.email}</td>
-                    <td className='py-4 px-6'>
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${teacher.subjectColor}`}
-                      >
-                        {teacher.subject}
-                      </span>
-                    </td>
-                    <td className='py-4 px-6'>
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${teacher.levelColor}`}
-                      >
-                        {teacher.level}
-                      </span>
-                    </td>
-                    <td className='py-4 px-6'>
-                      <button
-                        onClick={() => handleSchedule(teacher.id)}
-                        className='inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2'
-                      >
-                        <Calendar className='w-4 h-4 mr-2' />
-                        Xem lịch dạy
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          <div className='bg-white px-6 py-4 border-t border-gray-200'>
-            <div className='flex items-center justify-between'>
-              <div className='text-sm text-gray-700'>
-                Hiển thị 1 đến {filteredTeachers.length} trong tổng số{' '}
-                {teachers.length} giáo viên
-              </div>
-              <div className='flex items-center space-x-2'>
-                <button className='px-3 py-1 text-sm text-gray-500 bg-white border border-gray-300 rounded hover:bg-gray-50'>
-                  Trước
-                </button>
-                <button className='px-3 py-1 text-sm text-white bg-teal-600 border border-teal-600 rounded'>
-                  1
-                </button>
-                <button className='px-3 py-1 text-sm text-gray-500 bg-white border border-gray-300 rounded hover:bg-gray-50'>
-                  2
-                </button>
-                <button className='px-3 py-1 text-sm text-gray-500 bg-white border border-gray-300 rounded hover:bg-gray-50'>
-                  Sau
-                </button>
-              </div>
-            </div>
-          </div>
+                      <div className='ml-4'>
+                        <div className='text-sm font-semibold text-gray-900'>
+                          {teacher.name}
+                        </div>
+                        <div className='text-sm text-gray-500'>
+                          {teacher.role}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    <div className='flex flex-col space-y-1'>
+                      <div className='flex items-center text-sm text-gray-900'>
+                        <Mail className='w-4 h-4 text-gray-400 mr-2' />
+                        {teacher.email}
+                      </div>
+                      <div className='flex items-center text-sm text-gray-500'>
+                        <Phone className='w-4 h-4 text-gray-400 mr-2' />
+                        {teacher.phone}
+                      </div>
+                    </div>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    <span
+                      className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${teacher.subjectColor}`}
+                    >
+                      {teacher.subject}
+                    </span>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    <span
+                      className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${teacher.levelColor}`}
+                    >
+                      {teacher.level}
+                    </span>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                    {Math.floor(Math.random() * 5) + 1} lớp
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
+                    <button
+                      onClick={() => handleSchedule(teacher.id)}
+                      className='text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors'
+                      title='Xem lịch giảng dạy'
+                    >
+                      <Calendar className='w-4 h-4' />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </main>
+
+        {/* Empty State */}
+        {filteredTeachers.length === 0 && (
+          <div className='text-center py-12'>
+            <GraduationCap className='w-16 h-16 text-gray-300 mx-auto mb-4' />
+            <h3 className='text-lg font-medium text-gray-900 mb-2'>
+              Không tìm thấy giáo viên
+            </h3>
+            <p className='text-gray-500 mb-6'>
+              {searchTerm ||
+              levelFilter !== 'Tất cả trình độ' ||
+              subjectFilter !== 'Tất cả môn học'
+                ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm'
+                : 'Chưa có giáo viên nào trong hệ thống'}
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Teaching Schedule Modal */}
       {showScheduleModal && selectedTeacher && (
-        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-          <div className='bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden'>
-            <div className='flex items-center justify-between p-6 border-b border-gray-200'>
-              <h3 className='text-xl font-semibold text-gray-900'>
-                Lịch giảng dạy - {selectedTeacher.name}
-              </h3>
-              <button
-                onClick={closeScheduleModal}
-                className='text-gray-400 hover:text-gray-600'
-              >
-                <X className='w-6 h-6' />
-              </button>
-            </div>
-            <div className='overflow-y-auto max-h-[calc(90vh-120px)]'>
-              <TeachingScheduleModal
-                teacherId={selectedTeacher.id}
-                teacherName={selectedTeacher.name}
-                onClose={closeScheduleModal}
-              />
-            </div>
-          </div>
-        </div>
+        <TeachingScheduleModal
+          teacherId={selectedTeacher.id}
+          teacherName={selectedTeacher.name}
+          isOpen={showScheduleModal}
+          onClose={closeScheduleModal}
+        />
       )}
-    </div>
+    </>
   );
 }

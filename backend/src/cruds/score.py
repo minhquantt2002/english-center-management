@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 from uuid import UUID
 from ..models.score import Score
+from ..models.exam import Exam
 from ..schemas.score import ScoreCreate, ScoreUpdate
 
 def get_score(db: Session, score_id: UUID) -> Optional[Score]:
@@ -78,4 +79,27 @@ def get_average_score_by_student(db: Session, student_id: UUID) -> float:
         .filter(Score.student_id == student_id)\
         .filter(Score.total_score.isnot(None))\
         .scalar()
-    return float(result) if result else 0.0 
+    return float(result) if result else 0.0
+
+def get_recent_scores_by_student(db: Session, student_id: UUID, limit: int = 5) -> List[Score]:
+    """Get recent scores for a student"""
+    return db.query(Score)\
+        .filter(Score.student_id == student_id)\
+        .order_by(Score.created_at.desc())\
+        .limit(limit)\
+        .all()
+
+def get_scores_by_classroom(db: Session, classroom_id: UUID) -> List[Score]:
+    """Get scores for a specific classroom"""
+    return db.query(Score)\
+        .join(Exam, Score.exam_id == Exam.id)\
+        .filter(Exam.class_id == classroom_id)\
+        .all()
+
+def get_scores_by_student_classroom(db: Session, student_id: UUID, classroom_id: UUID) -> List[Score]:
+    """Get scores for a student in a specific classroom"""
+    return db.query(Score)\
+        .join(Exam, Score.exam_id == Exam.id)\
+        .filter(Score.student_id == student_id)\
+        .filter(Exam.class_id == classroom_id)\
+        .all() 

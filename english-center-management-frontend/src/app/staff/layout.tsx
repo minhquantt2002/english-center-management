@@ -31,11 +31,11 @@ const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className='flex h-screen bg-gray-50 overflow-hidden'>
+    <div className='flex h-screen bg-gradient-to-br from-gray-50 via-white to-green-50 overflow-hidden'>
       {/* Sidebar */}
       <div
         className={`
-          fixed inset-y-0 left-0 z-50 w-64 bg-white transform transition-transform duration-300 ease-in-out
+          fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out
           ${
             isMobile
               ? sidebarOpen
@@ -51,7 +51,7 @@ const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
       {/* Mobile overlay */}
       {isMobile && sidebarOpen && (
         <div
-          className='fixed inset-0 z-40 bg-black bg-opacity-50'
+          className='fixed inset-0 z-40 bg-black bg-opacity-50 backdrop-blur-sm'
           onClick={closeSidebar}
         />
       )}
@@ -72,7 +72,9 @@ const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
       </div>
 
       {/* Mobile bottom padding for safe area */}
-      {isMobile && <div className='h-safe-area-inset-bottom bg-gray-50' />}
+      {isMobile && (
+        <div className='h-safe-area-inset-bottom bg-gradient-to-br from-gray-50 via-white to-green-50' />
+      )}
     </div>
   );
 };

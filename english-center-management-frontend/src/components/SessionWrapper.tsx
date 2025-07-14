@@ -3,6 +3,7 @@
 import { SessionProvider } from 'next-auth/react';
 import { ReactNode } from 'react';
 import { PersonalInfoProvider, usePersonalInfo } from './PersonalInfoContext';
+import { UserInfoProvider } from './UserInfoContext';
 import PersonalInfoModal from './PersonalInfoModal';
 
 interface SessionWrapperProps {
@@ -25,10 +26,12 @@ const PersonalInfoModalRenderer = () => {
 export default function SessionWrapper({ children }: SessionWrapperProps) {
   return (
     <SessionProvider>
-      <PersonalInfoProvider>
-        {children}
-        <PersonalInfoModalRenderer />
-      </PersonalInfoProvider>
+      <UserInfoProvider>
+        <PersonalInfoProvider>
+          {children}
+          <PersonalInfoModalRenderer />
+        </PersonalInfoProvider>
+      </UserInfoProvider>
     </SessionProvider>
   );
 }

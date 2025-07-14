@@ -10,14 +10,21 @@ import {
   FileText,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useStaffApi } from '../_hooks/use-api';
+import {
+  useStaffStudentApi,
+  useStaffCourseApi,
+  useStaffClassroomApi,
+  useStaffInvoiceApi,
+} from '../_hooks';
 
 export default function CreateInvoicePage() {
   const [selectedStudent, setSelectedStudent] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
   const [tuitionFee, setTuitionFee] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'transfer'>(
+    'cash'
+  );
   const [notes, setNotes] = useState('');
   const [students, setStudents] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
@@ -25,17 +32,29 @@ export default function CreateInvoicePage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const {
-    loading,
-    error,
+    loading: studentLoading,
+    error: studentError,
     getStudents,
+  } = useStaffStudentApi();
+
+  const {
+    loading: courseLoading,
+    error: courseError,
     getCourses,
+  } = useStaffCourseApi();
+
+  const {
+    loading: classroomLoading,
+    error: classroomError,
     getClassrooms,
-    createInvoice,
-  } = useStaffApi();
+  } = useStaffClassroomApi();
+
+  const { createInvoice } = useStaffInvoiceApi();
 
   // Fetch data on component mount
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {
@@ -46,11 +65,16 @@ export default function CreateInvoicePage() {
         getClassrooms(),
       ]);
 
-      setStudents(studentsData.slice(0, 5).map((student: any) => student.name));
+      setStudents(
+        studentsData.data.slice(0, 5).map((student: any) => student.name)
+      );
       setCourses(coursesData.map((course: any) => course.name));
       setClassrooms(
         classroomsData.map(
-          (classItem: any) => `${classItem.id} (${classItem.schedule.time})`
+          (classItem: any) =>
+            `${classItem.id} (${
+              classItem.schedule?.time || 'Chưa có lịch học'
+            })`
         )
       );
       setIsLoading(false);
@@ -87,7 +111,7 @@ export default function CreateInvoicePage() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || studentLoading || courseLoading || classroomLoading) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
         <div className='flex items-center gap-2'>
@@ -98,7 +122,7 @@ export default function CreateInvoicePage() {
     );
   }
 
-  if (error) {
+  if (studentError || courseError || classroomError) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
         <div className='text-center'>
@@ -223,7 +247,9 @@ export default function CreateInvoicePage() {
                     name='paymentMethod'
                     value='cash'
                     checked={paymentMethod === 'cash'}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    onChange={(e) =>
+                      setPaymentMethod(e.target.value as 'cash' | 'transfer')
+                    }
                     className='w-4 h-4 text-cyan-600 border-gray-300 focus:ring-cyan-500'
                   />
                   <span className='text-sm text-gray-700'>Tiền mặt</span>
@@ -234,7 +260,9 @@ export default function CreateInvoicePage() {
                     name='paymentMethod'
                     value='transfer'
                     checked={paymentMethod === 'transfer'}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    onChange={(e) =>
+                      setPaymentMethod(e.target.value as 'cash' | 'transfer')
+                    }
                     className='w-4 h-4 text-cyan-600 border-gray-300 focus:ring-cyan-500'
                   />
                   <span className='text-sm text-gray-700'>Chuyển khoản</span>

@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import {
   ChevronLeft,
@@ -9,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useTeacherApi } from '../_hooks/use-api';
 import { ClassSession } from '../../../types';
+import type { TeachingSchedule } from '../../../types';
 
 interface ClassItem {
   id: string;
@@ -26,24 +29,30 @@ interface DaySchedule {
 const TeachingSchedule = () => {
   const { loading, error, getTeachingScheduleDetails } = useTeacherApi();
   const [sessions, setSessions] = useState<ClassSession[]>([]);
-  const [scheduleDetails, setScheduleDetails] = useState<any>(null);
 
   useEffect(() => {
     const fetchSessions = async () => {
       try {
         const scheduleData = await getTeachingScheduleDetails();
-        setScheduleDetails(scheduleData);
 
         // Convert schedule data to sessions format
-        const convertedSessions =
-          scheduleData.schedule?.map((item: any, index: number) => ({
+        const convertedSessions = scheduleData.map(
+          (item: TeachingSchedule) => ({
             id: item.id,
-            title: item.classroom_name,
+            title: item.className,
             room: item.room,
-            time: `${item.time}`,
+            time: `${item.timeSlot.startTime} - ${item.timeSlot.endTime}`,
             day: item.day,
-            status: item.status,
-          })) || [];
+            studentCount: item.studentCount,
+            status: (item.status === 'scheduled'
+              ? 'Upcoming'
+              : item.status === 'in-progress'
+              ? 'In Progress'
+              : item.status === 'completed'
+              ? 'Completed'
+              : 'Upcoming') as 'In Progress' | 'Upcoming' | 'Completed',
+          })
+        );
 
         setSessions(convertedSessions);
       } catch (err) {

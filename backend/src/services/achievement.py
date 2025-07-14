@@ -19,7 +19,7 @@ def create_achievement(db: Session, achievement: AchievementCreate) -> Achieveme
     """
     Tạo thành tích mới
     """
-    db_achievement = Achievement(**achievement.dict())
+    db_achievement = Achievement(**achievement.model_dump())
     db.add(db_achievement)
     db.commit()
     db.refresh(db_achievement)
@@ -33,7 +33,7 @@ def update_achievement(db: Session, achievement_id: str, achievement: Achievemen
     if not db_achievement:
         return None
     
-    update_data = achievement.dict(exclude_unset=True)
+    update_data = achievement.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_achievement, field, value)
     

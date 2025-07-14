@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 from ..models.user import User
 from ..models.enrollment import Enrollment
@@ -62,3 +62,64 @@ def count_students_by_classroom(db: Session, class_id: UUID) -> int:
         .filter(Enrollment.class_id == class_id)\
         .filter(User.role_name == "student")\
         .count()
+
+def count_students_by_teacher(db: Session, teacher_id: UUID) -> int:
+    """Count students taught by specific teacher"""
+    return db.query(User)\
+        .join(Enrollment, User.id == Enrollment.student_id)\
+        .join(Class, Enrollment.class_id == Class.id)\
+        .filter(Class.teacher_id == teacher_id)\
+        .filter(User.role_name == "student")\
+        .distinct()\
+        .count()
+
+def create_student(db: Session, student_data) -> User:
+    """Create new student"""
+    from ..schemas.user import UserCreate
+    from ..utils.auth import get_password_hash
+    
+    user_data = UserCreate(
+        name=student_data.name,
+        email=student_data.email,
+        password=student_data.password,
+        role_name="student",
+        bio=student_data.bio,
+        date_of_birth=student_data.date_of_birth,
+        phone_number=student_data.phone_number,
+        input_level=student_data.input_level,
+        level=student_data.level,
+        parent_name=student_data.parent_name,
+        parent_phone=student_data.parent_phone,
+        student_id=student_data.student_id
+    )
+    
+    hashed_password = get_password_hash(student_data.password)
+    from ..cruds import user as user_crud
+    student = user_crud.create_user(db, user_data, hashed_password)
+    return student
+
+def update_student(db: Session, student_id: UUID, student_data) -> Optional[User]:
+    """Update student"""
+    from ..schemas.user import UserUpdate
+    
+    user_data = UserUpdate(
+        name=student_data.name,
+        email=student_data.email,
+        bio=student_data.bio,
+        date_of_birth=student_data.date_of_birth,
+        phone_number=student_data.phone_number,
+        input_level=student_data.input_level,
+        level=student_data.level,
+        parent_name=student_data.parent_name,
+        parent_phone=student_data.parent_phone,
+        student_id=student_data.student_id
+    )
+    
+    from ..cruds import user as user_crud
+    student = user_crud.update_user(db, student_id, user_data)
+    return student
+
+def delete_student(db: Session, student_id: UUID) -> bool:
+    """Delete student"""
+    from ..cruds import user as user_crud
+    return user_crud.delete_user(db, student_id)

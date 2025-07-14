@@ -16,7 +16,7 @@ class Exam(Base):
     description = Column(Text)  # Mô tả bài thi
     duration = Column(Integer)  # Thời gian làm bài (phút)
     total_points = Column(Integer)  # Tổng điểm
-    exam_type = Column(String(50))  # midterm, final, quiz, assignment
+    exam_type = Column(String(50))  # midterm, final, quiz
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships

@@ -24,6 +24,7 @@ class UserBase(BaseSchema):
     parent_name: Optional[str] = None
     parent_phone: Optional[str] = None
     student_id: Optional[str] = None
+    status: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str
@@ -49,6 +50,7 @@ class UserUpdate(BaseSchema):
     parent_name: Optional[str] = None
     parent_phone: Optional[str] = None
     student_id: Optional[str] = None
+    status: Optional[str] = None
 
 class UserResponse(UserBase):
     id: UUID

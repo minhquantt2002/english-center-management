@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Search, Users, Check } from 'lucide-react';
 import { Student } from '../../../../../types';
-import { useStaffApi } from '../../../_hooks/use-api';
+import { useStaffStudentApi } from '../../../_hooks';
 
 interface AssignStudentModalProps {
   isOpen: boolean;
@@ -25,7 +25,7 @@ export default function AssignStudentModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [availableStudents, setAvailableStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
-  const { getAvailableStudents, loading, error } = useStaffApi();
+  const { getAvailableStudents, loading, error } = useStaffStudentApi();
 
   // Fetch available students from API
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function AssignStudentModal({
       try {
         const students = await getAvailableStudents();
         // Filter out students already in this classroom
-        const available = students.filter(
+        const available = students.data.filter(
           (student: Student) => !existingStudentIds.includes(student.id)
         );
         setAvailableStudents(available);
@@ -101,9 +101,6 @@ export default function AssignStudentModal({
   const isAllSelected =
     filteredStudents.length > 0 &&
     selectedStudentIds.length === filteredStudents.length;
-  const isIndeterminate =
-    selectedStudentIds.length > 0 &&
-    selectedStudentIds.length < filteredStudents.length;
 
   if (!isOpen) return null;
 

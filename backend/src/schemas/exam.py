@@ -10,7 +10,7 @@ class ExamBase(BaseSchema):
     description: Optional[str] = None  # Mô tả bài thi
     duration: Optional[int] = None  # Thời gian làm bài (phút)
     total_points: Optional[int] = None  # Tổng điểm
-    exam_type: Optional[str] = None  # midterm, final, quiz, assignment
+    exam_type: Optional[str] = None  # midterm, final, quiz
 
 class ExamCreate(ExamBase):
     pass

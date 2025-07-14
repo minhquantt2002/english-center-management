@@ -18,36 +18,56 @@ export interface User extends BaseEntity {
 
 // Course interface for admin management
 export interface Course extends BaseEntity {
-  name: string;
+  name?: string; // Frontend compatibility
+  course_name?: string; // API response field
   description: string;
   level: CourseLevel;
-  duration: string; // e.g., "8 weeks"
-  startDate: string;
-  endDate: string;
-  status: CourseStatus;
-  price?: number;
+  duration?: string | null; // e.g., "8 weeks"
+  startDate?: string;
+  endDate?: string;
+  start_date?: string; // API response field
+  end_date?: string; // API response field
+  status?: CourseStatus;
+  price?: number | null;
   maxStudents?: number;
+  max_students?: number; // API response field
   syllabus?: string[];
 }
 
 // Class/Classroom interfaces for admin
 export interface ClassData extends BaseEntity {
-  name: string;
-  level: CourseLevel;
+  class_name: string; // Match backend field name
+  name?: string; // For frontend compatibility
+  level?: CourseLevel; // From course
   teacher: {
     id: string;
     name: string;
+    email: string;
+    role_name: string;
     avatar?: string;
   };
-  students: number;
+  students?: number;
   maxStudents?: number;
-  schedule: {
+  max_students?: number;
+  current_students?: number;
+  schedule?: {
     days: string;
     time: string;
   };
   room?: string;
   courseId?: string;
-  status: 'active' | 'inactive';
+  course_id?: string;
+  course?: {
+    id: string;
+    course_name: string;
+    level: CourseLevel;
+    description?: string;
+  };
+  status: 'active' | 'inactive' | 'completed' | 'cancelled';
+  duration?: number;
+  start_date?: string;
+  end_date?: string;
+  description?: string;
 }
 
 // Category management interfaces

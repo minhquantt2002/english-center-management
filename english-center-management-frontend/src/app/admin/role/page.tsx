@@ -12,9 +12,10 @@ import {
   GraduationCap,
   UserCheck,
 } from 'lucide-react';
-import { User, UserStatus } from '../../../types';
+import { User, UserRole, UserStatus } from '../../../types';
 import CreateUserModal, { UserFormData } from './_components/create-user';
-import { useRoleApi } from './_hooks/use-api';
+import { useUserApi } from '../_hooks';
+import Image from 'next/image';
 
 interface Permission {
   id: string;
@@ -30,19 +31,13 @@ const UserRolePermissionManagement = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
 
-  const {
-    loading,
-    error,
-    createUser,
-    updateUser,
-    deleteUser,
-    getUsers,
-    updateUserRole,
-  } = useRoleApi();
+  const { createUser, updateUser, deleteUser, getUsers, updateUserRole } =
+    useUserApi();
 
   // Fetch users on component mount
   useEffect(() => {
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchUsers = async () => {
@@ -206,7 +201,7 @@ const UserRolePermissionManagement = () => {
 
   const handleUpdateUserRole = async (userId: string, newRole: string) => {
     try {
-      await updateUserRole(userId, newRole);
+      await updateUserRole(userId, newRole as UserRole);
       await fetchUsers(); // Refresh the list
       alert('Vai trò người dùng đã được cập nhật thành công!');
     } catch (error) {
@@ -364,7 +359,7 @@ const UserRolePermissionManagement = () => {
                           <td className='px-4 py-4 whitespace-nowrap'>
                             <div className='flex items-center'>
                               <div className='h-10 w-10 flex-shrink-0'>
-                                <img
+                                <Image
                                   className='h-10 w-10 rounded-full object-cover'
                                   src={user.avatar}
                                   alt={user.name}
@@ -457,7 +452,7 @@ const UserRolePermissionManagement = () => {
                       Người dùng đã chọn
                     </h3>
                     <div className='flex items-center p-3 bg-gray-50 rounded-lg'>
-                      <img
+                      <Image
                         className='h-10 w-10 rounded-full object-cover'
                         src={selectedUser.avatar}
                         alt={selectedUser.name}

@@ -30,6 +30,7 @@ class User(Base):
     parent_name = Column(String(255))
     parent_phone = Column(String(20))
     student_id = Column(String(50), unique=True)  # Student ID for frontend compatibility
+    status = Column(String(50), default="active")  # active, inactive, suspended, graduated
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

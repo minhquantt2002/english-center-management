@@ -13,6 +13,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { Student } from '../../../../types';
+import Image from 'next/image';
 
 interface ViewStudentModalProps {
   student: Student | null;
@@ -85,7 +86,7 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
         <div className='flex items-center justify-between p-6 border-b border-gray-200'>
           <div className='flex items-center space-x-3'>
             <div className='h-12 w-12 flex-shrink-0'>
-              <img
+              <Image
                 className='h-12 w-12 rounded-full object-cover'
                 src={
                   student.avatar ||
@@ -226,8 +227,8 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
                       student.level
                     )}`}
                   >
-                    {student.level.charAt(0).toUpperCase() +
-                      student.level.slice(1)}
+                    {(student.level || 'beginner').charAt(0).toUpperCase() +
+                      (student.level || 'beginner').slice(1)}
                   </span>
                 </div>
               </div>
@@ -248,10 +249,12 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
                 <div className='mt-2'>
                   <span
                     className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusBadgeColor(
-                      student.status
+                      student.status || 'active'
                     )}`}
                   >
-                    {student.status === 'active' ? 'Đang học' : 'Tạm nghỉ'}
+                    {(student.status || 'active') === 'active'
+                      ? 'Đang học'
+                      : 'Tạm nghỉ'}
                   </span>
                 </div>
               </div>

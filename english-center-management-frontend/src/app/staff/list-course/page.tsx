@@ -10,11 +10,11 @@ import {
   MessageCircle,
   Award,
 } from 'lucide-react';
-import { useStaffApi } from '../_hooks/use-api';
+import { useStaffCourseApi } from '../_hooks';
 import { Course } from '../../../types';
 
 export default function CourseManagement() {
-  const { loading, error, getCourses } = useStaffApi();
+  const { loading, error, getCourses } = useStaffCourseApi();
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState('all');
   const [courses, setCourses] = useState<Course[]>([]);
@@ -34,10 +34,14 @@ export default function CourseManagement() {
 
   const processedCourses = courses.map((course: Course, index: number) => ({
     id: course.id,
-    title: course.name,
-    description: course.description,
+    title: course.name || 'Khóa học không có tên',
+    description: course.description || 'Không có mô tả',
     classCount: 8, // Default class count
-    levels: [course.level.charAt(0).toUpperCase() + course.level.slice(1)],
+    levels: [
+      course.level
+        ? course.level.charAt(0).toUpperCase() + course.level.slice(1)
+        : 'N/A',
+    ],
     icon:
       index % 4 === 0
         ? 'book'
@@ -82,13 +86,15 @@ export default function CourseManagement() {
 
   const filteredCourses = processedCourses.filter((course) => {
     const matchesSearch =
-      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchTerm.toLowerCase());
+      (course.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (course.description?.toLowerCase() || '').includes(
+        searchTerm.toLowerCase()
+      );
 
     const matchesLevel =
       levelFilter === 'all' ||
       course.levels.some((level) =>
-        level.toLowerCase().includes(levelFilter.toLowerCase())
+        (level?.toLowerCase() || '').includes(levelFilter.toLowerCase())
       );
 
     return matchesSearch && matchesLevel;

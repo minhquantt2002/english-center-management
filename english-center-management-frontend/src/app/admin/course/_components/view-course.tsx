@@ -12,7 +12,7 @@ import {
   AlertCircle,
   Clock as ClockIcon,
 } from 'lucide-react';
-import { Course } from '@/types';
+import { Course } from '../../../../types';
 
 interface ViewCourseModalProps {
   isOpen: boolean;
@@ -148,7 +148,7 @@ const ViewCourseModal: React.FC<ViewCourseModalProps> = ({
             <div className='flex items-start justify-between mb-4'>
               <div className='flex-1'>
                 <h1 className='text-3xl font-bold text-gray-900 mb-2'>
-                  {course.name}
+                  {course.course_name || course.name}
                 </h1>
                 <p className='text-gray-600 text-lg leading-relaxed'>
                   {course.description}
@@ -164,12 +164,12 @@ const ViewCourseModal: React.FC<ViewCourseModalProps> = ({
                 </span>
                 <span
                   className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${getStatusBadgeColor(
-                    course.status
+                    course.status || 'upcoming'
                   )}`}
                 >
-                  {getStatusIcon(course.status)}
+                  {getStatusIcon(course.status || 'upcoming')}
                   <span className='ml-1'>
-                    {getStatusDisplay(course.status)}
+                    {getStatusDisplay(course.status || 'upcoming')}
                   </span>
                 </span>
               </div>
@@ -189,29 +189,35 @@ const ViewCourseModal: React.FC<ViewCourseModalProps> = ({
                   <Clock className='w-4 h-4 text-gray-500 mr-3' />
                   <span className='text-gray-700'>
                     <span className='font-medium'>Thời lượng:</span>{' '}
-                    {course.duration} tuần
+                    {course.duration
+                      ? `${course.duration} tuần`
+                      : 'Chưa cập nhật'}
                   </span>
                 </div>
                 <div className='flex items-center'>
                   <Calendar className='w-4 h-4 text-gray-500 mr-3' />
                   <span className='text-gray-700'>
                     <span className='font-medium'>Ngày bắt đầu:</span>{' '}
-                    {formatDate(course.startDate)}
+                    {course.startDate || course.start_date
+                      ? formatDate(course.startDate || course.start_date || '')
+                      : 'Chưa cập nhật'}
                   </span>
                 </div>
                 <div className='flex items-center'>
                   <Calendar className='w-4 h-4 text-gray-500 mr-3' />
                   <span className='text-gray-700'>
                     <span className='font-medium'>Ngày kết thúc:</span>{' '}
-                    {formatDate(course.endDate)}
+                    {course.endDate || course.end_date
+                      ? formatDate(course.endDate || course.end_date || '')
+                      : 'Chưa cập nhật'}
                   </span>
                 </div>
-                {course.maxStudents && (
+                {(course.maxStudents || course.max_students) && (
                   <div className='flex items-center'>
                     <Users className='w-4 h-4 text-gray-500 mr-3' />
                     <span className='text-gray-700'>
                       <span className='font-medium'>Số học viên tối đa:</span>{' '}
-                      {course.maxStudents}
+                      {course.maxStudents || course.max_students}
                     </span>
                   </div>
                 )}

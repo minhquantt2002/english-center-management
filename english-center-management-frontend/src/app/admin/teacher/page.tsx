@@ -1,7 +1,21 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Edit, Trash2, Plus, Eye } from 'lucide-react';
+import {
+  Search,
+  Edit,
+  Trash2,
+  Plus,
+  Eye,
+  GraduationCap,
+  Filter,
+  Mail,
+  Phone,
+  BookOpen,
+  Calendar,
+  Users,
+  Award,
+} from 'lucide-react';
 import { Teacher } from '../../../types';
 import CreateTeacherModal, {
   TeacherFormData,
@@ -10,7 +24,9 @@ import ViewTeacherModal from './_components/view-teacher';
 import EditTeacherModal, {
   TeacherFormData as EditTeacherFormData,
 } from './_components/edit-teacher';
-import { useTeacherApi } from './_hooks/use-api';
+import { useTeacherApi } from '../_hooks';
+import { UpdateTeacherData } from '../_hooks/use-teacher';
+import Image from 'next/image';
 
 const TeacherManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,20 +38,13 @@ const TeacherManagement = () => {
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
 
-  const {
-    loading,
-    error,
-    createTeacher,
-    updateTeacher,
-    deleteTeacher,
-    getTeachers,
-    getTeacherById,
-    getTeacherSchedule,
-  } = useTeacherApi();
+  const { createTeacher, updateTeacher, deleteTeacher, getTeachers } =
+    useTeacherApi();
 
   // Fetch teachers on component mount
   useEffect(() => {
     fetchTeachers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchTeachers = async () => {
@@ -67,26 +76,14 @@ const TeacherManagement = () => {
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'Hoạt động':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 border-green-200';
       case 'Nghỉ phép':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'Không hoạt động':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 border-gray-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
-  };
-
-  const getClassBadgeColor = (className: string) => {
-    const colors = [
-      'bg-blue-100 text-blue-700',
-      'bg-purple-100 text-purple-700',
-      'bg-green-100 text-green-700',
-      'bg-orange-100 text-orange-700',
-      'bg-pink-100 text-pink-700',
-      'bg-indigo-100 text-indigo-700',
-    ];
-    return colors[className.length % colors.length];
   };
 
   const filteredTeachers = teachersList.filter((teacher) => {
@@ -124,7 +121,7 @@ const TeacherManagement = () => {
     if (!selectedTeacher) return;
 
     try {
-      await updateTeacher(selectedTeacher.id, teacherData);
+      await updateTeacher(selectedTeacher.id, teacherData as UpdateTeacherData);
       setIsEditModalOpen(false);
       setSelectedTeacher(null);
       await fetchTeachers(); // Refresh the list
@@ -149,20 +146,95 @@ const TeacherManagement = () => {
   };
 
   return (
-    <div className='min-h-screen bg-gray-50 p-6'>
-      <div className='max-w-7xl mx-auto'>
-        {/* Header */}
-        <div className='mb-8'>
-          <h1 className='text-3xl font-bold text-gray-900'>
-            Quản lý giáo viên
-          </h1>
-          <p className='text-gray-600 mt-1'>
-            Quản lý và tổ chức đội ngũ giảng dạy
-          </p>
+    <>
+      {/* Header */}
+      <div className='mb-8'>
+        <div className='flex items-center gap-4 mb-4'>
+          <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg'>
+            <GraduationCap className='w-6 h-6 text-white' />
+          </div>
+          <div>
+            <h1 className='text-3xl font-bold text-gray-900'>
+              Quản lý giáo viên
+            </h1>
+            <p className='text-gray-600 mt-1'>
+              Quản lý và tổ chức đội ngũ giảng dạy của trung tâm
+            </p>
+          </div>
         </div>
 
-        {/* Filters and Search */}
-        <div className='flex flex-col sm:flex-row gap-4 mb-8'>
+        {/* Stats Cards */}
+        <div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-8'>
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>
+                  Tổng giáo viên
+                </p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {teachers.length}
+                </p>
+              </div>
+              <div className='w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center'>
+                <GraduationCap className='w-6 h-6 text-green-600' />
+              </div>
+            </div>
+          </div>
+
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>
+                  Đang giảng dạy
+                </p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {teachers.filter((t) => t.status === 'active').length}
+                </p>
+              </div>
+              <div className='w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center'>
+                <BookOpen className='w-6 h-6 text-blue-600' />
+              </div>
+            </div>
+          </div>
+
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>Nghỉ phép</p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {teachers.filter((t) => t.status === 'inactive').length}
+                </p>
+              </div>
+              <div className='w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center'>
+                <Calendar className='w-6 h-6 text-yellow-600' />
+              </div>
+            </div>
+          </div>
+
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>
+                  Lớp đang dạy
+                </p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {teachers.reduce(
+                    (total, t) => total + (t.assignedClasses?.length || 0),
+                    0
+                  )}
+                </p>
+              </div>
+              <div className='w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center'>
+                <Users className='w-6 h-6 text-purple-600' />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters and Search */}
+      <div className='bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-8'>
+        <div className='flex flex-col lg:flex-row gap-4'>
           {/* Search */}
           <div className='flex-1 relative'>
             <Search
@@ -171,225 +243,235 @@ const TeacherManagement = () => {
             />
             <input
               type='text'
-              placeholder='Tìm kiếm giáo viên...'
+              placeholder='Tìm kiếm giáo viên theo tên hoặc chuyên môn...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+              className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
             />
           </div>
 
           {/* Subject Filter */}
-          <select
-            value={subjectFilter}
-            onChange={(e) => setSubjectFilter(e.target.value)}
-            className='px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[150px]'
-          >
-            <option>Tất cả môn học</option>
-            <option>Ngữ pháp</option>
-            <option>Hội thoại</option>
-            <option>IELTS</option>
-            <option>Tiếng Anh thương mại</option>
-          </select>
+          <div className='relative'>
+            <select
+              value={subjectFilter}
+              onChange={(e) => setSubjectFilter(e.target.value)}
+              className='px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent min-w-[150px] appearance-none bg-white'
+            >
+              <option>Tất cả môn học</option>
+              <option>Ngữ pháp</option>
+              <option>Hội thoại</option>
+              <option>IELTS</option>
+              <option>Tiếng Anh thương mại</option>
+            </select>
+            <Filter className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none' />
+          </div>
 
           {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className='px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px]'
-          >
-            <option>Tất cả trạng thái</option>
-            <option>Hoạt động</option>
-            <option>Nghỉ phép</option>
-            <option>Không hoạt động</option>
-          </select>
+          <div className='relative'>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className='px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent min-w-[140px] appearance-none bg-white'
+            >
+              <option>Tất cả trạng thái</option>
+              <option>Hoạt động</option>
+              <option>Nghỉ phép</option>
+              <option>Không hoạt động</option>
+            </select>
+            <Filter className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none' />
+          </div>
 
           {/* Add Teacher Button */}
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors whitespace-nowrap'
+            className='px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl'
           >
-            <Plus size={20} />
-            Thêm giáo viên
+            <Plus className='h-5 w-5' />
+            <span className='font-semibold'>Thêm giáo viên</span>
           </button>
         </div>
+      </div>
 
-        {/* Teachers Table */}
-        <div className='bg-white rounded-lg shadow-sm overflow-hidden'>
-          <div className='overflow-x-auto'>
-            <table className='w-full'>
-              <thead className='bg-gray-50'>
-                <tr>
-                  <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Giáo viên
-                  </th>
-                  <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Liên hệ
-                  </th>
-                  <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Lớp được phân công
-                  </th>
-                  <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Trạng thái
-                  </th>
-                  <th className='px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Thao tác
-                  </th>
-                </tr>
-              </thead>
-              <tbody className='bg-white divide-y divide-gray-200'>
-                {filteredTeachers.map((teacher) => (
-                  <tr key={teacher.id} className='hover:bg-gray-50'>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <div className='flex items-center'>
-                        <div className='h-12 w-12 flex-shrink-0'>
-                          <img
-                            className='h-12 w-12 rounded-full object-cover'
-                            src={teacher.avatar}
-                            alt={teacher.name}
-                          />
+      {/* Teachers Table */}
+      <div className='bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden'>
+        <div className='overflow-x-auto'>
+          <table className='w-full'>
+            <thead className='bg-gradient-to-r from-gray-50 to-gray-100'>
+              <tr>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Giáo viên
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Liên hệ
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Chuyên môn
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Lớp đang dạy
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Trạng thái
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Thao tác
+                </th>
+              </tr>
+            </thead>
+            <tbody className='bg-white divide-y divide-gray-100'>
+              {filteredTeachers.map((teacher) => (
+                <tr
+                  key={teacher.id}
+                  className='hover:bg-gray-50 transition-colors'
+                >
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    <div className='flex items-center'>
+                      <div className='h-12 w-12 flex-shrink-0'>
+                        <Image
+                          className='h-12 w-12 rounded-full object-cover ring-2 ring-gray-100'
+                          src={teacher.avatar}
+                          alt={teacher.name}
+                        />
+                      </div>
+                      <div className='ml-4'>
+                        <div className='text-sm font-semibold text-gray-900'>
+                          {teacher.name}
                         </div>
-                        <div className='ml-4'>
-                          <div
-                            className='text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors'
-                            onClick={() =>
-                              handleViewTeacher(
-                                teachers.find((t) => t.id === teacher.id)!
-                              )
-                            }
-                          >
-                            {teacher.name}
-                          </div>
-                          <div className='text-sm text-gray-500'>
-                            {teacher.specialization}
-                          </div>
+                        <div className='text-sm text-gray-500'>
+                          ID: {teacher.id.slice(0, 8)}...
                         </div>
                       </div>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <div className='text-sm text-gray-900'>
+                    </div>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    <div className='flex flex-col space-y-1'>
+                      <div className='flex items-center text-sm text-gray-900'>
+                        <Mail className='w-4 h-4 text-gray-400 mr-2' />
                         {teacher.email}
                       </div>
-                      <div className='text-sm text-gray-500'>
-                        {teacher.phone}
+                      <div className='flex items-center text-sm text-gray-500'>
+                        <Phone className='w-4 h-4 text-gray-400 mr-2' />
+                        {teacher.phone || 'Chưa cập nhật'}
                       </div>
-                    </td>
-                    <td className='px-6 py-4'>
-                      <div className='flex flex-wrap gap-1'>
-                        {teacher.assignedClasses.map((className, index) => (
-                          <span
-                            key={index}
-                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getClassBadgeColor(
-                              className
-                            )}`}
-                          >
-                            {className}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <span
-                        className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(
-                          teacher.status
-                        )}`}
-                      >
-                        {teacher.status}
+                    </div>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    <div className='flex items-center'>
+                      <Award className='w-4 h-4 text-green-500 mr-2' />
+                      <span className='text-sm font-medium text-gray-900'>
+                        {teacher.specialization}
                       </span>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
-                      <div className='flex space-x-3'>
-                        <button
-                          onClick={() =>
-                            handleViewTeacher(
-                              teachers.find((t) => t.id === teacher.id)!
-                            )
-                          }
-                          className='text-green-600 hover:text-green-900 transition-colors'
-                          title='Xem chi tiết'
-                        >
-                          <Eye size={18} />
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleEditTeacher(
-                              teachers.find((t) => t.id === teacher.id)!
-                            )
-                          }
-                          className='text-blue-600 hover:text-blue-900 transition-colors'
-                          title='Chỉnh sửa'
-                        >
-                          <Edit size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTeacher(teacher.id)}
-                          className='text-red-600 hover:text-red-900 transition-colors'
-                          title='Xóa'
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          <div className='bg-gray-50 px-6 py-3 flex items-center justify-between border-t border-gray-200'>
-            <div className='text-sm text-gray-700'>
-              Hiển thị 1 đến {filteredTeachers.length} trong tổng số{' '}
-              {teachers.length} giáo viên
-            </div>
-            <div className='flex items-center space-x-2'>
-              <button className='px-3 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors'>
-                Trước
-              </button>
-              <button className='px-3 py-2 text-sm bg-blue-600 text-white rounded'>
-                1
-              </button>
-              <button className='px-3 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors'>
-                2
-              </button>
-              <button className='px-3 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors'>
-                3
-              </button>
-              <button className='px-3 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors'>
-                Tiếp
-              </button>
-            </div>
-          </div>
+                    </div>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    <div className='text-sm text-gray-900'>
+                      {teacher.assignedClasses.length > 0 ? (
+                        <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800'>
+                          {teacher.assignedClasses.length} lớp
+                        </span>
+                      ) : (
+                        <span className='text-gray-500'>Chưa phân lớp</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    <span
+                      className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getStatusBadgeColor(
+                        teacher.status
+                      )}`}
+                    >
+                      {teacher.status}
+                    </span>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
+                    <div className='flex items-center space-x-2'>
+                      <button
+                        onClick={() =>
+                          handleViewTeacher(
+                            teachers.find((t) => t.id === teacher.id)!
+                          )
+                        }
+                        className='text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors'
+                        title='Xem chi tiết'
+                      >
+                        <Eye className='w-4 h-4' />
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleEditTeacher(
+                            teachers.find((t) => t.id === teacher.id)!
+                          )
+                        }
+                        className='text-green-600 hover:text-green-900 p-1 rounded-lg hover:bg-green-50 transition-colors'
+                        title='Chỉnh sửa'
+                      >
+                        <Edit className='w-4 h-4' />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTeacher(teacher.id)}
+                        className='text-red-600 hover:text-red-900 p-1 rounded-lg hover:bg-red-50 transition-colors'
+                        title='Xóa'
+                      >
+                        <Trash2 className='w-4 h-4' />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
-        {/* Create Teacher Modal */}
+        {/* Empty State */}
+        {filteredTeachers.length === 0 && (
+          <div className='text-center py-12'>
+            <GraduationCap className='w-16 h-16 text-gray-300 mx-auto mb-4' />
+            <h3 className='text-lg font-medium text-gray-900 mb-2'>
+              Không tìm thấy giáo viên
+            </h3>
+            <p className='text-gray-500 mb-6'>
+              {searchTerm || statusFilter !== 'All Status'
+                ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm'
+                : 'Bắt đầu bằng cách thêm giáo viên mới'}
+            </p>
+            {!searchTerm && statusFilter === 'All Status' && (
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className='px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors'
+              >
+                Thêm giáo viên đầu tiên
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      {isViewModalOpen && selectedTeacher && (
+        <ViewTeacherModal
+          teacher={selectedTeacher}
+          isOpen={isViewModalOpen}
+          onClose={() => setIsViewModalOpen(false)}
+        />
+      )}
+
+      {isEditModalOpen && selectedTeacher && (
+        <EditTeacherModal
+          teacher={selectedTeacher}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onUpdateTeacher={handleUpdateTeacher}
+        />
+      )}
+
+      {isCreateModalOpen && (
         <CreateTeacherModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
           onCreateTeacher={handleCreateTeacher}
         />
-
-        {/* View Teacher Modal */}
-        <ViewTeacherModal
-          isOpen={isViewModalOpen}
-          onClose={() => {
-            setIsViewModalOpen(false);
-            setSelectedTeacher(null);
-          }}
-          teacher={selectedTeacher}
-        />
-
-        {/* Edit Teacher Modal */}
-        <EditTeacherModal
-          isOpen={isEditModalOpen}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedTeacher(null);
-          }}
-          onUpdateTeacher={handleUpdateTeacher}
-          teacher={selectedTeacher}
-        />
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 

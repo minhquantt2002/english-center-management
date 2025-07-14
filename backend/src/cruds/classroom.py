@@ -8,15 +8,48 @@ from ..schemas.classroom import ClassroomCreate, ClassroomUpdate
 
 def get_classroom(db: Session, classroom_id: UUID) -> Optional[Class]:
     """Get classroom by UUID"""
-    return db.query(Class).filter(Class.id == classroom_id).first()
+    return db.query(Class)\
+        .options(joinedload(Class.course), joinedload(Class.teacher))\
+        .filter(Class.id == classroom_id).first()
 
 def get_classrooms(db: Session, skip: int = 0, limit: int = 100) -> List[Class]:
     """Get classrooms with pagination"""
-    return db.query(Class).offset(skip).limit(limit).all()
+    return db.query(Class)\
+        .options(joinedload(Class.course), joinedload(Class.teacher))\
+        .offset(skip).limit(limit).all()
+
+def get_all_classrooms(db: Session) -> List[Class]:
+    """Get all classrooms without pagination"""
+    return db.query(Class).all()
 
 def get_classrooms_by_teacher(db: Session, teacher_id: UUID) -> List[Class]:
     """Get classrooms taught by specific teacher"""
     return db.query(Class).filter(Class.teacher_id == teacher_id).all()
+
+def get_upcoming_classes_by_teacher(db: Session, teacher_id: UUID) -> List[Class]:
+    """Get upcoming classes taught by specific teacher"""
+    from datetime import date
+    today = date.today()
+    return db.query(Class)\
+        .filter(Class.teacher_id == teacher_id)\
+        .filter(Class.start_date >= today)\
+        .filter(Class.status == "active")\
+        .order_by(Class.start_date)\
+        .limit(5)\
+        .all()
+
+def get_upcoming_classes_by_student(db: Session, student_id: UUID) -> List[Class]:
+    """Get upcoming classes for specific student"""
+    from datetime import date
+    today = date.today()
+    return db.query(Class)\
+        .join(Enrollment, Class.id == Enrollment.class_id)\
+        .filter(Enrollment.student_id == student_id)\
+        .filter(Class.start_date >= today)\
+        .filter(Class.status == "active")\
+        .order_by(Class.start_date)\
+        .limit(5)\
+        .all()
 
 def get_classrooms_by_course(db: Session, course_id: UUID) -> List[Class]:
     """Get classrooms for specific course"""

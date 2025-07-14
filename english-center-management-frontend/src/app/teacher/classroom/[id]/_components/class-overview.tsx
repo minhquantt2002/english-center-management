@@ -1,5 +1,4 @@
 import React from 'react';
-import { Book, Users, Clock, MapPin, Calendar } from 'lucide-react';
 
 interface ClassDetails {
   id: string;

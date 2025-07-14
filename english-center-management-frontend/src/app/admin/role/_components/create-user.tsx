@@ -6,7 +6,6 @@ import {
   User,
   Phone,
   Mail,
-  BookOpen,
   GraduationCap,
   Calendar,
   MapPin,
@@ -365,11 +364,6 @@ export default function CreateUserModal({
       certifications:
         prev.certifications?.filter((cert) => cert !== certification) || [],
     }));
-  };
-
-  const getRoleIcon = (role: UserRole) => {
-    const roleData = userRoles.find((r) => r.value === role);
-    return roleData ? roleData.icon : User;
   };
 
   if (!isOpen) return null;

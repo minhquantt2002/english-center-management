@@ -3,24 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, MapPin, User, Check } from 'lucide-react';
 import { ClassData } from '../../../../../types/admin';
-import { TimeSlot } from '../../../../../types/common';
-import { useStaffApi } from '../../../_hooks/use-api';
+import {
+  useStaffStatsApi,
+  ScheduleSession,
+  RoomApiResponse,
+} from '../../../_hooks';
 
 interface CreateScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
   classroom: ClassData | null;
-  onScheduleCreated?: (schedule: any) => void;
-}
-
-interface ScheduleSession {
-  id: string;
-  day: string;
-  timeSlot: TimeSlot;
-  room: string;
-  teacher: string;
-  status: 'scheduled' | 'completed' | 'cancelled';
-  notes?: string;
+  onScheduleCreated?: (schedule: ScheduleSession) => void;
 }
 
 const dayNames = {
@@ -58,13 +51,14 @@ export default function CreateScheduleModal({
     notes: '',
   });
 
-  const [rooms, setRooms] = useState<any[]>([]);
-  const { loading, error, getRooms } = useStaffApi();
+  const [rooms, setRooms] = useState<RoomApiResponse[]>([]);
+  const { loading, error, getRooms } = useStaffStatsApi();
 
   useEffect(() => {
     if (isOpen) {
       loadRooms();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const loadRooms = async () => {

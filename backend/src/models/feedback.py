@@ -15,7 +15,7 @@ class Feedback(Base):
     class_id = Column(UUID(as_uuid=True), ForeignKey("classes.id"), nullable=False)
     content = Column(Text)
     rating = Column(Integer)  # Đánh giá từ 1-5
-    feedback_type = Column(String(50))  # academic, behavior, attendance
+    feedback_type = Column(String(50))  # academic, behavior
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships

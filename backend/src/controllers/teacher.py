@@ -1,4 +1,5 @@
 from typing import List
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..database import get_db
@@ -65,18 +66,19 @@ async def get_classroom_detail(
     """
     Lấy chi tiết lớp học (chỉ teacher của lớp đó hoặc admin)
     """
-    classroom = classroom_service.get_classroom(db, classroom_id)
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
+    classroom = classroom_service.get_classroom(db, classroom_uuid)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Lớp học không tồn tại"
-        )
-    
-    # Kiểm tra quyền truy cập
-    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Không có quyền truy cập lớp học này"
         )
     
     return classroom
@@ -91,21 +93,22 @@ async def update_classroom(
     """
     Cập nhật thông tin lớp học
     """
-    classroom = classroom_service.get_classroom(db, classroom_id)
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
+    classroom = classroom_service.get_classroom(db, classroom_uuid)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Lớp học không tồn tại"
         )
     
-    # Kiểm tra quyền
-    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Không có quyền cập nhật lớp học này"
-        )
-    
-    updated_classroom = classroom_service.update_classroom(db, classroom_id, classroom_data)
+    updated_classroom = classroom_service.update_classroom(db, classroom_uuid, classroom_data)
     return updated_classroom
 
 # Student Management in Classroom
@@ -118,21 +121,22 @@ async def get_classroom_students(
     """
     Lấy danh sách học sinh trong lớp
     """
-    classroom = classroom_service.get_classroom(db, classroom_id)
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
+    classroom = classroom_service.get_classroom(db, classroom_uuid)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Lớp học không tồn tại"
         )
     
-    # Kiểm tra quyền
-    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Không có quyền truy cập lớp học này"
-        )
-    
-    students = student_service.get_students_by_classroom(db, classroom_id)
+    students = student_service.get_students_by_classroom(db, classroom_uuid)
     return students
 
 # Schedule Management
@@ -158,77 +162,25 @@ async def update_attendance(
     """
     Cập nhật điểm danh cho lớp học
     """
-    classroom = classroom_service.get_classroom(db, classroom_id)
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
+    classroom = classroom_service.get_classroom(db, classroom_uuid)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Lớp học không tồn tại"
-        )
-    
-    # Kiểm tra quyền
-    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Không có quyền cập nhật điểm danh cho lớp học này"
         )
     
     # TODO: Implement attendance service
     return {"message": "Cập nhật điểm danh thành công"}
 
-# Materials Management
-@router.get("/classes/{classroom_id}/materials")
-async def get_class_materials(
-    classroom_id: str,
-    current_user: User = Depends(get_current_teacher_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy tài liệu học tập của lớp học
-    """
-    classroom = classroom_service.get_classroom(db, classroom_id)
-    if not classroom:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Lớp học không tồn tại"
-        )
-    
-    # Kiểm tra quyền
-    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Không có quyền truy cập lớp học này"
-        )
-    
-    # TODO: Implement materials service
-    materials = []
-    return materials
 
-@router.post("/classes/{classroom_id}/materials")
-async def upload_material(
-    classroom_id: str,
-    material_data: dict,
-    current_user: User = Depends(get_current_teacher_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Upload tài liệu học tập cho lớp học
-    """
-    classroom = classroom_service.get_classroom(db, classroom_id)
-    if not classroom:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Lớp học không tồn tại"
-        )
-    
-    # Kiểm tra quyền
-    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Không có quyền upload tài liệu cho lớp học này"
-        )
-    
-    # TODO: Implement materials service
-    return {"message": "Upload tài liệu thành công"}
 
 # Score Management
 @router.post("/classes/{classroom_id}/scores", response_model=ScoreResponse)
@@ -241,18 +193,19 @@ async def create_student_score(
     """
     Tạo điểm số cho học sinh
     """
-    classroom = classroom_service.get_classroom(db, classroom_id)
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
+    classroom = classroom_service.get_classroom(db, classroom_uuid)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Lớp học không tồn tại"
-        )
-    
-    # Kiểm tra quyền
-    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Không có quyền tạo điểm cho lớp học này"
         )
     
     score = score_service.create_score(db, score_data)
@@ -267,32 +220,23 @@ async def get_classroom_grades(
     """
     Lấy điểm số của tất cả học sinh trong lớp
     """
-    classroom = classroom_service.get_classroom(db, classroom_id)
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
+    classroom = classroom_service.get_classroom(db, classroom_uuid)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Lớp học không tồn tại"
         )
     
-    # Kiểm tra quyền
-    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Không có quyền xem điểm của lớp học này"
-        )
-    
-    scores = score_service.get_scores_by_classroom(db, classroom_id)
+    scores = score_service.get_scores_by_classroom(db, classroom_uuid)
     return scores
-    
-    # Kiểm tra quyền
-    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Không có quyền nhập điểm cho lớp học này"
-        )
-    
-    score = score_service.create_score(db, score_data)
-    return score
 
 @router.put("/classes/{classroom_id}/scores/{score_id}", response_model=ScoreResponse)
 async def update_student_score(
@@ -305,28 +249,30 @@ async def update_student_score(
     """
     Cập nhật điểm số cho học sinh
     """
-    classroom = classroom_service.get_classroom(db, classroom_id)
+    try:
+        classroom_uuid = UUID(classroom_id)
+        score_uuid = UUID(score_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="ID không hợp lệ"
+        )
+    
+    classroom = classroom_service.get_classroom(db, classroom_uuid)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Lớp học không tồn tại"
         )
     
-    # Kiểm tra quyền
-    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Không có quyền cập nhật điểm cho lớp học này"
-        )
-    
-    score = score_service.get_score(db, score_id)
+    score = score_service.get_score(db, score_uuid)
     if not score:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Điểm số không tồn tại"
         )
     
-    updated_score = score_service.update_score(db, score_id, score_data)
+    updated_score = score_service.update_score(db, score_uuid, score_data)
     return updated_score
 
 @router.get("/classes/{classroom_id}/scores", response_model=List[ScoreResponse])
@@ -338,21 +284,22 @@ async def get_classroom_scores(
     """
     Lấy danh sách điểm số của lớp học
     """
-    classroom = classroom_service.get_classroom(db, classroom_id)
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
+    classroom = classroom_service.get_classroom(db, classroom_uuid)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Lớp học không tồn tại"
         )
     
-    # Kiểm tra quyền
-    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Không có quyền truy cập lớp học này"
-        )
-    
-    scores = score_service.get_scores_by_classroom(db, classroom_id)
+    scores = score_service.get_scores_by_classroom(db, classroom_uuid)
     return scores
 
 # Teacher Statistics
@@ -431,18 +378,19 @@ async def get_class_schedule(
     """
     Lấy lịch học chi tiết của lớp học
     """
-    classroom = classroom_service.get_classroom(db, classroom_id)
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
+    classroom = classroom_service.get_classroom(db, classroom_uuid)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Lớp học không tồn tại"
-        )
-    
-    # Kiểm tra quyền
-    if current_user.role_name != "admin" and classroom.teacher_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Không có quyền truy cập lớp học này"
         )
     
     # TODO: Implement class schedule service

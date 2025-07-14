@@ -1,4 +1,5 @@
 from typing import List
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..database import get_db
@@ -105,7 +106,15 @@ async def get_teacher_schedule(
     """
     Lấy lịch dạy của giáo viên
     """
-    schedules = schedule_service.get_schedules_by_teacher(db, teacher_id)
+    try:
+        teacher_uuid = UUID(teacher_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="teacher_id không hợp lệ"
+        )
+    
+    schedules = schedule_service.get_schedules_by_teacher(db, teacher_uuid)
     return schedules
 
 # Course Management
@@ -196,7 +205,15 @@ async def get_classroom_by_id(
     """
     Lấy thông tin lớp học theo ID
     """
-    classroom = classroom_service.get_classroom(db, classroom_id)
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
+    classroom = classroom_service.get_classroom(db, classroom_uuid)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -226,14 +243,22 @@ async def update_classroom(
     """
     Cập nhật thông tin lớp học
     """
-    classroom = classroom_service.get_classroom(db, classroom_id)
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
+    classroom = classroom_service.get_classroom(db, classroom_uuid)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Lớp học không tồn tại"
         )
     
-    updated_classroom = classroom_service.update_classroom(db, classroom_id, classroom_data)
+    updated_classroom = classroom_service.update_classroom(db, classroom_uuid, classroom_data)
     return updated_classroom
 
 @router.post("/classrooms/{classroom_id}/students")
@@ -246,6 +271,14 @@ async def assign_student_to_classroom(
     """
     Gán học sinh vào lớp học
     """
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
     student_id = student_data.get("studentId")
     if not student_id:
         raise HTTPException(
@@ -255,7 +288,7 @@ async def assign_student_to_classroom(
     
     # Kiểm tra xem học sinh đã đăng ký lớp này chưa
     existing_enrollment = enrollment_service.get_enrollment_by_student_classroom(
-        db, student_id, classroom_id
+        db, student_id, classroom_uuid
     )
     if existing_enrollment:
         raise HTTPException(
@@ -266,7 +299,7 @@ async def assign_student_to_classroom(
     # Tạo enrollment mới
     enrollment_data = {
         "student_id": student_id,
-        "class_id": classroom_id,
+        "class_id": classroom_uuid,
         "enrollment_date": "2024-01-01"  # Có thể lấy ngày hiện tại
     }
     enrollment = enrollment_service.create_enrollment(db, enrollment_data)
@@ -282,6 +315,14 @@ async def assign_multiple_students_to_classroom(
     """
     Gán nhiều học sinh vào lớp học cùng lúc
     """
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
     student_ids = student_data.get("studentIds", [])
     if not student_ids:
         raise HTTPException(
@@ -290,7 +331,7 @@ async def assign_multiple_students_to_classroom(
         )
     
     # Kiểm tra xem lớp học có tồn tại không
-    classroom = classroom_service.get_classroom(db, classroom_id)
+    classroom = classroom_service.get_classroom(db, classroom_uuid)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -315,7 +356,7 @@ async def assign_multiple_students_to_classroom(
         try:
             # Kiểm tra xem học sinh đã đăng ký lớp này chưa
             existing_enrollment = enrollment_service.get_enrollment_by_student_classroom(
-                db, student_id, classroom_id
+                db, student_id, classroom_uuid
             )
             if existing_enrollment:
                 failed_enrollments.append({
@@ -327,7 +368,7 @@ async def assign_multiple_students_to_classroom(
             # Tạo enrollment mới
             enrollment_data = {
                 "student_id": student_id,
-                "class_id": classroom_id,
+                "class_id": classroom_uuid,
                 "enrollment_date": "2024-01-01"  # Có thể lấy ngày hiện tại
             }
             enrollment = enrollment_service.create_enrollment(db, enrollment_data)
@@ -491,7 +532,15 @@ async def get_classroom_enrollments(
     """
     Lấy danh sách đăng ký của một lớp học
     """
-    enrollments = enrollment_service.get_enrollments_by_classroom(db, classroom_id)
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
+    enrollments = enrollment_service.get_enrollments_by_classroom(db, classroom_uuid)
     return enrollments
 
 # Schedule Management
@@ -568,7 +617,15 @@ async def get_classroom_schedules(
     """
     Lấy lịch học của một lớp học
     """
-    schedules = schedule_service.get_schedules_by_classroom(db, classroom_id)
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
+    schedules = schedule_service.get_schedules_by_classroom(db, classroom_uuid)
     return schedules
 
 @router.get("/classrooms/{classroom_id}/students", response_model=List[StudentResponse])
@@ -580,7 +637,15 @@ async def get_classroom_students(
     """
     Lấy danh sách học sinh trong lớp học
     """
-    students = student_service.get_students_by_classroom(db, classroom_id)
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
+    
+    students = student_service.get_students_by_classroom(db, classroom_uuid)
     return students
 
 # Invoice Management

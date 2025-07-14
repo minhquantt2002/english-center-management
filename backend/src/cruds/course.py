@@ -12,6 +12,10 @@ def get_courses(db: Session, skip: int = 0, limit: int = 100) -> List[Course]:
     """Get courses with pagination"""
     return db.query(Course).offset(skip).limit(limit).all()
 
+def get_all_courses(db: Session) -> List[Course]:
+    """Get all courses without pagination"""
+    return db.query(Course).all()
+
 def get_courses_by_level(db: Session, level: str) -> List[Course]:
     """Get courses by level"""
     return db.query(Course).filter(Course.level == level).all()

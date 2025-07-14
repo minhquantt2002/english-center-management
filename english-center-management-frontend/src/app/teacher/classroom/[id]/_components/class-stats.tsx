@@ -12,7 +12,6 @@ const ClassStats: React.FC<ClassStatsProps> = ({
   totalStudents,
   maxStudents,
   room,
-  currentUnit,
 }) => {
   return (
     <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6'>

@@ -9,6 +9,7 @@ import {
   CheckCircle,
   Star,
 } from 'lucide-react';
+import Image from 'next/image';
 
 interface Student {
   id: string;
@@ -42,7 +43,7 @@ const StudentList: React.FC<StudentListProps> = ({ students }) => {
       className='bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow'
     >
       <div className='flex items-start space-x-3'>
-        <img
+        <Image
           src={student.avatar}
           alt={student.name}
           className='w-12 h-12 rounded-full'

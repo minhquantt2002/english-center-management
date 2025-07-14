@@ -9,10 +9,13 @@ import {
   UserPlus,
   UserCheck,
   Calendar,
-  BarChart3,
   ArrowUp,
+  TrendingUp,
+  CheckCircle,
+  AlertCircle,
 } from 'lucide-react';
-import { useAdminApi, StatCard, DashboardStats } from './_hooks/use-api';
+import { useDashboardApi, type StatCard, type DashboardStats } from './_hooks';
+import Image from 'next/image';
 
 interface StatCardProps {
   title: string;
@@ -20,6 +23,7 @@ interface StatCardProps {
   change: string;
   icon: React.ReactNode;
   iconBg: string;
+  trend: 'up' | 'down' | 'neutral';
 }
 
 interface QuickActionProps {
@@ -27,6 +31,7 @@ interface QuickActionProps {
   description: string;
   icon: React.ReactNode;
   iconBg: string;
+  href: string;
 }
 
 interface EnrollmentProps {
@@ -43,7 +48,7 @@ interface SystemStatusProps {
 }
 
 const AdminDashboard: React.FC = () => {
-  const { loading, error, getDashboardStats, getStatCards } = useAdminApi();
+  const { loading, error, getDashboardStats, getStatCards } = useDashboardApi();
   const [stats, setStats] = useState<StatCard[]>([]);
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
     null
@@ -86,25 +91,29 @@ const AdminDashboard: React.FC = () => {
       title: 'Quản lý học viên',
       description: 'Thêm, chỉnh sửa hoặc xóa tài khoản học viên',
       icon: <UserPlus size={24} />,
-      iconBg: 'bg-blue-100 text-blue-600',
+      iconBg: 'bg-gradient-to-r from-blue-500 to-blue-600',
+      href: '/admin/student',
     },
     {
       title: 'Quản lý giáo viên',
       description: 'Giám sát hồ sơ và phân công giáo viên',
       icon: <UserCheck size={24} />,
-      iconBg: 'bg-green-100 text-green-600',
+      iconBg: 'bg-gradient-to-r from-green-500 to-green-600',
+      href: '/admin/teacher',
     },
     {
       title: 'Quản lý lớp học',
       description: 'Tạo và lên lịch lớp học mới',
       icon: <Calendar size={24} />,
-      iconBg: 'bg-purple-100 text-purple-600',
+      iconBg: 'bg-gradient-to-r from-purple-500 to-purple-600',
+      href: '/admin/classroom',
     },
     {
-      title: 'Xem báo cáo',
-      description: 'Truy cập phân tích và báo cáo chi tiết',
-      icon: <BarChart3 size={24} />,
-      iconBg: 'bg-orange-100 text-orange-600',
+      title: 'Quản lý khóa học',
+      description: 'Tạo và cập nhật các khóa học',
+      icon: <BookOpen size={24} />,
+      iconBg: 'bg-gradient-to-r from-orange-500 to-orange-600',
+      href: '/admin/course',
     },
   ];
 
@@ -114,22 +123,39 @@ const AdminDashboard: React.FC = () => {
     change,
     icon,
     iconBg,
+    trend,
   }) => (
-    <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+    <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200'>
       <div className='flex items-center justify-between mb-4'>
         <div>
           <p className='text-gray-500 text-sm font-medium'>{title}</p>
-          <p className='text-2xl font-bold text-gray-900 mt-1'>{value}</p>
+          <p className='text-3xl font-bold text-gray-900 mt-1'>{value}</p>
         </div>
         <div
-          className={`w-12 h-12 rounded-lg flex items-center justify-center ${iconBg}`}
+          className={`w-14 h-14 rounded-xl flex items-center justify-center ${iconBg} text-white shadow-lg`}
         >
           {icon}
         </div>
       </div>
-      <div className='flex items-center gap-1'>
-        <ArrowUp size={16} className='text-green-500' />
-        <span className='text-green-500 text-sm font-medium'>{change}</span>
+      <div className='flex items-center gap-2'>
+        {trend === 'up' ? (
+          <ArrowUp size={16} className='text-green-500' />
+        ) : trend === 'down' ? (
+          <ArrowUp size={16} className='text-red-500 rotate-180' />
+        ) : (
+          <TrendingUp size={16} className='text-gray-500' />
+        )}
+        <span
+          className={`text-sm font-medium ${
+            trend === 'up'
+              ? 'text-green-500'
+              : trend === 'down'
+              ? 'text-red-500'
+              : 'text-gray-500'
+          }`}
+        >
+          {change}
+        </span>
       </div>
     </div>
   );
@@ -139,16 +165,22 @@ const AdminDashboard: React.FC = () => {
     description,
     icon,
     iconBg,
+    href,
   }) => (
-    <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer'>
+    <a
+      href={href}
+      className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer group'
+    >
       <div
-        className={`w-12 h-12 rounded-lg flex items-center justify-center ${iconBg} mb-4`}
+        className={`w-14 h-14 rounded-xl flex items-center justify-center ${iconBg} text-white shadow-lg mb-4 group-hover:scale-110 transition-transform duration-200`}
       >
         {icon}
       </div>
-      <h3 className='font-semibold text-gray-900 mb-2'>{title}</h3>
-      <p className='text-gray-500 text-sm'>{description}</p>
-    </div>
+      <h3 className='font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors'>
+        {title}
+      </h3>
+      <p className='text-gray-500 text-sm leading-relaxed'>{description}</p>
+    </a>
   );
 
   const EnrollmentItem: React.FC<EnrollmentProps> = ({
@@ -157,17 +189,26 @@ const AdminDashboard: React.FC = () => {
     time,
     avatar,
   }) => (
-    <div className='flex items-center gap-3 py-3'>
-      <img
-        src={avatar}
-        alt={name}
-        className='w-10 h-10 rounded-full object-cover'
-      />
+    <div className='flex items-center gap-4 py-4 border-b border-gray-50 last:border-b-0'>
+      <div className='relative'>
+        <Image
+          src={avatar}
+          alt={name}
+          className='w-12 h-12 rounded-full object-cover ring-2 ring-gray-100'
+        />
+        <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white'></div>
+      </div>
       <div className='flex-1'>
-        <p className='font-medium text-gray-900'>{name}</p>
+        <p className='font-semibold text-gray-900'>{name}</p>
         <p className='text-sm text-gray-500'>Đăng ký {course}</p>
       </div>
-      <p className='text-sm text-gray-400'>{time}</p>
+      <div className='text-right'>
+        <p className='text-sm text-gray-400'>{time}</p>
+        <div className='flex items-center gap-1 mt-1'>
+          <CheckCircle size={12} className='text-green-500' />
+          <span className='text-xs text-green-600 font-medium'>Hoàn thành</span>
+        </div>
+      </div>
     </div>
   );
 
@@ -176,51 +217,68 @@ const AdminDashboard: React.FC = () => {
     status,
     statusColor,
   }) => (
-    <div className='flex items-center justify-between py-2'>
-      <div className='flex items-center gap-2'>
+    <div className='flex items-center justify-between py-3 border-b border-gray-50 last:border-b-0'>
+      <div className='flex items-center gap-3'>
         <div
-          className={`w-2 h-2 rounded-full ${statusColor.replace(
+          className={`w-3 h-3 rounded-full ${statusColor.replace(
             'text-',
             'bg-'
           )}`}
         ></div>
-        <span className='text-gray-700'>{service}</span>
+        <span className='text-gray-700 font-medium'>{service}</span>
       </div>
-      <span className={`text-sm font-medium ${statusColor}`}>{status}</span>
+      <span className={`text-sm font-semibold ${statusColor}`}>{status}</span>
     </div>
   );
 
   return (
     <>
+      {/* Header */}
+      <div className='mb-8'>
+        <h1 className='text-3xl font-bold text-gray-900 mb-2'>
+          Chào mừng trở lại, Admin!
+        </h1>
+        <p className='text-gray-600'>
+          Đây là tổng quan về trung tâm tiếng Anh của bạn
+        </p>
+      </div>
+
       {/* Loading state */}
       {loading && (
-        <div className='flex justify-center items-center py-8'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+        <div className='flex justify-center items-center py-12'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600'></div>
         </div>
       )}
 
       {/* Error state */}
       {error && (
-        <div className='bg-red-50 border border-red-200 rounded-lg p-4 mb-6'>
-          <p className='text-red-800'>{error}</p>
+        <div className='bg-red-50 border border-red-200 rounded-xl p-6 mb-6'>
+          <div className='flex items-center gap-3'>
+            <AlertCircle className='w-5 h-5 text-red-500' />
+            <p className='text-red-800 font-medium'>{error}</p>
+          </div>
         </div>
       )}
 
-      {/* Thống kê */}
+      {/* Thống kê chính */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
         {stats.map((stat, index) => (
           <StatCard
             key={index}
             {...stat}
             icon={getIconComponent(stat.icon)}
-            iconBg='bg-blue-100 text-blue-600'
+            iconBg='bg-gradient-to-r from-blue-500 to-blue-600'
+            trend='up'
           />
         ))}
       </div>
 
       {/* Thao tác nhanh */}
       <div className='mb-8'>
-        <h2 className='text-xl font-bold text-gray-900 mb-6'>Thao tác nhanh</h2>
+        <h2 className='text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3'>
+          <div className='w-1 h-8 bg-blue-600 rounded-full'></div>
+          Thao tác nhanh
+        </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
           {quickActions.map((action, index) => (
             <QuickActionCard key={index} {...action} />
@@ -228,27 +286,76 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Đăng ký gần đây */}
-      <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
-        <div className='flex items-center justify-between mb-6'>
-          <h3 className='text-lg font-semibold text-gray-900'>
-            Đăng ký gần đây
-          </h3>
-          <button className='text-blue-600 text-sm font-medium hover:text-blue-700'>
-            Xem tất cả
-          </button>
+      {/* Content Grid */}
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+        {/* Đăng ký gần đây */}
+        <div className='lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm'>
+          <div className='p-6 border-b border-gray-100'>
+            <div className='flex items-center justify-between'>
+              <h3 className='text-xl font-bold text-gray-900 flex items-center gap-2'>
+                <Users className='w-5 h-5 text-blue-600' />
+                Đăng ký gần đây
+              </h3>
+              <button className='text-blue-600 text-sm font-semibold hover:text-blue-700 transition-colors'>
+                Xem tất cả
+              </button>
+            </div>
+          </div>
+          <div className='p-6'>
+            <div className='space-y-2'>
+              {dashboardStats?.recentEnrollments?.map((enrollment, index) => (
+                <EnrollmentItem key={index} {...enrollment} />
+              )) || (
+                <div className='text-center py-8'>
+                  <Users className='w-12 h-12 text-gray-300 mx-auto mb-3' />
+                  <p className='text-gray-500 font-medium'>
+                    Không có đăng ký gần đây
+                  </p>
+                  <p className='text-gray-400 text-sm'>
+                    Học viên mới sẽ xuất hiện ở đây
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        <div className='space-y-1'>
-          {dashboardStats?.recentEnrollments?.map((enrollment, index) => (
-            <EnrollmentItem key={index} {...enrollment} />
-          )) || (
-            <p className='text-gray-500 text-center py-4'>
-              Không có đăng ký gần đây
-            </p>
-          )}
+
+        {/* Trạng thái hệ thống */}
+        <div className='bg-white rounded-xl border border-gray-100 shadow-sm'>
+          <div className='p-6 border-b border-gray-100'>
+            <h3 className='text-xl font-bold text-gray-900 flex items-center gap-2'>
+              <CheckCircle className='w-5 h-5 text-green-600' />
+              Trạng thái hệ thống
+            </h3>
+          </div>
+          <div className='p-6'>
+            <div className='space-y-2'>
+              <StatusItem
+                service='Cơ sở dữ liệu'
+                status='Hoạt động'
+                statusColor='text-green-600'
+              />
+              <StatusItem
+                service='API Server'
+                status='Hoạt động'
+                statusColor='text-green-600'
+              />
+              <StatusItem
+                service='Email Service'
+                status='Hoạt động'
+                statusColor='text-green-600'
+              />
+              <StatusItem
+                service='File Storage'
+                status='Hoạt động'
+                statusColor='text-green-600'
+              />
+            </div>
+          </div>
         </div>
       </div>
     </>
   );
 };
+
 export default AdminDashboard;

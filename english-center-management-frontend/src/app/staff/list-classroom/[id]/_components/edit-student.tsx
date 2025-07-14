@@ -5,11 +5,6 @@ import {
   X,
   Save,
   User,
-  Mail,
-  Phone,
-  Calendar,
-  MapPin,
-  Users,
 } from 'lucide-react';
 import { Student } from '../../../../../types';
 

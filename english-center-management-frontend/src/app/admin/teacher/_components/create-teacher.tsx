@@ -14,7 +14,6 @@ import {
   Award,
   FileText,
 } from 'lucide-react';
-import { TeacherProfile, UserStatus } from '../../../../types';
 
 interface CreateTeacherModalProps {
   isOpen: boolean;

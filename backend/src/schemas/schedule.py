@@ -2,6 +2,8 @@ from typing import Optional
 from datetime import time, datetime
 from uuid import UUID
 from .base import BaseSchema
+from .room import RoomResponse
+from .classroom import ClassroomResponse
 from ..models.schedule import Weekday, SessionStatus
 
 class ScheduleBase(BaseSchema):
@@ -32,5 +34,5 @@ class ScheduleUpdate(BaseSchema):
 class ScheduleResponse(ScheduleBase):
     id: UUID
     created_at: datetime
-    room: Optional[dict] = None  # Room information
-    class_: Optional[dict] = None  # Class information 
+    room: Optional[RoomResponse] = None  # Room information
+    class_: Optional[ClassroomResponse] = None  # Class information 

@@ -166,7 +166,7 @@ export interface LessonPlan extends BaseEntity {
   date: string;
   duration: number; // minutes
   objectives: string[];
-  materials: string[];
+
   activities: LessonActivity[];
   homework?: string;
   notes?: string;
@@ -180,7 +180,7 @@ export interface LessonActivity {
   description: string;
   duration: number; // minutes
   type: 'warmup' | 'presentation' | 'practice' | 'production' | 'assessment';
-  materials?: string[];
+
   instructions?: string;
 }
 

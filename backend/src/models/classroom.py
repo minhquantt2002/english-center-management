@@ -36,5 +36,5 @@ class Class(Base):
     exams = relationship("Exam", back_populates="class_")
     feedbacks = relationship("Feedback", back_populates="class_")
     schedules = relationship("Schedule", back_populates="class_")
-    materials = relationship("Material", back_populates="class_")
-    assignments = relationship("Assignment", back_populates="class_") 
+
+ 

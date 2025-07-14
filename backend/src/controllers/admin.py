@@ -598,4 +598,498 @@ async def get_system_statistics(
         "total_receptionists": user_service.count_users_by_role(db, "receptionist"),
         "total_admins": user_service.count_users_by_role(db, "admin"),
     }
-    return stats 
+    return stats
+
+# Health Check
+@router.get("/health")
+async def health_check():
+    """
+    Kiểm tra trạng thái server
+    """
+    return {
+        "status": "healthy",
+        "message": "Server đang hoạt động bình thường",
+        "timestamp": "2024-01-01T00:00:00Z"
+    }
+
+# Fake Data Generation
+@router.post("/generate-fake-data-test")
+async def generate_fake_data_test(
+    # current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Tạo dữ liệu mẫu test đơn giản cho hệ thống (chỉ admin)
+    """
+    from faker import Faker
+    from datetime import date
+    from ..cruds import user as user_crud
+    from ..cruds import course as course_crud
+    from ..utils.auth import get_password_hash
+    
+    fake = Faker(['vi_VN'])
+    
+    try:
+        # Xóa dữ liệu mẫu trước khi tạo mới để tránh trùng email
+        from fastapi import Request
+        request = None  # Không có request thực, chỉ cần truyền current_user và db
+        # clear_fake_data(current_user, db)
+        
+        # 1. Tạo khóa học mẫu
+        course_data = {
+            "course_name": "Tiếng Anh Cơ Bản A1",
+            "description": "Khóa học tiếng Anh cơ bản cho người mới bắt đầu",
+            "duration": 12,
+            "price": 2000000,
+            "level": "A1"
+        }
+        
+        from ..schemas.course import CourseCreate
+        course_create = CourseCreate(**course_data)
+        course = course_crud.create_course(db, course_create)
+        
+        # 2. Tạo giáo viên mẫu
+        teacher_data = {
+            "name": "Nguyễn Thị Hương",
+            "email": f"huong.nguyen+{fake.unique.random_number(digits=5)}@example.com",
+            "password": "password123",
+            "role_name": "teacher",
+            "specialization": "Tiếng Anh Giao Tiếp",
+            "experience_years": 5,
+            "education": "Đại học Ngoại ngữ",
+            "phone_number": "0901234567"
+        }
+        
+        hashed_password = get_password_hash(teacher_data["password"])
+        from ..schemas.user import UserCreate
+        user_create = UserCreate(**teacher_data)
+        teacher = user_crud.create_user(db, user_create, hashed_password)
+        
+        # 3. Tạo học sinh mẫu
+        student_data = {
+            "name": "Trần Văn An",
+            "email": f"an.tran+{fake.unique.random_number(digits=5)}@example.com",
+            "password": "password123",
+            "role_name": "student",
+            "date_of_birth": date(2010, 5, 15),
+            "phone_number": "0901234568",
+            "level": "A1",
+            "parent_name": "Trần Văn Bố",
+            "parent_phone": "0901234569",
+            "student_id": f"STU{fake.unique.random_number(digits=6)}"
+        }
+        
+        hashed_password = get_password_hash(student_data["password"])
+        user_create = UserCreate(**student_data)
+        student = user_crud.create_user(db, user_create, hashed_password)
+        
+        return {
+            "message": "Tạo dữ liệu mẫu test thành công!",
+            "summary": {
+                "course_created": course.course_name,
+                "teacher_created": teacher.name,
+                "student_created": student.name
+            },
+            "login_credentials": {
+                "teacher": {
+                    "email": teacher.email,
+                    "password": "password123"
+                },
+                "student": {
+                    "email": student.email,
+                    "password": "password123"
+                }
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Lỗi khi tạo dữ liệu mẫu: {str(e)}"
+        )
+
+@router.post("/generate-fake-data-simple")
+async def generate_fake_data_simple(
+    # current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Tạo dữ liệu mẫu đơn giản cho hệ thống (chỉ admin)
+    """
+    from faker import Faker
+    from datetime import date, timedelta
+    import random
+    from ..cruds import user as user_crud
+    from ..cruds import course as course_crud
+    from ..utils.auth import get_password_hash
+    
+    fake = Faker(['vi_VN'])
+    
+    try:
+        # Xóa dữ liệu mẫu trước khi tạo mới để tránh trùng email
+        from fastapi import Request
+        request = None  # Không có request thực, chỉ cần truyền current_user và db
+        # clear_fake_data(current_user, db)
+        
+        # 1. Tạo khóa học mẫu
+        course_data = {
+            "course_name": "Tiếng Anh Cơ Bản A1",
+            "description": "Khóa học tiếng Anh cơ bản cho người mới bắt đầu",
+            "duration": 12,
+            "price": 2000000,
+            "level": "A1"
+        }
+        
+        from ..schemas.course import CourseCreate
+        course_create = CourseCreate(**course_data)
+        course = course_crud.create_course(db, course_create)
+        
+        # 2. Tạo giáo viên mẫu
+        teacher_data = {
+            "name": "Nguyễn Thị Hương",
+            "email": f"staff@gmail.com",
+            "password": "123123123",
+            "role_name": "staff",
+            "phone_number": "0901234567"
+        }
+        
+        hashed_password = get_password_hash(teacher_data["password"])
+        from ..schemas.user import UserCreate
+        user_create = UserCreate(**teacher_data)
+        teacher = user_crud.create_user(db, user_create, hashed_password)
+        
+        # 3. Tạo học sinh mẫu
+        student_data = {
+            "name": "Trần Văn An",
+            "email": f"student@gmail.com",
+            "password": "password123",
+            "role_name": "student",
+            "date_of_birth": date(2010, 5, 15),
+            "phone_number": "0901234568",
+            "level": "A1",
+            "parent_name": "Trần Văn Bố",
+            "parent_phone": "0901234569",
+            "student_id": f"STU{fake.unique.random_number(digits=6)}"
+        }
+        
+        hashed_password = get_password_hash(student_data["password"])
+        user_create = UserCreate(**student_data)
+        student = user_crud.create_user(db, user_create, hashed_password)
+        
+        return {
+            "message": "Tạo dữ liệu mẫu đơn giản thành công!",
+            "summary": {
+                "course_created": course.course_name,
+                "teacher_created": teacher.name,
+                "student_created": student.name
+            },
+            "login_credentials": {
+                "teacher": {
+                    "email": teacher.email,
+                    "password": "password123"
+                },
+                "student": {
+                    "email": student.email,
+                    "password": "password123"
+                }
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Lỗi khi tạo dữ liệu mẫu: {str(e)}"
+        )
+
+@router.post("/generate-fake-data-complete")
+async def generate_fake_data_complete(
+    # current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Tạo dữ liệu mẫu hoàn chỉnh cho hệ thống (chỉ admin)
+    """
+    from faker import Faker
+    from datetime import date, timedelta
+    import random
+    from ..cruds import user as user_crud
+    from ..cruds import course as course_crud
+    from ..cruds import room as room_crud
+    from ..cruds import classroom as classroom_crud
+    from ..cruds import schedule as schedule_crud
+    from ..cruds import enrollment as enrollment_crud
+    from ..utils.auth import get_password_hash
+    
+    fake = Faker(['vi_VN'])
+    
+    try:
+        # Xóa dữ liệu mẫu trước khi tạo mới để tránh trùng email
+        from fastapi import Request
+        request = None  # Không có request thực, chỉ cần truyền current_user và db
+        # clear_fake_data(current_user, db)
+        
+        # 1. Tạo khóa học mẫu
+        courses_data = [
+            {
+                "course_name": "Tiếng Anh Cơ Bản A1",
+                "description": "Khóa học tiếng Anh cơ bản cho người mới bắt đầu",
+                "duration": 12,
+                "price": 2000000,
+                "level": "A1"
+            },
+            {
+                "course_name": "Tiếng Anh Sơ Cấp A2",
+                "description": "Khóa học tiếng Anh sơ cấp",
+                "duration": 12,
+                "price": 2200000,
+                "level": "A2"
+            },
+            {
+                "course_name": "Tiếng Anh Trung Cấp B1",
+                "description": "Khóa học tiếng Anh trung cấp",
+                "duration": 16,
+                "price": 2500000,
+                "level": "B1"
+            },
+            {
+                "course_name": "Tiếng Anh Trung Cao Cấp B2",
+                "description": "Khóa học tiếng Anh trung cao cấp",
+                "duration": 16,
+                "price": 2800000,
+                "level": "B2"
+            },
+            {
+                "course_name": "Tiếng Anh Nâng Cao C1",
+                "description": "Khóa học tiếng Anh nâng cao",
+                "duration": 20,
+                "price": 3200000,
+                "level": "C1"
+            }
+        ]
+        
+        created_courses = []
+        for course_data in courses_data:
+            from ..schemas.course import CourseCreate
+            course_create = CourseCreate(**course_data)
+            course = course_crud.create_course(db, course_create)
+            created_courses.append(course)
+        
+        # 2. Tạo phòng học mẫu
+        rooms_data = [
+            {"name": "Phòng A101", "capacity": 25, "equipment": "Máy chiếu, loa, điều hòa"},
+            {"name": "Phòng A102", "capacity": 25, "equipment": "Máy chiếu, loa, điều hòa"},
+            {"name": "Phòng A103", "capacity": 20, "equipment": "Máy chiếu, loa, điều hòa"},
+            {"name": "Phòng B201", "capacity": 30, "equipment": "Máy chiếu, loa, điều hòa, bảng tương tác"},
+            {"name": "Phòng B202", "capacity": 30, "equipment": "Máy chiếu, loa, điều hòa, bảng tương tác"},
+            {"name": "Phòng Lab 1", "capacity": 20, "equipment": "Máy tính, loa, điều hòa"},
+            {"name": "Phòng Lab 2", "capacity": 20, "equipment": "Máy tính, loa, điều hòa"}
+        ]
+        
+        created_rooms = []
+        for room_data in rooms_data:
+            from ..schemas.room import RoomCreate
+            room_create = RoomCreate(**room_data)
+            room = room_crud.create_room(db, room_create)
+            created_rooms.append(room)
+        
+        # 3. Tạo giáo viên mẫu
+        teachers_data = [
+            {
+                "name": "Nguyễn Thị Hương",
+                "email": f"huong.nguyen+{fake.unique.random_number(digits=5)}@example.com",
+                "password": "password123",
+                "role_name": "teacher",
+                "specialization": "Tiếng Anh Giao Tiếp",
+                "experience_years": 5,
+                "education": "Đại học Ngoại ngữ",
+                "phone_number": "0901234567"
+            },
+            {
+                "name": "Trần Văn Minh",
+                "email": f"minh.tran+{fake.unique.random_number(digits=5)}@example.com",
+                "password": "password123",
+                "role_name": "teacher",
+                "specialization": "IELTS, TOEIC",
+                "experience_years": 8,
+                "education": "Thạc sĩ Ngôn ngữ học",
+                "phone_number": "0901234568"
+            },
+            {
+                "name": "Lê Thị Lan",
+                "email": f"lan.le+{fake.unique.random_number(digits=5)}@example.com",
+                "password": "password123",
+                "role_name": "teacher",
+                "specialization": "Tiếng Anh Trẻ em",
+                "experience_years": 3,
+                "education": "Đại học Sư phạm",
+                "phone_number": "0901234569"
+            },
+            {
+                "name": "Phạm Văn Dũng",
+                "email": f"dung.pham+{fake.unique.random_number(digits=5)}@example.com",
+                "password": "password123",
+                "role_name": "teacher",
+                "specialization": "Tiếng Anh Thương mại",
+                "experience_years": 6,
+                "education": "Đại học Kinh tế",
+                "phone_number": "0901234570"
+            },
+            {
+                "name": "Hoàng Thị Mai",
+                "email": f"mai.hoang+{fake.unique.random_number(digits=5)}@example.com",
+                "password": "password123",
+                "role_name": "teacher",
+                "specialization": "Tiếng Anh Học thuật",
+                "experience_years": 7,
+                "education": "Tiến sĩ Ngôn ngữ học",
+                "phone_number": "0901234571"
+            },
+            {
+                "name": "Hoàng Thị Mai",
+                "email": f"admin@example.com",
+                "password": "123123123",
+                "role_name": "admin",
+                "specialization": "Tiếng Anh Học thuật",
+                "experience_years": 7,
+                "education": "Tiến sĩ Ngôn ngữ học",
+                "phone_number": "0901234567"
+            }
+        ]
+        
+        created_teachers = []
+        for teacher_data in teachers_data:
+            hashed_password = get_password_hash(teacher_data["password"])
+            from ..schemas.user import UserCreate
+            user_create = UserCreate(**teacher_data)
+            teacher = user_crud.create_user(db, user_create, hashed_password)
+            created_teachers.append(teacher)
+        
+        # 4. Tạo học sinh mẫu
+        students_data = []
+        for i in range(50):  # Tạo 50 học sinh
+            student_data = {
+                "name": fake.name(),
+                "email": fake.unique.email(),
+                "password": "password123",
+                "role_name": "student",
+                "date_of_birth": fake.date_of_birth(minimum_age=8, maximum_age=25),
+                "phone_number": fake.phone_number(),
+                "level": random.choice(["A1", "A2", "B1", "B2", "C1"]),
+                "parent_name": fake.name(),
+                "parent_phone": fake.phone_number(),
+                "student_id": f"STU{fake.unique.random_number(digits=6)}"
+            }
+            hashed_password = get_password_hash(student_data["password"])
+            from ..schemas.user import UserCreate
+            user_create = UserCreate(**student_data)
+            student = user_crud.create_user(db, user_create, hashed_password)
+            students_data.append(student)
+        
+        # 5. Tạo lớp học mẫu
+        classrooms_data = []
+        for i in range(15):  # Tạo 15 lớp học
+            course = random.choice(created_courses)
+            teacher = random.choice(created_teachers)
+            start_date = date.today() + timedelta(days=random.randint(-30, 30))
+            # Kiểm tra duration có tồn tại không
+            duration_weeks = getattr(course, 'duration', 12) or 12
+            end_date = start_date + timedelta(weeks=duration_weeks)
+            
+            classroom_data = {
+                "class_name": f"{course.course_name} - Lớp {i+1}",
+                "course_id": course.id,
+                "teacher_id": teacher.id,
+                "start_date": start_date,
+                "end_date": end_date,
+                "max_students": random.randint(15, 25),
+                "description": f"Lớp học {course.course_name} được giảng dạy bởi {teacher.name}"
+            }
+            from ..schemas.classroom import ClassroomCreate
+            classroom_create = ClassroomCreate(**classroom_data)
+            classroom = classroom_crud.create_classroom(db, classroom_create)
+            classrooms_data.append(classroom)
+        
+        # 6. Tạo lịch học mẫu
+        weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+        time_slots = [
+            ("09:00", "10:30"),
+            ("14:00", "15:30"),
+            ("18:00", "19:30"),
+            ("19:30", "21:00")
+        ]
+        
+        schedules_created = 0
+        for classroom in classrooms_data:
+            # Tạo 2-3 lịch học cho mỗi lớp
+            num_schedules = random.randint(2, 3)
+            for _ in range(num_schedules):
+                weekday = random.choice(weekdays)
+                start_time, end_time = random.choice(time_slots)
+                room = random.choice(created_rooms)
+                
+                schedule_data = {
+                    "class_id": classroom.id,
+                    "room_id": room.id,
+                    "weekday": weekday,
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "title": f"Buổi học {weekday}",
+                    "description": f"Lịch học thường xuyên vào {weekday}",
+                    "status": "scheduled"
+                }
+                from ..schemas.schedule import ScheduleCreate
+                schedule_create = ScheduleCreate(**schedule_data)
+                schedule_crud.create_schedule(db, schedule_create)
+                schedules_created += 1
+        
+        # 7. Tạo đăng ký học mẫu
+        enrollments_created = 0
+        for classroom in classrooms_data:
+            # Mỗi lớp có 15-20 học sinh đăng ký
+            num_students = random.randint(15, min(20, len(students_data)))
+            selected_students = random.sample(students_data, num_students)
+            
+            for student in selected_students:
+                enrollment_data = {
+                    "student_id": student.id,
+                    "class_id": classroom.id,
+                    "enrollment_date": fake.date_between(start_date=date.today() - timedelta(days=180), end_date=date.today())
+                }
+                from ..schemas.enrollment import EnrollmentCreate
+                enrollment_create = EnrollmentCreate(**enrollment_data)
+                enrollment_crud.create_enrollment(db, enrollment_create)
+                enrollments_created += 1
+        
+        return {
+            "message": "Tạo dữ liệu mẫu hoàn chỉnh thành công!",
+            "summary": {
+                "courses_created": len(created_courses),
+                "rooms_created": len(created_rooms),
+                "teachers_created": len(created_teachers),
+                "students_created": len(students_data),
+                "classrooms_created": len(classrooms_data),
+                "schedules_created": schedules_created,
+                "enrollments_created": enrollments_created
+            },
+            "login_credentials": {
+                "admin": {
+                    "email": "admin@example.com",
+                    "password": "admin123"
+                },
+                "teachers": [
+                    {"email": teacher.email, "password": "password123"} 
+                    for teacher in created_teachers[:3]
+                ],
+                "students": [
+                    {"email": student.email, "password": "password123"} 
+                    for student in students_data[:5]
+                ]
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Lỗi khi tạo dữ liệu mẫu: {str(e)}"
+        )
+

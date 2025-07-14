@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
@@ -11,7 +13,8 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useTeacherApi } from '../_hooks/use-api';
-import { ClassData } from '../../../types';
+import { ClassSession } from '../../../types';
+import Image from 'next/image';
 
 interface Student {
   id: string;
@@ -77,7 +80,7 @@ const MyClassesDashboard = () => {
 
         // Process classes data
         const processedClasses: LocalClassData[] = classesData.map(
-          (classItem: ClassData, index: number) => {
+          (classItem: ClassSession, index: number) => {
             const levelMap = {
               beginner: 'Beginner' as const,
               intermediate: 'Intermediate' as const,
@@ -93,25 +96,23 @@ const MyClassesDashboard = () => {
             };
 
             // Get first 3 students as avatars
-            const studentAvatars = classItem.students
-              ? Array.from(
-                  { length: Math.min(3, classItem.students) },
-                  (_, i) => ({
-                    id: `student-${i}`,
-                    name: `Student ${i + 1}`,
-                    avatar: '',
-                  })
-                )
-              : [];
+            const studentAvatars = Array.from(
+              { length: Math.min(3, classItem.studentCount) },
+              (_, i) => ({
+                id: `student-${i}`,
+                name: `Student ${i + 1}`,
+                avatar: '',
+              })
+            );
 
             return {
               id: classItem.id,
-              title: classItem.name,
+              title: classItem.title,
               level:
                 levelMap[classItem.level as keyof typeof levelMap] ||
                 'Intermediate',
-              students: classItem.students,
-              schedule: classItem.schedule?.time || 'TBD',
+              students: classItem.studentCount,
+              schedule: classItem.time || 'TBD',
               room: classItem.room || 'Room 101',
               building: 'Building A',
               unit: `Unit ${index + 1}: Course Content`,
@@ -130,7 +131,7 @@ const MyClassesDashboard = () => {
           { ...prevStats[0], value: classesData.length.toString() },
           {
             ...prevStats[1],
-            value: dashboardData.totalStudents?.toString() || '0',
+            value: dashboardData.weeklyStats.studentsTotal.toString() || '0',
           },
           prevStats[2],
           prevStats[3],
@@ -149,8 +150,8 @@ const MyClassesDashboard = () => {
 
     return (
       <div className='flex items-center -space-x-2'>
-        {visibleStudents.map((student, index) => (
-          <img
+        {visibleStudents.map((student) => (
+          <Image
             key={student.id}
             src={student.avatar}
             alt={student.name}

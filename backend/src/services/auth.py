@@ -55,7 +55,9 @@ def register_user(db: Session, user_data) -> Optional[User]:
 
 def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
     """Authenticate user with email and password"""
+    print(user_crud.get_all_users(db))
     user = user_crud.get_user_by_email(db, email)
+    print(user)
     if not user:
         return None
     if not verify_password(password, user.password):
