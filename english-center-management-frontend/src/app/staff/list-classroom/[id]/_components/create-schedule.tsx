@@ -2,18 +2,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, MapPin, User, Check } from 'lucide-react';
-import { ClassData } from '../../../../../types/admin';
+import { useStaffStatsApi } from '../../../_hooks';
 import {
-  useStaffStatsApi,
-  ScheduleSession,
-  RoomApiResponse,
-} from '../../../_hooks';
+  ClassroomResponse,
+  ScheduleResponse,
+  ScheduleCreate,
+  Weekday,
+} from '../../../../../types/staff';
 
 interface CreateScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  classroom: ClassData | null;
-  onScheduleCreated?: (schedule: ScheduleSession) => void;
+  classroom: ClassroomResponse | null;
+  onScheduleCreated?: (schedule: ScheduleResponse) => void;
 }
 
 const dayNames = {
@@ -51,29 +52,6 @@ export default function CreateScheduleModal({
     notes: '',
   });
 
-  const [rooms, setRooms] = useState<RoomApiResponse[]>([]);
-  const { loading, error, getRooms } = useStaffStatsApi();
-
-  useEffect(() => {
-    if (isOpen) {
-      loadRooms();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
-
-  const loadRooms = async () => {
-    try {
-      const response = await getRooms();
-      setRooms(response);
-      // Set default room if available
-      if (response.length > 0 && !formData.room) {
-        setFormData((prev) => ({ ...prev, room: response[0].id }));
-      }
-    } catch (err) {
-      console.error('Error loading rooms:', err);
-    }
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -83,17 +61,14 @@ export default function CreateScheduleModal({
       formData.room &&
       formData.teacher
     ) {
-      const newSchedule: ScheduleSession = {
-        id: `session_${Date.now()}`,
-        day: formData.day,
-        timeSlot: formData.timeSlot,
-        room: formData.room, // This will be room ID
-        teacher: formData.teacher,
-        status: 'scheduled',
-        notes: formData.notes,
+      const newSchedule: ScheduleCreate = {
+        class_id: classroom?.id,
+        weekday: formData.day as Weekday,
+        start_time: formData.timeSlot.startTime,
+        end_time: formData.timeSlot.endTime,
       };
 
-      onScheduleCreated?.(newSchedule);
+      onScheduleCreated?.(newSchedule as ScheduleResponse);
       handleClose();
     }
   };
@@ -122,7 +97,7 @@ export default function CreateScheduleModal({
               Tạo lịch học mới
             </h2>
             <p className='text-gray-600 mt-1'>
-              Thêm buổi học mới cho lớp {classroom?.name}
+              Thêm buổi học mới cho lớp {classroom?.class_name}
             </p>
           </div>
           <button
@@ -135,12 +110,6 @@ export default function CreateScheduleModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className='p-6'>
-          {error && (
-            <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4'>
-              <p>Lỗi: {error}</p>
-            </div>
-          )}
-
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             {/* Day Selection */}
             <div>
@@ -206,14 +175,8 @@ export default function CreateScheduleModal({
                 }
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
                 required
-                disabled={loading}
               >
                 <option value=''>Chọn phòng học</option>
-                {rooms.map((room) => (
-                  <option key={room.id} value={room.id}>
-                    {room.name}
-                  </option>
-                ))}
               </select>
             </div>
 
@@ -232,7 +195,6 @@ export default function CreateScheduleModal({
                 placeholder='Tên giáo viên'
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
                 required
-                disabled={loading}
               />
             </div>
           </div>
@@ -250,7 +212,6 @@ export default function CreateScheduleModal({
               placeholder='Ghi chú về buổi học...'
               rows={3}
               className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
-              disabled={loading}
             />
           </div>
 
@@ -263,25 +224,19 @@ export default function CreateScheduleModal({
               <div>
                 <span className='text-gray-600'>Tên lớp:</span>
                 <span className='ml-2 font-medium text-gray-900'>
-                  {classroom?.name}
+                  {classroom?.class_name}
                 </span>
               </div>
               <div>
                 <span className='text-gray-600'>Khóa học ID:</span>
                 <span className='ml-2 font-medium text-gray-900'>
-                  {classroom?.courseId || 'Chưa có'}
-                </span>
-              </div>
-              <div>
-                <span className='text-gray-600'>Số học viên:</span>
-                <span className='ml-2 font-medium text-gray-900'>
-                  {classroom?.students || 0} học viên
+                  {classroom?.course_id || 'Chưa có'}
                 </span>
               </div>
               <div>
                 <span className='text-gray-600'>Trạng thái:</span>
                 <span className='ml-2 font-medium text-gray-900'>
-                  {classroom?.status}
+                  {classroom?.status || 'Chưa có'}
                 </span>
               </div>
             </div>
@@ -293,21 +248,15 @@ export default function CreateScheduleModal({
               type='button'
               onClick={handleClose}
               className='px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'
-              disabled={loading}
             >
               Hủy
             </button>
             <button
               type='submit'
-              disabled={loading}
               className='px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 disabled:bg-gray-400 transition-colors flex items-center space-x-2'
             >
-              {loading ? (
-                <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
-              ) : (
-                <Check className='w-4 h-4' />
-              )}
-              <span>{loading ? 'Đang tạo...' : 'Tạo lịch học'}</span>
+              <Check className='w-4 h-4' />
+              <span>Tạo lịch học</span>
             </button>
           </div>
         </form>

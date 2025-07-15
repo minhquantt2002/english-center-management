@@ -2,14 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
-import { ClassData, CourseLevel } from '../../../../../types';
-import { useStaffTeacherApi, useStaffStatsApi } from '../../../_hooks';
+import {
+  ClassroomResponse,
+  CourseLevel,
+  TeacherResponse,
+} from '../../../../../types/staff';
+import { useStaffTeacherApi } from '../../../_hooks';
 
 interface EditClassroomInfoModalProps {
   isOpen: boolean;
   onClose: () => void;
-  classroom: ClassData | null;
-  onSave: (updatedClassroom: ClassData) => void;
+  classroom: ClassroomResponse | null;
+  onSave: (updatedClassroom: ClassroomResponse) => void;
 }
 
 export default function EditClassroomInfoModal({
@@ -18,34 +22,28 @@ export default function EditClassroomInfoModal({
   classroom,
   onSave,
 }: EditClassroomInfoModalProps) {
-  const [formData, setFormData] = useState<Partial<ClassData>>({
-    name: '',
-    level: 'intermediate',
-    teacher: { id: '', name: '', email: '', role_name: 'teacher' },
-    students: 0,
-    maxStudents: 20,
-    schedule: { days: '', time: '' },
+  const [formData, setFormData] = useState<Partial<ClassroomResponse>>({
+    class_name: '',
+    course_id: '',
+    teacher_id: '',
     room: '',
+    course_level: 'intermediate',
     status: 'active',
+    start_date: '',
+    end_date: '',
   });
 
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [teachers, setTeachers] = useState<any[]>([]);
-  const [rooms, setRooms] = useState<any[]>([]);
+  const [teachers, setTeachers] = useState<TeacherResponse[]>([]);
   const { getTeachers } = useStaffTeacherApi();
-  const { getRooms } = useStaffStatsApi();
 
   // Fetch data for dropdowns
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [teachersData, roomsData] = await Promise.all([
-          getTeachers(),
-          getRooms(),
-        ]);
+        const teachersData = await getTeachers();
         setTeachers(teachersData);
-        setRooms(roomsData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -55,7 +53,7 @@ export default function EditClassroomInfoModal({
     if (isOpen) {
       fetchData();
     }
-  }, [isOpen, getTeachers, getRooms]);
+  }, [isOpen, getTeachers]);
 
   const courseLevels: { value: CourseLevel; label: string }[] = [
     { value: 'beginner', label: 'Cơ bản (Beginner)' },
@@ -93,18 +91,8 @@ export default function EditClassroomInfoModal({
     if (classroom) {
       setFormData({
         ...classroom,
-        schedule: {
-          days: classroom.schedule?.days || '',
-          time: classroom.schedule?.time || '',
-        },
         teacher: { ...classroom.teacher },
       });
-      // Parse days from schedule.days if it exists
-      if (classroom.schedule?.days) {
-        setSelectedDays(
-          classroom.schedule.days.split(',').map((day) => day.trim())
-        );
-      }
     }
   }, [classroom]);
 
@@ -123,16 +111,6 @@ export default function EditClassroomInfoModal({
     }
   };
 
-  const handleScheduleChange = (field: 'days' | 'time', value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      schedule: {
-        ...prev.schedule!,
-        [field]: value,
-      },
-    }));
-  };
-
   const handleDayToggle = (day: string) => {
     setSelectedDays((prev) => {
       const newDays = prev.includes(day)
@@ -142,10 +120,6 @@ export default function EditClassroomInfoModal({
       // Update form data
       setFormData((prev) => ({
         ...prev,
-        schedule: {
-          ...prev.schedule!,
-          days: newDays.join(', '),
-        },
       }));
 
       return newDays;
@@ -161,7 +135,6 @@ export default function EditClassroomInfoModal({
           id: teacher.id,
           name: teacher.name,
           email: teacher.email || '',
-          role_name: teacher.role_name || 'teacher',
         },
       }));
     }
@@ -170,28 +143,16 @@ export default function EditClassroomInfoModal({
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name?.trim()) {
-      newErrors.name = 'Tên lớp không được để trống';
+    if (!formData.class_name?.trim()) {
+      newErrors.class_name = 'Tên lớp không được để trống';
     }
 
     if (!formData.teacher?.id) {
       newErrors.teacher = 'Vui lòng chọn giáo viên';
     }
 
-    if (!formData.schedule?.days?.trim()) {
-      newErrors.scheduleDays = 'Vui lòng chọn ngày học';
-    }
-
-    if (!formData.schedule?.time) {
-      newErrors.scheduleTime = 'Vui lòng chọn thời gian học';
-    }
-
     if (!formData.room) {
       newErrors.room = 'Vui lòng chọn phòng học';
-    }
-
-    if (formData.maxStudents && formData.maxStudents < 1) {
-      newErrors.maxStudents = 'Số học viên tối đa phải lớn hơn 0';
     }
 
     setErrors(newErrors);
@@ -205,12 +166,10 @@ export default function EditClassroomInfoModal({
       return;
     }
 
-    const updatedClassroom: ClassData = {
+    const updatedClassroom: ClassroomResponse = {
       ...classroom,
       ...formData,
-      schedule: formData.schedule!,
       teacher: formData.teacher!,
-      updatedAt: new Date().toISOString(),
     };
 
     onSave(updatedClassroom);
@@ -249,15 +208,15 @@ export default function EditClassroomInfoModal({
             </label>
             <input
               type='text'
-              value={formData.name || ''}
-              onChange={(e) => handleInputChange('name', e.target.value)}
+              value={formData.class_name || ''}
+              onChange={(e) => handleInputChange('class_name', e.target.value)}
               className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
-                errors.name ? 'border-red-500' : 'border-gray-300'
+                errors.class_name ? 'border-red-500' : 'border-gray-300'
               }`}
               placeholder='Nhập tên lớp học'
             />
-            {errors.name && (
-              <p className='mt-1 text-sm text-red-600'>{errors.name}</p>
+            {errors.class_name && (
+              <p className='mt-1 text-sm text-red-600'>{errors.class_name}</p>
             )}
           </div>
 
@@ -268,8 +227,10 @@ export default function EditClassroomInfoModal({
                 Trình độ
               </label>
               <select
-                value={formData.level || 'intermediate'}
-                onChange={(e) => handleInputChange('level', e.target.value)}
+                value={formData.course_level || 'intermediate'}
+                onChange={(e) =>
+                  handleInputChange('course_level', e.target.value)
+                }
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
               >
                 {courseLevels.map((level) => (
@@ -344,10 +305,12 @@ export default function EditClassroomInfoModal({
                   Thời gian
                 </label>
                 <select
-                  value={formData.schedule?.time || ''}
-                  onChange={(e) => handleScheduleChange('time', e.target.value)}
+                  value={formData.schedules?.[0]?.start_time || ''}
+                  onChange={(e) =>
+                    handleInputChange('start_time', e.target.value)
+                  }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
-                    errors.scheduleTime ? 'border-red-500' : 'border-gray-300'
+                    errors.start_time ? 'border-red-500' : 'border-gray-300'
                   }`}
                 >
                   <option value=''>Chọn thời gian</option>
@@ -357,9 +320,9 @@ export default function EditClassroomInfoModal({
                     </option>
                   ))}
                 </select>
-                {errors.scheduleTime && (
+                {errors.start_time && (
                   <p className='mt-1 text-sm text-red-600'>
-                    {errors.scheduleTime}
+                    {errors.start_time}
                   </p>
                 )}
               </div>
@@ -380,42 +343,10 @@ export default function EditClassroomInfoModal({
                 }`}
               >
                 <option value=''>Chọn phòng học</option>
-                {rooms
-                  .filter(
-                    (room) =>
-                      room.status === 'available' || room.status === 'occupied'
-                  )
-                  .map((room) => (
-                    <option key={room.id} value={room.name}>
-                      {room.name} - Sức chứa: {room.capacity}
-                    </option>
-                  ))}
+                {classroom?.room}
               </select>
               {errors.room && (
                 <p className='mt-1 text-sm text-red-600'>{errors.room}</p>
-              )}
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Số học viên tối đa
-              </label>
-              <input
-                type='number'
-                value={formData.maxStudents || ''}
-                onChange={(e) =>
-                  handleInputChange('maxStudents', parseInt(e.target.value))
-                }
-                min='1'
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
-                  errors.maxStudents ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder='20'
-              />
-              {errors.maxStudents && (
-                <p className='mt-1 text-sm text-red-600'>
-                  {errors.maxStudents}
-                </p>
               )}
             </div>
           </div>

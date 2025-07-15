@@ -17,13 +17,13 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { useStudentApi } from '../../_hooks/use-api';
-import { StudentClass } from '../../../../types';
+import { ClassroomResponse } from '../../../../types/student';
 
 const ClassDetailPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const { loading, error, getClassDetails } = useStudentApi();
-  const [classData, setClassData] = useState<StudentClass | null>(null);
+  const [classData, setClassData] = useState<ClassroomResponse | null>(null);
   const [activeTab, setActiveTab] = useState<
     'overview' | 'assignments' | 'schedule'
   >('overview');
@@ -137,7 +137,9 @@ const ClassDetailPage: React.FC = () => {
           <span>Quay lại</span>
         </button>
         <div className='flex-1'>
-          <h1 className='text-2xl font-bold text-gray-900'>{classData.name}</h1>
+          <h1 className='text-2xl font-bold text-gray-900'>
+            {classData.class_name}
+          </h1>
           <p className='text-gray-600 mt-1'>Chi tiết lớp học</p>
         </div>
         <div className='flex items-center gap-3'>
@@ -157,7 +159,7 @@ const ClassDetailPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Giáo viên</p>
               <p className='font-medium text-gray-900'>
-                {classData.teacher.name}
+                {classData.teacher?.name}
               </p>
             </div>
           </div>
@@ -171,7 +173,9 @@ const ClassDetailPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Lịch học</p>
               <p className='font-medium text-gray-900'>
-                {classData.schedule?.days || 'Chưa có lịch học'}
+                {classData.schedules && classData.schedules.length > 0
+                  ? classData.schedules.map((s) => s.weekday).join(', ')
+                  : 'Chưa có lịch học'}
               </p>
             </div>
           </div>
@@ -197,9 +201,9 @@ const ClassDetailPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Trạng thái</p>
               <p className='font-medium text-gray-900'>
-                {classData.status === 'In Progress' && 'Đang học'}
-                {classData.status === 'Upcoming' && 'Sắp tới'}
-                {classData.status === 'Completed' && 'Hoàn thành'}
+                {classData.status === 'active' && 'Đang học'}
+                {classData.status === 'cancelled' && 'Đã hủy'}
+                {classData.status === 'completed' && 'Hoàn thành'}
               </p>
             </div>
           </div>
@@ -249,7 +253,7 @@ const ClassDetailPage: React.FC = () => {
                         <div>
                           <p className='text-sm text-gray-600'>Tên lớp</p>
                           <p className='font-medium text-gray-900'>
-                            {classData.name}
+                            {classData.class_name}
                           </p>
                         </div>
                       </div>
@@ -261,7 +265,7 @@ const ClassDetailPage: React.FC = () => {
                         <div>
                           <p className='text-sm text-gray-600'>Giáo viên</p>
                           <p className='font-medium text-gray-900'>
-                            {classData.teacher.name}
+                            {classData.teacher?.name}
                           </p>
                         </div>
                       </div>
@@ -273,7 +277,10 @@ const ClassDetailPage: React.FC = () => {
                         <div>
                           <p className='text-sm text-gray-600'>Thời gian học</p>
                           <p className='font-medium text-gray-900'>
-                            {classData.schedule?.time || 'Chưa có lịch học'}
+                            {classData.schedules &&
+                            classData.schedules.length > 0
+                              ? `${classData.schedules[0].start_time} - ${classData.schedules[0].end_time}`
+                              : 'Chưa có lịch học'}
                           </p>
                         </div>
                       </div>
@@ -299,92 +306,34 @@ const ClassDetailPage: React.FC = () => {
                     <div className='flex gap-2'>
                       <span
                         className={`px-3 py-1 text-sm font-medium rounded-full ${getLevelColor(
-                          classData.level
+                          classData.course_level
                         )}`}
                       >
-                        {classData.level === 'beginner' && 'Cơ bản'}
-                        {classData.level === 'intermediate' && 'Trung cấp'}
-                        {classData.level === 'advanced' && 'Nâng cao'}
+                        {classData.course_level === 'beginner' && 'Cơ bản'}
+                        {classData.course_level === 'intermediate' &&
+                          'Trung cấp'}
+                        {classData.course_level === 'advanced' && 'Nâng cao'}
+                        {classData.course_level === 'elementary' && 'Sơ cấp'}
+                        {classData.course_level === 'upper-intermediate' &&
+                          'Trung cao'}
+                        {classData.course_level === 'proficiency' &&
+                          'Thành thạo'}
                       </span>
                       <span
                         className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(
                           classData.status
                         )}`}
                       >
-                        {classData.status === 'In Progress' && 'Đang học'}
-                        {classData.status === 'Upcoming' && 'Sắp tới'}
-                        {classData.status === 'Completed' && 'Hoàn thành'}
+                        {classData.status === 'active' && 'Đang học'}
+                        {classData.status === 'cancelled' && 'Đã hủy'}
+                        {classData.status === 'completed' && 'Hoàn thành'}
                       </span>
                     </div>
                   </div>
                 </div>
 
                 <div className='space-y-6'>
-                  <div>
-                    <h3 className='text-lg font-semibold text-gray-900 mb-4'>
-                      Tiến độ học tập
-                    </h3>
-                    {classData.sessionsCompleted && classData.totalSessions && (
-                      <div className='space-y-4'>
-                        <div className='flex items-center justify-between'>
-                          <span className='text-sm text-gray-600'>
-                            Buổi học
-                          </span>
-                          <span className='font-medium text-gray-900'>
-                            {classData.sessionsCompleted}/
-                            {classData.totalSessions}
-                          </span>
-                        </div>
-                        <div className='w-full bg-gray-200 rounded-full h-3'>
-                          <div
-                            className='bg-purple-600 h-3 rounded-full transition-all duration-300'
-                            style={{
-                              width: `${getProgressPercentage(
-                                classData.sessionsCompleted,
-                                classData.totalSessions
-                              )}%`,
-                            }}
-                          />
-                        </div>
-                        <p className='text-sm text-gray-600'>
-                          {getProgressPercentage(
-                            classData.sessionsCompleted,
-                            classData.totalSessions
-                          )}
-                          % hoàn thành
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {classData.nextSession &&
-                    classData.status === 'In Progress' && (
-                      <div>
-                        <h3 className='text-lg font-semibold text-gray-900 mb-4'>
-                          Buổi học tiếp theo
-                        </h3>
-                        <div className='p-4 bg-purple-50 rounded-lg border border-purple-200'>
-                          <div className='flex items-center gap-3'>
-                            <Calendar className='w-5 h-5 text-purple-600' />
-                            <div>
-                              <p className='font-medium text-gray-900'>
-                                {new Date(
-                                  classData.nextSession
-                                ).toLocaleDateString('vi-VN', {
-                                  weekday: 'long',
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                })}
-                              </p>
-                              <p className='text-sm text-gray-600'>
-                                {classData.schedule?.time || 'Chưa có lịch học'}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                  {/* Tiến độ học tập và buổi học tiếp theo đã bị loại bỏ vì không có dữ liệu phù hợp */}
                 </div>
               </div>
 
@@ -509,8 +458,13 @@ const ClassDetailPage: React.FC = () => {
                     </span>
                   </div>
                   <p className='text-sm text-gray-600'>
-                    {classData.schedule?.days || 'Chưa có lịch học'} -{' '}
-                    {classData.schedule?.time || ''}
+                    {classData.schedules && classData.schedules.length > 0
+                      ? classData.schedules.map((s) => s.weekday).join(', ')
+                      : 'Chưa có lịch học'}{' '}
+                    -{' '}
+                    {classData.schedules && classData.schedules.length > 0
+                      ? classData.schedules[0].start_time
+                      : ''}
                   </p>
                 </div>
 

@@ -8,35 +8,29 @@ import {
   Plus,
   Eye,
   GraduationCap,
-  Filter,
   Mail,
   Phone,
-  BookOpen,
-  Calendar,
   Users,
   Award,
 } from 'lucide-react';
-import { Teacher } from '../../../types';
-import CreateTeacherModal, {
-  TeacherFormData,
-} from './_components/create-teacher';
+import {
+  TeacherCreate,
+  TeacherResponse,
+  TeacherUpdate,
+} from '../../../types/admin';
+import CreateTeacherModal from './_components/create-teacher';
 import ViewTeacherModal from './_components/view-teacher';
-import EditTeacherModal, {
-  TeacherFormData as EditTeacherFormData,
-} from './_components/edit-teacher';
+import EditTeacherModal from './_components/edit-teacher';
 import { useTeacherApi } from '../_hooks';
-import { UpdateTeacherData } from '../_hooks/use-teacher';
-import Image from 'next/image';
 
 const TeacherManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [subjectFilter, setSubjectFilter] = useState('All Subjects');
-  const [statusFilter, setStatusFilter] = useState('All Status');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [selectedTeacher, setSelectedTeacher] =
+    useState<TeacherResponse | null>(null);
+  const [teachers, setTeachers] = useState<TeacherResponse[]>([]);
 
   const { createTeacher, updateTeacher, deleteTeacher, getTeachers } =
     useTeacherApi();
@@ -57,20 +51,13 @@ const TeacherManagement = () => {
   };
 
   // Use teachers data from API
-  const teachersList = teachers.map((teacher: Teacher) => ({
+  const teachersList = teachers.map((teacher: TeacherResponse) => ({
     id: teacher.id,
     name: teacher.name,
     specialization: teacher.specialization,
     email: teacher.email,
-    phone: teacher.phone,
-    assignedClasses: teacher.assignedClasses || [],
-    status:
-      teacher.status === 'active'
-        ? 'Hoạt động'
-        : teacher.status === 'inactive'
-        ? 'Không hoạt động'
-        : 'Nghỉ phép',
-    avatar: teacher.avatar,
+    phone: teacher.phone_number,
+    assignedClasses: teacher.taught_classes || [],
   }));
 
   const getStatusBadgeColor = (status: string) => {
@@ -90,12 +77,10 @@ const TeacherManagement = () => {
     const matchesSearch =
       teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       teacher.specialization.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === 'All Status' || teacher.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
-  const handleCreateTeacher = async (teacherData: TeacherFormData) => {
+  const handleCreateTeacher = async (teacherData: TeacherCreate) => {
     try {
       await createTeacher(teacherData);
       setIsCreateModalOpen(false);
@@ -107,21 +92,21 @@ const TeacherManagement = () => {
     }
   };
 
-  const handleViewTeacher = (teacher: Teacher) => {
+  const handleViewTeacher = (teacher: TeacherResponse) => {
     setSelectedTeacher(teacher);
     setIsViewModalOpen(true);
   };
 
-  const handleEditTeacher = (teacher: Teacher) => {
+  const handleEditTeacher = (teacher: TeacherResponse) => {
     setSelectedTeacher(teacher);
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateTeacher = async (teacherData: EditTeacherFormData) => {
+  const handleUpdateTeacher = async (teacherData: TeacherUpdate) => {
     if (!selectedTeacher) return;
 
     try {
-      await updateTeacher(selectedTeacher.id, teacherData as UpdateTeacherData);
+      await updateTeacher(selectedTeacher.id, teacherData);
       setIsEditModalOpen(false);
       setSelectedTeacher(null);
       await fetchTeachers(); // Refresh the list
@@ -185,41 +170,11 @@ const TeacherManagement = () => {
             <div className='flex items-center justify-between'>
               <div>
                 <p className='text-gray-500 text-sm font-medium'>
-                  Đang giảng dạy
-                </p>
-                <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {teachers.filter((t) => t.status === 'active').length}
-                </p>
-              </div>
-              <div className='w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center'>
-                <BookOpen className='w-6 h-6 text-blue-600' />
-              </div>
-            </div>
-          </div>
-
-          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
-            <div className='flex items-center justify-between'>
-              <div>
-                <p className='text-gray-500 text-sm font-medium'>Nghỉ phép</p>
-                <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {teachers.filter((t) => t.status === 'inactive').length}
-                </p>
-              </div>
-              <div className='w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center'>
-                <Calendar className='w-6 h-6 text-yellow-600' />
-              </div>
-            </div>
-          </div>
-
-          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
-            <div className='flex items-center justify-between'>
-              <div>
-                <p className='text-gray-500 text-sm font-medium'>
                   Lớp đang dạy
                 </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
                   {teachers.reduce(
-                    (total, t) => total + (t.assignedClasses?.length || 0),
+                    (total, t) => total + (t.taught_classes?.length || 0),
                     0
                   )}
                 </p>
@@ -248,37 +203,6 @@ const TeacherManagement = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
             />
-          </div>
-
-          {/* Subject Filter */}
-          <div className='relative'>
-            <select
-              value={subjectFilter}
-              onChange={(e) => setSubjectFilter(e.target.value)}
-              className='px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent min-w-[150px] appearance-none bg-white'
-            >
-              <option>Tất cả môn học</option>
-              <option>Ngữ pháp</option>
-              <option>Hội thoại</option>
-              <option>IELTS</option>
-              <option>Tiếng Anh thương mại</option>
-            </select>
-            <Filter className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none' />
-          </div>
-
-          {/* Status Filter */}
-          <div className='relative'>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className='px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent min-w-[140px] appearance-none bg-white'
-            >
-              <option>Tất cả trạng thái</option>
-              <option>Hoạt động</option>
-              <option>Nghỉ phép</option>
-              <option>Không hoạt động</option>
-            </select>
-            <Filter className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none' />
           </div>
 
           {/* Add Teacher Button */}
@@ -311,9 +235,6 @@ const TeacherManagement = () => {
                   Lớp đang dạy
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
-                  Trạng thái
-                </th>
-                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                   Thao tác
                 </th>
               </tr>
@@ -327,9 +248,11 @@ const TeacherManagement = () => {
                   <td className='px-6 py-4 whitespace-nowrap'>
                     <div className='flex items-center'>
                       <div className='h-12 w-12 flex-shrink-0'>
-                        <Image
+                        <img
                           className='h-12 w-12 rounded-full object-cover ring-2 ring-gray-100'
-                          src={teacher.avatar}
+                          src={
+                            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+                          }
                           alt={teacher.name}
                         />
                       </div>
@@ -373,15 +296,6 @@ const TeacherManagement = () => {
                         <span className='text-gray-500'>Chưa phân lớp</span>
                       )}
                     </div>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <span
-                      className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getStatusBadgeColor(
-                        teacher.status
-                      )}`}
-                    >
-                      {teacher.status}
-                    </span>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                     <div className='flex items-center space-x-2'>
@@ -430,11 +344,11 @@ const TeacherManagement = () => {
               Không tìm thấy giáo viên
             </h3>
             <p className='text-gray-500 mb-6'>
-              {searchTerm || statusFilter !== 'All Status'
+              {searchTerm
                 ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm'
                 : 'Bắt đầu bằng cách thêm giáo viên mới'}
             </p>
-            {!searchTerm && statusFilter === 'All Status' && (
+            {!searchTerm && (
               <button
                 onClick={() => setIsCreateModalOpen(true)}
                 className='px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors'

@@ -31,7 +31,7 @@ export default function TeachingScheduleModal({
       const fetchTeacherSchedule = async () => {
         try {
           const scheduleData = await getTeacherSchedule(teacherId);
-          setSchedule(scheduleData);
+          setSchedule(scheduleData.schedule || []);
         } catch (error) {
           console.error('Error fetching teacher schedule:', error);
         }

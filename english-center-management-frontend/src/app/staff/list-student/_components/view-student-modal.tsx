@@ -15,14 +15,14 @@ import {
   DollarSign,
   TrendingUp,
 } from 'lucide-react';
-import { StudentProfile } from '../../../../types';
+import { StudentResponse } from '../../../../types/staff';
 import { useStaffStudentApi } from '../../_hooks';
 import Image from 'next/image';
 
 interface ViewStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  student: StudentProfile | null;
+  student: StudentResponse | null;
 }
 
 export default function ViewStudentModal({
@@ -190,44 +190,30 @@ export default function ViewStudentModal({
       {/* Student Header */}
       <div className='flex items-start space-x-6 mb-8'>
         <div className='flex-shrink-0'>
-          {student.avatar ? (
-            <Image
-              src={student.avatar}
-              alt={student.name}
-              className='w-24 h-24 rounded-full object-cover border-4 border-gray-200'
-            />
-          ) : (
-            <div className='w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold text-xl'>
-              {getInitials(student.name)}
-            </div>
-          )}
+          <div className='w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold text-xl'>
+            {getInitials(student.name)}
+          </div>
         </div>
         <div className='flex-1'>
           <h3 className='text-2xl font-bold text-gray-900 mb-2'>
             {student.name}
           </h3>
-          <p className='text-gray-600 mb-4'>Mã học viên: {student.studentId}</p>
 
           <div className='flex flex-wrap gap-3'>
             <span
               className={`px-3 py-1 text-sm font-medium rounded-full ${getLevelColor(
-                student.level
+                student.input_level
               )}`}
             >
-              {getLevelLabel(student.level)}
+              {getLevelLabel(student.input_level)}
             </span>
             <span
               className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(
-                student.enrollmentStatus
+                student.status
               )}`}
             >
-              {getStatusLabel(student.enrollmentStatus)}
+              {getStatusLabel(student.status)}
             </span>
-            {student.streak && (
-              <span className='px-3 py-1 text-sm font-medium rounded-full bg-orange-100 text-orange-800'>
-                🔥 {student.streak} ngày liên tiếp
-              </span>
-            )}
           </div>
         </div>
       </div>
@@ -244,16 +230,16 @@ export default function ViewStudentModal({
               <Mail className='w-4 h-4 text-gray-500 mr-3' />
               <span className='text-gray-700'>{student.email}</span>
             </div>
-            {student.phone && (
+            {student.phone_number && (
               <div className='flex items-center'>
                 <Phone className='w-4 h-4 text-gray-500 mr-3' />
-                <span className='text-gray-700'>{student.phone}</span>
+                <span className='text-gray-700'>{student.phone_number}</span>
               </div>
             )}
-            {student.address && (
+            {student.bio && (
               <div className='flex items-start'>
                 <MapPin className='w-4 h-4 text-gray-500 mr-3 mt-0.5' />
-                <span className='text-gray-700'>{student.address}</span>
+                <span className='text-gray-700'>{student.bio}</span>
               </div>
             )}
           </div>
@@ -265,18 +251,18 @@ export default function ViewStudentModal({
             Thông tin cá nhân
           </h4>
           <div className='space-y-3'>
-            {student.dateOfBirth && (
+            {student.date_of_birth && (
               <div className='flex items-center'>
                 <Calendar className='w-4 h-4 text-gray-500 mr-3' />
                 <span className='text-gray-700'>
-                  Ngày sinh: {formatDate(student.dateOfBirth)}
+                  Ngày sinh: {formatDate(student.date_of_birth)}
                 </span>
               </div>
             )}
             <div className='flex items-center'>
               <Clock className='w-4 h-4 text-gray-500 mr-3' />
               <span className='text-gray-700'>
-                Ngày nhập học: {formatDate(student.enrollmentDate)}
+                Ngày tạo: {formatDate(student.created_at)}
               </span>
             </div>
           </div>
@@ -294,9 +280,7 @@ export default function ViewStudentModal({
             <label className='block text-sm font-medium text-gray-700 mb-1'>
               Lớp hiện tại
             </label>
-            <p className='text-gray-900 font-medium'>
-              {student.currentClass || 'Chưa phân lớp'}
-            </p>
+            <p className='text-gray-900 font-medium'>{'Chưa phân lớp'}</p>
           </div>
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-1'>
@@ -304,17 +288,17 @@ export default function ViewStudentModal({
             </label>
             <span
               className={`px-2 py-1 text-sm font-medium rounded-full ${getLevelColor(
-                student.level
+                student.input_level
               )}`}
             >
-              {getLevelLabel(student.level)}
+              {getLevelLabel(student.input_level)}
             </span>
           </div>
         </div>
       </div>
 
       {/* Emergency Contact */}
-      {student.emergencyContact && (
+      {student.parent_name && (
         <div className='bg-gray-50 rounded-lg p-6'>
           <h4 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
             <Users className='w-5 h-5 mr-2 text-gray-600' />
@@ -325,21 +309,13 @@ export default function ViewStudentModal({
               <label className='block text-sm font-medium text-gray-700 mb-1'>
                 Tên
               </label>
-              <p className='text-gray-900'>{student.emergencyContact.name}</p>
+              <p className='text-gray-900'>{student.parent_name}</p>
             </div>
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-1'>
                 Số điện thoại
               </label>
-              <p className='text-gray-900'>{student.emergencyContact.phone}</p>
-            </div>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
-                Mối quan hệ
-              </label>
-              <p className='text-gray-900'>
-                {student.emergencyContact.relationship}
-              </p>
+              <p className='text-gray-900'>{student.parent_phone}</p>
             </div>
           </div>
         </div>

@@ -12,10 +12,14 @@ import {
   GraduationCap,
   UserCheck,
 } from 'lucide-react';
-import { User, UserRole, UserStatus } from '../../../types';
-import CreateUserModal, { UserFormData } from './_components/create-user';
+import {
+  UserCreate,
+  UserRole,
+  UserResponse,
+  StudentStatus,
+} from '../../../types/admin';
+import CreateUserModal from './_components/create-user';
 import { useUserApi } from '../_hooks';
-import Image from 'next/image';
 
 interface Permission {
   id: string;
@@ -25,11 +29,10 @@ interface Permission {
 
 const UserRolePermissionManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('All Roles');
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null);
   const [selectedRole, setSelectedRole] = useState('admin');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserResponse[]>([]);
 
   const { createUser, updateUser, deleteUser, getUsers, updateUserRole } =
     useUserApi();
@@ -124,23 +127,22 @@ const UserRolePermissionManagement = () => {
     const matchesSearch =
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === 'All Roles' || user.role === roleFilter;
-    return matchesSearch && matchesRole;
+    return matchesSearch;
   });
 
-  const handleUserSelect = (user: User) => {
+  const handleUserSelect = (user: UserResponse) => {
     setSelectedUser(user);
-    setSelectedRole(user.role.toLowerCase());
+    setSelectedRole(user.role_name.toLowerCase());
     // Update permissions based on user role (example logic)
     const updatedPermissions = permissions.map((perm) => {
-      if (user.role === 'admin') {
+      if (user.role_name === 'admin') {
         return { ...perm, checked: true };
-      } else if (user.role === 'teacher') {
+      } else if (user.role_name === 'teacher') {
         return {
           ...perm,
           checked: ['course-management', 'content-creation'].includes(perm.id),
         };
-      } else if (user.role === 'staff') {
+      } else if (user.role_name === 'staff') {
         return { ...perm, checked: ['user-management'].includes(perm.id) };
       } else {
         return { ...perm, checked: false };
@@ -157,7 +159,7 @@ const UserRolePermissionManagement = () => {
     );
   };
 
-  const handleCreateUser = async (userData: UserFormData) => {
+  const handleCreateUser = async (userData: UserCreate) => {
     try {
       await createUser(userData);
       setIsCreateModalOpen(false);
@@ -187,7 +189,7 @@ const UserRolePermissionManagement = () => {
 
   const handleUpdateUserStatus = async (
     userId: string,
-    newStatus: UserStatus
+    newStatus: StudentStatus
   ) => {
     try {
       await updateUser(userId, { status: newStatus });
@@ -199,9 +201,9 @@ const UserRolePermissionManagement = () => {
     }
   };
 
-  const handleUpdateUserRole = async (userId: string, newRole: string) => {
+  const handleUpdateUserRole = async (userId: string, newRole: UserRole) => {
     try {
-      await updateUserRole(userId, newRole as UserRole);
+      await updateUserRole(userId, { role_name: newRole });
       await fetchUsers(); // Refresh the list
       alert('Vai trò người dùng đã được cập nhật thành công!');
     } catch (error) {
@@ -258,7 +260,7 @@ const UserRolePermissionManagement = () => {
               <div className='ml-3'>
                 <p className='text-sm font-medium text-gray-600'>Quản trị</p>
                 <p className='text-lg font-semibold text-gray-900'>
-                  {users.filter((u) => u.role === 'admin').length}
+                  {users.filter((u) => u.role_name === 'admin').length}
                 </p>
               </div>
             </div>
@@ -271,7 +273,7 @@ const UserRolePermissionManagement = () => {
               <div className='ml-3'>
                 <p className='text-sm font-medium text-gray-600'>Giáo viên</p>
                 <p className='text-lg font-semibold text-gray-900'>
-                  {users.filter((u) => u.role === 'teacher').length}
+                  {users.filter((u) => u.role_name === 'teacher').length}
                 </p>
               </div>
             </div>
@@ -284,7 +286,7 @@ const UserRolePermissionManagement = () => {
               <div className='ml-3'>
                 <p className='text-sm font-medium text-gray-600'>Học viên</p>
                 <p className='text-lg font-semibold text-gray-900'>
-                  {users.filter((u) => u.role === 'student').length}
+                  {users.filter((u) => u.role_name === 'student').length}
                 </p>
               </div>
             </div>
@@ -314,17 +316,6 @@ const UserRolePermissionManagement = () => {
                     className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                   />
                 </div>
-                <select
-                  value={roleFilter}
-                  onChange={(e) => setRoleFilter(e.target.value)}
-                  className='px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                >
-                  <option value='All Roles'>Tất cả vai trò</option>
-                  <option value='admin'>Quản trị</option>
-                  <option value='teacher'>Giáo viên</option>
-                  <option value='staff'>Nhân viên</option>
-                  <option value='student'>Học viên</option>
-                </select>
               </div>
 
               {/* Users Table */}
@@ -359,9 +350,11 @@ const UserRolePermissionManagement = () => {
                           <td className='px-4 py-4 whitespace-nowrap'>
                             <div className='flex items-center'>
                               <div className='h-10 w-10 flex-shrink-0'>
-                                <Image
+                                <img
                                   className='h-10 w-10 rounded-full object-cover'
-                                  src={user.avatar}
+                                  src={
+                                    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+                                  }
                                   alt={user.name}
                                 />
                               </div>
@@ -378,16 +371,16 @@ const UserRolePermissionManagement = () => {
                           <td className='px-4 py-4 whitespace-nowrap'>
                             <span
                               className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(
-                                user.role
+                                user.role_name
                               )}`}
                             >
-                              {getRoleDisplayName(user.role)}
+                              {getRoleDisplayName(user.role_name)}
                             </span>
                           </td>
                           <td className='px-4 py-4 whitespace-nowrap'>
                             <span
                               className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(
-                                user.status
+                                user.status || 'active'
                               )}`}
                             >
                               {getStatusDisplayName(user.status)}
@@ -452,9 +445,11 @@ const UserRolePermissionManagement = () => {
                       Người dùng đã chọn
                     </h3>
                     <div className='flex items-center p-3 bg-gray-50 rounded-lg'>
-                      <Image
+                      <img
                         className='h-10 w-10 rounded-full object-cover'
-                        src={selectedUser.avatar}
+                        src={
+                          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+                        }
                         alt={selectedUser.name}
                       />
                       <div className='ml-3'>
@@ -517,7 +512,10 @@ const UserRolePermissionManagement = () => {
                     <button
                       onClick={() => {
                         if (selectedUser) {
-                          handleUpdateUserRole(selectedUser.id, selectedRole);
+                          handleUpdateUserRole(
+                            selectedUser.id,
+                            selectedRole as UserRole
+                          );
                         }
                       }}
                       className='w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors'
@@ -564,7 +562,7 @@ const UserRolePermissionManagement = () => {
         <CreateUserModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
-          onCreateUser={handleCreateUser}
+          onCreateUser={handleCreateUser as (userData: UserCreate) => void}
         />
       </div>
     </div>

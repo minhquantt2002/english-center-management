@@ -13,61 +13,17 @@ import {
   Users,
   UserCheck,
   UserPlus,
-  Globe,
-  Award,
   FileText,
   Lock,
   Eye,
   EyeOff,
 } from 'lucide-react';
-import { UserRole, UserStatus, CourseLevel } from '../../../../types/common';
+import { UserCreate } from '../../../../types/admin';
 
 interface CreateUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateUser: (userData: UserFormData) => void;
-}
-
-export interface UserFormData {
-  // Basic information
-  name: string;
-  email: string;
-  phone: string;
-  password: string;
-  confirmPassword: string;
-  role: UserRole;
-  status: UserStatus;
-
-  // Additional fields based on role
-  dateOfBirth?: string;
-  address?: string;
-
-  // Teacher specific
-  specialization?: string;
-  qualification?: string;
-  experience?: number;
-  hourlyRate?: number;
-  bio?: string;
-  languages?: string[];
-  certifications?: string[];
-
-  // Student specific
-  studentId?: string;
-  level?: CourseLevel;
-  enrollmentDate?: string;
-  parentContact?: string;
-  notes?: string;
-  currentClass?: string;
-  emergencyContact?: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
-
-  // Admin/Staff specific
-  employeeId?: string;
-  department?: string;
-  position?: string;
+  onCreateUser: (userData: UserCreate) => void;
 }
 
 const userRoles = [
@@ -158,41 +114,27 @@ export default function CreateUserModal({
   onClose,
   onCreateUser,
 }: CreateUserModalProps) {
-  const [formData, setFormData] = useState<UserFormData>({
+  const [formData, setFormData] = useState<UserCreate>({
     name: '',
     email: '',
-    phone: '',
+    phone_number: '',
     password: '',
-    confirmPassword: '',
-    role: 'student',
+    role_name: 'student',
     status: 'active',
-    dateOfBirth: '',
+    date_of_birth: '',
     address: '',
     specialization: 'general-english',
-    qualification: 'bachelor',
-    experience: 0,
-    hourlyRate: 0,
+    education: 'bachelor',
+    experience_years: 0,
     bio: '',
-    languages: ['Tiếng Anh'],
-    certifications: [],
-    studentId: '',
+    input_level: 'beginner',
     level: 'beginner',
-    enrollmentDate: new Date().toISOString().split('T')[0],
-    parentContact: '',
-    notes: '',
-    currentClass: '',
-    emergencyContact: {
-      name: '',
-      phone: '',
-      relationship: '',
-    },
-    employeeId: '',
-    department: 'Quản lý',
-    position: '',
+    parent_name: '',
+    parent_phone: '',
   });
 
   const [errors, setErrors] = useState<
-    Partial<Record<keyof UserFormData, string>>
+    Partial<Record<keyof UserCreate, string>>
   >({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -213,10 +155,12 @@ export default function CreateUserModal({
       newErrors.email = 'Email không hợp lệ';
     }
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Số điện thoại là bắt buộc';
-    } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
+    if (!formData.phone_number.trim()) {
+      newErrors.phone_number = 'Số điện thoại là bắt buộc';
+    } else if (
+      !/^[0-9]{10,11}$/.test(formData.phone_number.replace(/\s/g, ''))
+    ) {
+      newErrors.phone_number = 'Số điện thoại không hợp lệ';
     }
 
     if (!formData.password) {
@@ -225,31 +169,25 @@ export default function CreateUserModal({
       newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
     }
 
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Xác nhận mật khẩu là bắt buộc';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Mật khẩu không khớp';
-    }
-
     // Role-specific validation
-    if (formData.role === 'teacher') {
+    if (formData.role_name === 'teacher') {
       if (!formData.specialization) {
         newErrors.specialization = 'Chuyên môn là bắt buộc';
       }
-      if (!formData.qualification) {
-        newErrors.qualification = 'Bằng cấp là bắt buộc';
+      if (!formData.education) {
+        newErrors.education = 'Bằng cấp là bắt buộc';
       }
-      if (formData.hourlyRate && formData.hourlyRate <= 0) {
-        newErrors.hourlyRate = 'Mức lương theo giờ phải lớn hơn 0';
+      if (formData.experience_years && formData.experience_years <= 0) {
+        newErrors.experience_years = 'Kinh nghiệm là bắt buộc';
       }
     }
 
-    if (formData.role === 'student') {
+    if (formData.role_name === 'student') {
       if (!formData.level) {
         newErrors.level = 'Trình độ là bắt buộc';
       }
-      if (!formData.enrollmentDate) {
-        newErrors.enrollmentDate = 'Ngày đăng ký là bắt buộc';
+      if (!formData.input_level) {
+        newErrors.input_level = 'Trình độ là bắt buộc';
       }
     }
 
@@ -270,34 +208,20 @@ export default function CreateUserModal({
     setFormData({
       name: '',
       email: '',
-      phone: '',
+      phone_number: '',
       password: '',
-      confirmPassword: '',
-      role: 'student',
+      role_name: 'student',
       status: 'active',
-      dateOfBirth: '',
+      date_of_birth: '',
       address: '',
       specialization: 'general-english',
-      qualification: 'bachelor',
-      experience: 0,
-      hourlyRate: 0,
+      education: 'bachelor',
+      experience_years: 0,
       bio: '',
-      languages: ['Tiếng Anh'],
-      certifications: [],
-      studentId: '',
+      input_level: 'beginner',
       level: 'beginner',
-      enrollmentDate: new Date().toISOString().split('T')[0],
-      parentContact: '',
-      notes: '',
-      currentClass: '',
-      emergencyContact: {
-        name: '',
-        phone: '',
-        relationship: '',
-      },
-      employeeId: '',
-      department: 'Quản lý',
-      position: '',
+      parent_name: '',
+      parent_phone: '',
     });
     setErrors({});
     setShowPassword(false);
@@ -307,7 +231,7 @@ export default function CreateUserModal({
     onClose();
   };
 
-  const handleInputChange = (field: keyof UserFormData, value: any) => {
+  const handleInputChange = (field: keyof UserCreate, value: any) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -320,50 +244,6 @@ export default function CreateUserModal({
         [field]: undefined,
       }));
     }
-  };
-
-  const addLanguage = () => {
-    if (
-      newLanguage.trim() &&
-      !formData.languages?.includes(newLanguage.trim())
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        languages: [...(prev.languages || []), newLanguage.trim()],
-      }));
-      setNewLanguage('');
-    }
-  };
-
-  const removeLanguage = (language: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      languages: prev.languages?.filter((lang) => lang !== language) || [],
-    }));
-  };
-
-  const addCertification = () => {
-    if (
-      newCertification.trim() &&
-      !formData.certifications?.includes(newCertification.trim())
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        certifications: [
-          ...(prev.certifications || []),
-          newCertification.trim(),
-        ],
-      }));
-      setNewCertification('');
-    }
-  };
-
-  const removeCertification = (certification: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      certifications:
-        prev.certifications?.filter((cert) => cert !== certification) || [],
-    }));
   };
 
   if (!isOpen) return null;
@@ -400,9 +280,9 @@ export default function CreateUserModal({
                   <button
                     key={role.value}
                     type='button'
-                    onClick={() => handleInputChange('role', role.value)}
+                    onClick={() => handleInputChange('role_name', role.value)}
                     className={`p-4 border-2 rounded-lg transition-all ${
-                      formData.role === role.value
+                      formData.role_name === role.value
                         ? 'border-blue-500 bg-blue-50 text-blue-700'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
@@ -467,15 +347,19 @@ export default function CreateUserModal({
                 </label>
                 <input
                   type='tel'
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  value={formData.phone_number}
+                  onChange={(e) =>
+                    handleInputChange('phone_number', e.target.value)
+                  }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.phone ? 'border-red-500' : 'border-gray-300'
+                    errors.phone_number ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder='0123456789'
                 />
-                {errors.phone && (
-                  <p className='text-red-500 text-sm mt-1'>{errors.phone}</p>
+                {errors.phone_number && (
+                  <p className='text-red-500 text-sm mt-1'>
+                    {errors.phone_number}
+                  </p>
                 )}
               </div>
 
@@ -538,14 +422,12 @@ export default function CreateUserModal({
                 <div className='relative'>
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
-                    value={formData.confirmPassword}
+                    value={formData.password}
                     onChange={(e) =>
-                      handleInputChange('confirmPassword', e.target.value)
+                      handleInputChange('password', e.target.value)
                     }
                     className={`w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.confirmPassword
-                        ? 'border-red-500'
-                        : 'border-gray-300'
+                      errors.password ? 'border-red-500' : 'border-gray-300'
                     }`}
                     placeholder='Nhập lại mật khẩu'
                   />
@@ -561,10 +443,8 @@ export default function CreateUserModal({
                     )}
                   </button>
                 </div>
-                {errors.confirmPassword && (
-                  <p className='text-red-500 text-sm mt-1'>
-                    {errors.confirmPassword}
-                  </p>
+                {errors.password && (
+                  <p className='text-red-500 text-sm mt-1'>{errors.password}</p>
                 )}
               </div>
 
@@ -575,9 +455,9 @@ export default function CreateUserModal({
                 </label>
                 <input
                   type='date'
-                  value={formData.dateOfBirth}
+                  value={formData.date_of_birth}
                   onChange={(e) =>
-                    handleInputChange('dateOfBirth', e.target.value)
+                    handleInputChange('date_of_birth', e.target.value)
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
@@ -600,7 +480,7 @@ export default function CreateUserModal({
           </div>
 
           {/* Teacher Specific Fields */}
-          {formData.role === 'teacher' && (
+          {formData.role_name === 'teacher' && (
             <div>
               <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
                 <GraduationCap className='w-5 h-5 text-orange-600' />
@@ -641,14 +521,12 @@ export default function CreateUserModal({
                     Bằng cấp <span className='text-red-500'>*</span>
                   </label>
                   <select
-                    value={formData.qualification}
+                    value={formData.education}
                     onChange={(e) =>
-                      handleInputChange('qualification', e.target.value)
+                      handleInputChange('education', e.target.value)
                     }
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                      errors.qualification
-                        ? 'border-red-500'
-                        : 'border-gray-300'
+                      errors.education ? 'border-red-500' : 'border-gray-300'
                     }`}
                   >
                     {qualifications.map((qual) => (
@@ -657,9 +535,9 @@ export default function CreateUserModal({
                       </option>
                     ))}
                   </select>
-                  {errors.qualification && (
+                  {errors.education && (
                     <p className='text-red-500 text-sm mt-1'>
-                      {errors.qualification}
+                      {errors.education}
                     </p>
                   )}
                 </div>
@@ -669,9 +547,12 @@ export default function CreateUserModal({
                     Kinh nghiệm giảng dạy
                   </label>
                   <select
-                    value={formData.experience}
+                    value={formData.experience_years}
                     onChange={(e) =>
-                      handleInputChange('experience', Number(e.target.value))
+                      handleInputChange(
+                        'experience_years',
+                        Number(e.target.value)
+                      )
                     }
                     className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent'
                   >
@@ -689,119 +570,26 @@ export default function CreateUserModal({
                   </label>
                   <input
                     type='number'
-                    value={formData.hourlyRate}
+                    value={formData.experience_years}
                     onChange={(e) =>
-                      handleInputChange('hourlyRate', Number(e.target.value))
+                      handleInputChange(
+                        'experience_years',
+                        Number(e.target.value)
+                      )
                     }
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                      errors.hourlyRate ? 'border-red-500' : 'border-gray-300'
+                      errors.experience_years
+                        ? 'border-red-500'
+                        : 'border-gray-300'
                     }`}
                     placeholder='200000'
                     min='0'
                   />
-                  {errors.hourlyRate && (
+                  {errors.experience_years && (
                     <p className='text-red-500 text-sm mt-1'>
-                      {errors.hourlyRate}
+                      {errors.experience_years}
                     </p>
                   )}
-                </div>
-              </div>
-
-              {/* Languages */}
-              <div className='mt-4'>
-                <h4 className='text-md font-medium text-gray-900 mb-3 flex items-center gap-2'>
-                  <Globe className='w-4 h-4 text-orange-600' />
-                  Ngôn ngữ
-                </h4>
-                <div className='space-y-3'>
-                  <div className='flex gap-2'>
-                    <select
-                      value={newLanguage}
-                      onChange={(e) => setNewLanguage(e.target.value)}
-                      className='flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent'
-                    >
-                      <option value=''>Chọn ngôn ngữ</option>
-                      {commonLanguages.map((lang) => (
-                        <option key={lang} value={lang}>
-                          {lang}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type='button'
-                      onClick={addLanguage}
-                      className='px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors'
-                    >
-                      Thêm
-                    </button>
-                  </div>
-
-                  {formData.languages && formData.languages.length > 0 && (
-                    <div className='flex flex-wrap gap-2'>
-                      {formData.languages.map((language) => (
-                        <span
-                          key={language}
-                          className='inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm'
-                        >
-                          {language}
-                          <button
-                            type='button'
-                            onClick={() => removeLanguage(language)}
-                            className='hover:text-orange-600'
-                          >
-                            <X className='w-3 h-3' />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Certifications */}
-              <div className='mt-4'>
-                <h4 className='text-md font-medium text-gray-900 mb-3 flex items-center gap-2'>
-                  <Award className='w-4 h-4 text-orange-600' />
-                  Chứng chỉ
-                </h4>
-                <div className='space-y-3'>
-                  <div className='flex gap-2'>
-                    <input
-                      type='text'
-                      value={newCertification}
-                      onChange={(e) => setNewCertification(e.target.value)}
-                      className='flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent'
-                      placeholder='Nhập tên chứng chỉ'
-                    />
-                    <button
-                      type='button'
-                      onClick={addCertification}
-                      className='px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors'
-                    >
-                      Thêm
-                    </button>
-                  </div>
-
-                  {formData.certifications &&
-                    formData.certifications.length > 0 && (
-                      <div className='flex flex-wrap gap-2'>
-                        {formData.certifications.map((certification) => (
-                          <span
-                            key={certification}
-                            className='inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm'
-                          >
-                            {certification}
-                            <button
-                              type='button'
-                              onClick={() => removeCertification(certification)}
-                              className='hover:text-blue-600'
-                            >
-                              <X className='w-3 h-3' />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
                 </div>
               </div>
 
@@ -818,244 +606,6 @@ export default function CreateUserModal({
                   rows={3}
                   placeholder='Giới thiệu về bản thân, phương pháp giảng dạy, kinh nghiệm...'
                 />
-              </div>
-            </div>
-          )}
-
-          {/* Student Specific Fields */}
-          {formData.role === 'student' && (
-            <div>
-              <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
-                <UserCheck className='w-5 h-5 text-purple-600' />
-                Thông tin học viên
-              </h3>
-
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div>
-                  <label className='text-sm font-medium text-gray-700 mb-2'>
-                    Mã học viên
-                  </label>
-                  <input
-                    type='text'
-                    value={formData.studentId}
-                    onChange={(e) =>
-                      handleInputChange('studentId', e.target.value)
-                    }
-                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent'
-                    placeholder='STU-2024-001'
-                  />
-                </div>
-
-                <div>
-                  <label className='text-sm font-medium text-gray-700 mb-2'>
-                    Trình độ <span className='text-red-500'>*</span>
-                  </label>
-                  <select
-                    value={formData.level}
-                    onChange={(e) => handleInputChange('level', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                      errors.level ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  >
-                    {courseLevels.map((level) => (
-                      <option key={level.value} value={level.value}>
-                        {level.label}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.level && (
-                    <p className='text-red-500 text-sm mt-1'>{errors.level}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className='text-sm font-medium text-gray-700 mb-2'>
-                    Ngày đăng ký <span className='text-red-500'>*</span>
-                  </label>
-                  <input
-                    type='date'
-                    value={formData.enrollmentDate}
-                    onChange={(e) =>
-                      handleInputChange('enrollmentDate', e.target.value)
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                      errors.enrollmentDate
-                        ? 'border-red-500'
-                        : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.enrollmentDate && (
-                    <p className='text-red-500 text-sm mt-1'>
-                      {errors.enrollmentDate}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className='text-sm font-medium text-gray-700 mb-2'>
-                    Liên hệ phụ huynh
-                  </label>
-                  <input
-                    type='tel'
-                    value={formData.parentContact}
-                    onChange={(e) =>
-                      handleInputChange('parentContact', e.target.value)
-                    }
-                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent'
-                    placeholder='0123456789'
-                  />
-                </div>
-
-                <div>
-                  <label className='text-sm font-medium text-gray-700 mb-2'>
-                    Lớp hiện tại
-                  </label>
-                  <input
-                    type='text'
-                    value={formData.currentClass}
-                    onChange={(e) =>
-                      handleInputChange('currentClass', e.target.value)
-                    }
-                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent'
-                    placeholder='Lớp A1'
-                  />
-                </div>
-              </div>
-
-              {/* Emergency Contact */}
-              <div className='mt-4'>
-                <h4 className='text-md font-medium text-gray-900 mb-3 flex items-center gap-2'>
-                  <Phone className='w-4 h-4 text-purple-600' />
-                  Liên hệ khẩn cấp
-                </h4>
-                <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                  <div>
-                    <label className='text-sm font-medium text-gray-700 mb-2'>
-                      Họ tên
-                    </label>
-                    <input
-                      type='text'
-                      value={formData.emergencyContact?.name}
-                      onChange={(e) =>
-                        handleInputChange('emergencyContact', {
-                          ...formData.emergencyContact,
-                          name: e.target.value,
-                        })
-                      }
-                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent'
-                      placeholder='Họ tên người liên hệ'
-                    />
-                  </div>
-                  <div>
-                    <label className='text-sm font-medium text-gray-700 mb-2'>
-                      Số điện thoại
-                    </label>
-                    <input
-                      type='tel'
-                      value={formData.emergencyContact?.phone}
-                      onChange={(e) =>
-                        handleInputChange('emergencyContact', {
-                          ...formData.emergencyContact,
-                          phone: e.target.value,
-                        })
-                      }
-                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent'
-                      placeholder='0123456789'
-                    />
-                  </div>
-                  <div>
-                    <label className='text-sm font-medium text-gray-700 mb-2'>
-                      Mối quan hệ
-                    </label>
-                    <input
-                      type='text'
-                      value={formData.emergencyContact?.relationship}
-                      onChange={(e) =>
-                        handleInputChange('emergencyContact', {
-                          ...formData.emergencyContact,
-                          relationship: e.target.value,
-                        })
-                      }
-                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent'
-                      placeholder='Cha, mẹ, anh, chị...'
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Notes */}
-              <div className='mt-4'>
-                <label className='text-sm font-medium text-gray-700 mb-2'>
-                  Ghi chú
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) => handleInputChange('notes', e.target.value)}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent'
-                  rows={3}
-                  placeholder='Ghi chú về học viên...'
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Admin/Staff Specific Fields */}
-          {(formData.role === 'admin' || formData.role === 'staff') && (
-            <div>
-              <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
-                <Shield className='w-5 h-5 text-green-600' />
-                Thông tin nhân viên
-              </h3>
-
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div>
-                  <label className='text-sm font-medium text-gray-700 mb-2'>
-                    Mã nhân viên
-                  </label>
-                  <input
-                    type='text'
-                    value={formData.employeeId}
-                    onChange={(e) =>
-                      handleInputChange('employeeId', e.target.value)
-                    }
-                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent'
-                    placeholder='EMP-2024-001'
-                  />
-                </div>
-
-                <div>
-                  <label className='text-sm font-medium text-gray-700 mb-2'>
-                    Phòng ban
-                  </label>
-                  <select
-                    value={formData.department}
-                    onChange={(e) =>
-                      handleInputChange('department', e.target.value)
-                    }
-                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent'
-                  >
-                    {departments.map((dept) => (
-                      <option key={dept} value={dept}>
-                        {dept}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className='text-sm font-medium text-gray-700 mb-2'>
-                    Chức vụ
-                  </label>
-                  <input
-                    type='text'
-                    value={formData.position}
-                    onChange={(e) =>
-                      handleInputChange('position', e.target.value)
-                    }
-                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent'
-                    placeholder='Nhân viên, Trưởng phòng, Giám đốc...'
-                  />
-                </div>
               </div>
             </div>
           )}

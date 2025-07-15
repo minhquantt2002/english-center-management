@@ -109,7 +109,7 @@ async def get_current_user_info(
         )
     
     return UserResponse(
-        id=user.id,
+        id=str(user.id),
         name=user.name,
         email=user.email,
         role_name=user.role_name,
@@ -157,7 +157,7 @@ async def update_current_user_info(
         )
     
     return UserResponse(
-        id=updated_user.id,
+        id=str(updated_user.id),
         name=updated_user.name,
         email=updated_user.email,
         role_name=updated_user.role_name,

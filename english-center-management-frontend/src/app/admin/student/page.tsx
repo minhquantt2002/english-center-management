@@ -10,26 +10,23 @@ import {
   Phone,
   Eye,
   Users,
-  Filter,
   Calendar,
   BookOpen,
 } from 'lucide-react';
-import { Student, StudentProfile } from '../../../types';
+import { StudentResponse, StudentCreate } from '../../../types/admin';
 import ViewStudentModal from './_components/view-student';
 import EditStudentModal from './_components/edit-student';
 import CreateStudentModal from './_components/create-student';
 import { useStudentApi } from '../_hooks';
-import Image from 'next/image';
 
 const StudentManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [levelFilter, setLevelFilter] = useState('All Levels');
-  const [statusFilter, setStatusFilter] = useState('All Status');
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [selectedStudent, setSelectedStudent] =
+    useState<StudentResponse | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [students, setStudents] = useState<Student[]>([]);
+  const [students, setStudents] = useState<StudentResponse[]>([]);
 
   const { createStudent, updateStudent, deleteStudent, getStudents } =
     useStudentApi();
@@ -73,20 +70,14 @@ const StudentManagement = () => {
     }
   };
 
-  const filteredStudents = students.filter((student: Student) => {
+  const filteredStudents = students.filter((student: StudentResponse) => {
     const matchesSearch =
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLevel =
-      levelFilter === 'All Levels' ||
-      student.level === levelFilter.toLowerCase();
-    const matchesStatus =
-      statusFilter === 'All Status' ||
-      (student.status || 'active') === statusFilter.toLowerCase();
-    return matchesSearch && matchesLevel && matchesStatus;
+    return matchesSearch;
   });
 
-  const handleViewStudent = (student: Student) => {
+  const handleViewStudent = (student: StudentResponse) => {
     setSelectedStudent(student);
     setIsViewModalOpen(true);
   };
@@ -96,7 +87,7 @@ const StudentManagement = () => {
     setSelectedStudent(null);
   };
 
-  const handleEditStudent = (student: Student) => {
+  const handleEditStudent = (student: StudentResponse) => {
     setSelectedStudent(student);
     setIsEditModalOpen(true);
   };
@@ -106,7 +97,7 @@ const StudentManagement = () => {
     setSelectedStudent(null);
   };
 
-  const handleSaveStudent = async (updatedStudent: Student) => {
+  const handleSaveStudent = async (updatedStudent: StudentResponse) => {
     try {
       await updateStudent(updatedStudent.id, updatedStudent);
       setIsEditModalOpen(false);
@@ -120,7 +111,7 @@ const StudentManagement = () => {
   };
 
   const handleCreateStudent = async (
-    newStudent: Omit<StudentProfile, 'id' | 'createdAt' | 'updatedAt'>
+    newStudent: Omit<StudentCreate, 'id' | 'createdAt' | 'updatedAt'>
   ) => {
     try {
       await createStudent(newStudent);
@@ -244,35 +235,6 @@ const StudentManagement = () => {
             />
           </div>
 
-          {/* Level Filter */}
-          <div className='relative'>
-            <select
-              value={levelFilter}
-              onChange={(e) => setLevelFilter(e.target.value)}
-              className='px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[150px] appearance-none bg-white'
-            >
-              <option>Tất cả trình độ</option>
-              <option>Sơ cấp</option>
-              <option>Trung cấp</option>
-              <option>Cao cấp</option>
-            </select>
-            <Filter className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none' />
-          </div>
-
-          {/* Status Filter */}
-          <div className='relative'>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className='px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px] appearance-none bg-white'
-            >
-              <option>Tất cả trạng thái</option>
-              <option>Đang học</option>
-              <option>Tạm nghỉ</option>
-            </select>
-            <Filter className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none' />
-          </div>
-
           {/* Create Student Button */}
           <button
             onClick={() => setIsCreateModalOpen(true)}
@@ -311,7 +273,7 @@ const StudentManagement = () => {
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-100'>
-              {filteredStudents.map((student: Student) => (
+              {filteredStudents.map((student: StudentResponse) => (
                 <tr
                   key={student.id}
                   className='hover:bg-gray-50 transition-colors'
@@ -319,11 +281,10 @@ const StudentManagement = () => {
                   <td className='px-6 py-4 whitespace-nowrap'>
                     <div className='flex items-center'>
                       <div className='h-12 w-12 flex-shrink-0'>
-                        <Image
+                        <img
                           className='h-12 w-12 rounded-full object-cover ring-2 ring-gray-100'
                           src={
-                            student.avatar ||
-                            'https://images.unsplash.com/photo-1494790108755-2616b612b3fd?w=150&h=150&fit=crop&crop=face'
+                            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
                           }
                           alt={student.name}
                         />
@@ -331,9 +292,6 @@ const StudentManagement = () => {
                       <div className='ml-4'>
                         <div className='text-sm font-semibold text-gray-900'>
                           {student.name}
-                        </div>
-                        <div className='text-sm text-gray-500'>
-                          Mã số: {student.studentId}
                         </div>
                       </div>
                     </div>
@@ -346,25 +304,27 @@ const StudentManagement = () => {
                       </div>
                       <div className='flex items-center text-sm text-gray-500'>
                         <Phone className='w-4 h-4 text-gray-400 mr-2' />
-                        {student.phone || 'Chưa cập nhật'}
+                        {student.phone_number || 'Chưa cập nhật'}
                       </div>
                     </div>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap'>
                     <span
                       className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getLevelBadgeColor(
-                        student.level
+                        student.input_level
                       )}`}
                     >
-                      {student.level === 'beginner'
+                      {student.input_level === 'beginner'
                         ? 'Sơ cấp'
-                        : student.level === 'intermediate'
+                        : student.input_level === 'intermediate'
                         ? 'Trung cấp'
                         : 'Cao cấp'}
                     </span>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                    {student.currentClass || 'Chưa phân lớp'}
+                    {student.enrollments.length > 0
+                      ? student.enrollments.length
+                      : 'Chưa phân lớp'}
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap'>
                     <span
@@ -414,22 +374,18 @@ const StudentManagement = () => {
               Không tìm thấy học viên
             </h3>
             <p className='text-gray-500 mb-6'>
-              {searchTerm ||
-              levelFilter !== 'All Levels' ||
-              statusFilter !== 'All Status'
+              {searchTerm
                 ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm'
                 : 'Bắt đầu bằng cách thêm học viên mới'}
             </p>
-            {!searchTerm &&
-              levelFilter === 'All Levels' &&
-              statusFilter === 'All Status' && (
-                <button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className='px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
-                >
-                  Thêm học viên đầu tiên
-                </button>
-              )}
+            {!searchTerm && (
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className='px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+              >
+                Thêm học viên đầu tiên
+              </button>
+            )}
           </div>
         )}
       </div>

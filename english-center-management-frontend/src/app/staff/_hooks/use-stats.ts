@@ -1,17 +1,17 @@
 import { useState, useCallback } from 'react';
 import { api } from '../../../lib/api';
-import { StaffStats, Room } from '../../../types/staff';
+import { StaffStats, RoomsResponse } from '../../../types/staff';
 
 export const useStaffStatsApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getStaffStats = useCallback(async (): Promise<StaffStats> => {
+  const getStats = useCallback(async (): Promise<StaffStats> => {
     setLoading(true);
     setError(null);
     try {
       const response = await api.get('/staff/stats');
-      return response;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
       setError(errorMessage);
@@ -21,12 +21,12 @@ export const useStaffStatsApi = () => {
     }
   }, []);
 
-  const getRooms = useCallback(async (): Promise<Room[]> => {
+  const getRooms = useCallback(async (): Promise<RoomsResponse> => {
     setLoading(true);
     setError(null);
     try {
       const response = await api.get('/staff/rooms');
-      return response;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
       setError(errorMessage);
@@ -39,7 +39,7 @@ export const useStaffStatsApi = () => {
   return {
     loading,
     error,
-    getStaffStats,
+    getStats,
     getRooms,
   };
 };

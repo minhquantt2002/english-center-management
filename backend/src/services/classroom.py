@@ -9,9 +9,22 @@ def get_classroom(db: Session, classroom_id: UUID) -> Optional[Class]:
     """Get classroom by ID"""
     return classroom_crud.get_classroom(db, classroom_id)
 
-def get_classrooms(db: Session, skip: int = 0, limit: int = 100) -> List[Class]:
-    """Get list of classrooms with pagination"""
-    return classroom_crud.get_classrooms(db, skip=skip, limit=limit)
+def get_classrooms(db: Session) -> List[Class]:
+    """Get list of classrooms"""
+    return classroom_crud.get_classrooms(db)
+
+def get_classrooms_with_filters(
+    db: Session, 
+    course_id: Optional[UUID] = None,
+    teacher_id: Optional[UUID] = None,
+    status: Optional[str] = None
+) -> List[Class]:
+    """Get classrooms with optional filters"""
+    return classroom_crud.get_classrooms_with_filters(db, course_id, teacher_id, status)
+
+def get_all_classrooms(db: Session) -> List[Class]:
+    """Get all classrooms without pagination"""
+    return classroom_crud.get_all_classrooms(db)
 
 def get_classrooms_by_teacher(db: Session, teacher_id: UUID) -> List[Class]:
     """Get classrooms taught by specific teacher"""

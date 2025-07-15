@@ -13,6 +13,10 @@ def get_scores(db: Session, skip: int = 0, limit: int = 100) -> List[Score]:
     """Get list of scores with pagination"""
     return score_crud.get_scores(db, skip=skip, limit=limit)
 
+def get_all_scores(db: Session) -> List[Score]:
+    """Get all scores without pagination"""
+    return score_crud.get_scores(db, skip=0, limit=1000000)  # Large limit to get all
+
 def get_scores_by_student(db: Session, student_id: UUID) -> List[Score]:
     """Get scores for specific student"""
     return score_crud.get_scores_by_student(db, student_id)
@@ -55,4 +59,12 @@ def count_scores_by_student(db: Session, student_id: UUID) -> int:
 
 def get_average_score_by_student(db: Session, student_id: UUID) -> float:
     """Get average total score for a student"""
-    return score_crud.get_average_score_by_student(db, student_id) 
+    return score_crud.get_average_score_by_student(db, student_id)
+
+def get_scores_by_teacher(db: Session, teacher_id: UUID):
+    """Get all scores for a specific teacher"""
+    return score_crud.get_scores_by_teacher(db, teacher_id)
+
+def get_recent_scores_by_teacher(db: Session, teacher_id: UUID, limit: int = 5):
+    """Get recent scores for a specific teacher"""
+    return score_crud.get_recent_scores_by_teacher(db, teacher_id, limit) 

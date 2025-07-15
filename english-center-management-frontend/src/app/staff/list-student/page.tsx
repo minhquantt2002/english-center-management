@@ -14,13 +14,15 @@ import {
   GraduationCap,
   AlertCircle,
 } from 'lucide-react';
-import CreateStudentModal, {
-  StudentFormData,
-} from './_components/create-student-modal';
+import CreateStudentModal from './_components/create-student-modal';
 import EditStudentModal from './_components/edit-student-modal';
 import ViewStudentModal from './_components/view-student-modal';
 import { useStaffStudentApi } from '../_hooks';
-import { StudentResponse } from '../../../types';
+import {
+  StudentResponse,
+  StudentCreate,
+  StudentUpdate,
+} from '../../../types/staff';
 
 export default function StudentManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,32 +55,32 @@ export default function StudentManagement() {
     }
   };
 
-  const studentsWithDisplay = students.map((student: StudentResponse) => ({
-    id: student.id,
-    name: student.name,
-    phone: student.phone_number || 'N/A',
-    email: student.email,
-    level:
-      (student.level || 'beginner').charAt(0).toUpperCase() +
-      (student.level || 'beginner').slice(1),
-    currentClass: student.currentClass || 'Chưa phân lớp',
-    status: student.status as 'active' | 'inactive' | 'pending',
-    role: student.role_name,
-    studentId: student.id,
-    enrollmentDate: student.enrollmentDate,
-    enrollmentStatus: student.status as 'active' | 'inactive' | 'pending',
-    createdAt: student.created_at,
-  }));
+  const studentsWithDisplay = (students || []).map(
+    (student: StudentResponse): StudentResponse => ({
+      id: student.id,
+      name: student.name,
+      phone_number: student.phone_number || 'N/A',
+      email: student.email,
+      input_level: student.input_level || 'beginner',
+      created_at: student.created_at,
+      enrollments: student.enrollments,
+      status: student.status,
+      parent_name: student.parent_name,
+      parent_phone: student.parent_phone,
+      bio: student.bio,
+      date_of_birth: student.date_of_birth,
+    })
+  );
 
   const filteredStudents = studentsWithDisplay.filter((student) => {
     const matchesSearch =
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.studentId.toLowerCase().includes(searchTerm.toLowerCase());
+      student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.id?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
-  const handleCreateStudent = async (studentData: StudentFormData) => {
+  const handleCreateStudent = async (studentData: StudentCreate) => {
     try {
       await createStudent(studentData);
       setIsCreateModalOpen(false);
@@ -92,7 +94,7 @@ export default function StudentManagement() {
 
   const handleUpdateStudent = async (
     studentId: string,
-    studentData: StudentFormData
+    studentData: StudentUpdate
   ) => {
     try {
       await updateStudent(studentId, studentData);
@@ -106,40 +108,34 @@ export default function StudentManagement() {
     }
   };
 
-  const handleViewStudent = (student: any) => {
+  const handleViewStudent = (student: StudentResponse) => {
     // Convert student data to StudentProfile format for the modal
-    const studentProfile: StudentProfile = {
+    const studentProfile: StudentResponse = {
       id: student.id,
-      studentId: student.studentId || `ST${student.id.padStart(3, '0')}`,
       name: student.name,
       email: student.email,
-      phone: student.phone,
-      level: student.level.toLowerCase() as any,
-      currentClass: student.currentClass,
-      enrollmentDate: student.enrollmentDate || '2024-01-15',
-      enrollmentStatus: (student.status || 'active') as any,
-      createdAt: student.createdAt || '2024-01-15T08:00:00Z',
-      updatedAt: student.updatedAt || '2024-01-15T08:00:00Z',
+      phone_number: student.phone_number,
+      input_level: student.input_level,
+      enrollments: student.enrollments,
+      status: student.status,
+      created_at: student.created_at,
     };
 
     setSelectedStudent(studentProfile);
     setIsViewModalOpen(true);
   };
 
-  const handleEditStudent = (student: any) => {
+  const handleEditStudent = (student: StudentResponse) => {
     // Convert student data to StudentProfile format for the modal
-    const studentProfile: StudentProfile = {
+    const studentProfile: StudentResponse = {
       id: student.id,
-      studentId: student.studentId || `ST${student.id.padStart(3, '0')}`,
       name: student.name,
       email: student.email,
-      phone: student.phone,
-      level: student.level.toLowerCase() as any,
-      currentClass: student.currentClass,
-      enrollmentDate: student.enrollmentDate || '2024-01-15',
-      enrollmentStatus: (student.status || 'active') as any,
-      createdAt: student.createdAt || '2024-01-15T08:00:00Z',
-      updatedAt: student.updatedAt || '2024-01-15T08:00:00Z',
+      phone_number: student.phone_number,
+      input_level: student.input_level,
+      enrollments: student.enrollments,
+      status: student.status,
+      created_at: student.created_at,
     };
 
     setSelectedStudent(studentProfile);
@@ -250,7 +246,7 @@ export default function StudentManagement() {
                   Tổng học viên
                 </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {students.length}
+                  {studentsWithDisplay.length}
                 </p>
               </div>
               <div className='w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center'>
@@ -264,7 +260,10 @@ export default function StudentManagement() {
               <div>
                 <p className='text-gray-500 text-sm font-medium'>Đang học</p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {students.filter((s) => s.status === 'active').length}
+                  {
+                    studentsWithDisplay.filter((s) => s.status === 'active')
+                      .length
+                  }
                 </p>
               </div>
               <div className='w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center'>
@@ -280,7 +279,10 @@ export default function StudentManagement() {
                   Chờ phân lớp
                 </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {students.filter((s) => s.status === 'suspended').length}
+                  {
+                    studentsWithDisplay.filter((s) => s.status === 'suspended')
+                      .length
+                  }
                 </p>
               </div>
               <div className='w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center'>
@@ -294,7 +296,10 @@ export default function StudentManagement() {
               <div>
                 <p className='text-gray-500 text-sm font-medium'>Tạm nghỉ</p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {students.filter((s) => s.status === 'inactive').length}
+                  {
+                    studentsWithDisplay.filter((s) => s.status === 'inactive')
+                      .length
+                  }
                 </p>
               </div>
               <div className='w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center'>
@@ -377,9 +382,6 @@ export default function StudentManagement() {
                         <div className='text-sm font-semibold text-gray-900'>
                           {student.name}
                         </div>
-                        <div className='text-sm text-gray-500'>
-                          Mã số: {student.studentId}
-                        </div>
                       </div>
                     </div>
                   </td>
@@ -391,25 +393,25 @@ export default function StudentManagement() {
                       </div>
                       <div className='flex items-center text-sm text-gray-500'>
                         <Phone className='w-4 h-4 text-gray-400 mr-2' />
-                        {student.phone}
+                        {student.phone_number}
                       </div>
                     </div>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap'>
                     <span
                       className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getLevelBadgeColor(
-                        student.level
+                        student.input_level
                       )}`}
                     >
-                      {student.level === 'Beginner'
+                      {student.input_level === 'Beginner'
                         ? 'Sơ cấp'
-                        : student.level === 'Intermediate'
+                        : student.input_level === 'Intermediate'
                         ? 'Trung cấp'
                         : 'Cao cấp'}
                     </span>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                    {student.currentClass}
+                    {student.enrollments?.[0]?.class_id}
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap'>
                     <span

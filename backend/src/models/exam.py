@@ -13,12 +13,12 @@ class Exam(Base):
     exam_name = Column(String(255), nullable=False)
     class_id = Column(UUID(as_uuid=True), ForeignKey("classes.id"), nullable=False)
     exam_date = Column(Date)
-    description = Column(Text)  # Mô tả bài thi
-    duration = Column(Integer)  # Thời gian làm bài (phút)
-    total_points = Column(Integer)  # Tổng điểm
-    exam_type = Column(String(50))  # midterm, final, quiz
+    description = Column(Text) 
+    duration = Column(Integer)  
+    total_points = Column(Integer)  
+    exam_type = Column(String(50))  
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    class_ = relationship("Class", back_populates="exams")
+    classroom = relationship("Class", back_populates="exams")
     scores = relationship("Score", back_populates="exam") 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, User, Search, Users, Check } from 'lucide-react';
-import { Student } from '../../../../../types';
+import { StudentResponse } from '../../../../../types/staff';
 import { useStaffStudentApi } from '../../../_hooks';
 
 interface AssignStudentModalProps {
@@ -23,8 +23,12 @@ export default function AssignStudentModal({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [availableStudents, setAvailableStudents] = useState<Student[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [availableStudents, setAvailableStudents] = useState<StudentResponse[]>(
+    []
+  );
+  const [filteredStudents, setFilteredStudents] = useState<StudentResponse[]>(
+    []
+  );
   const { getAvailableStudents, loading, error } = useStaffStudentApi();
 
   // Fetch available students from API
@@ -33,8 +37,8 @@ export default function AssignStudentModal({
       try {
         const students = await getAvailableStudents();
         // Filter out students already in this classroom
-        const available = students.data.filter(
-          (student: Student) => !existingStudentIds.includes(student.id)
+        const available = students.filter(
+          (student: StudentResponse) => !existingStudentIds.includes(student.id)
         );
         setAvailableStudents(available);
         setFilteredStudents(available);
@@ -54,7 +58,7 @@ export default function AssignStudentModal({
       (student) =>
         student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (student.phone && student.phone.includes(searchTerm))
+        (student.phone_number && student.phone_number.includes(searchTerm))
     );
     setFilteredStudents(filtered);
   }, [searchTerm, availableStudents]);
@@ -212,9 +216,9 @@ export default function AssignStudentModal({
                             <p className='text-sm text-gray-600'>
                               {student.email}
                             </p>
-                            {student.phone && (
+                            {student.phone_number && (
                               <p className='text-sm text-gray-500'>
-                                {student.phone}
+                                {student.phone_number}
                               </p>
                             )}
                           </div>
@@ -222,7 +226,7 @@ export default function AssignStudentModal({
                       </div>
                       <div className='text-right'>
                         <span className='text-sm text-gray-600'>
-                          {student.studentId}
+                          {student.id}
                         </span>
                       </div>
                     </div>

@@ -1,21 +1,19 @@
-from typing import List
+from typing import List, Optional
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..dependencies import get_current_student_user
 from ..models.user import User
-from ..schemas.user import UserResponse, UserUpdate
-from ..schemas.classroom import ClassroomResponse
-from ..schemas.enrollment import EnrollmentResponse
-from ..schemas.score import ScoreResponse
-from ..schemas.schedule import ScheduleResponse
 from ..services import user as user_service
 from ..services import classroom as classroom_service
-from ..services import enrollment as enrollment_service
-from ..services import score as score_service
 from ..services import schedule as schedule_service
-from ..services import student as student_service
+from ..services import score as score_service
+from ..services import user as user_service
+from ..schemas.user import StudentResponse, StudentUpdate
+from ..schemas.classroom import ClassroomResponse
+from ..schemas.schedule import ScheduleResponse
+from ..schemas.score import ScoreResponse
 
 router = APIRouter()
 
@@ -28,16 +26,12 @@ async def get_student_dashboard(
     """
     Lấy dữ liệu dashboard cho học sinh
     """
-    # Lấy thống kê học tập
-    academic_summary = student_service.get_student_academic_summary(db, current_user.id)
+    academic_summary = user_service.get_student_academic_summary(db, current_user.id)
     
-    # Lấy lịch học hôm nay
     today_schedules = schedule_service.get_today_schedules_by_student(db, current_user.id)
     
-    # Lấy lớp học sắp tới
     upcoming_classes = classroom_service.get_upcoming_classes_by_student(db, current_user.id)
     
-    # Lấy kết quả gần đây
     recent_scores = score_service.get_recent_scores_by_student(db, current_user.id)
     
     dashboard_data = {
@@ -52,69 +46,54 @@ async def get_student_dashboard(
     }
     return dashboard_data
 
-# Student Profile Management
-@router.get("/profile", response_model=UserResponse)
-async def get_my_profile(
-    current_user: User = Depends(get_current_student_user)
+# ==================== PROFILE MANAGEMENT ====================
+@router.get("/profile", response_model=StudentResponse)
+async def get_student_profile(
+    current_user: User = Depends(get_current_student_user),
+    db: Session = Depends(get_db)
 ):
     """
-    Lấy thông tin cá nhân của học sinh
+    Lấy thông tin profile của học sinh
     """
     return current_user
 
-@router.put("/profile", response_model=UserResponse)
-async def update_my_profile(
-    user_data: UserUpdate,
+@router.put("/profile", response_model=StudentResponse)
+async def update_student_profile(
+    profile_data: StudentUpdate,
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
     """
-    Cập nhật thông tin cá nhân (chỉ một số trường nhất định)
+    Cập nhật thông tin profile của học sinh
     """
-    # Học sinh chỉ được cập nhật name, bio, phone_number, date_of_birth
-    allowed_fields = {"name", "bio", "phone_number", "date_of_birth"}
-    update_data = {k: v for k, v in user_data.model_dump(exclude_unset=True).items() if k in allowed_fields}
-    
-    if not update_data:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Không có trường nào được phép cập nhật"
-        )
-    
-    updated_user = user_service.update_user(db, current_user.id, update_data)
+    updated_user = user_service.update_user(db, current_user.id, profile_data)
     return updated_user
 
-# Enrollment Information
-@router.get("/enrollments", response_model=List[EnrollmentResponse])
-async def get_my_enrollments(
-    current_user: User = Depends(get_current_student_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy danh sách các lớp học mà học sinh đã đăng ký
-    """
-    enrollments = enrollment_service.get_enrollments_by_student(db, current_user.id)
-    return enrollments
-
+# ==================== CLASSROOM MANAGEMENT ====================
 @router.get("/classes", response_model=List[ClassroomResponse])
-async def get_my_classes(
+async def get_student_classes(
+    status: Optional[str] = Query(None, description="Filter by classroom status"),
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
     """
-    Lấy danh sách các lớp học mà học sinh đang theo học
+    Lấy danh sách lớp học của học sinh
     """
-    classrooms = classroom_service.get_classrooms_by_student(db, current_user.id)
+    classrooms = classroom_service.get_classrooms_by_student(
+        db, 
+        current_user.id, 
+        status=status,
+    )
     return classrooms
 
 @router.get("/classes/{classroom_id}", response_model=ClassroomResponse)
-async def get_classroom_detail(
+async def get_student_classroom(
     classroom_id: str,
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
     """
-    Lấy chi tiết lớp học (chỉ lớp mà học sinh đã đăng ký)
+    Lấy thông tin lớp học cụ thể của học sinh
     """
     try:
         classroom_uuid = UUID(classroom_id)
@@ -124,102 +103,37 @@ async def get_classroom_detail(
             detail="classroom_id không hợp lệ"
         )
     
-    # Kiểm tra xem học sinh có đăng ký lớp này không
-    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_uuid):
+    if not user_service.check_student_enrollment_permission(db, current_user.id, classroom_uuid):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Bạn chưa đăng ký lớp học này"
         )
     
-    classroom = classroom_service.get_classroom(db, classroom_uuid)
+    classroom = classroom_service.get_classroom_by_student(db, classroom_uuid, current_user.id)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Lớp học không tồn tại"
+            detail="Lớp học không tồn tại hoặc không thuộc quyền truy cập"
         )
-    
     return classroom
 
-
-
-@router.get("/classes/{classroom_id}/assignments")
-async def get_class_assignments(
-    classroom_id: str,
-    current_user: User = Depends(get_current_student_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy bài tập của lớp học
-    """
-    try:
-        classroom_uuid = UUID(classroom_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="classroom_id không hợp lệ"
-        )
-    
-    # Kiểm tra xem học sinh có đăng ký lớp này không
-    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_uuid):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Bạn chưa đăng ký lớp học này"
-        )
-    
-    # TODO: Implement assignment service
-    assignments = []
-    return assignments
-
-
-# Academic Scores
-@router.get("/scores", response_model=List[ScoreResponse])
-async def get_my_scores(
-    current_user: User = Depends(get_current_student_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy danh sách điểm số của học sinh
-    """
-    scores = score_service.get_scores_by_student(db, current_user.id)
-    return scores
-
-@router.get("/classes/{classroom_id}/scores", response_model=List[ScoreResponse])
-async def get_my_classroom_scores(
-    classroom_id: str,
-    current_user: User = Depends(get_current_student_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy điểm số của học sinh trong một lớp học cụ thể
-    """
-    try:
-        classroom_uuid = UUID(classroom_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="classroom_id không hợp lệ"
-        )
-    
-    # Kiểm tra xem học sinh có đăng ký lớp này không
-    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_uuid):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Bạn chưa đăng ký lớp học này"
-        )
-    
-    scores = score_service.get_scores_by_student_classroom(db, current_user.id, classroom_uuid)
-    return scores
-
-# Schedule Information
+# ==================== SCHEDULE MANAGEMENT ====================
 @router.get("/schedule", response_model=List[ScheduleResponse])
-async def get_my_schedule(
+async def get_student_schedule(
+    classroom_id: Optional[str] = Query(None, description="Filter by classroom ID"),
+    weekday: Optional[str] = Query(None, description="Filter by weekday"),
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
     """
     Lấy lịch học của học sinh (từ tất cả lớp đã đăng ký)
     """
-    schedules = schedule_service.get_schedules_by_student(db, current_user.id)
+    schedules = schedule_service.get_schedules_by_student(
+        db, 
+        current_user.id, 
+        classroom_id=classroom_id,
+        weekday=weekday,
+    )
     return schedules
 
 @router.get("/classes/{classroom_id}/schedules", response_model=List[ScheduleResponse])
@@ -239,8 +153,7 @@ async def get_classroom_schedules(
             detail="classroom_id không hợp lệ"
         )
     
-    # Kiểm tra xem học sinh có đăng ký lớp này không
-    if not student_service.check_student_enrollment_permission(db, current_user.id, classroom_uuid):
+    if not user_service.check_student_enrollment_permission(db, current_user.id, classroom_uuid):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Bạn chưa đăng ký lớp học này"
@@ -248,24 +161,48 @@ async def get_classroom_schedules(
     
     schedules = schedule_service.get_schedules_by_classroom(db, classroom_uuid)
     return schedules
-    
 
-# Statistics for Student
-@router.get("/statistics")
-async def get_my_statistics(
+# ==================== SCORE MANAGEMENT ====================
+@router.get("/scores", response_model=List[ScoreResponse])
+async def get_student_scores(
+    exam_id: Optional[str] = Query(None, description="Filter by exam ID"),
+    classroom_id: Optional[str] = Query(None, description="Filter by classroom ID"),
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
     """
-    Lấy thống kê học tập của học sinh
+    Lấy danh sách điểm số của học sinh
     """
-    # Sử dụng student service để lấy academic summary
-    academic_summary = student_service.get_student_academic_summary(db, current_user.id)
+    scores = score_service.get_scores_by_student(
+        db, 
+        current_user.id, 
+        exam_id=exam_id,
+        classroom_id=classroom_id,
+    )
+    return scores
+
+@router.get("/classes/{classroom_id}/scores", response_model=List[ScoreResponse])
+async def get_classroom_scores(
+    classroom_id: str,
+    current_user: User = Depends(get_current_student_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy điểm số của học sinh trong một lớp học cụ thể
+    """
+    try:
+        classroom_uuid = UUID(classroom_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="classroom_id không hợp lệ"
+        )
     
-    stats = {
-        "student_id": str(current_user.id),
-        "total_enrollments": academic_summary.get("total_enrollments", 0),
-        "total_scores": academic_summary.get("total_scores", 0),
-        "average_score": academic_summary.get("average_score", 0.0),
-    }
-    return stats 
+    if not user_service.check_student_enrollment_permission(db, current_user.id, classroom_uuid):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Bạn chưa đăng ký lớp học này"
+        )
+    
+    scores = score_service.get_scores_by_student_classroom(db, current_user.id, classroom_uuid)
+    return scores 

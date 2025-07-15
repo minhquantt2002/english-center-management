@@ -3,9 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader2, Calendar, Users, BookOpen } from 'lucide-react';
 import { useCourseApi, useTeacherApi } from '../../_hooks';
-import { CourseResponse } from '../../../../types/course';
-import { UserResponse } from '../../../../types/user';
-import { ClassroomCreate } from '../../../../types/classroom';
+import { CourseResponse, TeacherResponse } from '../../../../types/admin';
+import { ClassroomCreate } from '../../../../types/admin';
 
 interface CreateClassroomModalProps {
   isOpen: boolean;
@@ -24,13 +23,14 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
     class_name: '',
     course_id: '',
     teacher_id: '',
+    course_level: 'beginner',
+    status: 'active',
     start_date: '',
     end_date: '',
-    description: '',
   });
 
   const [courses, setCourses] = useState<CourseResponse[]>([]);
-  const [teachers, setTeachers] = useState<UserResponse[]>([]);
+  const [teachers, setTeachers] = useState<TeacherResponse[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { getCourses } = useCourseApi();
@@ -128,9 +128,10 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
         class_name: '',
         course_id: '',
         teacher_id: '',
+        course_level: 'beginner',
+        status: 'active',
         start_date: '',
         end_date: '',
-        description: '',
       });
       setErrors({});
     } catch (error) {
@@ -143,9 +144,10 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
       class_name: '',
       course_id: '',
       teacher_id: '',
+      course_level: 'beginner',
+      status: 'active',
       start_date: '',
       end_date: '',
-      description: '',
     });
     setErrors({});
     onClose();
@@ -304,21 +306,6 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                 <p className='text-red-500 text-sm mt-1'>{errors.end_date}</p>
               )}
             </div>
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Mô tả
-            </label>
-            <textarea
-              name='description'
-              value={formData.description}
-              onChange={handleInputChange}
-              rows={3}
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-              placeholder='Nhập mô tả về lớp học (tùy chọn)'
-            />
           </div>
 
           {/* Action Buttons */}

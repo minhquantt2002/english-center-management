@@ -26,4 +26,4 @@ class Schedule(Base):
     end_time = Column(Time, nullable=False)
 
     # Relationships
-    class_ = relationship("Class", back_populates="schedules") 
+    classroom = relationship("Class", back_populates="schedules") 

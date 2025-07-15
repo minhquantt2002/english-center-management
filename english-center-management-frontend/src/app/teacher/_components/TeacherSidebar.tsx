@@ -6,17 +6,9 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Calendar,
-  ClipboardCheck,
-  MessageSquare,
   School,
   ChevronRight,
   GraduationCap,
-  Settings,
-  FileText,
-  Award,
-  Users,
-  BarChart3,
-  BookOpen,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -135,120 +127,6 @@ const TeacherSidebar: React.FC = () => {
               </div>
             </Link>
           ))}
-        </div>
-
-        {/* Divider */}
-        <div className='my-6 border-t border-gray-200'></div>
-
-        {/* Additional Tools */}
-        <div className='space-y-2'>
-          <Link
-            href='/teacher/students'
-            className='group flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-xl transition-all duration-200'
-          >
-            <div className='w-10 h-10 rounded-lg bg-gray-100 text-gray-600 group-hover:bg-gray-200 group-hover:text-gray-700 flex items-center justify-center transition-all duration-200'>
-              <Users className='w-5 h-5' />
-            </div>
-            <div>
-              <span className='font-semibold'>Học viên</span>
-              <p className='text-xs text-gray-500 mt-0.5'>Quản lý học viên</p>
-            </div>
-          </Link>
-
-          <Link
-            href='/teacher/assignments'
-            className='group flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-xl transition-all duration-200'
-          >
-            <div className='w-10 h-10 rounded-lg bg-gray-100 text-gray-600 group-hover:bg-gray-200 group-hover:text-gray-700 flex items-center justify-center transition-all duration-200'>
-              <FileText className='w-5 h-5' />
-            </div>
-            <div>
-              <span className='font-semibold'>Bài tập</span>
-              <p className='text-xs text-gray-500 mt-0.5'>Giao & chấm bài</p>
-            </div>
-          </Link>
-
-          <Link
-            href='/teacher/grades'
-            className='group flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-xl transition-all duration-200'
-          >
-            <div className='w-10 h-10 rounded-lg bg-gray-100 text-gray-600 group-hover:bg-gray-200 group-hover:text-gray-700 flex items-center justify-center transition-all duration-200'>
-              <ClipboardCheck className='w-5 h-5' />
-            </div>
-            <div>
-              <span className='font-semibold'>Điểm số</span>
-              <p className='text-xs text-gray-500 mt-0.5'>
-                Nhập & quản lý điểm
-              </p>
-            </div>
-          </Link>
-
-          <Link
-            href='/teacher/feedback'
-            className='group flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-xl transition-all duration-200'
-          >
-            <div className='w-10 h-10 rounded-lg bg-gray-100 text-gray-600 group-hover:bg-gray-200 group-hover:text-gray-700 flex items-center justify-center transition-all duration-200'>
-              <MessageSquare className='w-5 h-5' />
-            </div>
-            <div>
-              <span className='font-semibold'>Nhận xét</span>
-              <p className='text-xs text-gray-500 mt-0.5'>Feedback học viên</p>
-            </div>
-          </Link>
-
-          <Link
-            href='/teacher/materials'
-            className='group flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-xl transition-all duration-200'
-          >
-            <div className='w-10 h-10 rounded-lg bg-gray-100 text-gray-600 group-hover:bg-gray-200 group-hover:text-gray-700 flex items-center justify-center transition-all duration-200'>
-              <BookOpen className='w-5 h-5' />
-            </div>
-            <div>
-              <span className='font-semibold'>Tài liệu</span>
-              <p className='text-xs text-gray-500 mt-0.5'>Quản lý tài liệu</p>
-            </div>
-          </Link>
-
-          <Link
-            href='/teacher/reports'
-            className='group flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-xl transition-all duration-200'
-          >
-            <div className='w-10 h-10 rounded-lg bg-gray-100 text-gray-600 group-hover:bg-gray-200 group-hover:text-gray-700 flex items-center justify-center transition-all duration-200'>
-              <BarChart3 className='w-5 h-5' />
-            </div>
-            <div>
-              <span className='font-semibold'>Báo cáo</span>
-              <p className='text-xs text-gray-500 mt-0.5'>Thống kê & báo cáo</p>
-            </div>
-          </Link>
-
-          <Link
-            href='/teacher/performance'
-            className='group flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-xl transition-all duration-200'
-          >
-            <div className='w-10 h-10 rounded-lg bg-gray-100 text-gray-600 group-hover:bg-gray-200 group-hover:text-gray-700 flex items-center justify-center transition-all duration-200'>
-              <Award className='w-5 h-5' />
-            </div>
-            <div>
-              <span className='font-semibold'>Hiệu suất</span>
-              <p className='text-xs text-gray-500 mt-0.5'>Đánh giá hiệu suất</p>
-            </div>
-          </Link>
-
-          <Link
-            href='/teacher/settings'
-            className='group flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-xl transition-all duration-200'
-          >
-            <div className='w-10 h-10 rounded-lg bg-gray-100 text-gray-600 group-hover:bg-gray-200 group-hover:text-gray-700 flex items-center justify-center transition-all duration-200'>
-              <Settings className='w-5 h-5' />
-            </div>
-            <div>
-              <span className='font-semibold'>Cài đặt</span>
-              <p className='text-xs text-gray-500 mt-0.5'>
-                Tùy chỉnh tài khoản
-              </p>
-            </div>
-          </Link>
         </div>
       </nav>
 

@@ -4,19 +4,22 @@ import {
   ClassroomCreate,
   ClassroomResponse,
   ClassroomUpdate,
-} from '../../../types/classroom';
+  GetClassroomsQuery,
+  AssignStudentRequest,
+  StudentResponse,
+} from '../../../types/admin';
 
 export const useClassroomApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const createClassroom = useCallback(
-    async (classroomData: ClassroomCreate) => {
+    async (classroomData: ClassroomCreate): Promise<ClassroomResponse> => {
       setLoading(true);
       setError(null);
       try {
         const response = await api.post('/admin/classrooms', classroomData);
-        return response;
+        return response as ClassroomResponse;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Có lỗi xảy ra';
@@ -30,7 +33,10 @@ export const useClassroomApi = () => {
   );
 
   const updateClassroom = useCallback(
-    async (id: string, classroomData: Partial<ClassroomUpdate>) => {
+    async (
+      id: string,
+      classroomData: ClassroomUpdate
+    ): Promise<ClassroomResponse> => {
       setLoading(true);
       setError(null);
       try {
@@ -38,7 +44,7 @@ export const useClassroomApi = () => {
           `/admin/classrooms/${id}`,
           classroomData
         );
-        return response;
+        return response as ClassroomResponse;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Có lỗi xảy ra';
@@ -66,20 +72,27 @@ export const useClassroomApi = () => {
     }
   }, []);
 
-  const getClassrooms = useCallback(async (): Promise<ClassroomResponse[]> => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.get('/admin/classrooms');
-      return response;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const getClassrooms = useCallback(
+    async (query?: GetClassroomsQuery): Promise<ClassroomResponse[]> => {
+      setLoading(true);
+      setError(null);
+      try {
+        const queryParams = query
+          ? `?${new URLSearchParams(query as Record<string, string>)}`
+          : '';
+        const response = await api.get(`/admin/classrooms${queryParams}`);
+        return response as ClassroomResponse[];
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Có lỗi xảy ra';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   const getClassroomById = useCallback(
     async (id: string): Promise<ClassroomResponse> => {
@@ -87,7 +100,7 @@ export const useClassroomApi = () => {
       setError(null);
       try {
         const response = await api.get(`/admin/classrooms/${id}`);
-        return response;
+        return response as ClassroomResponse;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Có lỗi xảy ra';
@@ -101,13 +114,13 @@ export const useClassroomApi = () => {
   );
 
   const assignStudentToClassroom = useCallback(
-    async (classroomId: string, studentId: string) => {
+    async (classroomId: string, studentData: AssignStudentRequest) => {
       setLoading(true);
       setError(null);
       try {
         const response = await api.post(
           `/admin/classrooms/${classroomId}/students`,
-          { studentId }
+          studentData
         );
         return response;
       } catch (err) {
@@ -143,22 +156,26 @@ export const useClassroomApi = () => {
     []
   );
 
-  const getClassroomStudents = useCallback(async (classroomId: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.get(
-        `/admin/classrooms/${classroomId}/students`
-      );
-      return response;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const getClassroomStudents = useCallback(
+    async (classroomId: string): Promise<StudentResponse[]> => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await api.get(
+          `/admin/classrooms/${classroomId}/students`
+        );
+        return response as StudentResponse[];
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Có lỗi xảy ra';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   return {
     loading,

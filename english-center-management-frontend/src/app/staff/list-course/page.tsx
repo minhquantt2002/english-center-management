@@ -11,7 +11,7 @@ import {
   Award,
 } from 'lucide-react';
 import { useStaffCourseApi } from '../_hooks';
-import { CourseResponse } from '../../../types/course';
+import { CourseResponse } from '../../../types/staff';
 
 export default function CourseManagement() {
   const { loading, error, getCourses } = useStaffCourseApi();

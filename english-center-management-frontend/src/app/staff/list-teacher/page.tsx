@@ -5,7 +5,6 @@ import {
   Search,
   Calendar,
   GraduationCap,
-  Filter,
   Mail,
   Phone,
   BookOpen,
@@ -13,17 +12,16 @@ import {
   Users,
   AlertCircle,
 } from 'lucide-react';
-import { Teacher } from '../../../types';
+import { TeacherResponse } from '../../../types/staff';
 import TeachingScheduleModal from './_components/teaching-schedule-modal';
 import { useStaffTeacherApi } from '../_hooks';
 
 export default function TeacherManagement() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [levelFilter, setLevelFilter] = useState('Tất cả trình độ');
-  const [subjectFilter, setSubjectFilter] = useState('Tất cả môn học');
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+  const [selectedTeacher, setSelectedTeacher] =
+    useState<TeacherResponse | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [teachers, setTeachers] = useState<TeacherResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const { error, getTeachers, getTeacherSchedule } = useStaffTeacherApi();
@@ -47,20 +45,19 @@ export default function TeacherManagement() {
 
   // Use teachers data from API
   const teachersWithDisplay = teachers.map(
-    (teacher: Teacher, index: number) => ({
+    (teacher: TeacherResponse, index: number) => ({
       id: teacher.id,
       name: teacher.name,
-      role: teacher.experience
-        ? `${teacher.experience} năm kinh nghiệm`
+      role: teacher.experience_years
+        ? `${teacher.experience_years} năm kinh nghiệm`
         : 'Giáo viên',
-      phone: teacher.phone || 'N/A',
+      phone: teacher.phone_number || 'N/A',
       email: teacher.email,
-      subject: teacher.specialization,
+      subject: teacher.specialization || 'N/A',
       subjectColor:
         index % 2 === 0
           ? 'bg-blue-100 text-blue-800 border-blue-200'
           : 'bg-purple-100 text-purple-800 border-purple-200',
-      level: 'A1 - C1', // Default level range
       levelColor: 'bg-green-100 text-green-800 border-green-200',
     })
   );
@@ -70,7 +67,7 @@ export default function TeacherManagement() {
       const teacher = teachers.find((t) => t.id === teacherId);
       if (teacher) {
         const schedule = await getTeacherSchedule(teacherId);
-        setSelectedTeacher({ ...teacher, schedule } as Teacher & {
+        setSelectedTeacher({ ...teacher, schedule } as TeacherResponse & {
           schedule: any;
         });
         setShowScheduleModal(true);
@@ -88,12 +85,9 @@ export default function TeacherManagement() {
 
   const filteredTeachers = teachersWithDisplay.filter((teacher) => {
     const matchesSearch =
-      teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.subject.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLevel = levelFilter === 'Tất cả trình độ';
-    const matchesSubject =
-      subjectFilter === 'Tất cả môn học' || teacher.subject === subjectFilter;
-    return matchesSearch && matchesLevel && matchesSubject;
+      teacher.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      teacher.subject?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
   });
 
   if (isLoading) {
@@ -158,7 +152,7 @@ export default function TeacherManagement() {
                   Tổng giáo viên
                 </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {teachers.length}
+                  {teachersWithDisplay.length}
                 </p>
               </div>
               <div className='w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center'>
@@ -172,9 +166,6 @@ export default function TeacherManagement() {
               <div>
                 <p className='text-gray-500 text-sm font-medium'>
                   Đang giảng dạy
-                </p>
-                <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {teachers.filter((t) => t.status === 'active').length}
                 </p>
               </div>
               <div className='w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center'>
@@ -190,7 +181,7 @@ export default function TeacherManagement() {
                   Lớp đang dạy
                 </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {teachers.length * 2} {/* Mock data */}
+                  {teachersWithDisplay.length * 2} {/* Mock data */}
                 </p>
               </div>
               <div className='w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center'>
@@ -206,7 +197,7 @@ export default function TeacherManagement() {
                   Giờ dạy tuần
                 </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {teachers.length * 20} {/* Mock data */}
+                  {teachersWithDisplay.length * 20} {/* Mock data */}
                 </p>
               </div>
               <div className='w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center'>
@@ -234,39 +225,6 @@ export default function TeacherManagement() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-
-          {/* Level Filter */}
-          <div className='relative'>
-            <select
-              className='px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent min-w-[150px] appearance-none bg-white'
-              value={levelFilter}
-              onChange={(e) => setLevelFilter(e.target.value)}
-            >
-              <option>Tất cả trình độ</option>
-              <option>A1 - A2</option>
-              <option>A2 - B2</option>
-              <option>B1 - C1</option>
-              <option>B2 - C2</option>
-            </select>
-            <Filter className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none' />
-          </div>
-
-          {/* Subject Filter */}
-          <div className='relative'>
-            <select
-              className='px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent min-w-[160px] appearance-none bg-white'
-              value={subjectFilter}
-              onChange={(e) => setSubjectFilter(e.target.value)}
-            >
-              <option>Tất cả môn học</option>
-              <option>IELTS</option>
-              <option>TOEIC</option>
-              <option>Business English</option>
-              <option>Ngữ pháp</option>
-              <option>Giao tiếp cơ bản</option>
-            </select>
-            <Filter className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none' />
-          </div>
         </div>
       </div>
 
@@ -284,9 +242,6 @@ export default function TeacherManagement() {
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                   Chuyên môn
-                </th>
-                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
-                  Trình độ
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                   Lớp đang dạy
@@ -338,13 +293,6 @@ export default function TeacherManagement() {
                       {teacher.subject}
                     </span>
                   </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <span
-                      className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${teacher.levelColor}`}
-                    >
-                      {teacher.level}
-                    </span>
-                  </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
                     {Math.floor(Math.random() * 5) + 1} lớp
                   </td>
@@ -371,9 +319,7 @@ export default function TeacherManagement() {
               Không tìm thấy giáo viên
             </h3>
             <p className='text-gray-500 mb-6'>
-              {searchTerm ||
-              levelFilter !== 'Tất cả trình độ' ||
-              subjectFilter !== 'Tất cả môn học'
+              {searchTerm
                 ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm'
                 : 'Chưa có giáo viên nào trong hệ thống'}
             </p>

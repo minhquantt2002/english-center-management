@@ -9,14 +9,36 @@ from ..schemas.classroom import ClassroomCreate, ClassroomUpdate
 def get_classroom(db: Session, classroom_id: UUID) -> Optional[Class]:
     """Get classroom by UUID"""
     return db.query(Class)\
-        .options(joinedload(Class.course), joinedload(Class.teacher))\
+        .options(joinedload(Class.course), joinedload(Class.teacher), joinedload(Class.schedules))\
         .filter(Class.id == classroom_id).first()
 
-def get_classrooms(db: Session, skip: int = 0, limit: int = 100) -> List[Class]:
-    """Get classrooms with pagination"""
+def get_classrooms(db: Session) -> List[Class]:
+    """Get classrooms"""
     return db.query(Class)\
-        .options(joinedload(Class.course), joinedload(Class.teacher))\
-        .offset(skip).limit(limit).all()
+        .options(joinedload(Class.course), joinedload(Class.teacher), joinedload(Class.schedules))\
+        .all()
+
+def get_classrooms_with_filters(
+    db: Session, 
+    course_id: Optional[UUID] = None,
+    teacher_id: Optional[UUID] = None,
+    status: Optional[str] = None
+) -> List[Class]:
+    """Get classrooms with optional filters"""
+    query = db.query(Class).options(
+        joinedload(Class.course), 
+        joinedload(Class.teacher),
+        joinedload(Class.schedules)
+    )
+    
+    if course_id:
+        query = query.filter(Class.course_id == course_id)
+    if teacher_id:
+        query = query.filter(Class.teacher_id == teacher_id)
+    if status:
+        query = query.filter(Class.status == status)
+    
+    return query.all()
 
 def get_all_classrooms(db: Session) -> List[Class]:
     """Get all classrooms without pagination"""

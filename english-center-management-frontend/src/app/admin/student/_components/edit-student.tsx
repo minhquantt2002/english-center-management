@@ -2,14 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Phone, User, BookOpen, Save, AlertCircle } from 'lucide-react';
-import { Student } from '../../../../types';
-import Image from 'next/image';
+import { UserUpdate } from '../../../../types/admin';
 
 interface EditStudentModalProps {
-  student: Student | null;
+  student: UserUpdate | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (updatedStudent: Student) => void;
+  onSave: (updatedStudent: UserUpdate) => void;
 }
 
 const EditStudentModal: React.FC<EditStudentModalProps> = ({
@@ -18,18 +17,13 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
   onClose,
   onSave,
 }) => {
-  const [formData, setFormData] = useState<Partial<Student>>({});
+  const [formData, setFormData] = useState<Partial<UserUpdate>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (student) {
       setFormData({
         ...student,
-        emergencyContact: student.emergencyContact || {
-          name: '',
-          phone: '',
-          relationship: '',
-        },
       });
       setErrors({});
     }
@@ -55,18 +49,6 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
     }
   };
 
-  const handleEmergencyContactChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      emergencyContact: {
-        name: prev.emergencyContact?.name || '',
-        phone: prev.emergencyContact?.phone || '',
-        relationship: prev.emergencyContact?.relationship || '',
-        [field]: value,
-      },
-    }));
-  };
-
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -80,12 +62,8 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
       newErrors.email = 'Email không hợp lệ';
     }
 
-    if (!formData.phone?.trim()) {
+    if (!formData.phone_number?.trim()) {
       newErrors.phone = 'Số điện thoại là bắt buộc';
-    }
-
-    if (!formData.studentId?.trim()) {
-      newErrors.studentId = 'Mã số học viên là bắt buộc';
     }
 
     if (!formData.level) {
@@ -104,11 +82,11 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
     e.preventDefault();
 
     if (validateForm()) {
-      const updatedStudent: Student = {
+      const updatedStudent: UserUpdate = {
         ...student,
         ...formData,
         updatedAt: new Date().toISOString(),
-      } as Student;
+      } as UserUpdate;
 
       onSave(updatedStudent);
       onClose();
@@ -122,7 +100,7 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
         <div className='flex items-center justify-between p-6 border-b border-gray-200'>
           <div className='flex items-center space-x-3'>
             <div className='h-12 w-12 flex-shrink-0'>
-              <Image
+              <img
                 className='h-12 w-12 rounded-full object-cover'
                 src={
                   formData.avatar ||
@@ -135,9 +113,6 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
               <h2 className='text-xl font-semibold text-gray-900'>
                 Chỉnh sửa thông tin học viên
               </h2>
-              <p className='text-sm text-gray-500'>
-                Mã số: {formData.studentId}
-              </p>
             </div>
           </div>
           <button
@@ -186,9 +161,9 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   </label>
                   <input
                     type='date'
-                    value={formData.dateOfBirth || ''}
+                    value={formData.date_of_birth || ''}
                     onChange={(e) =>
-                      handleInputChange('dateOfBirth', e.target.value)
+                      handleInputChange('date_of_birth', e.target.value)
                     }
                     className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                   />
@@ -246,17 +221,19 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   </label>
                   <input
                     type='tel'
-                    value={formData.phone || ''}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    value={formData.phone_number || ''}
+                    onChange={(e) =>
+                      handleInputChange('phone_number', e.target.value)
+                    }
                     className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.phone ? 'border-red-500' : 'border-gray-300'
+                      errors.phone_number ? 'border-red-500' : 'border-gray-300'
                     }`}
                     placeholder='Nhập số điện thoại'
                   />
-                  {errors.phone && (
+                  {errors.phone_number && (
                     <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
                       <AlertCircle size={14} />
-                      {errors.phone}
+                      {errors.phone_number}
                     </p>
                   )}
                 </div>
@@ -267,9 +244,9 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   </label>
                   <input
                     type='tel'
-                    value={formData.parentContact || ''}
+                    value={formData.parent_phone || ''}
                     onChange={(e) =>
-                      handleInputChange('parentContact', e.target.value)
+                      handleInputChange('parent_phone', e.target.value)
                     }
                     className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                     placeholder='Nhập số điện thoại phụ huynh'
@@ -293,19 +270,19 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                 </label>
                 <input
                   type='text'
-                  value={formData.studentId || ''}
+                  value={formData.student_id || ''}
                   onChange={(e) =>
-                    handleInputChange('studentId', e.target.value)
+                    handleInputChange('student_id', e.target.value)
                   }
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.studentId ? 'border-red-500' : 'border-gray-300'
+                    errors.student_id ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder='Nhập mã số học viên'
                 />
-                {errors.studentId && (
+                {errors.student_id && (
                   <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
                     <AlertCircle size={14} />
-                    {errors.studentId}
+                    {errors.student_id}
                   </p>
                 )}
               </div>
@@ -362,34 +339,6 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                 )}
               </div>
             </div>
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
-                Lớp hiện tại
-              </label>
-              <input
-                type='text'
-                value={formData.currentClass || ''}
-                onChange={(e) =>
-                  handleInputChange('currentClass', e.target.value)
-                }
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                placeholder='Nhập tên lớp hiện tại'
-              />
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
-                Ghi chú
-              </label>
-              <textarea
-                value={formData.notes || ''}
-                onChange={(e) => handleInputChange('notes', e.target.value)}
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                rows={3}
-                placeholder='Nhập ghi chú về học viên'
-              />
-            </div>
           </div>
 
           {/* Emergency Contact */}
@@ -406,9 +355,9 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                 </label>
                 <input
                   type='text'
-                  value={formData.emergencyContact?.name || ''}
+                  value={formData.parent_name || ''}
                   onChange={(e) =>
-                    handleEmergencyContactChange('name', e.target.value)
+                    handleInputChange('parent_name', e.target.value)
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                   placeholder='Nhập họ và tên'
@@ -421,9 +370,9 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                 </label>
                 <input
                   type='tel'
-                  value={formData.emergencyContact?.phone || ''}
+                  value={formData.parent_phone || ''}
                   onChange={(e) =>
-                    handleEmergencyContactChange('phone', e.target.value)
+                    handleInputChange('parent_phone', e.target.value)
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                   placeholder='Nhập số điện thoại'
@@ -436,9 +385,9 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                 </label>
                 <input
                   type='text'
-                  value={formData.emergencyContact?.relationship || ''}
+                  value={formData.parent_name || ''}
                   onChange={(e) =>
-                    handleEmergencyContactChange('relationship', e.target.value)
+                    handleInputChange('parent_name', e.target.value)
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                   placeholder='Ví dụ: Bố, Mẹ, Anh trai...'

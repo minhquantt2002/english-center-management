@@ -1,22 +1,5 @@
 import React from 'react';
-
-interface ClassDetails {
-  id: string;
-  name: string;
-  level: string;
-  teacher: string;
-  room: string;
-  building: string;
-  schedule: string;
-  totalStudents: number;
-  maxStudents: number;
-  currentUnit: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  status: string;
-  levelColor: string;
-}
+import { ClassDetails } from '../../../../../types/teacher';
 
 interface ClassOverviewProps {
   classDetails: ClassDetails;
@@ -34,39 +17,41 @@ const ClassOverview: React.FC<ClassOverviewProps> = ({ classDetails }) => {
             <div className='flex justify-between'>
               <span className='text-sm text-gray-500'>Tên lớp:</span>
               <span className='text-sm font-medium text-gray-900'>
-                {classDetails.name}
+                {classDetails.class_name}
               </span>
             </div>
             <div className='flex justify-between'>
               <span className='text-sm text-gray-500'>Trình độ:</span>
               <span
-                className={`text-sm px-2 py-1 rounded-full ${classDetails.levelColor}`}
+                className={`text-sm px-2 py-1 rounded-full ${classDetails.course.level}`}
               >
-                {classDetails.level}
+                {classDetails.course.level}
               </span>
             </div>
             <div className='flex justify-between'>
               <span className='text-sm text-gray-500'>Giáo viên:</span>
               <span className='text-sm font-medium text-gray-900'>
-                {classDetails.teacher}
+                {classDetails.teacher.name}
               </span>
             </div>
             <div className='flex justify-between'>
               <span className='text-sm text-gray-500'>Phòng học:</span>
               <span className='text-sm font-medium text-gray-900'>
-                {classDetails.room}, {classDetails.building}
+                {classDetails.room}
               </span>
             </div>
             <div className='flex justify-between'>
               <span className='text-sm text-gray-500'>Lịch học:</span>
               <span className='text-sm font-medium text-gray-900'>
-                {classDetails.schedule}
+                {classDetails.schedules
+                  .map((schedule) => schedule.weekday)
+                  .join(', ')}
               </span>
             </div>
             <div className='flex justify-between'>
               <span className='text-sm text-gray-500'>Bài học hiện tại:</span>
               <span className='text-sm font-medium text-gray-900'>
-                {classDetails.currentUnit}
+                {classDetails.course.level}
               </span>
             </div>
           </div>
@@ -76,19 +61,19 @@ const ClassOverview: React.FC<ClassOverviewProps> = ({ classDetails }) => {
             Mô tả khóa học
           </h3>
           <p className='text-sm text-gray-700 leading-relaxed'>
-            {classDetails.description}
+            {classDetails.course.course_name}
           </p>
           <div className='mt-4 space-y-2'>
             <div className='flex justify-between text-sm'>
               <span className='text-gray-500'>Ngày bắt đầu:</span>
               <span className='font-medium text-gray-900'>
-                {new Date(classDetails.startDate).toLocaleDateString('vi-VN')}
+                {new Date(classDetails.start_date).toLocaleDateString('vi-VN')}
               </span>
             </div>
             <div className='flex justify-between text-sm'>
               <span className='text-gray-500'>Ngày kết thúc:</span>
               <span className='font-medium text-gray-900'>
-                {new Date(classDetails.endDate).toLocaleDateString('vi-VN')}
+                {new Date(classDetails.end_date).toLocaleDateString('vi-VN')}
               </span>
             </div>
           </div>

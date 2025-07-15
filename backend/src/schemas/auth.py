@@ -1,7 +1,9 @@
 from pydantic import EmailStr
 from typing import Optional
 from datetime import date
-from .base import BaseSchema
+from uuid import UUID
+from src.schemas.base import BaseSchema
+from .user import UserRole
 
 class LoginRequest(BaseSchema):
     email: EmailStr
@@ -11,7 +13,7 @@ class RegisterRequest(BaseSchema):
     name: str
     email: EmailStr
     password: str
-    role_name: str  # admin, receptionist, teacher, student
+    role_name: UserRole
     bio: Optional[str] = None
     date_of_birth: Optional[date] = None
     phone_number: Optional[str] = None
@@ -24,10 +26,8 @@ class RegisterRequest(BaseSchema):
     experience_years: Optional[int] = None
     
     # Student specific fields
-    level: Optional[str] = None
     parent_name: Optional[str] = None
     parent_phone: Optional[str] = None
-    student_id: Optional[str] = None
 
 class TokenResponse(BaseSchema):
     access_token: str
@@ -36,5 +36,5 @@ class TokenResponse(BaseSchema):
 
 class TokenData(BaseSchema):
     email: Optional[str] = None
-    user_id: Optional[str] = None
+    user_id: Optional[UUID] = None
     role: Optional[str] = None 

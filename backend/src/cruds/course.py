@@ -8,9 +8,9 @@ def get_course(db: Session, course_id: UUID) -> Optional[Course]:
     """Get course by UUID"""
     return db.query(Course).filter(Course.id == course_id).first()
 
-def get_courses(db: Session, skip: int = 0, limit: int = 100) -> List[Course]:
+def get_courses(db: Session) -> List[Course]:
     """Get courses with pagination"""
-    return db.query(Course).offset(skip).limit(limit).all()
+    return db.query(Course).all()
 
 def get_all_courses(db: Session) -> List[Course]:
     """Get all courses without pagination"""
@@ -25,7 +25,9 @@ def create_course(db: Session, course_data: CourseCreate) -> Course:
     db_course = Course(
         course_name=course_data.course_name,
         description=course_data.description,
-        level=course_data.level
+        level=course_data.level,
+        total_weeks=course_data.total_weeks,
+        price=course_data.price
     )
     db.add(db_course)
     db.commit()

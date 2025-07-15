@@ -14,14 +14,14 @@ import {
   Info,
 } from 'lucide-react';
 import { useStudentApi } from '../_hooks/use-api';
-import { StudentSchedule } from '../../../types/student';
+import { ScheduleResponse } from '../../../types/student';
 
 const StudyingSchedule: React.FC = () => {
   const { loading, error, getStudentSchedule } = useStudentApi();
   const [currentWeek, setCurrentWeek] = useState(new Date(2024, 0, 22)); // January 22, 2024
   const [selectedSchedule, setSelectedSchedule] =
-    useState<StudentSchedule | null>(null);
-  const [schedules, setSchedules] = useState<StudentSchedule[]>([]);
+    useState<ScheduleResponse | null>(null);
+  const [schedules, setSchedules] = useState<ScheduleResponse[]>([]);
 
   useEffect(() => {
     const fetchSchedules = async () => {
@@ -93,34 +93,64 @@ const StudyingSchedule: React.FC = () => {
 
   // Get schedules for current week
   const weekSchedules = useMemo(() => {
+    // Map weekday string to JS day index (Monday=1, Sunday=0)
     const startOfWeek = new Date(currentWeek);
     const dayOfWeek = startOfWeek.getDay();
     const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
     startOfWeek.setDate(diff);
-
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
 
-    return schedules.filter((schedule: StudentSchedule) => {
-      const scheduleDate = new Date(schedule.date);
-      return scheduleDate >= startOfWeek && scheduleDate <= endOfWeek;
-    });
-  }, [currentWeek]);
+    // Helper to get date for a given weekday string
+    function getDateOfWeekday(weekday: string) {
+      const weekdayMap: Record<string, number> = {
+        monday: 1,
+        tuesday: 2,
+        wednesday: 3,
+        thursday: 4,
+        friday: 5,
+        saturday: 6,
+        sunday: 0,
+      };
+      const dayIdx = weekdayMap[weekday.toLowerCase()];
+      const date = new Date(startOfWeek);
+      date.setDate(
+        startOfWeek.getDate() + ((dayIdx + 7 - startOfWeek.getDay()) % 7)
+      );
+      return date;
+    }
+
+    // Attach a computed date field for filtering
+    return schedules
+      .map((sch) => ({
+        ...sch,
+        _date: getDateOfWeekday(sch.weekday),
+      }))
+      .filter((schedule) => {
+        return schedule._date >= startOfWeek && schedule._date <= endOfWeek;
+      });
+  }, [currentWeek, schedules]);
 
   // Helper function to get session for a specific day and time slot
   const getSessionForSlot = (
     day: string,
     timeSlot: { startTime: string; endTime: string }
   ) => {
+    // Map UI day to backend weekday
+    const dayMap: Record<string, string> = {
+      Monday: 'monday',
+      Tuesday: 'tuesday',
+      Wednesday: 'wednesday',
+      Thursday: 'thursday',
+      Friday: 'friday',
+      Saturday: 'saturday',
+      Sunday: 'sunday',
+    };
     return weekSchedules.find((schedule) => {
-      const scheduleTime = schedule.time.split(' - ');
-      const scheduleStartTime = scheduleTime[0];
-      const scheduleEndTime = scheduleTime[1];
-
       return (
-        schedule.day === day &&
-        scheduleStartTime === timeSlot.startTime &&
-        scheduleEndTime === timeSlot.endTime
+        schedule.weekday === dayMap[day] &&
+        schedule.start_time === timeSlot.startTime &&
+        schedule.end_time === timeSlot.endTime
       );
     });
   };
@@ -288,7 +318,7 @@ const StudyingSchedule: React.FC = () => {
                             <div className='h-full flex flex-col'>
                               <div className='flex items-start justify-between mb-1'>
                                 <div className='text-xs font-medium text-gray-900 truncate'>
-                                  {session.title}
+                                  {session.classroom?.class_name || 'Lớp học'}
                                 </div>
                                 <button
                                   onClick={() => setSelectedSchedule(session)}
@@ -298,28 +328,14 @@ const StudyingSchedule: React.FC = () => {
                                 </button>
                               </div>
                               <div className='text-xs text-gray-600 mb-1'>
-                                {session.room}
+                                {session.classroom?.room || ''}
                               </div>
                               <div className='text-xs text-gray-600 mb-1'>
-                                {session.teacher}
+                                {''}
                               </div>
                               <div className='flex items-center gap-1 mb-1'>
-                                <span
-                                  className={`w-2 h-2 rounded-full ${getTypeColor(
-                                    session.type
-                                  )}`}
-                                ></span>
-                                <span className='text-xs text-gray-600'>
-                                  {getTypeText(session.type)}
-                                </span>
+                                {/* Type info not available in ScheduleResponse */}
                               </div>
-                              <span
-                                className={`text-xs px-1 py-0.5 rounded-full ${getStatusColor(
-                                  session.status
-                                )}`}
-                              >
-                                {getStatusText(session.status)}
-                              </span>
                             </div>
                           </div>
                         ) : (
@@ -397,7 +413,7 @@ const StudyingSchedule: React.FC = () => {
                     <div>
                       <p className='text-sm text-gray-600'>Tên lớp</p>
                       <p className='font-medium text-gray-900'>
-                        {selectedSchedule.title}
+                        {selectedSchedule.classroom?.class_name || 'Lớp học'}
                       </p>
                     </div>
                   </div>
@@ -407,7 +423,8 @@ const StudyingSchedule: React.FC = () => {
                     <div>
                       <p className='text-sm text-gray-600'>Thời gian</p>
                       <p className='font-medium text-gray-900'>
-                        {selectedSchedule.time}
+                        {selectedSchedule.start_time} -{' '}
+                        {selectedSchedule.end_time}
                       </p>
                     </div>
                   </div>
@@ -417,12 +434,10 @@ const StudyingSchedule: React.FC = () => {
                     <div>
                       <p className='text-sm text-gray-600'>Ngày</p>
                       <p className='font-medium text-gray-900'>
-                        {
-                          dayNames[
-                            selectedSchedule.day as keyof typeof dayNames
-                          ]
-                        }{' '}
-                        - {selectedSchedule.date}
+                        {Object.entries(dayNames).find(
+                          ([k, v]) =>
+                            k.toLowerCase() === selectedSchedule.weekday
+                        )?.[1] || selectedSchedule.weekday}
                       </p>
                     </div>
                   </div>
@@ -432,7 +447,7 @@ const StudyingSchedule: React.FC = () => {
                     <div>
                       <p className='text-sm text-gray-600'>Phòng học</p>
                       <p className='font-medium text-gray-900'>
-                        {selectedSchedule.room}
+                        {selectedSchedule.classroom?.room || ''}
                       </p>
                     </div>
                   </div>
@@ -441,55 +456,15 @@ const StudyingSchedule: React.FC = () => {
                     <User className='w-5 h-5 text-gray-500' />
                     <div>
                       <p className='text-sm text-gray-600'>Giáo viên</p>
-                      <p className='font-medium text-gray-900'>
-                        {selectedSchedule.teacher}
-                      </p>
+                      <p className='font-medium text-gray-900'>{''}</p>
                     </div>
                   </div>
 
-                  {selectedSchedule.topic && (
-                    <div className='flex items-center space-x-3'>
-                      <Info className='w-5 h-5 text-gray-500' />
-                      <div>
-                        <p className='text-sm text-gray-600'>Chủ đề</p>
-                        <p className='font-medium text-gray-900'>
-                          {selectedSchedule.topic}
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                  {/* Topic info not available in ScheduleResponse */}
 
-                  <div className='flex items-center space-x-3'>
-                    <div
-                      className={`w-5 h-5 rounded ${getTypeColor(
-                        selectedSchedule.type
-                      )}`}
-                    ></div>
-                    <div>
-                      <p className='text-sm text-gray-600'>Loại</p>
-                      <p className='font-medium text-gray-900'>
-                        {getTypeText(selectedSchedule.type)}
-                      </p>
-                    </div>
-                  </div>
+                  {/* Type info not available in ScheduleResponse */}
 
-                  <div className='flex items-center space-x-3'>
-                    <div
-                      className={`w-5 h-5 rounded ${
-                        selectedSchedule.status === 'upcoming'
-                          ? 'bg-blue-100 border border-blue-200'
-                          : selectedSchedule.status === 'completed'
-                          ? 'bg-green-100 border border-green-200'
-                          : 'bg-red-100 border border-red-200'
-                      }`}
-                    ></div>
-                    <div>
-                      <p className='text-sm text-gray-600'>Trạng thái</p>
-                      <p className='font-medium text-gray-900'>
-                        {getStatusText(selectedSchedule.status)}
-                      </p>
-                    </div>
-                  </div>
+                  {/* Status info not available in ScheduleResponse */}
                 </div>
               </div>
 

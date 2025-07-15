@@ -10,21 +10,10 @@ import {
   Users,
 } from 'lucide-react';
 import { useTeacherApi } from '../_hooks/use-api';
-import { ClassSession } from '../../../types';
-import type { TeachingSchedule } from '../../../types';
-
-interface ClassItem {
-  id: string;
-  title: string;
-  room: string;
-  time: string;
-  color: string;
-  bgColor: string;
-}
-
-interface DaySchedule {
-  [key: string]: ClassItem[];
-}
+import {
+  ClassSession,
+  TeachingSchedule as TeachingScheduleType,
+} from '../../../types/teacher';
 
 const TeachingSchedule = () => {
   const { loading, error, getTeachingScheduleDetails } = useTeacherApi();
@@ -36,23 +25,21 @@ const TeachingSchedule = () => {
         const scheduleData = await getTeachingScheduleDetails();
 
         // Convert schedule data to sessions format
-        const convertedSessions = scheduleData.map(
-          (item: TeachingSchedule) => ({
-            id: item.id,
-            title: item.className,
-            room: item.room,
-            time: `${item.timeSlot.startTime} - ${item.timeSlot.endTime}`,
-            day: item.day,
-            studentCount: item.studentCount,
-            status: (item.status === 'scheduled'
-              ? 'Upcoming'
-              : item.status === 'in-progress'
-              ? 'In Progress'
-              : item.status === 'completed'
-              ? 'Completed'
-              : 'Upcoming') as 'In Progress' | 'Upcoming' | 'Completed',
-          })
-        );
+        const convertedSessions: ClassSession[] = [];
+        scheduleData.forEach((teacherSchedule) => {
+          teacherSchedule.schedules.forEach((schedule) => {
+            convertedSessions.push({
+              id: schedule.id,
+              class_name: `Class ${schedule.id}`,
+              course_name: 'English Course',
+              room: schedule.classroom?.class_name || 'Room 1',
+              weekday: schedule.weekday,
+              start_time: schedule.start_time,
+              end_time: schedule.end_time,
+              date: new Date().toISOString().split('T')[0],
+            });
+          });
+        });
 
         setSessions(convertedSessions);
       } catch (err) {
@@ -85,7 +72,7 @@ const TeachingSchedule = () => {
   ];
 
   // Generate schedule from API data
-  const schedule: DaySchedule = {};
+  const schedule: Record<string, any[]> = {};
 
   // Initialize empty schedule
   days.forEach((day) => {
@@ -116,9 +103,9 @@ const TeachingSchedule = () => {
     if (schedule[key]) {
       schedule[key].push({
         id: session.id,
-        title: session.title,
-        room: session.room,
-        time: session.time,
+        title: session.class_name,
+        room: session.room || 'Room 1',
+        time: `${session.start_time} - ${session.end_time}`,
         color: colorSet.color,
         bgColor: colorSet.bgColor,
       });

@@ -15,7 +15,7 @@ import EditClassroomModal from './_components/edit-classroom';
 import CreateClassroomModal from './_components/create-classroom';
 import AssignStudentModal from './_components/assign-student';
 import { useStaffClassroomApi } from '../_hooks';
-import { ClassroomCreate, ClassroomResponse } from '../../../types/classroom';
+import { ClassroomCreate, ClassroomResponse } from '../../../types/staff';
 
 export default function EnglishCourseInterface() {
   const router = useRouter();
@@ -39,7 +39,7 @@ export default function EnglishCourseInterface() {
   const fetchClassrooms = async () => {
     try {
       const data = await getClassrooms();
-      setClassrooms(data as ClassroomResponse[]);
+      setClassrooms(data);
       setIsLoading(false);
     } catch (err) {
       console.error('Failed to fetch classrooms:', err);

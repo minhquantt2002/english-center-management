@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from typing import Optional, List
 from uuid import UUID
 from ..models.user import User
@@ -17,16 +16,16 @@ def get_user_by_email(db: Session, email: str) -> Optional[User]:
     """Get user by email"""
     return db.query(User).filter(User.email == email).first()
 
-def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
+def get_users(db: Session) -> List[User]:
     """Get users with pagination"""
-    return db.query(User).offset(skip).limit(limit).all()
+    return db.query(User).all()
 
 def get_all_users(db: Session) -> List[User]:
     """Get all users without pagination"""
     return db.query(User).all()
 
 def get_users_by_role(db: Session, role_name: str) -> List[User]:
-    """Get users by role name"""
+    """Get users by role name"""    
     return db.query(User).filter(User.role_name == role_name).all()
 
 def create_user(db: Session, user_data: UserCreate, hashed_password: str) -> User:
@@ -47,7 +46,7 @@ def create_user(db: Session, user_data: UserCreate, hashed_password: str) -> Use
         level=user_data.level,
         parent_name=user_data.parent_name,
         parent_phone=user_data.parent_phone,
-        student_id=user_data.student_id
+        status=user_data.status
     )
     db.add(db_user)
     db.commit()
@@ -64,6 +63,17 @@ def update_user(db: Session, user_id: UUID, user_update: UserUpdate) -> Optional
     for field, value in update_data.items():
         setattr(db_user, field, value)
     
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def update_user_role(db: Session, user_id: UUID, new_role: str) -> Optional[User]:
+    """Update user role"""
+    db_user = get_user(db, user_id)
+    if not db_user:
+        return None
+    
+    db_user.role_name = new_role
     db.commit()
     db.refresh(db_user)
     return db_user

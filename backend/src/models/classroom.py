@@ -40,9 +40,9 @@ class Class(Base):
     # Relationships
     course = relationship("Course", back_populates="classes")
     teacher = relationship("User", back_populates="taught_classes")
-    enrollments = relationship("Enrollment", back_populates="class_")
-    exams = relationship("Exam", back_populates="class_")
-    feedbacks = relationship("Feedback", back_populates="class_")
-    schedules = relationship("Schedule", back_populates="class_")
+    enrollments = relationship("Enrollment", back_populates="classroom")
+    exams = relationship("Exam", back_populates="classroom")
+    feedbacks = relationship("Feedback", back_populates="classroom")
+    schedules = relationship("Schedule", back_populates="classroom")
 
  

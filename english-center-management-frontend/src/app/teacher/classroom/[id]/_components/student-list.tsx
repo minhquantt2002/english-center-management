@@ -9,23 +9,10 @@ import {
   CheckCircle,
   Star,
 } from 'lucide-react';
-import Image from 'next/image';
-
-interface Student {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  avatar: string;
-  level: string;
-  attendanceRate: number;
-  lastScore: number;
-  status: string;
-  joinDate: string;
-}
+import { EnrollmentNested } from '../../../../../types/teacher';
 
 interface StudentListProps {
-  students: Student[];
+  students: EnrollmentNested[];
 }
 
 const StudentList: React.FC<StudentListProps> = ({ students }) => {
@@ -33,36 +20,28 @@ const StudentList: React.FC<StudentListProps> = ({ students }) => {
 
   const filteredStudents = students.filter(
     (student) =>
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase())
+      student.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.student.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const renderStudentCard = (student: Student) => (
+  const renderStudentCard = (student: EnrollmentNested) => (
     <div
       key={student.id}
       className='bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow'
     >
       <div className='flex items-start space-x-3'>
-        <Image
-          src={student.avatar}
-          alt={student.name}
+        <img
+          src={student.student.avatar}
+          alt={student.student.name}
           className='w-12 h-12 rounded-full'
         />
         <div className='flex-1 min-w-0'>
           <h4 className='text-sm font-semibold text-gray-900 truncate'>
-            {student.name}
+            {student.student.name}
           </h4>
-          <p className='text-xs text-gray-500 truncate'>{student.email}</p>
-          <div className='flex items-center space-x-4 mt-2'>
-            <div className='flex items-center text-xs text-gray-600'>
-              <CheckCircle className='w-3 h-3 mr-1 text-green-500' />
-              {student.attendanceRate}%
-            </div>
-            <div className='flex items-center text-xs text-gray-600'>
-              <Star className='w-3 h-3 mr-1 text-yellow-500' />
-              {student.lastScore}/100
-            </div>
-          </div>
+          <p className='text-xs text-gray-500 truncate'>
+            {student.student.email}
+          </p>
         </div>
         <div className='flex items-center space-x-2'>
           <button className='p-1 text-gray-400 hover:text-gray-600'>

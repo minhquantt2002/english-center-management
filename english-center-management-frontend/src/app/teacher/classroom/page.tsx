@@ -13,37 +13,36 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useTeacherApi } from '../_hooks/use-api';
-import { ClassroomResponse } from '../../../types/classroom';
+import { TeacherClassroomResponse } from '../../../types/teacher';
 
 const MyClassesDashboard = () => {
-  const { loading, error, getTeacherClasses, getTeacherDashboard } =
-    useTeacherApi();
-  const [classes, setClasses] = useState<ClassroomResponse[]>([]);
+  const { loading, error, getTeacherClasses } = useTeacherApi();
+  const [classes, setClasses] = useState<TeacherClassroomResponse[]>([]);
   const [stats, setStats] = useState([
     {
       icon: Book,
-      label: 'Total Classes',
+      label: 'Tổng số lớp',
       value: '0',
       bgColor: 'bg-blue-50',
       iconColor: 'text-blue-500',
     },
     {
       icon: Users,
-      label: 'Total Students',
+      label: 'Tổng số học viên',
       value: '0',
       bgColor: 'bg-green-50',
       iconColor: 'text-green-500',
     },
     {
       icon: Clock,
-      label: 'Hours/Week',
+      label: 'Giờ/tuần',
       value: '24',
       bgColor: 'bg-orange-50',
       iconColor: 'text-orange-500',
     },
     {
       icon: Star,
-      label: 'Avg Rating',
+      label: 'Đánh giá trung bình',
       value: '4.8',
       bgColor: 'bg-purple-50',
       iconColor: 'text-purple-500',
@@ -53,47 +52,14 @@ const MyClassesDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [classesData, dashboardData] = await Promise.all([
-          getTeacherClasses(),
-          getTeacherDashboard(),
-        ]);
+        const classesData = await getTeacherClasses();
 
-        // Process classes data
-        const processedClasses: ClassroomResponse[] = classesData.map(
-          (classItem: ClassroomResponse, index: number) => {
-            const levelMap = {
-              beginner: 'Beginner' as const,
-              intermediate: 'Intermediate' as const,
-              advanced: 'Advanced' as const,
-              upper_intermediate: 'Advanced' as const,
-            };
-
-            return {
-              id: classItem.id,
-              title: classItem.class_name,
-              level:
-                levelMap[classItem.course_level as keyof typeof levelMap] ||
-                'Intermediate',
-              students: [1, 2, 3, 4],
-              schedule: classItem.schedules
-                .map((schedule) => schedule.weekday)
-                .join(', '),
-              room: classItem.room || 'Room 101',
-              building: 'Building A',
-              unit: `Unit ${index + 1}: Course Content`,
-            };
-          }
-        );
-
-        setClasses(processedClasses);
+        setClasses(classesData);
 
         // Update stats
         setStats((prevStats) => [
           { ...prevStats[0], value: classesData.length.toString() },
-          {
-            ...prevStats[1],
-            value: dashboardData.weeklyStats.studentsTotal.toString() || '0',
-          },
+          { ...prevStats[1], value: classesData.length.toString() },
           prevStats[2],
           prevStats[3],
         ]);
@@ -103,7 +69,7 @@ const MyClassesDashboard = () => {
     };
 
     fetchData();
-  }, [getTeacherClasses, getTeacherDashboard]);
+  }, [getTeacherClasses]);
 
   return (
     <div className='min-h-screen bg-gray-50 p-6'>

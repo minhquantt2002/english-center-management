@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader2, Calendar, Users, BookOpen } from 'lucide-react';
 import { useCourseApi, useTeacherApi } from '../../_hooks';
-import { UserResponse } from '../../../../types/user';
-import { CourseResponse } from '../../../../types/course';
-import { ClassroomUpdate } from '../../../../types/classroom';
+import {
+  CourseResponse,
+  ClassroomUpdate,
+  TeacherResponse,
+} from '../../../../types/admin';
 
 interface EditClassroomModalProps {
   isOpen: boolean;
@@ -28,11 +30,10 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
     teacher_id: '',
     start_date: '',
     end_date: '',
-    description: '',
   });
 
   const [courses, setCourses] = useState<CourseResponse[]>([]);
-  const [teachers, setTeachers] = useState<UserResponse[]>([]);
+  const [teachers, setTeachers] = useState<TeacherResponse[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { getCourses } = useCourseApi();
@@ -54,7 +55,6 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
           ? classroom.start_date.split('T')[0]
           : '',
         end_date: classroom.end_date ? classroom.end_date.split('T')[0] : '',
-        description: classroom.description || '',
       });
     }
   }, [classroom, isOpen]);
@@ -317,21 +317,6 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
                 <span> / {classroom.max_students}</span>
               )}
             </p>
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Mô tả
-            </label>
-            <textarea
-              name='description'
-              value={formData.description}
-              onChange={handleInputChange}
-              rows={3}
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-              placeholder='Nhập mô tả về lớp học (tùy chọn)'
-            />
           </div>
 
           {/* Action Buttons */}

@@ -3,17 +3,19 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search, Users, User, Check, AlertCircle } from 'lucide-react';
 import { useStaffStudentApi, useStaffClassroomApi } from '../../_hooks';
-import { ClassroomResponse } from '../../../../types/classroom';
-import { UserResponse } from '../../../../types/user';
+import { ClassroomResponse, StudentResponse } from '../../../../types/staff';
 
 interface AssignStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
   classroom: ClassroomResponse | null;
-  onAssignStudents: (classroomId: string, studentIds: string[]) => void;
+  onAssignStudents: (
+    classroomId: string,
+    studentIds: string[]
+  ) => Promise<void>;
 }
 
-interface StudentWithSelection extends UserResponse {
+interface StudentWithSelection extends StudentResponse {
   isSelected: boolean;
   isAssigned: boolean;
 }
@@ -46,8 +48,8 @@ export default function AssignStudentModal({
         setIsFetchingStudents(true);
         try {
           const availableStudents = await getAvailableStudents();
-          const studentsWithSelection = availableStudents.data.map(
-            (student: UserResponse) => ({
+          const studentsWithSelection = availableStudents.map(
+            (student: StudentResponse) => ({
               ...student,
               isSelected: false,
               isAssigned: false,
@@ -71,7 +73,7 @@ export default function AssignStudentModal({
       searchTerm === '' ||
       student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.student_id?.toLowerCase().includes(searchTerm.toLowerCase());
+      student.id?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesLevel =
       selectedLevel === 'all' || student.input_level === selectedLevel;
@@ -121,16 +123,16 @@ export default function AssignStudentModal({
         selectedStudentIds
       );
 
-      // Show success/failure messages
-      if (result.failed_enrollments && result.failed_enrollments.length > 0) {
-        const failedCount = result.failed_enrollments.length;
-        const successCount = result.successful_enrollments.length;
-        alert(
-          `Đã phân công ${successCount} học viên thành công. ${failedCount} học viên không thể phân công.`
-        );
-      } else {
-        alert(`Đã phân công ${selectedStudentIds.length} học viên thành công!`);
-      }
+      // // Show success/failure messages
+      // if (result.failed_enrollments && result.failed_enrollments.length > 0) {
+      //   const failedCount = result.failed_enrollments.length;
+      //   const successCount = result.successful_enrollments.length;
+      //   alert(
+      //     `Đã phân công ${successCount} học viên thành công. ${failedCount} học viên không thể phân công.`
+      //   );
+      // } else {
+      //   alert(`Đã phân công ${selectedStudentIds.length} học viên thành công!`);
+      // }
 
       await onAssignStudents(classroom.id, selectedStudentIds);
       onClose();
@@ -295,7 +297,7 @@ export default function AssignStudentModal({
                               {student.name}
                             </p>
                             <p className='text-sm text-gray-500 truncate'>
-                              {student.student_id}
+                              {student.id}
                             </p>
                           </div>
                         </div>

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from datetime import date, datetime
 from uuid import UUID
 from .base import BaseSchema
@@ -24,6 +24,22 @@ class ExamUpdate(BaseSchema):
     total_points: Optional[int] = None
     exam_type: Optional[str] = None
 
+
+# Nested schemas for relationships
+class ClassroomNested(BaseSchema):
+    id: UUID
+    class_name: str
+    room: Optional[str] = None
+
+class ScoreNested(BaseSchema):
+    id: UUID
+    total_score: Optional[float] = None
+    grade: Optional[str] = None
+
+# Exam with relationships
 class ExamResponse(ExamBase):
     id: UUID
     created_at: datetime 
+
+    classroom: Optional[ClassroomNested] = None
+    scores: Optional[List[ScoreNested]] = None 

@@ -51,7 +51,7 @@ const StudentDashboard = () => {
         getStudentScores(),
       ]);
 
-      setStudentProfile(dashboard.profile || dashboard.studentProfile);
+      setStudentProfile(dashboard);
 
       // Get upcoming classes (next 3 classes)
       const upcoming = classes

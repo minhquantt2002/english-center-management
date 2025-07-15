@@ -1,68 +1,38 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
-
-interface ScheduleSession {
-  id: string;
-  date: string;
-  day: string;
-  time: string;
-  topic: string;
-  status: 'completed' | 'upcoming' | 'cancelled';
-  attendance: number;
-  totalStudents: number;
-}
+import { ScheduleNested } from '../../../../../types/teacher';
 
 interface ClassScheduleProps {
-  sessions: ScheduleSession[];
+  sessions: ScheduleNested[];
 }
 
 const ClassSchedule: React.FC<ClassScheduleProps> = ({ sessions }) => {
-  const renderScheduleItem = (session: ScheduleSession) => (
+  const renderScheduleItem = (session: ScheduleNested) => (
     <div
       key={session.id}
       className='bg-white rounded-lg border border-gray-200 p-4'
     >
       <div className='flex items-center justify-between mb-3'>
         <div className='flex items-center space-x-3'>
-          <div
-            className={`w-3 h-3 rounded-full ${
-              session.status === 'completed'
-                ? 'bg-green-500'
-                : session.status === 'upcoming'
-                ? 'bg-blue-500'
-                : 'bg-gray-400'
-            }`}
-          />
+          <div className={`w-3 h-3 rounded-full bg-gray-400`} />
           <div>
             <h4 className='text-sm font-semibold text-gray-900'>
-              {session.day}
+              {session.weekday}
             </h4>
-            <p className='text-xs text-gray-500'>{session.date}</p>
+            <p className='text-xs text-gray-500'>{session.start_time}</p>
           </div>
         </div>
         <div className='text-right'>
-          <p className='text-sm font-medium text-gray-900'>{session.time}</p>
-          <p className='text-xs text-gray-500'>
-            {session.attendance}/{session.totalStudents} học viên
+          <p className='text-sm font-medium text-gray-900'>
+            {session.end_time}
           </p>
         </div>
       </div>
-      <p className='text-sm text-gray-700 mb-3'>{session.topic}</p>
       <div className='flex items-center justify-between'>
         <span
-          className={`text-xs px-2 py-1 rounded-full ${
-            session.status === 'completed'
-              ? 'bg-green-100 text-green-700'
-              : session.status === 'upcoming'
-              ? 'bg-blue-100 text-blue-700'
-              : 'bg-gray-100 text-gray-700'
-          }`}
+          className={`text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700`}
         >
-          {session.status === 'completed'
-            ? 'Đã hoàn thành'
-            : session.status === 'upcoming'
-            ? 'Sắp tới'
-            : 'Đã hủy'}
+          Lịch học
         </span>
         <button className='text-xs text-blue-600 hover:text-blue-700 font-medium'>
           Chi tiết

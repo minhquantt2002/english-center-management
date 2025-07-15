@@ -1,26 +1,59 @@
-from .user import UserBase, UserCreate, UserUpdate, UserResponse, UserInDB
+from .user import (
+    UserBase, UserCreate, UserUpdate, UserResponse,
+    TeacherBase, TeacherCreate, TeacherUpdate, TeacherResponse,
+    StudentBase, StudentCreate, StudentUpdate, StudentResponse,
+    UserRole, StudentStatus,
+)
 from .course import CourseBase, CourseCreate, CourseUpdate, CourseResponse
-from .classroom import ClassroomBase, ClassroomCreate, ClassroomUpdate, ClassroomResponse
-from .schedule import ScheduleBase, ScheduleCreate, ScheduleUpdate, ScheduleResponse
+from .classroom import (
+    ClassroomBase, ClassroomCreate, ClassroomUpdate, ClassroomResponse,
+    ClassStatus, CourseLevel
+)
+from .schedule import (
+    ScheduleBase, ScheduleCreate, ScheduleUpdate, ScheduleResponse,
+    Weekday
+)
 from .score import ScoreBase, ScoreCreate, ScoreUpdate, ScoreResponse
 from .exam import ExamBase, ExamCreate, ExamUpdate, ExamResponse
-
-from .enrollment import EnrollmentBase, EnrollmentCreate, EnrollmentResponse
-from .feedback import FeedbackBase, FeedbackCreate, FeedbackUpdate, FeedbackResponse
-from .teacher import TeacherBase, TeacherCreate, TeacherUpdate, TeacherResponse
-from .student import StudentBase, StudentCreate, StudentUpdate, StudentResponse
+from .enrollment import (
+    EnrollmentBase, EnrollmentCreate, EnrollmentUpdate, EnrollmentResponse,
+)
+from .feedback import (
+    FeedbackBase, FeedbackCreate, FeedbackUpdate, FeedbackResponse,
+)
+from .auth import LoginRequest, RegisterRequest, TokenResponse, TokenData
 
 
 __all__ = [
-    "UserBase", "UserCreate", "UserUpdate", "UserResponse", "UserInDB",
-    "CourseBase", "CourseCreate", "CourseUpdate", "CourseResponse",
-    "ClassroomBase", "ClassroomCreate", "ClassroomUpdate", "ClassroomResponse",
-    "ScheduleBase", "ScheduleCreate", "ScheduleUpdate", "ScheduleResponse",
-    "ScoreBase", "ScoreCreate", "ScoreUpdate", "ScoreResponse",
-    "ExamBase", "ExamCreate", "ExamUpdate", "ExamResponse",
-
-    "EnrollmentBase", "EnrollmentCreate", "EnrollmentResponse",
-    "FeedbackBase", "FeedbackCreate", "FeedbackUpdate", "FeedbackResponse",
+    # User schemas
+    "UserBase", "UserCreate", "UserUpdate", "UserResponse",
     "TeacherBase", "TeacherCreate", "TeacherUpdate", "TeacherResponse",
     "StudentBase", "StudentCreate", "StudentUpdate", "StudentResponse",
+    "UserRole", "StudentStatus",
+    
+    # Course schemas
+    "CourseBase", "CourseCreate", "CourseUpdate", "CourseResponse",
+    
+    # Classroom schemas
+    "ClassroomBase", "ClassroomCreate", "ClassroomUpdate", "ClassroomResponse",
+    "ClassStatus", "CourseLevel",
+    
+    # Schedule schemas
+    "ScheduleBase", "ScheduleCreate", "ScheduleUpdate", "ScheduleResponse",
+    "Weekday",
+    
+    # Score schemas
+    "ScoreBase", "ScoreCreate", "ScoreUpdate", "ScoreResponse",
+    
+    # Exam schemas
+    "ExamBase", "ExamCreate", "ExamUpdate", "ExamResponse",
+    
+    # Enrollment schemas
+    "EnrollmentBase", "EnrollmentCreate", "EnrollmentUpdate", "EnrollmentResponse",
+    
+    # Feedback schemas
+    "FeedbackBase", "FeedbackCreate", "FeedbackUpdate", "FeedbackResponse",
+    
+    # Auth schemas
+    "LoginRequest", "RegisterRequest", "TokenResponse", "TokenData",
 ] 

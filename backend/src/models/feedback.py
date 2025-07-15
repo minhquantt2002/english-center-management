@@ -21,4 +21,4 @@ class Feedback(Base):
     # Relationships
     teacher = relationship("User", foreign_keys=[teacher_id], back_populates="given_feedbacks")
     student = relationship("User", foreign_keys=[student_id], back_populates="received_feedbacks")
-    class_ = relationship("Class", back_populates="feedbacks") 
+    classroom = relationship("Class", back_populates="feedbacks") 

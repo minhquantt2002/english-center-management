@@ -7,27 +7,30 @@ import {
   Trash2,
   Plus,
   Eye,
-  Filter,
   BarChart3,
   Users,
   Calendar,
   BookOpen,
 } from 'lucide-react';
-import { Course } from '../../../types';
-import CreateCourseModal, { CourseFormData } from './_components/create-course';
+import {
+  CourseCreate,
+  CourseResponse,
+  CourseUpdate,
+} from '../../../types/admin';
+import CreateCourseModal from './_components/create-course';
 import EditCourseModal from './_components/edit-course';
 import ViewCourseModal from './_components/view-course';
 import { useCourseApi } from '../_hooks';
 
 const CourseManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [levelFilter, setLevelFilter] = useState('Tất cả cấp độ');
-  const [statusFilter, setStatusFilter] = useState('Tất cả trạng thái');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<CourseResponse | null>(
+    null
+  );
+  const [courses, setCourses] = useState<CourseResponse[]>([]);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
 
   const { createCourse, updateCourse, deleteCourse, getCourses } =
@@ -71,44 +74,13 @@ const CourseManagement = () => {
   };
 
   // Use courses data from API
-  const coursesWithDisplay = courses.map((course: Course) => ({
+  const coursesWithDisplay = courses.map((course: CourseResponse) => ({
     ...course,
-    // Handle both course_name and name fields
-    name: course.course_name || course.name || 'Không có tên',
+    name: course.course_name || 'Không có tên',
     displayLevel: getLevel(course.level || 'beginner'),
-    displayDuration: course.duration
-      ? `${course.duration}`
+    displayDuration: course.total_weeks
+      ? `${course.total_weeks} tuần`
       : 'Không có thông tin',
-    displayStartDate:
-      course.startDate || course.start_date
-        ? new Date(course.startDate || course.start_date).toLocaleDateString(
-            'vi-VN',
-            {
-              year: 'numeric',
-              month: 'numeric',
-              day: 'numeric',
-            }
-          )
-        : 'Không có ngày',
-    displayEndDate:
-      course.endDate || course.end_date
-        ? new Date(course.endDate || course.end_date).toLocaleDateString(
-            'vi-VN',
-            {
-              year: 'numeric',
-              month: 'numeric',
-              day: 'numeric',
-            }
-          )
-        : 'Không có ngày',
-    displayStatus:
-      course.status === 'active'
-        ? 'Đang hoạt động'
-        : course.status === 'completed'
-        ? 'Đã hoàn thành'
-        : course.status === 'upcoming'
-        ? 'Sắp diễn ra'
-        : 'Sắp diễn ra', // Default fallback
   }));
 
   const getLevelBadgeColor = (level: string) => {
@@ -138,31 +110,17 @@ const CourseManagement = () => {
   };
 
   const filteredCourses = coursesWithDisplay.filter((course) => {
-    // Handle both course_name and name fields for search
     const courseName = course.course_name || course.name || '';
     const matchesSearch = courseName
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
 
-    const matchesLevel =
-      levelFilter === 'Tất cả cấp độ' || course.displayLevel === levelFilter;
-    const matchesStatus =
-      statusFilter === 'Tất cả trạng thái' ||
-      course.displayStatus === statusFilter;
-    return matchesSearch && matchesLevel && matchesStatus;
+    return matchesSearch;
   });
 
-  // Calculate statistics
-  const stats = {
-    total: courses.length,
-    active: courses.filter((c) => c.status === 'active').length,
-    upcoming: courses.filter((c) => c.status === 'upcoming').length,
-    completed: courses.filter((c) => c.status === 'completed').length,
-  };
-
-  const handleCreateCourse = async (courseData: CourseFormData) => {
+  const handleCreateCourse = async (courseData: CourseCreate) => {
     try {
-      await createCourse(courseData);
+      await createCourse(courseData as CourseCreate);
       setIsCreateModalOpen(false);
       await fetchCourses(); // Refresh the list
       alert('Khóa học đã được tạo thành công!');
@@ -194,7 +152,7 @@ const CourseManagement = () => {
 
   const handleUpdateCourse = async (
     courseId: string,
-    courseData: CourseFormData
+    courseData: CourseUpdate
   ) => {
     try {
       await updateCourse(courseId, courseData);
@@ -261,7 +219,7 @@ const CourseManagement = () => {
                   Tổng khóa học
                 </p>
                 <p className='text-3xl font-bold text-gray-900'>
-                  {stats.total}
+                  {courses.length}
                 </p>
               </div>
               <div className='p-3 bg-blue-100 rounded-xl'>
@@ -277,7 +235,10 @@ const CourseManagement = () => {
                   Đang hoạt động
                 </p>
                 <p className='text-3xl font-bold text-green-600'>
-                  {stats.active}
+                  {
+                    courses.filter((course) => course.level === 'beginner')
+                      .length
+                  }
                 </p>
               </div>
               <div className='p-3 bg-green-100 rounded-xl'>
@@ -291,7 +252,10 @@ const CourseManagement = () => {
               <div>
                 <p className='text-sm font-medium text-gray-600'>Sắp diễn ra</p>
                 <p className='text-3xl font-bold text-purple-600'>
-                  {stats.upcoming}
+                  {
+                    courses.filter((course) => course.level === 'intermediate')
+                      .length
+                  }
                 </p>
               </div>
               <div className='p-3 bg-purple-100 rounded-xl'>
@@ -307,7 +271,10 @@ const CourseManagement = () => {
                   Đã hoàn thành
                 </p>
                 <p className='text-3xl font-bold text-gray-600'>
-                  {stats.completed}
+                  {
+                    courses.filter((course) => course.level === 'advanced')
+                      .length
+                  }
                 </p>
               </div>
               <div className='p-3 bg-gray-100 rounded-xl'>
@@ -336,34 +303,6 @@ const CourseManagement = () => {
                     className='w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors'
                   />
                 </div>
-              </div>
-
-              {/* Level Filter */}
-              <div className='sm:w-48'>
-                <select
-                  value={levelFilter}
-                  onChange={(e) => setLevelFilter(e.target.value)}
-                  className='w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors'
-                >
-                  <option>Tất cả cấp độ</option>
-                  <option>Cơ bản</option>
-                  <option>Trung cấp</option>
-                  <option>Nâng cao</option>
-                </select>
-              </div>
-
-              {/* Status Filter */}
-              <div className='sm:w-48'>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className='w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors'
-                >
-                  <option>Tất cả trạng thái</option>
-                  <option>Đang hoạt động</option>
-                  <option>Sắp diễn ra</option>
-                  <option>Đã hoàn thành</option>
-                </select>
               </div>
             </div>
 
@@ -414,10 +353,6 @@ const CourseManagement = () => {
               <h2 className='text-xl font-semibold text-gray-900'>
                 Danh sách khóa học ({filteredCourses.length})
               </h2>
-              <div className='flex items-center gap-2 text-sm text-gray-600'>
-                <Filter size={16} />
-                <span>Đã lọc {filteredCourses.length} khóa học</span>
-              </div>
             </div>
           </div>
 
@@ -435,15 +370,6 @@ const CourseManagement = () => {
                     </th>
                     <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                       Thời lượng
-                    </th>
-                    <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
-                      Ngày bắt đầu
-                    </th>
-                    <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
-                      Ngày kết thúc
-                    </th>
-                    <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
-                      Trạng thái
                     </th>
                     <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                       Thao tác
@@ -480,21 +406,7 @@ const CourseManagement = () => {
                       <td className='px-6 py-4 text-sm text-gray-900'>
                         {course.displayDuration}
                       </td>
-                      <td className='px-6 py-4 text-sm text-gray-900'>
-                        {course.displayStartDate}
-                      </td>
-                      <td className='px-6 py-4 text-sm text-gray-900'>
-                        {course.displayEndDate}
-                      </td>
-                      <td className='px-6 py-4'>
-                        <span
-                          className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getStatusBadgeColor(
-                            course.displayStatus
-                          )}`}
-                        >
-                          {course.displayStatus}
-                        </span>
-                      </td>
+
                       <td className='px-6 py-4'>
                         <div className='flex items-center gap-2'>
                           <button
@@ -559,19 +471,6 @@ const CourseManagement = () => {
 
                       <div className='flex items-center justify-between'>
                         <span className='text-sm text-gray-600'>
-                          Trạng thái:
-                        </span>
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full border ${getStatusBadgeColor(
-                            course.displayStatus
-                          )}`}
-                        >
-                          {course.displayStatus}
-                        </span>
-                      </div>
-
-                      <div className='flex items-center justify-between'>
-                        <span className='text-sm text-gray-600'>
                           Thời lượng:
                         </span>
                         <span className='text-sm font-medium text-gray-900'>
@@ -628,34 +527,6 @@ const CourseManagement = () => {
             </div>
           )}
         </div>
-
-        {/* Pagination */}
-        {filteredCourses.length > 0 && (
-          <div className='bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-4'>
-            <div className='flex items-center justify-between'>
-              <div className='text-sm text-gray-600'>
-                Hiển thị {filteredCourses.length} khóa học
-              </div>
-              <div className='flex items-center gap-2'>
-                <button className='px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors'>
-                  Trước
-                </button>
-                <button className='px-3 py-2 text-sm bg-blue-600 text-white rounded-lg'>
-                  1
-                </button>
-                <button className='px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors'>
-                  2
-                </button>
-                <button className='px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors'>
-                  3
-                </button>
-                <button className='px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors'>
-                  Tiếp
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Create Course Modal */}

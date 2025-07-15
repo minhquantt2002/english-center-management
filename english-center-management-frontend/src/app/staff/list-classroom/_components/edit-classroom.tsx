@@ -11,17 +11,12 @@ import {
   Edit as EditIcon,
   Plus,
 } from 'lucide-react';
-import {
-  useStaffCourseApi,
-  useStaffTeacherApi,
-  useStaffStatsApi,
-} from '../../_hooks';
+import { useStaffTeacherApi } from '../../_hooks';
 import {
   ClassroomResponse,
   ClassroomUpdate,
-  ClassStatus,
-  weekdayOptions,
-} from '../../../../types/classroom';
+  TeacherResponse,
+} from '../../../../types/staff';
 
 interface EditClassroomModalProps {
   isOpen: boolean;
@@ -40,35 +35,25 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
     class_name: '',
     course_id: '',
     teacher_id: '',
-    status: ClassStatus.ACTIVE,
+    status: 'active',
     start_date: '',
     end_date: '',
     room: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [teachers, setTeachers] = useState<any[]>([]);
-  const [courses, setCourses] = useState<any[]>([]);
-  const [rooms, setRooms] = useState<any[]>([]);
+  const [teachers, setTeachers] = useState<TeacherResponse[]>([]);
   const [schedules, setSchedules] = useState([
     { weekday: '', start_time: '', end_time: '' },
   ]);
   const [scheduleErrors, setScheduleErrors] = useState<string[]>([]);
   const { getTeachers } = useStaffTeacherApi();
-  const { getCourses } = useStaffCourseApi();
-  const { getRooms } = useStaffStatsApi();
 
   // Fetch data for dropdowns
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [teachersData, coursesData, roomsData] = await Promise.all([
-          getTeachers(),
-          getCourses(),
-          getRooms(),
-        ]);
+        const teachersData = await getTeachers();
         setTeachers(teachersData);
-        setCourses(coursesData);
-        setRooms(roomsData);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -76,7 +61,7 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
     if (isOpen) {
       fetchData();
     }
-  }, [isOpen, getTeachers, getCourses, getRooms]);
+  }, [isOpen, getTeachers]);
 
   // Map classroom data to state
   useEffect(() => {
@@ -85,7 +70,7 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
         class_name: classroom.class_name || '',
         course_id: classroom.course_id || '',
         teacher_id: classroom.teacher_id || '',
-        status: (classroom.status as ClassStatus) || ClassStatus.ACTIVE,
+        status: classroom.status || 'active',
         start_date: classroom.start_date || '',
         end_date: classroom.end_date || '',
         room: classroom.room || '',
@@ -260,20 +245,15 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
                 <MapPin className='w-4 h-4 inline mr-2' />
                 Phòng học *
               </label>
-              <select
+              <input
+                type='text'
                 value={formData.room}
                 onChange={(e) => handleInputChange('room', e.target.value)}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
                   errors.room ? 'border-red-300' : 'border-gray-300'
                 }`}
-              >
-                <option value=''>Chọn phòng học</option>
-                {rooms.map((room) => (
-                  <option key={room.id} value={room.name}>
-                    {room.name} - Sức chứa: {room.capacity}
-                  </option>
-                ))}
-              </select>
+                placeholder='Nhập tên phòng học'
+              />
               {errors.room && (
                 <p className='text-red-500 text-sm mt-1'>{errors.room}</p>
               )}
@@ -381,11 +361,13 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
                       className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
                     >
                       <option value=''>Chọn thứ</option>
-                      {weekdayOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
+                      <option value='monday'>Thứ Hai</option>
+                      <option value='tuesday'>Thứ Ba</option>
+                      <option value='wednesday'>Thứ Tư</option>
+                      <option value='thursday'>Thứ Năm</option>
+                      <option value='friday'>Thứ Sáu</option>
+                      <option value='saturday'>Thứ Bảy</option>
+                      <option value='sunday'>Chủ Nhật</option>
                     </select>
                   </div>
                   {/* Start time */}

@@ -13,12 +13,12 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { useStudentApi } from '../_hooks/use-api';
-import { StudentClass } from '../../../types/student';
+import { ClassroomResponse } from '../../../types/student';
 
 const StudentClassroomPage: React.FC = () => {
   const router = useRouter();
   const { loading, error, getStudentClasses } = useStudentApi();
-  const [classes, setClasses] = useState<StudentClass[]>([]);
+  const [classes, setClasses] = useState<ClassroomResponse[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -161,7 +161,7 @@ const StudentClassroomPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Đang học</p>
               <p className='text-xl font-bold text-gray-900'>
-                {classes.filter((c) => c.status === 'In Progress').length}
+                {classes.filter((c) => c.status === 'active').length}
               </p>
             </div>
           </div>
@@ -175,7 +175,7 @@ const StudentClassroomPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Hoàn thành</p>
               <p className='text-xl font-bold text-gray-900'>
-                {classes.filter((c) => c.status === 'Completed').length}
+                {classes.filter((c) => c.status === 'completed').length}
               </p>
             </div>
           </div>
@@ -189,7 +189,7 @@ const StudentClassroomPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Sắp tới</p>
               <p className='text-xl font-bold text-gray-900'>
-                {classes.filter((c) => c.status === 'Upcoming').length}
+                {classes.filter((c) => c.status === 'cancelled').length}
               </p>
             </div>
           </div>
@@ -208,15 +208,15 @@ const StudentClassroomPage: React.FC = () => {
             <div className='flex items-start justify-between mb-4'>
               <div className='flex-1'>
                 <h3 className='text-lg font-semibold text-gray-900 mb-1 group-hover:text-purple-600 transition-colors'>
-                  {classItem.name}
+                  {classItem.class_name}
                 </h3>
                 <div className='flex items-center gap-2'>
                   <span
                     className={`px-2 py-1 text-xs font-medium rounded-full ${getLevelColor(
-                      classItem.level
+                      classItem.course_level
                     )}`}
                   >
-                    {getLevelText(classItem.level)}
+                    {getLevelText(classItem.course_level)}
                   </span>
                   <span
                     className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
@@ -239,11 +239,9 @@ const StudentClassroomPage: React.FC = () => {
               </div>
               <div>
                 <p className='text-sm font-medium text-gray-900'>
-                  {classItem.teacher.name}
+                  {classItem.teacher?.name}
                 </p>
-                <p className='text-xs text-gray-500'>
-                  {classItem.teacher.specialization || 'Giáo viên'}
-                </p>
+                <p className='text-xs text-gray-500'>Giáo viên</p>
               </div>
             </div>
 
@@ -252,34 +250,15 @@ const StudentClassroomPage: React.FC = () => {
               <div className='flex items-center gap-2 text-sm text-gray-600'>
                 <Clock className='w-4 h-4' />
                 <span>
-                  {classItem.schedule.days} - {classItem.schedule.time}
+                  {classItem.schedules && classItem.schedules.length > 0
+                    ? `${classItem.schedules[0].weekday} ${classItem.schedules[0].start_time} - ${classItem.schedules[0].end_time}`
+                    : 'Chưa có lịch'}
                 </span>
               </div>
               <div className='flex items-center gap-2 text-sm text-gray-600'>
                 <MapPin className='w-4 h-4' />
                 <span>Phòng {classItem.room}</span>
               </div>
-            </div>
-
-            {/* Progress Info */}
-            <div className='mb-4'>
-              <div className='flex items-center justify-between text-sm'>
-                <span className='text-gray-600'>Tiến độ học tập</span>
-                <span className='font-medium text-gray-900'>
-                  {classItem.sessionsCompleted || 0}
-                  {classItem.totalSessions &&
-                    `/${classItem.totalSessions}`}{' '}
-                  buổi
-                </span>
-              </div>
-              {classItem.nextSession && (
-                <div className='flex items-center gap-2 text-sm text-gray-600 mt-1'>
-                  <Clock className='w-4 h-4' />
-                  <span>
-                    Buổi tiếp theo: {formatDate(classItem.nextSession)}
-                  </span>
-                </div>
-              )}
             </div>
 
             {/* Action Buttons */}

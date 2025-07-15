@@ -14,9 +14,8 @@ class Enrollment(Base):
     student_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     enrollment_at = Column(Date, server_default=func.current_date())
     status = Column(String(50), default="active")  # active, completed, dropped
-    notes = Column(Text)  # Ghi chú về việc đăng ký
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    class_ = relationship("Class", back_populates="enrollments")
+    classroom = relationship("Class", back_populates="enrollments")
     student = relationship("User", back_populates="enrollments") 

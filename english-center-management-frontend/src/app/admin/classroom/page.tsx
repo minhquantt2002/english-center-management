@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Loader2 } from 'lucide-react';
 import { useClassroomApi } from '../_hooks';
 import { CreateClassroomModal, EditClassroomModal } from './_components';
-import { ClassroomResponse } from '../../../types/classroom';
+import { ClassroomResponse } from '../../../types/admin';
 
 const ClassManagement: React.FC = () => {
   const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
@@ -205,9 +205,6 @@ const ClassManagement: React.FC = () => {
                         <span className='text-gray-700 font-medium'>
                           {classroom.teacher.name}
                         </span>
-                        <p className='text-xs text-gray-500'>
-                          {classroom.teacher.specialization}
-                        </p>
                       </div>
                     </div>
                   </div>

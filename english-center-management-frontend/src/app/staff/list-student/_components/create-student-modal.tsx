@@ -2,26 +2,12 @@
 
 import React, { useState } from 'react';
 import { X, User, Phone, Mail, BookOpen, Users, MapPin } from 'lucide-react';
-import { CourseLevel } from '../../../../types';
+import { StudentCreate } from '../../../../types/staff';
 
 interface CreateStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateStudent: (studentData: StudentFormData) => Promise<void> | void;
-}
-
-export interface StudentFormData {
-  name: string;
-  email: string;
-  phone: string;
-  dateOfBirth: string;
-  level: CourseLevel;
-  address: string;
-  emergencyContact: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
+  onCreateStudent: (studentData: StudentCreate) => Promise<void> | void;
 }
 
 const levels = [
@@ -31,43 +17,28 @@ const levels = [
   { value: 'advanced', label: 'Nâng cao' },
 ];
 
-const relationships = [
-  { value: 'Father', label: 'Cha' },
-  { value: 'Mother', label: 'Mẹ' },
-  { value: 'Sibling', label: 'Anh/Chị/Em' },
-  { value: 'Spouse', label: 'Vợ/Chồng' },
-  { value: 'Friend', label: 'Bạn bè' },
-  { value: 'Other', label: 'Khác' },
-];
-
 export default function CreateStudentModal({
   isOpen,
   onClose,
   onCreateStudent,
 }: CreateStudentModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<StudentFormData>({
+  const [formData, setFormData] = useState<StudentCreate>({
     name: '',
     email: '',
-    phone: '',
-    dateOfBirth: '',
-    level: 'beginner',
-    address: '',
-    emergencyContact: {
-      name: '',
-      phone: '',
-      relationship: 'Father',
-    },
+    phone_number: '',
+    date_of_birth: '',
+    input_level: 'beginner',
+    parent_name: '',
+    parent_phone: '',
+    bio: '',
+    status: 'active',
+    password: '',
   });
 
   const [errors, setErrors] = useState<
     Partial<
-      Record<
-        | keyof StudentFormData
-        | 'emergencyContactName'
-        | 'emergencyContactPhone',
-        string
-      >
+      Record<keyof StudentCreate | 'parent_name' | 'parent_phone', string>
     >
   >({});
 
@@ -84,22 +55,24 @@ export default function CreateStudentModal({
       newErrors.email = 'Email không hợp lệ';
     }
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Số điện thoại là bắt buộc';
-    } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
+    if (!formData.phone_number.trim()) {
+      newErrors.phone_number = 'Số điện thoại là bắt buộc';
+    } else if (
+      !/^[0-9]{10,11}$/.test(formData.phone_number.replace(/\s/g, ''))
+    ) {
+      newErrors.phone_number = 'Số điện thoại không hợp lệ';
     }
 
-    if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = 'Ngày sinh là bắt buộc';
+    if (!formData.date_of_birth) {
+      newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
     }
 
-    if (!formData.emergencyContact.name.trim()) {
-      newErrors.emergencyContactName = 'Tên người liên hệ khẩn cấp là bắt buộc';
+    if (!formData.parent_name.trim()) {
+      newErrors.parent_name = 'Tên người liên hệ khẩn cấp là bắt buộc';
     }
 
-    if (!formData.emergencyContact.phone.trim()) {
-      newErrors.emergencyContactPhone =
+    if (!formData.parent_phone.trim()) {
+      newErrors.parent_phone =
         'Số điện thoại người liên hệ khẩn cấp là bắt buộc';
     }
 
@@ -128,21 +101,20 @@ export default function CreateStudentModal({
     setFormData({
       name: '',
       email: '',
-      phone: '',
-      dateOfBirth: '',
-      level: 'beginner',
-      address: '',
-      emergencyContact: {
-        name: '',
-        phone: '',
-        relationship: 'parent',
-      },
+      phone_number: '',
+      date_of_birth: '',
+      input_level: 'beginner',
+      parent_name: '',
+      parent_phone: '',
+      bio: '',
+      status: 'active',
+      password: '',
     });
     setErrors({});
     onClose();
   };
 
-  const handleInputChange = (field: keyof StudentFormData, value: any) => {
+  const handleInputChange = (field: keyof StudentCreate, value: any) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -153,30 +125,6 @@ export default function CreateStudentModal({
       setErrors((prev) => ({
         ...prev,
         [field]: undefined,
-      }));
-    }
-  };
-
-  const handleEmergencyContactChange = (
-    field: keyof StudentFormData['emergencyContact'],
-    value: string
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      emergencyContact: {
-        ...prev.emergencyContact,
-        [field]: value,
-      },
-    }));
-
-    // Clear error when user starts typing
-    const errorKey = `emergencyContact${
-      field.charAt(0).toUpperCase() + field.slice(1)
-    }` as keyof typeof errors;
-    if (errors[errorKey]) {
-      setErrors((prev) => ({
-        ...prev,
-        [errorKey]: undefined,
       }));
     }
   };
@@ -233,17 +181,17 @@ export default function CreateStudentModal({
                 </label>
                 <input
                   type='date'
-                  value={formData.dateOfBirth}
+                  value={formData.date_of_birth}
                   onChange={(e) =>
-                    handleInputChange('dateOfBirth', e.target.value)
+                    handleInputChange('date_of_birth', e.target.value)
                   }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'
+                    errors.date_of_birth ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
-                {errors.dateOfBirth && (
+                {errors.date_of_birth && (
                   <p className='text-red-500 text-sm mt-1'>
-                    {errors.dateOfBirth}
+                    {errors.date_of_birth}
                   </p>
                 )}
               </div>
@@ -274,15 +222,19 @@ export default function CreateStudentModal({
                 </label>
                 <input
                   type='tel'
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  value={formData.phone_number}
+                  onChange={(e) =>
+                    handleInputChange('phone_number', e.target.value)
+                  }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.phone ? 'border-red-500' : 'border-gray-300'
+                    errors.phone_number ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder='0123456789'
                 />
-                {errors.phone && (
-                  <p className='text-red-500 text-sm mt-1'>{errors.phone}</p>
+                {errors.phone_number && (
+                  <p className='text-red-500 text-sm mt-1'>
+                    {errors.phone_number}
+                  </p>
                 )}
               </div>
 
@@ -292,8 +244,8 @@ export default function CreateStudentModal({
                   Địa chỉ
                 </label>
                 <textarea
-                  value={formData.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  value={formData.bio}
+                  onChange={(e) => handleInputChange('bio', e.target.value)}
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
                   rows={2}
                   placeholder='Nhập địa chỉ'
@@ -306,9 +258,9 @@ export default function CreateStudentModal({
                   Trình độ
                 </label>
                 <select
-                  value={formData.level}
+                  value={formData.input_level}
                   onChange={(e) =>
-                    handleInputChange('level', e.target.value as CourseLevel)
+                    handleInputChange('input_level', e.target.value)
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
                 >
@@ -336,20 +288,18 @@ export default function CreateStudentModal({
                 </label>
                 <input
                   type='text'
-                  value={formData.emergencyContact.name}
+                  value={formData.parent_name}
                   onChange={(e) =>
-                    handleEmergencyContactChange('name', e.target.value)
+                    handleInputChange('parent_name', e.target.value)
                   }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.emergencyContactName
-                      ? 'border-red-500'
-                      : 'border-gray-300'
+                    errors.parent_name ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder='Tên người liên hệ'
                 />
-                {errors.emergencyContactName && (
+                {errors.parent_name && (
                   <p className='text-red-500 text-sm mt-1'>
-                    {errors.emergencyContactName}
+                    {errors.parent_name}
                   </p>
                 )}
               </div>
@@ -360,41 +310,20 @@ export default function CreateStudentModal({
                 </label>
                 <input
                   type='tel'
-                  value={formData.emergencyContact.phone}
+                  value={formData.parent_phone}
                   onChange={(e) =>
-                    handleEmergencyContactChange('phone', e.target.value)
+                    handleInputChange('parent_phone', e.target.value)
                   }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.emergencyContactPhone
-                      ? 'border-red-500'
-                      : 'border-gray-300'
+                    errors.parent_phone ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder='0123456789'
                 />
-                {errors.emergencyContactPhone && (
+                {errors.parent_phone && (
                   <p className='text-red-500 text-sm mt-1'>
-                    {errors.emergencyContactPhone}
+                    {errors.parent_phone}
                   </p>
                 )}
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Mối quan hệ
-                </label>
-                <select
-                  value={formData.emergencyContact.relationship}
-                  onChange={(e) =>
-                    handleEmergencyContactChange('relationship', e.target.value)
-                  }
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
-                >
-                  {relationships.map((rel) => (
-                    <option key={rel.value} value={rel.value}>
-                      {rel.label}
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
           </div>

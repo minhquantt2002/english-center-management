@@ -54,4 +54,10 @@ def delete_exam(db: Session, exam_id: UUID) -> bool:
 
 def count_exams_by_class(db: Session, class_id: UUID) -> int:
     """Count exams for a class"""
-    return db.query(Exam).filter(Exam.class_id == class_id).count() 
+    return db.query(Exam).filter(Exam.class_id == class_id).count()
+
+def get_exams_by_teacher(db: Session, teacher_id: UUID):
+    """Get all exams for a specific teacher"""
+    from ..models.classroom import Class
+    query = db.query(Exam).join(Class, Exam.class_id == Class.id).filter(Class.teacher_id == teacher_id)
+    return query.all() 

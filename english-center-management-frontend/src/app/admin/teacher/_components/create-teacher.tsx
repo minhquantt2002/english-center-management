@@ -9,29 +9,14 @@ import {
   BookOpen,
   GraduationCap,
   Clock,
-  DollarSign,
-  Globe,
-  Award,
   FileText,
 } from 'lucide-react';
+import { TeacherCreate } from '../../../../types/admin';
 
 interface CreateTeacherModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateTeacher: (teacherData: TeacherFormData) => void;
-}
-
-export interface TeacherFormData {
-  name: string;
-  email: string;
-  phone: string;
-  specialization: string;
-  qualification: string;
-  experience: number;
-  hourlyRate: number;
-  bio: string;
-  languages: string[];
-  certifications: string[];
+  onCreateTeacher: (teacherData: TeacherCreate) => void;
 }
 
 const specializations = [
@@ -90,24 +75,20 @@ export default function CreateTeacherModal({
   onClose,
   onCreateTeacher,
 }: CreateTeacherModalProps) {
-  const [formData, setFormData] = useState<TeacherFormData>({
+  const [formData, setFormData] = useState<TeacherCreate>({
     name: '',
     email: '',
-    phone: '',
+    phone_number: '',
     specialization: 'general-english',
-    qualification: 'bachelor',
-    experience: 0,
-    hourlyRate: 0,
+    education: 'bachelor',
     bio: '',
-    languages: ['Tiếng Anh'],
-    certifications: [],
+    password: '',
+    experience_years: 0,
   });
 
   const [errors, setErrors] = useState<
-    Partial<Record<keyof TeacherFormData, string>>
+    Partial<Record<keyof TeacherCreate, string>>
   >({});
-  const [newLanguage, setNewLanguage] = useState('');
-  const [newCertification, setNewCertification] = useState('');
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -122,22 +103,16 @@ export default function CreateTeacherModal({
       newErrors.email = 'Email không hợp lệ';
     }
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Số điện thoại là bắt buộc';
-    } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
+    if (!formData.phone_number.trim()) {
+      newErrors.phone_number = 'Số điện thoại là bắt buộc';
+    } else if (
+      !/^[0-9]{10,11}$/.test(formData.phone_number.replace(/\s/g, ''))
+    ) {
+      newErrors.phone_number = 'Số điện thoại không hợp lệ';
     }
 
     if (!formData.specialization) {
       newErrors.specialization = 'Chuyên môn là bắt buộc';
-    }
-
-    if (!formData.qualification) {
-      newErrors.qualification = 'Bằng cấp là bắt buộc';
-    }
-
-    if (formData.hourlyRate <= 0) {
-      newErrors.hourlyRate = 'Mức lương theo giờ phải lớn hơn 0';
     }
 
     setErrors(newErrors);
@@ -157,22 +132,16 @@ export default function CreateTeacherModal({
     setFormData({
       name: '',
       email: '',
-      phone: '',
+      phone_number: '',
       specialization: 'general-english',
-      qualification: 'bachelor',
-      experience: 0,
-      hourlyRate: 0,
       bio: '',
-      languages: ['Tiếng Anh'],
-      certifications: [],
+      password: '',
     });
     setErrors({});
-    setNewLanguage('');
-    setNewCertification('');
     onClose();
   };
 
-  const handleInputChange = (field: keyof TeacherFormData, value: any) => {
+  const handleInputChange = (field: keyof TeacherCreate, value: any) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -185,48 +154,6 @@ export default function CreateTeacherModal({
         [field]: undefined,
       }));
     }
-  };
-
-  const addLanguage = () => {
-    if (
-      newLanguage.trim() &&
-      !formData.languages.includes(newLanguage.trim())
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        languages: [...prev.languages, newLanguage.trim()],
-      }));
-      setNewLanguage('');
-    }
-  };
-
-  const removeLanguage = (language: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      languages: prev.languages.filter((lang) => lang !== language),
-    }));
-  };
-
-  const addCertification = () => {
-    if (
-      newCertification.trim() &&
-      !formData.certifications.includes(newCertification.trim())
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        certifications: [...prev.certifications, newCertification.trim()],
-      }));
-      setNewCertification('');
-    }
-  };
-
-  const removeCertification = (certification: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      certifications: prev.certifications.filter(
-        (cert) => cert !== certification
-      ),
-    }));
   };
 
   if (!isOpen) return null;
@@ -302,39 +229,18 @@ export default function CreateTeacherModal({
                 </label>
                 <input
                   type='tel'
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  value={formData.phone_number}
+                  onChange={(e) =>
+                    handleInputChange('phone_number', e.target.value)
+                  }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.phone ? 'border-red-500' : 'border-gray-300'
+                    errors.phone_number ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder='0123456789'
                 />
-                {errors.phone && (
-                  <p className='text-red-500 text-sm mt-1'>{errors.phone}</p>
-                )}
-              </div>
-
-              <div>
-                <label className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-1'>
-                  <DollarSign className='w-4 h-4' />
-                  Mức lương theo giờ (VNĐ){' '}
-                  <span className='text-red-500'>*</span>
-                </label>
-                <input
-                  type='number'
-                  value={formData.hourlyRate}
-                  onChange={(e) =>
-                    handleInputChange('hourlyRate', Number(e.target.value))
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.hourlyRate ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder='200000'
-                  min='0'
-                />
-                {errors.hourlyRate && (
+                {errors.phone_number && (
                   <p className='text-red-500 text-sm mt-1'>
-                    {errors.hourlyRate}
+                    {errors.phone_number}
                   </p>
                 )}
               </div>
@@ -380,12 +286,12 @@ export default function CreateTeacherModal({
                   Bằng cấp <span className='text-red-500'>*</span>
                 </label>
                 <select
-                  value={formData.qualification}
+                  value={formData.education}
                   onChange={(e) =>
-                    handleInputChange('qualification', e.target.value)
+                    handleInputChange('education', e.target.value)
                   }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.qualification ? 'border-red-500' : 'border-gray-300'
+                    errors.education ? 'border-red-500' : 'border-gray-300'
                   }`}
                 >
                   {qualifications.map((qual) => (
@@ -394,9 +300,9 @@ export default function CreateTeacherModal({
                     </option>
                   ))}
                 </select>
-                {errors.qualification && (
+                {errors.education && (
                   <p className='text-red-500 text-sm mt-1'>
-                    {errors.qualification}
+                    {errors.education}
                   </p>
                 )}
               </div>
@@ -407,11 +313,18 @@ export default function CreateTeacherModal({
                   Kinh nghiệm giảng dạy
                 </label>
                 <select
-                  value={formData.experience}
+                  value={formData.experience_years}
                   onChange={(e) =>
-                    handleInputChange('experience', Number(e.target.value))
+                    handleInputChange(
+                      'experience_years',
+                      Number(e.target.value)
+                    )
                   }
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    errors.experience_years
+                      ? 'border-red-500'
+                      : 'border-gray-300'
+                  }`}
                 >
                   {experienceYears.map((exp) => (
                     <option key={exp.value} value={exp.value}>
@@ -420,105 +333,6 @@ export default function CreateTeacherModal({
                   ))}
                 </select>
               </div>
-            </div>
-          </div>
-
-          {/* Languages */}
-          <div>
-            <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
-              <Globe className='w-5 h-5 text-teal-600' />
-              Ngôn ngữ
-            </h3>
-
-            <div className='space-y-4'>
-              <div className='flex gap-2'>
-                <select
-                  value={newLanguage}
-                  onChange={(e) => setNewLanguage(e.target.value)}
-                  className='flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
-                >
-                  <option value=''>Chọn ngôn ngữ</option>
-                  {commonLanguages.map((lang) => (
-                    <option key={lang} value={lang}>
-                      {lang}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  type='button'
-                  onClick={addLanguage}
-                  className='px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors'
-                >
-                  Thêm
-                </button>
-              </div>
-
-              {formData.languages.length > 0 && (
-                <div className='flex flex-wrap gap-2'>
-                  {formData.languages.map((language) => (
-                    <span
-                      key={language}
-                      className='inline-flex items-center gap-1 px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-sm'
-                    >
-                      {language}
-                      <button
-                        type='button'
-                        onClick={() => removeLanguage(language)}
-                        className='hover:text-teal-600'
-                      >
-                        <X className='w-3 h-3' />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Certifications */}
-          <div>
-            <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
-              <Award className='w-5 h-5 text-teal-600' />
-              Chứng chỉ
-            </h3>
-
-            <div className='space-y-4'>
-              <div className='flex gap-2'>
-                <input
-                  type='text'
-                  value={newCertification}
-                  onChange={(e) => setNewCertification(e.target.value)}
-                  className='flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
-                  placeholder='Nhập tên chứng chỉ'
-                />
-                <button
-                  type='button'
-                  onClick={addCertification}
-                  className='px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors'
-                >
-                  Thêm
-                </button>
-              </div>
-
-              {formData.certifications.length > 0 && (
-                <div className='flex flex-wrap gap-2'>
-                  {formData.certifications.map((certification) => (
-                    <span
-                      key={certification}
-                      className='inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm'
-                    >
-                      {certification}
-                      <button
-                        type='button'
-                        onClick={() => removeCertification(certification)}
-                        className='hover:text-blue-600'
-                      >
-                        <X className='w-3 h-3' />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 

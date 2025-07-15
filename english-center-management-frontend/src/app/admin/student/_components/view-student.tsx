@@ -12,11 +12,10 @@ import {
   Clock,
   AlertCircle,
 } from 'lucide-react';
-import { Student } from '../../../../types';
-import Image from 'next/image';
+import { StudentResponse } from '../../../../types/admin';
 
 interface ViewStudentModalProps {
-  student: Student | null;
+  student: StudentResponse | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -86,11 +85,10 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
         <div className='flex items-center justify-between p-6 border-b border-gray-200'>
           <div className='flex items-center space-x-3'>
             <div className='h-12 w-12 flex-shrink-0'>
-              <Image
+              <img
                 className='h-12 w-12 rounded-full object-cover'
                 src={
-                  student.avatar ||
-                  'https://images.unsplash.com/photo-1494790108755-2616b612b3fd?w=150&h=150&fit=crop&crop=face'
+                  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
                 }
                 alt={student.name}
               />
@@ -99,9 +97,6 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
               <h2 className='text-xl font-semibold text-gray-900'>
                 {student.name}
               </h2>
-              <p className='text-sm text-gray-500'>
-                Mã số: {student.studentId}
-              </p>
             </div>
           </div>
           <button
@@ -137,13 +132,13 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
                   <div className='flex items-center gap-2 mt-1'>
                     <Calendar size={16} className='text-gray-400' />
                     <p className='text-sm text-gray-900'>
-                      {student.dateOfBirth
-                        ? formatDate(student.dateOfBirth)
+                      {student.date_of_birth
+                        ? formatDate(student.date_of_birth)
                         : 'Chưa cập nhật'}
-                      {student.dateOfBirth &&
-                        calculateAge(student.dateOfBirth) && (
+                      {student.date_of_birth &&
+                        calculateAge(student.date_of_birth) && (
                           <span className='text-gray-500 ml-2'>
-                            ({calculateAge(student.dateOfBirth)} tuổi)
+                            ({calculateAge(student.date_of_birth)} tuổi)
                           </span>
                         )}
                     </p>
@@ -188,11 +183,13 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
                   </label>
                   <div className='flex items-center gap-2 mt-1'>
                     <Phone size={16} className='text-gray-400' />
-                    <p className='text-sm text-gray-900'>{student.phone}</p>
+                    <p className='text-sm text-gray-900'>
+                      {student.phone_number}
+                    </p>
                   </div>
                 </div>
 
-                {student.parentContact && (
+                {student.parent_name && (
                   <div>
                     <label className='text-sm font-medium text-gray-500'>
                       Liên hệ phụ huynh
@@ -200,7 +197,7 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
                     <div className='flex items-center gap-2 mt-1'>
                       <Phone size={16} className='text-gray-400' />
                       <p className='text-sm text-gray-900'>
-                        {student.parentContact}
+                        {student.parent_name}
                       </p>
                     </div>
                   </div>
@@ -224,22 +221,15 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
                 <div className='mt-2'>
                   <span
                     className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getLevelBadgeColor(
-                      student.level
+                      student.input_level
                     )}`}
                   >
-                    {(student.level || 'beginner').charAt(0).toUpperCase() +
-                      (student.level || 'beginner').slice(1)}
+                    {(student.input_level || 'beginner')
+                      .charAt(0)
+                      .toUpperCase() +
+                      (student.input_level || 'beginner').slice(1)}
                   </span>
                 </div>
-              </div>
-
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <label className='text-sm font-medium text-gray-500'>
-                  Lớp hiện tại
-                </label>
-                <p className='text-sm text-gray-900 mt-2'>
-                  {student.currentClass || 'Chưa phân lớp'}
-                </p>
               </div>
 
               <div className='bg-gray-50 p-4 rounded-lg'>
@@ -268,19 +258,7 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
                 <div className='flex items-center gap-2 mt-2'>
                   <Clock size={16} className='text-gray-400' />
                   <p className='text-sm text-gray-900'>
-                    {formatDate(student.enrollmentDate)}
-                  </p>
-                </div>
-              </div>
-
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <label className='text-sm font-medium text-gray-500'>
-                  Ngày cập nhật
-                </label>
-                <div className='flex items-center gap-2 mt-2'>
-                  <Clock size={16} className='text-gray-400' />
-                  <p className='text-sm text-gray-900'>
-                    {formatDate(student.updatedAt)}
+                    {formatDate(student.created_at)}
                   </p>
                 </div>
               </div>
@@ -288,7 +266,7 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
           </div>
 
           {/* Emergency Contact */}
-          {student.emergencyContact && (
+          {student.parent_name && (
             <div className='space-y-4'>
               <h3 className='text-lg font-medium text-gray-900 flex items-center gap-2'>
                 <AlertCircle size={20} className='text-red-500' />
@@ -302,7 +280,7 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
                       Tên
                     </label>
                     <p className='text-sm text-gray-900 mt-1'>
-                      {student.emergencyContact.name}
+                      {student.parent_name}
                     </p>
                   </div>
 
@@ -311,7 +289,7 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
                       Số điện thoại
                     </label>
                     <p className='text-sm text-gray-900 mt-1'>
-                      {student.emergencyContact.phone}
+                      {student.parent_phone}
                     </p>
                   </div>
 
@@ -320,20 +298,10 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
                       Mối quan hệ
                     </label>
                     <p className='text-sm text-gray-900 mt-1'>
-                      {student.emergencyContact.relationship}
+                      {student.parent_name}
                     </p>
                   </div>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Notes */}
-          {student.notes && (
-            <div className='space-y-4'>
-              <h3 className='text-lg font-medium text-gray-900'>Ghi chú</h3>
-              <div className='bg-yellow-50 p-4 rounded-lg'>
-                <p className='text-sm text-gray-900'>{student.notes}</p>
               </div>
             </div>
           )}

@@ -102,4 +102,18 @@ def get_scores_by_student_classroom(db: Session, student_id: UUID, classroom_id:
         .join(Exam, Score.exam_id == Exam.id)\
         .filter(Score.student_id == student_id)\
         .filter(Exam.class_id == classroom_id)\
-        .all() 
+        .all()
+
+def get_scores_by_teacher(db: Session, teacher_id: UUID):
+    """Get all scores for a specific teacher"""
+    from ..models.exam import Exam
+    from ..models.classroom import Class
+    query = db.query(Score).join(Exam, Score.exam_id == Exam.id).join(Class, Exam.class_id == Class.id).filter(Class.teacher_id == teacher_id)
+    return query.all()
+
+def get_recent_scores_by_teacher(db: Session, teacher_id: UUID, limit: int = 5):
+    """Get recent scores for a specific teacher"""
+    from ..models.exam import Exam
+    from ..models.classroom import Class
+    query = db.query(Score).join(Exam, Score.exam_id == Exam.id).join(Class, Exam.class_id == Class.id).filter(Class.teacher_id == teacher_id).order_by(Score.created_at.desc()).limit(limit)
+    return query.all() 

@@ -18,10 +18,9 @@ import { useStaffStatsApi } from './_hooks';
 const Dashboard = () => {
   const [statsData, setStatsData] = useState<any[]>([]);
   const [recentRegistrations, setRecentRegistrations] = useState<any[]>([]);
-  const [todaySchedule, setTodaySchedule] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { error, getStaffStats } = useStaffStatsApi();
+  const { error, getStats } = useStaffStatsApi();
 
   // Fetch staff stats on component mount
   useEffect(() => {
@@ -32,13 +31,13 @@ const Dashboard = () => {
 
   const fetchStaffStats = async () => {
     try {
-      const data = await getStaffStats();
+      const data = await getStats();
 
       // Transform the data for display
       const transformedStats = [
         {
           title: 'Học viên mới đăng ký',
-          value: String(data.newRegistrations || 0),
+          value: String(data.totalStudents || 0),
           change: '+18% so với tháng qua',
           changeType: 'positive',
           icon: Users,
@@ -46,7 +45,7 @@ const Dashboard = () => {
         },
         {
           title: 'Lớp đang hoạt động',
-          value: String(data.activeClasses || 0),
+          value: String(data.totalClasses || 0),
           change: '— Không đổi so với tuần trước',
           changeType: 'neutral',
           icon: Calendar,
@@ -54,7 +53,7 @@ const Dashboard = () => {
         },
         {
           title: 'Lịch học hôm nay',
-          value: String(data.todaySchedule || 0),
+          value: String(data.totalClasses || 0),
           change: '5 lớp đang diễn ra',
           changeType: 'info',
           icon: BarChart3,
@@ -62,7 +61,7 @@ const Dashboard = () => {
         },
         {
           title: 'Hóa đơn chờ xử lý',
-          value: String(data.pendingInvoices || 0),
+          value: String(data.totalEnrollments || 0),
           change: '+3 so với hôm qua',
           changeType: 'positive',
           icon: Receipt,
@@ -71,8 +70,7 @@ const Dashboard = () => {
       ];
 
       setStatsData(transformedStats);
-      setRecentRegistrations(data.recentRegistrations || []);
-      setTodaySchedule(data.todayScheduleDetails || []);
+      setRecentRegistrations(data.recentEnrollments || []);
       setIsLoading(false);
     } catch (err) {
       console.error('Failed to fetch staff stats:', err);
@@ -345,47 +343,6 @@ const Dashboard = () => {
             <Calendar className='w-5 h-5 text-orange-600' />
             Lịch học hôm nay
           </h3>
-        </div>
-        <div className='p-6'>
-          {todaySchedule.length > 0 ? (
-            <div className='space-y-4'>
-              {todaySchedule.map((schedule, index) => (
-                <div
-                  key={index}
-                  className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'
-                >
-                  <div className='flex items-center space-x-4'>
-                    <div className='w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center text-white'>
-                      <Clock className='w-5 h-5' />
-                    </div>
-                    <div>
-                      <div className='font-semibold text-gray-900'>
-                        {schedule.className}
-                      </div>
-                      <div className='text-sm text-gray-500'>
-                        {schedule.time}
-                      </div>
-                    </div>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <span className='px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full border border-green-200'>
-                      {schedule.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className='text-center py-8'>
-              <Calendar className='w-16 h-16 text-gray-300 mx-auto mb-3' />
-              <p className='text-gray-500 font-medium'>
-                Không có lịch học hôm nay
-              </p>
-              <p className='text-gray-400 text-sm'>
-                Tất cả lớp học đã hoàn thành
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </>

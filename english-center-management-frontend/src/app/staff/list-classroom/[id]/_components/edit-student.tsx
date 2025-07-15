@@ -1,18 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-  X,
-  Save,
-  User,
-} from 'lucide-react';
-import { Student } from '../../../../../types';
+import { X, Save, User } from 'lucide-react';
+import { StudentResponse } from '../../../../../types/staff';
 
 interface EditStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  student: Student | null;
-  onSave: (updatedStudent: Student) => void;
+  student: StudentResponse | null;
+  onSave: (updatedStudent: StudentResponse) => void;
 }
 
 export default function EditStudentModal({
@@ -21,7 +17,7 @@ export default function EditStudentModal({
   student,
   onSave,
 }: EditStudentModalProps) {
-  const [formData, setFormData] = useState<Partial<Student>>({});
+  const [formData, setFormData] = useState<Partial<StudentResponse>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -30,13 +26,13 @@ export default function EditStudentModal({
       setFormData({
         name: student.name,
         email: student.email,
-        phone: student.phone,
-        dateOfBirth: student.dateOfBirth,
-        level: student.level,
-        address: student.address,
-        parentContact: student.parentContact,
-        notes: student.notes,
-        emergencyContact: student.emergencyContact,
+        phone_number: student.phone_number,
+        date_of_birth: student.date_of_birth,
+        input_level: student.input_level,
+        parent_name: student.parent_name,
+        parent_phone: student.parent_phone,
+        bio: student.bio,
+        status: student.status,
       });
       setErrors({});
     }
@@ -55,32 +51,32 @@ export default function EditStudentModal({
       newErrors.email = 'Email không hợp lệ';
     }
 
-    if (!formData.phone?.trim()) {
-      newErrors.phone = 'Số điện thoại là bắt buộc';
-    } else if (!/^[\+]?[0-9\s\-\(\)]{10,}$/.test(formData.phone)) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
+    if (!formData.phone_number?.trim()) {
+      newErrors.phone_number = 'Số điện thoại là bắt buộc';
+    } else if (!/^[\+]?[0-9\s\-\(\)]{10,}$/.test(formData.phone_number)) {
+      newErrors.phone_number = 'Số điện thoại không hợp lệ';
     }
 
-    if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = 'Ngày sinh là bắt buộc';
+    if (!formData.date_of_birth) {
+      newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
     }
 
-    if (!formData.level) {
-      newErrors.level = 'Trình độ là bắt buộc';
-    }
-
-    if (
-      formData.parentContact &&
-      !/^[\+]?[0-9\s\-\(\)]{10,}$/.test(formData.parentContact)
-    ) {
-      newErrors.parentContact = 'Số điện thoại phụ huynh không hợp lệ';
+    if (!formData.input_level) {
+      newErrors.input_level = 'Trình độ là bắt buộc';
     }
 
     if (
-      formData.emergencyContact?.phone &&
-      !/^[\+]?[0-9\s\-\(\)]{10,}$/.test(formData.emergencyContact.phone)
+      formData.parent_phone &&
+      !/^[\+]?[0-9\s\-\(\)]{10,}$/.test(formData.parent_phone)
     ) {
-      newErrors.emergencyPhone = 'Số điện thoại khẩn cấp không hợp lệ';
+      newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
+    }
+
+    if (
+      formData.parent_phone &&
+      !/^[\+]?[0-9\s\-\(\)]{10,}$/.test(formData.parent_phone)
+    ) {
+      newErrors.parent_phone = 'Số điện thoại khẩn cấp không hợp lệ';
     }
 
     setErrors(newErrors);
@@ -98,10 +94,9 @@ export default function EditStudentModal({
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const updatedStudent: Student = {
+      const updatedStudent: StudentResponse = {
         ...student,
         ...formData,
-        updatedAt: new Date().toISOString(),
       };
 
       onSave(updatedStudent);
@@ -117,26 +112,6 @@ export default function EditStudentModal({
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }));
-    }
-  };
-
-  const handleEmergencyContactChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      emergencyContact: {
-        name: field === 'name' ? value : prev.emergencyContact?.name || '',
-        phone: field === 'phone' ? value : prev.emergencyContact?.phone || '',
-        relationship:
-          field === 'relationship'
-            ? value
-            : prev.emergencyContact?.relationship || '',
-      },
-    }));
-    if (errors[field === 'phone' ? 'emergencyPhone' : field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field === 'phone' ? 'emergencyPhone' : field]: '',
-      }));
     }
   };
 
@@ -218,15 +193,19 @@ export default function EditStudentModal({
                 </label>
                 <input
                   type='tel'
-                  value={formData.phone || ''}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  value={formData.phone_number || ''}
+                  onChange={(e) =>
+                    handleInputChange('phone_number', e.target.value)
+                  }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.phone ? 'border-red-300' : 'border-gray-300'
+                    errors.phone_number ? 'border-red-300' : 'border-gray-300'
                   }`}
                   placeholder='Nhập số điện thoại'
                 />
-                {errors.phone && (
-                  <p className='mt-1 text-sm text-red-600'>{errors.phone}</p>
+                {errors.phone_number && (
+                  <p className='mt-1 text-sm text-red-600'>
+                    {errors.phone_number}
+                  </p>
                 )}
               </div>
 
@@ -236,17 +215,17 @@ export default function EditStudentModal({
                 </label>
                 <input
                   type='date'
-                  value={formData.dateOfBirth || ''}
+                  value={formData.date_of_birth || ''}
                   onChange={(e) =>
-                    handleInputChange('dateOfBirth', e.target.value)
+                    handleInputChange('date_of_birth', e.target.value)
                   }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.dateOfBirth ? 'border-red-300' : 'border-gray-300'
+                    errors.date_of_birth ? 'border-red-300' : 'border-gray-300'
                   }`}
                 />
-                {errors.dateOfBirth && (
+                {errors.date_of_birth && (
                   <p className='mt-1 text-sm text-red-600'>
-                    {errors.dateOfBirth}
+                    {errors.date_of_birth}
                   </p>
                 )}
               </div>
@@ -256,10 +235,12 @@ export default function EditStudentModal({
                   Trình độ <span className='text-red-500'>*</span>
                 </label>
                 <select
-                  value={formData.level || ''}
-                  onChange={(e) => handleInputChange('level', e.target.value)}
+                  value={formData.input_level || ''}
+                  onChange={(e) =>
+                    handleInputChange('input_level', e.target.value)
+                  }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.level ? 'border-red-300' : 'border-gray-300'
+                    errors.input_level ? 'border-red-300' : 'border-gray-300'
                   }`}
                 >
                   <option value=''>Chọn trình độ</option>
@@ -270,8 +251,10 @@ export default function EditStudentModal({
                   <option value='advanced'>Nâng cao</option>
                   <option value='proficiency'>Thành thạo</option>
                 </select>
-                {errors.level && (
-                  <p className='mt-1 text-sm text-red-600'>{errors.level}</p>
+                {errors.input_level && (
+                  <p className='mt-1 text-sm text-red-600'>
+                    {errors.input_level}
+                  </p>
                 )}
               </div>
 
@@ -281,18 +264,18 @@ export default function EditStudentModal({
                 </label>
                 <input
                   type='tel'
-                  value={formData.parentContact || ''}
+                  value={formData.parent_phone || ''}
                   onChange={(e) =>
-                    handleInputChange('parentContact', e.target.value)
+                    handleInputChange('parent_phone', e.target.value)
                   }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.parentContact ? 'border-red-300' : 'border-gray-300'
+                    errors.parent_phone ? 'border-red-300' : 'border-gray-300'
                   }`}
                   placeholder='Nhập số điện thoại phụ huynh'
                 />
-                {errors.parentContact && (
+                {errors.parent_phone && (
                   <p className='mt-1 text-sm text-red-600'>
-                    {errors.parentContact}
+                    {errors.parent_phone}
                   </p>
                 )}
               </div>
@@ -307,8 +290,7 @@ export default function EditStudentModal({
                 Địa chỉ
               </label>
               <textarea
-                value={formData.address || ''}
-                onChange={(e) => handleInputChange('address', e.target.value)}
+                value={formData.bio || ''}
                 rows={3}
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 placeholder='Nhập địa chỉ'
@@ -328,9 +310,9 @@ export default function EditStudentModal({
                 </label>
                 <input
                   type='text'
-                  value={formData.emergencyContact?.name || ''}
+                  value={formData.parent_name || ''}
                   onChange={(e) =>
-                    handleEmergencyContactChange('name', e.target.value)
+                    handleInputChange('parent_name', e.target.value)
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                   placeholder='Nhập tên'
@@ -343,35 +325,20 @@ export default function EditStudentModal({
                 </label>
                 <input
                   type='tel'
-                  value={formData.emergencyContact?.phone || ''}
+                  value={formData.parent_phone || ''}
                   onChange={(e) =>
-                    handleEmergencyContactChange('phone', e.target.value)
+                    handleInputChange('parent_phone', e.target.value)
                   }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.emergencyPhone ? 'border-red-300' : 'border-gray-300'
+                    errors.parent_phone ? 'border-red-300' : 'border-gray-300'
                   }`}
                   placeholder='Nhập số điện thoại'
                 />
-                {errors.emergencyPhone && (
+                {errors.parent_phone && (
                   <p className='mt-1 text-sm text-red-600'>
-                    {errors.emergencyPhone}
+                    {errors.parent_phone}
                   </p>
                 )}
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Mối quan hệ
-                </label>
-                <input
-                  type='text'
-                  value={formData.emergencyContact?.relationship || ''}
-                  onChange={(e) =>
-                    handleEmergencyContactChange('relationship', e.target.value)
-                  }
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                  placeholder='Ví dụ: Bố, Mẹ, Anh trai...'
-                />
               </div>
             </div>
           </div>
@@ -382,8 +349,8 @@ export default function EditStudentModal({
               Ghi chú
             </label>
             <textarea
-              value={formData.notes || ''}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
+              value={formData.bio || ''}
+              onChange={(e) => handleInputChange('bio', e.target.value)}
               rows={3}
               className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
               placeholder='Nhập ghi chú về học viên...'

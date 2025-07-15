@@ -2,21 +2,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, MapPin, User, Edit, Plus, Trash2 } from 'lucide-react';
-import { ClassData } from '../../../../../types/admin';
-import { TimeSlot } from '../../../../../types/common';
 import CreateScheduleModal from './create-schedule';
+import { useStaffScheduleApi } from '../../../_hooks';
 import {
-  useStaffScheduleApi,
-  ScheduleSession,
-  CreateScheduleData,
-  UpdateScheduleData,
-  ScheduleApiResponse,
-} from '../../../_hooks';
+  ClassroomResponse,
+  ScheduleResponse,
+  ScheduleCreate,
+  ScheduleUpdate,
+  Weekday,
+} from '../../../../../types/staff';
 
 interface StudyingScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  classroom: ClassData | null;
+  classroom: ClassroomResponse | null;
 }
 
 const dayNames = {
@@ -57,11 +56,9 @@ export default function StudyingScheduleModal({
   onClose,
   classroom,
 }: StudyingScheduleModalProps) {
-  const [sessions, setSessions] = useState<ScheduleSession[]>([]);
+  const [sessions, setSessions] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [editingSession, setEditingSession] = useState<ScheduleSession | null>(
-    null
-  );
+  const [editingSession, setEditingSession] = useState<any | null>(null);
   const [isCreateScheduleOpen, setIsCreateScheduleOpen] = useState(false);
 
   const {
@@ -86,18 +83,18 @@ export default function StudyingScheduleModal({
 
     try {
       const response = await getClassroomSchedules(classroom.id);
-      const scheduleSessions: ScheduleSession[] = response.map(
-        (schedule: ScheduleApiResponse) => ({
+      const scheduleSessions = response.schedules.map(
+        (schedule: ScheduleResponse) => ({
           id: schedule.id,
           day: schedule.weekday,
           timeSlot: {
             startTime: schedule.start_time,
             endTime: schedule.end_time,
           },
-          room: schedule.room?.name || 'Chưa phân công',
-          teacher: classroom.teacher.name,
-          status: schedule.status,
-          notes: schedule.notes,
+          room: schedule.classroom?.class_name || 'Chưa phân công',
+          teacher: classroom.teacher?.name || 'Chưa phân công',
+          status: 'scheduled',
+          notes: '',
         })
       );
       setSessions(scheduleSessions);
@@ -110,20 +107,15 @@ export default function StudyingScheduleModal({
     setIsCreateScheduleOpen(true);
   };
 
-  const handleScheduleCreated = async (newSchedule: ScheduleSession) => {
+  const handleScheduleCreated = async (newSchedule: any) => {
     if (!classroom?.id) return;
 
     try {
-      const scheduleData: CreateScheduleData = {
+      const scheduleData: ScheduleCreate = {
         class_id: classroom.id,
-        room_id: newSchedule.room, // This is room ID from the form
-        weekday: newSchedule.day,
+        weekday: newSchedule.day as Weekday,
         start_time: newSchedule.timeSlot.startTime,
         end_time: newSchedule.timeSlot.endTime,
-        title: newSchedule.notes,
-        description: newSchedule.notes,
-        status: newSchedule.status,
-        notes: newSchedule.notes,
       };
 
       await createSchedule(scheduleData);
@@ -138,7 +130,7 @@ export default function StudyingScheduleModal({
     setIsCreateScheduleOpen(false);
   };
 
-  const handleEditSession = (session: ScheduleSession) => {
+  const handleEditSession = (session: any) => {
     setEditingSession(session);
     setIsEditing(true);
   };
@@ -147,11 +139,10 @@ export default function StudyingScheduleModal({
     if (!editingSession) return;
 
     try {
-      // For now, we'll keep the room name as is since we don't have room ID mapping
-      // In a real implementation, you'd want to map room names to IDs
-      const scheduleData: UpdateScheduleData = {
-        status: editingSession.status,
-        notes: editingSession.notes,
+      const scheduleData: ScheduleUpdate = {
+        weekday: editingSession.day as Weekday,
+        start_time: editingSession.timeSlot.startTime,
+        end_time: editingSession.timeSlot.endTime,
       };
 
       await updateSchedule(editingSession.id, scheduleData);
@@ -199,7 +190,7 @@ export default function StudyingScheduleModal({
   };
 
   // Helper function to get session for a specific day and time slot
-  const getSessionForSlot = (day: string, timeSlot: TimeSlot) => {
+  const getSessionForSlot = (day: string, timeSlot: any) => {
     return sessions.find(
       (session) =>
         session.day === day &&
@@ -217,7 +208,7 @@ export default function StudyingScheduleModal({
         <div className='flex items-center justify-between p-6 border-b border-gray-200'>
           <div>
             <h2 className='text-2xl font-bold text-gray-900'>
-              Lịch học - {classroom?.name}
+              Lịch học - {classroom?.class_name}
             </h2>
             <p className='text-gray-600 mt-1'>
               Quản lý lịch học và lịch trình của lớp
@@ -264,8 +255,9 @@ export default function StudyingScheduleModal({
                 <div>
                   <p className='text-sm text-gray-600'>Lịch học</p>
                   <p className='font-medium text-gray-900'>
-                    {classroom?.schedule?.days || 'Chưa có lịch học'} -{' '}
-                    {classroom?.schedule?.time || ''}
+                    {classroom?.schedules?.length
+                      ? `${classroom.schedules.length} buổi học`
+                      : 'Chưa có lịch học'}
                   </p>
                 </div>
               </div>

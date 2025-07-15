@@ -8,19 +8,17 @@ import {
   Mail,
   BookOpen,
   Clock,
-  DollarSign,
   FileText,
   Users,
   MapPin,
   Edit,
 } from 'lucide-react';
-import { Teacher } from '../../../../types';
-import Image from 'next/image';
+import { TeacherResponse } from '../../../../types/admin';
 
 interface ViewTeacherModalProps {
   isOpen: boolean;
   onClose: () => void;
-  teacher: Teacher | null;
+  teacher: TeacherResponse | null;
 }
 
 const specializations = [
@@ -112,9 +110,11 @@ export default function ViewTeacherModal({
           {/* Teacher Header */}
           <div className='flex items-start gap-6 p-6 bg-gradient-to-r from-teal-50 to-blue-50 rounded-lg'>
             <div className='flex-shrink-0'>
-              <Image
+              <img
                 className='h-24 w-24 rounded-full object-cover border-4 border-white shadow-lg'
-                src={teacher.avatar}
+                src={
+                  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+                }
                 alt={teacher.name}
               />
             </div>
@@ -130,28 +130,13 @@ export default function ViewTeacherModal({
                   <Mail className='w-4 h-4' />
                   {teacher.email}
                 </span>
-                {teacher.phone && (
+                {teacher.phone_number && (
                   <span className='flex items-center gap-1'>
                     <Phone className='w-4 h-4' />
-                    {teacher.phone}
+                    {teacher.phone_number}
                   </span>
                 )}
               </div>
-              <div className='mt-3'>
-                <span
-                  className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusBadgeColor(
-                    teacher.status
-                  )}`}
-                >
-                  {getStatusText(teacher.status)}
-                </span>
-              </div>
-            </div>
-            <div className='text-right'>
-              <div className='text-2xl font-bold text-teal-600'>
-                {teacher.teacherId}
-              </div>
-              <div className='text-sm text-gray-500'>Mã giáo viên</div>
             </div>
           </div>
 
@@ -176,24 +161,13 @@ export default function ViewTeacherModal({
                   </label>
                   <p className='text-gray-900'>{teacher.email}</p>
                 </div>
-                {teacher.phone && (
+                {teacher.phone_number && (
                   <div>
                     <label className='text-sm font-medium text-gray-500 flex items-center gap-1'>
                       <Phone className='w-4 h-4' />
                       Số điện thoại
                     </label>
-                    <p className='text-gray-900'>{teacher.phone}</p>
-                  </div>
-                )}
-                {teacher.hourlyRate && (
-                  <div>
-                    <label className='text-sm font-medium text-gray-500 flex items-center gap-1'>
-                      <DollarSign className='w-4 h-4' />
-                      Mức lương theo giờ
-                    </label>
-                    <p className='text-gray-900'>
-                      {teacher.hourlyRate.toLocaleString('vi-VN')} VNĐ
-                    </p>
+                    <p className='text-gray-900'>{teacher.phone_number}</p>
                   </div>
                 )}
               </div>
@@ -213,28 +187,28 @@ export default function ViewTeacherModal({
                     {getSpecializationLabel(teacher.specialization)}
                   </p>
                 </div>
-                {teacher.qualification && (
+                {teacher.education && (
                   <div>
                     <label className='text-sm font-medium text-gray-500'>
                       Bằng cấp
                     </label>
                     <p className='text-gray-900'>
-                      {getQualificationLabel(teacher.qualification)}
+                      {getQualificationLabel(teacher.education)}
                     </p>
                   </div>
                 )}
-                {teacher.experience !== undefined && (
+                {teacher.experience_years !== undefined && (
                   <div>
                     <label className='text-sm font-medium text-gray-500 flex items-center gap-1'>
                       <Clock className='w-4 h-4' />
                       Kinh nghiệm giảng dạy
                     </label>
                     <p className='text-gray-900'>
-                      {teacher.experience === 0
+                      {teacher.experience_years === 0
                         ? 'Mới tốt nghiệp'
-                        : teacher.experience === 10
+                        : teacher.experience_years === 10
                         ? '10+ năm'
-                        : `${teacher.experience} năm`}
+                        : `${teacher.experience_years} năm`}
                     </p>
                   </div>
                 )}
@@ -253,32 +227,32 @@ export default function ViewTeacherModal({
                 <label className='text-sm font-medium text-gray-500'>
                   Mã giáo viên
                 </label>
-                <p className='text-gray-900 font-mono'>{teacher.teacherId}</p>
+                <p className='text-gray-900 font-mono'>{teacher.id}</p>
               </div>
               <div>
                 <label className='text-sm font-medium text-gray-500'>
                   Vai trò
                 </label>
-                <p className='text-gray-900 capitalize'>{teacher.role}</p>
+                <p className='text-gray-900 capitalize'>Giáo viên</p>
               </div>
             </div>
           </div>
 
           {/* Assigned Classes */}
-          {teacher.assignedClasses && teacher.assignedClasses.length > 0 && (
+          {teacher.taught_classes && teacher.taught_classes.length > 0 && (
             <div className='bg-white p-6 rounded-lg border border-gray-200'>
               <h4 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
                 <Users className='w-5 h-5 text-teal-600' />
                 Lớp được phân công
               </h4>
               <div className='flex flex-wrap gap-2'>
-                {teacher.assignedClasses.map((className, index) => (
+                {teacher.taught_classes.map((className, index) => (
                   <span
                     key={index}
                     className='inline-flex items-center gap-1 px-3 py-2 bg-indigo-100 text-indigo-800 rounded-lg text-sm font-medium'
                   >
                     <MapPin className='w-4 h-4' />
-                    {className}
+                    {className.class_name}
                   </span>
                 ))}
               </div>
@@ -292,7 +266,7 @@ export default function ViewTeacherModal({
                 <div>
                   <p className='text-blue-100 text-sm'>Tổng số lớp</p>
                   <p className='text-2xl font-bold'>
-                    {teacher.assignedClasses?.length || 0}
+                    {teacher.taught_classes?.length || 0}
                   </p>
                 </div>
                 <Users className='w-8 h-8 text-blue-200' />
@@ -303,23 +277,10 @@ export default function ViewTeacherModal({
                 <div>
                   <p className='text-green-100 text-sm'>Kinh nghiệm</p>
                   <p className='text-2xl font-bold'>
-                    {teacher.experience || 0} năm
+                    {teacher.experience_years || 0} năm
                   </p>
                 </div>
                 <Clock className='w-8 h-8 text-green-200' />
-              </div>
-            </div>
-            <div className='bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-lg text-white'>
-              <div className='flex items-center justify-between'>
-                <div>
-                  <p className='text-purple-100 text-sm'>Mức lương/giờ</p>
-                  <p className='text-2xl font-bold'>
-                    {teacher.hourlyRate
-                      ? `${(teacher.hourlyRate / 1000).toFixed(0)}k`
-                      : 'N/A'}
-                  </p>
-                </div>
-                <DollarSign className='w-8 h-8 text-purple-200' />
               </div>
             </div>
           </div>

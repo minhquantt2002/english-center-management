@@ -14,8 +14,8 @@ import {
   CheckCircle,
   AlertCircle,
 } from 'lucide-react';
-import { useDashboardApi, type StatCard, type DashboardStats } from './_hooks';
-import Image from 'next/image';
+import { useDashboardApi } from './_hooks';
+import { DashboardStatCards, DashboardStats } from '../../types/admin';
 
 interface StatCardProps {
   title: string;
@@ -49,7 +49,7 @@ interface SystemStatusProps {
 
 const AdminDashboard: React.FC = () => {
   const { loading, error, getDashboardStats, getStatCards } = useDashboardApi();
-  const [stats, setStats] = useState<StatCard[]>([]);
+  const [stats, setStats] = useState<DashboardStatCards>();
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
     null
   );
@@ -191,8 +191,10 @@ const AdminDashboard: React.FC = () => {
   }) => (
     <div className='flex items-center gap-4 py-4 border-b border-gray-50 last:border-b-0'>
       <div className='relative'>
-        <Image
-          src={avatar}
+        <img
+          src={
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+          }
           alt={name}
           className='w-12 h-12 rounded-full object-cover ring-2 ring-gray-100'
         />
@@ -262,15 +264,42 @@ const AdminDashboard: React.FC = () => {
 
       {/* Thống kê chính */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
-        {stats.map((stat, index) => (
-          <StatCard
-            key={index}
-            {...stat}
-            icon={getIconComponent(stat.icon)}
-            iconBg='bg-gradient-to-r from-blue-500 to-blue-600'
-            trend='up'
-          />
-        ))}
+        {stats && (
+          <>
+            <StatCard
+              title='Tổng học viên'
+              value={stats.totalStudents?.toString() || '0'}
+              change='+12% so với tháng trước'
+              icon={getIconComponent('Users')}
+              iconBg='bg-gradient-to-r from-blue-500 to-blue-600'
+              trend='up'
+            />
+            <StatCard
+              title='Tổng giáo viên'
+              value={stats.totalTeachers?.toString() || '0'}
+              change='+3% so với tháng trước'
+              icon={getIconComponent('GraduationCap')}
+              iconBg='bg-gradient-to-r from-green-500 to-green-600'
+              trend='up'
+            />
+            <StatCard
+              title='Tổng khóa học'
+              value={stats.totalCourses?.toString() || '0'}
+              change='+5% so với tháng trước'
+              icon={getIconComponent('BookOpen')}
+              iconBg='bg-gradient-to-r from-orange-500 to-orange-600'
+              trend='up'
+            />
+            <StatCard
+              title='Tổng lớp học'
+              value={stats.totalClasses?.toString() || '0'}
+              change='+8% so với tháng trước'
+              icon={getIconComponent('PlayCircle')}
+              iconBg='bg-gradient-to-r from-purple-500 to-purple-600'
+              trend='up'
+            />
+          </>
+        )}
       </div>
 
       {/* Thao tác nhanh */}

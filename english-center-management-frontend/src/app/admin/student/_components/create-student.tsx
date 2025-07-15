@@ -2,14 +2,12 @@
 
 import React, { useState } from 'react';
 import { X, User, Mail, Phone, Calendar, MapPin, Users } from 'lucide-react';
-import { StudentProfile, CourseLevel, UserStatus } from '../../../../types';
+import { StudentCreate } from '../../../../types/admin';
 
 interface CreateStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (
-    student: Omit<StudentProfile, 'id' | 'createdAt' | 'updatedAt'>
-  ) => void;
+  onSave: (student: StudentCreate) => Promise<void>;
 }
 
 const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
@@ -17,20 +15,14 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
   onClose,
   onSave,
 }) => {
-  const [formData, setFormData] = useState({
-    studentId: '',
+  const [formData, setFormData] = useState<StudentCreate>({
     name: '',
     email: '',
-    phone: '',
-    dateOfBirth: '',
-    level: 'beginner' as CourseLevel,
-    enrollmentStatus: 'active' as UserStatus,
+    password: '',
+    status: 'active',
+    date_of_birth: '',
+    input_level: 'beginner',
     address: '',
-    emergencyContact: {
-      name: '',
-      phone: '',
-      relationship: '',
-    },
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -38,10 +30,6 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
-    if (!formData.studentId.trim()) {
-      newErrors.studentId = 'Mã số học viên là bắt buộc';
-    }
 
     if (!formData.name.trim()) {
       newErrors.name = 'Tên học viên là bắt buộc';
@@ -53,14 +41,16 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
       newErrors.email = 'Email không hợp lệ';
     }
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Số điện thoại là bắt buộc';
-    } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
+    if (!formData.phone_number?.trim()) {
+      newErrors.phone_number = 'Số điện thoại là bắt buộc';
+    } else if (
+      !/^[0-9]{10,11}$/.test(formData.phone_number?.replace(/\s/g, ''))
+    ) {
+      newErrors.phone_number = 'Số điện thoại không hợp lệ';
     }
 
-    if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = 'Ngày sinh là bắt buộc';
+    if (!formData.date_of_birth) {
+      newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
     }
 
     setErrors(newErrors);
@@ -82,16 +72,6 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
     }
   };
 
-  const handleEmergencyContactChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      emergencyContact: {
-        ...prev.emergencyContact,
-        [field]: value,
-      },
-    }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -102,43 +82,30 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      const newStudent: Omit<StudentProfile, 'id' | 'createdAt' | 'updatedAt'> =
-        {
-          studentId: formData.studentId,
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          dateOfBirth: formData.dateOfBirth,
-          level: formData.level,
-          enrollmentStatus: formData.enrollmentStatus,
-          enrollmentDate: new Date().toISOString(),
-          address: formData.address || undefined,
-          emergencyContact: formData.emergencyContact.name
-            ? {
-                name: formData.emergencyContact.name,
-                phone: formData.emergencyContact.phone,
-                relationship: formData.emergencyContact.relationship,
-              }
-            : undefined,
-        };
+      const newStudent: StudentCreate = {
+        name: formData.name,
+        email: formData.email,
+        phone_number: formData.phone_number,
+        date_of_birth: formData.date_of_birth,
+        input_level: formData.input_level,
+        address: formData.address || undefined,
+        password: formData.password,
+        parent_name: formData.parent_name,
+        parent_phone: formData.parent_phone,
+        status: formData.status,
+      };
 
       await onSave(newStudent);
 
       // Reset form
       setFormData({
-        studentId: '',
         name: '',
         email: '',
-        phone: '',
-        dateOfBirth: '',
-        level: 'beginner',
-        enrollmentStatus: 'active',
+        password: '',
+        status: 'active',
+        date_of_birth: '',
+        input_level: 'beginner',
         address: '',
-        emergencyContact: {
-          name: '',
-          phone: '',
-          relationship: '',
-        },
       });
       setErrors({});
       onClose();
@@ -152,19 +119,16 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
   const handleClose = () => {
     if (!isSubmitting) {
       setFormData({
-        studentId: '',
         name: '',
         email: '',
-        phone: '',
-        dateOfBirth: '',
-        level: 'beginner',
-        enrollmentStatus: 'active',
+        phone_number: '',
+        date_of_birth: '',
+        input_level: 'beginner',
         address: '',
-        emergencyContact: {
-          name: '',
-          phone: '',
-          relationship: '',
-        },
+        password: '',
+        parent_name: '',
+        parent_phone: '',
+        status: 'active',
       });
       setErrors({});
       onClose();
@@ -208,29 +172,6 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
               Thông tin cơ bản
             </h3>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              {/* Student ID */}
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Mã số học viên *
-                </label>
-                <input
-                  type='text'
-                  value={formData.studentId}
-                  onChange={(e) =>
-                    handleInputChange('studentId', e.target.value)
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.studentId ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder='Nhập mã số học viên'
-                />
-                {errors.studentId && (
-                  <p className='mt-1 text-sm text-red-600'>
-                    {errors.studentId}
-                  </p>
-                )}
-              </div>
-
               {/* Name */}
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
@@ -281,16 +222,20 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                   <Phone className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
                   <input
                     type='tel'
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    value={formData.phone_number}
+                    onChange={(e) =>
+                      handleInputChange('phone_number', e.target.value)
+                    }
                     className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.phone ? 'border-red-500' : 'border-gray-300'
+                      errors.phone_number ? 'border-red-500' : 'border-gray-300'
                     }`}
                     placeholder='0123456789'
                   />
                 </div>
-                {errors.phone && (
-                  <p className='mt-1 text-sm text-red-600'>{errors.phone}</p>
+                {errors.phone_number && (
+                  <p className='mt-1 text-sm text-red-600'>
+                    {errors.phone_number}
+                  </p>
                 )}
               </div>
 
@@ -303,18 +248,20 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                   <Calendar className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
                   <input
                     type='date'
-                    value={formData.dateOfBirth}
+                    value={formData.date_of_birth}
                     onChange={(e) =>
-                      handleInputChange('dateOfBirth', e.target.value)
+                      handleInputChange('date_of_birth', e.target.value)
                     }
                     className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'
+                      errors.date_of_birth
+                        ? 'border-red-500'
+                        : 'border-gray-300'
                     }`}
                   />
                 </div>
-                {errors.dateOfBirth && (
+                {errors.date_of_birth && (
                   <p className='mt-1 text-sm text-red-600'>
-                    {errors.dateOfBirth}
+                    {errors.date_of_birth}
                   </p>
                 )}
               </div>
@@ -352,8 +299,10 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                   Trình độ
                 </label>
                 <select
-                  value={formData.level}
-                  onChange={(e) => handleInputChange('level', e.target.value)}
+                  value={formData.input_level}
+                  onChange={(e) =>
+                    handleInputChange('input_level', e.target.value)
+                  }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                 >
                   <option value='beginner'>Sơ cấp</option>
@@ -371,10 +320,8 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                   Trạng thái đăng ký
                 </label>
                 <select
-                  value={formData.enrollmentStatus}
-                  onChange={(e) =>
-                    handleInputChange('enrollmentStatus', e.target.value)
-                  }
+                  value={formData.status}
+                  onChange={(e) => handleInputChange('status', e.target.value)}
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                 >
                   <option value='active'>Đang học</option>
@@ -398,9 +345,9 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                 </label>
                 <input
                   type='text'
-                  value={formData.emergencyContact.name}
+                  value={formData.parent_name}
                   onChange={(e) =>
-                    handleEmergencyContactChange('name', e.target.value)
+                    handleInputChange('parent_name', e.target.value)
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                   placeholder='Tên người liên hệ'
@@ -413,9 +360,9 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                 </label>
                 <input
                   type='tel'
-                  value={formData.emergencyContact.phone}
+                  value={formData.parent_phone}
                   onChange={(e) =>
-                    handleEmergencyContactChange('phone', e.target.value)
+                    handleInputChange('parent_phone', e.target.value)
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                   placeholder='0123456789'
@@ -428,9 +375,9 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                 </label>
                 <input
                   type='text'
-                  value={formData.emergencyContact.relationship}
+                  value={formData.parent_name}
                   onChange={(e) =>
-                    handleEmergencyContactChange('relationship', e.target.value)
+                    handleInputChange('parent_name', e.target.value)
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                   placeholder='Cha, mẹ, vợ/chồng...'

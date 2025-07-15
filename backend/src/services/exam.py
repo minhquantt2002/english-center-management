@@ -13,6 +13,10 @@ def get_exams(db: Session, skip: int = 0, limit: int = 100) -> List[Exam]:
     """Get list of exams with pagination"""
     return exam_crud.get_exams(db, skip=skip, limit=limit)
 
+def get_all_exams(db: Session) -> List[Exam]:
+    """Get all exams without pagination"""
+    return exam_crud.get_exams(db, skip=0, limit=1000000)  # Large limit to get all
+
 def get_exams_by_class(db: Session, class_id: UUID) -> List[Exam]:
     """Get exams for specific class"""
     return exam_crud.get_exams_by_class(db, class_id)
@@ -31,4 +35,8 @@ def delete_exam(db: Session, exam_id: UUID) -> bool:
 
 def count_exams_by_class(db: Session, class_id: UUID) -> int:
     """Count exams for a class"""
-    return exam_crud.count_exams_by_class(db, class_id) 
+    return exam_crud.count_exams_by_class(db, class_id)
+
+def get_exams_by_teacher(db: Session, teacher_id: UUID):
+    """Get all exams for a specific teacher"""
+    return exam_crud.get_exams_by_teacher(db, teacher_id) 

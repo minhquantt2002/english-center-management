@@ -12,14 +12,13 @@ import {
   Shield,
   DollarSign,
 } from 'lucide-react';
-import { Student } from '../../../../../types';
+import { StudentResponse } from '../../../../../types/staff';
 import { useStaffStudentApi } from '../../../_hooks';
-import Image from 'next/image';
 
 interface ViewStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  student: Student | null;
+  student: StudentResponse | null;
 }
 
 export default function ViewStudentModal({
@@ -43,8 +42,8 @@ export default function ViewStudentModal({
             getStudentAchievements(student.id),
             getStudentInvoices(student.id),
           ]);
-          setAchievements(achievementsData.data);
-          setInvoices(invoicesData.data);
+          setAchievements(achievementsData.achievements);
+          setInvoices(invoicesData.invoices);
         } catch (error) {
           console.error('Error fetching student data:', error);
         }
@@ -154,11 +153,10 @@ export default function ViewStudentModal({
     <div className='space-y-6'>
       {/* Student Header */}
       <div className='flex items-start space-x-6 mb-8'>
-        <Image
+        <img
           className='h-24 w-24 rounded-full border-4 border-gray-200'
           src={
-            student.avatar ||
-            `https://ui-avatars.com/api/?name=${student.name}&background=0D9488&color=fff&size=96`
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
           }
           alt={student.name}
         />
@@ -173,9 +171,7 @@ export default function ViewStudentModal({
               {getStatusText(student.status || 'active')}
             </span>
           </div>
-          <p className='text-lg text-gray-600 mb-2'>
-            Mã số: {student.studentId}
-          </p>
+          <p className='text-lg text-gray-600 mb-2'>Mã số: {student.id}</p>
           <div className='flex items-center space-x-4 text-sm text-gray-500'>
             <span className='flex items-center space-x-1'>
               <Mail className='w-4 h-4' />
@@ -183,7 +179,7 @@ export default function ViewStudentModal({
             </span>
             <span className='flex items-center space-x-1'>
               <Phone className='w-4 h-4' />
-              <span>{student.phone}</span>
+              <span>{student.phone_number}</span>
             </span>
           </div>
         </div>
@@ -206,8 +202,10 @@ export default function ViewStudentModal({
               <div className='flex justify-between'>
                 <span className='text-gray-600'>Ngày sinh:</span>
                 <span className='font-medium'>
-                  {student.dateOfBirth
-                    ? new Date(student.dateOfBirth).toLocaleDateString('vi-VN')
+                  {student.date_of_birth
+                    ? new Date(student.date_of_birth).toLocaleDateString(
+                        'vi-VN'
+                      )
                     : 'Chưa cập nhật'}
                 </span>
               </div>
@@ -215,23 +213,25 @@ export default function ViewStudentModal({
                 <span className='text-gray-600'>Trình độ:</span>
                 <span
                   className={`px-2 py-1 text-sm font-medium rounded-full ${getLevelColor(
-                    student.level
+                    student.input_level
                   )}`}
                 >
-                  {getLevelText(student.level)}
+                  {getLevelText(student.input_level)}
                 </span>
               </div>
               <div className='flex justify-between'>
                 <span className='text-gray-600'>Ngày nhập học:</span>
                 <span className='font-medium'>
-                  {new Date(student.enrollmentDate).toLocaleDateString('vi-VN')}
+                  {new Date(
+                    student.enrollments[0].enrollment_at
+                  ).toLocaleDateString('vi-VN')}
                 </span>
               </div>
-              {student.address && (
+              {student.bio && (
                 <div className='flex justify-between'>
                   <span className='text-gray-600'>Địa chỉ:</span>
                   <span className='font-medium text-right max-w-xs'>
-                    {student.address}
+                    {student.bio}
                   </span>
                 </div>
               )}
@@ -248,17 +248,17 @@ export default function ViewStudentModal({
               <div className='flex justify-between'>
                 <span className='text-gray-600'>Lớp hiện tại:</span>
                 <span className='font-medium'>
-                  {student.currentClass || 'Chưa phân lớp'}
+                  {student.enrollments[0].class_id || 'Chưa phân lớp'}
                 </span>
               </div>
               <div className='flex justify-between'>
                 <span className='text-gray-600'>Trạng thái:</span>
                 <span
                   className={`px-2 py-1 text-sm font-medium rounded-full ${getStatusColor(
-                    student.status || 'active'
+                    student.enrollments[0].status || 'active'
                   )}`}
                 >
-                  {getStatusText(student.status || 'active')}
+                  {getStatusText(student.enrollments[0].status || 'active')}
                 </span>
               </div>
             </div>
@@ -280,19 +280,19 @@ export default function ViewStudentModal({
               </div>
               <div className='flex justify-between'>
                 <span className='text-gray-600'>Số điện thoại:</span>
-                <span className='font-medium'>{student.phone}</span>
+                <span className='font-medium'>{student.phone_number}</span>
               </div>
-              {student.parentContact && (
+              {student.parent_name && (
                 <div className='flex justify-between'>
                   <span className='text-gray-600'>Liên hệ phụ huynh:</span>
-                  <span className='font-medium'>{student.parentContact}</span>
+                  <span className='font-medium'>{student.parent_name}</span>
                 </div>
               )}
             </div>
           </div>
 
           {/* Emergency Contact */}
-          {student.emergencyContact && (
+          {student.parent_name && (
             <div className='bg-gray-50 rounded-lg p-6'>
               <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2'>
                 <Shield className='w-5 h-5 text-red-600' />
@@ -301,21 +301,11 @@ export default function ViewStudentModal({
               <div className='space-y-4'>
                 <div className='flex justify-between'>
                   <span className='text-gray-600'>Tên:</span>
-                  <span className='font-medium'>
-                    {student.emergencyContact.name}
-                  </span>
+                  <span className='font-medium'>{student.parent_name}</span>
                 </div>
                 <div className='flex justify-between'>
                   <span className='text-gray-600'>Số điện thoại:</span>
-                  <span className='font-medium'>
-                    {student.emergencyContact.phone}
-                  </span>
-                </div>
-                <div className='flex justify-between'>
-                  <span className='text-gray-600'>Mối quan hệ:</span>
-                  <span className='font-medium'>
-                    {student.emergencyContact.relationship}
-                  </span>
+                  <span className='font-medium'>{student.parent_phone}</span>
                 </div>
               </div>
             </div>
@@ -331,24 +321,16 @@ export default function ViewStudentModal({
               <div className='flex justify-between'>
                 <span className='text-gray-600'>Ngày tạo:</span>
                 <span className='font-medium'>
-                  {student.createdAt
-                    ? new Date(student.createdAt).toLocaleDateString('vi-VN')
+                  {student.created_at
+                    ? new Date(student.created_at).toLocaleDateString('vi-VN')
                     : 'N/A'}
                 </span>
               </div>
-              <div className='flex justify-between'>
-                <span className='text-gray-600'>Cập nhật lần cuối:</span>
-                <span className='font-medium'>
-                  {student.updatedAt
-                    ? new Date(student.updatedAt).toLocaleDateString('vi-VN')
-                    : 'N/A'}
-                </span>
-              </div>
-              {student.notes && (
+              {student.bio && (
                 <div>
                   <span className='text-gray-600 block mb-2'>Ghi chú:</span>
                   <p className='text-sm bg-white p-3 rounded border'>
-                    {student.notes}
+                    {student.bio}
                   </p>
                 </div>
               )}
@@ -376,45 +358,47 @@ export default function ViewStudentModal({
               >
                 <div className='flex items-center justify-between mb-3'>
                   <h4 className='font-semibold text-gray-900'>
-                    {achievement.courseName}
+                    {achievement.title}
                   </h4>
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      achievement.gradeLevel === 'A'
+                      achievement.type === 'academic'
                         ? 'bg-green-100 text-green-800'
-                        : achievement.gradeLevel === 'B'
+                        : achievement.type === 'participation'
                         ? 'bg-blue-100 text-blue-800'
-                        : achievement.gradeLevel === 'C'
+                        : achievement.type === 'leadership'
                         ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-red-100 text-red-800'
                     }`}
                   >
-                    {achievement.gradeLevel}
+                    {achievement.type}
                   </span>
                 </div>
                 <div className='grid grid-cols-2 gap-4 text-sm'>
                   <div>
                     <span className='text-gray-600'>Loại bài thi:</span>
                     <span className='ml-2 font-medium capitalize'>
-                      {achievement.testType}
+                      {achievement.type}
                     </span>
                   </div>
                   <div>
                     <span className='text-gray-600'>Điểm tổng:</span>
                     <span className='ml-2 font-medium'>
-                      {achievement.overall}/100
+                      {achievement.description}
                     </span>
                   </div>
                   <div>
                     <span className='text-gray-600'>Ngày thi:</span>
                     <span className='ml-2 font-medium'>
-                      {new Date(achievement.date).toLocaleDateString('vi-VN')}
+                      {new Date(achievement.achieved_date).toLocaleDateString(
+                        'vi-VN'
+                      )}
                     </span>
                   </div>
                   <div>
                     <span className='text-gray-600'>Giáo viên:</span>
                     <span className='ml-2 font-medium'>
-                      {achievement.teacherName}
+                      {achievement.description}
                     </span>
                   </div>
                 </div>
@@ -448,14 +432,14 @@ export default function ViewStudentModal({
               >
                 <div className='flex items-center justify-between mb-3'>
                   <h4 className='font-semibold text-gray-900'>
-                    {invoice.invoiceNumber}
+                    {invoice.description}
                   </h4>
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-medium ${getPaymentStatusColor(
-                      invoice.paymentStatus
+                      invoice.status
                     )}`}
                   >
-                    {getPaymentStatusText(invoice.paymentStatus)}
+                    {getPaymentStatusText(invoice.status)}
                   </span>
                 </div>
                 <p className='text-gray-600 mb-3'>{invoice.description}</p>
@@ -463,29 +447,29 @@ export default function ViewStudentModal({
                   <div>
                     <span className='text-gray-600'>Tổng tiền:</span>
                     <span className='ml-2 font-medium'>
-                      {invoice.amount.toLocaleString('vi-VN')} VNĐ
+                      {invoice.amount} VNĐ
                     </span>
                   </div>
                   <div>
                     <span className='text-gray-600'>Đã thanh toán:</span>
                     <span className='ml-2 font-medium text-green-600'>
-                      {invoice.paidAmount.toLocaleString('vi-VN')} VNĐ
+                      {invoice.amount} VNĐ
                     </span>
                   </div>
                   <div>
                     <span className='text-gray-600'>Còn nợ:</span>
                     <span className='ml-2 font-medium text-red-600'>
-                      {invoice.remainingAmount.toLocaleString('vi-VN')} VNĐ
+                      {invoice.amount} VNĐ
                     </span>
                   </div>
                   <div>
                     <span className='text-gray-600'>Hạn thanh toán:</span>
                     <span className='ml-2 font-medium'>
-                      {new Date(invoice.dueDate).toLocaleDateString('vi-VN')}
+                      {new Date(invoice.due_date).toLocaleDateString('vi-VN')}
                     </span>
                   </div>
                 </div>
-                {invoice.paymentStatus === 'overdue' && (
+                {invoice.status === 'overdue' && (
                   <div className='bg-red-50 border border-red-200 rounded p-3'>
                     <p className='text-red-700 text-sm font-medium'>
                       ⚠️ Quá hạn thanh toán
@@ -503,10 +487,7 @@ export default function ViewStudentModal({
                   <span className='text-blue-600'>Tổng nợ:</span>
                   <span className='ml-2 font-medium text-blue-900'>
                     {studentInvoices
-                      .reduce(
-                        (sum: number, inv: any) => sum + inv.remainingAmount,
-                        0
-                      )
+                      .reduce((sum: number, inv: any) => sum + inv.amount, 0)
                       .toLocaleString('vi-VN')}{' '}
                     VNĐ
                   </span>
@@ -515,10 +496,7 @@ export default function ViewStudentModal({
                   <span className='text-blue-600'>Đã thanh toán:</span>
                   <span className='ml-2 font-medium text-blue-900'>
                     {studentInvoices
-                      .reduce(
-                        (sum: number, inv: any) => sum + inv.paidAmount,
-                        0
-                      )
+                      .reduce((sum: number, inv: any) => sum + inv.amount, 0)
                       .toLocaleString('vi-VN')}{' '}
                     VNĐ
                   </span>
@@ -556,7 +534,7 @@ export default function ViewStudentModal({
                 Thông tin học viên
               </h2>
               <p className='text-sm text-gray-600'>
-                {student.name} - {student.studentId}
+                {student.name} - {student.id}
               </p>
             </div>
           </div>

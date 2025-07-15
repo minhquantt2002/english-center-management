@@ -2,7 +2,7 @@ from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
 from ..cruds import enrollment as enrollment_crud
-from ..schemas.enrollment import EnrollmentCreate
+from ..schemas.enrollment import EnrollmentCreate, EnrollmentUpdate
 from ..models.enrollment import Enrollment
 
 def get_enrollment(db: Session, enrollment_id: UUID) -> Optional[Enrollment]:
@@ -12,6 +12,10 @@ def get_enrollment(db: Session, enrollment_id: UUID) -> Optional[Enrollment]:
 def get_enrollments(db: Session, skip: int = 0, limit: int = 100) -> List[Enrollment]:
     """Get list of enrollments with pagination"""
     return enrollment_crud.get_enrollments(db, skip=skip, limit=limit)
+
+def get_all_enrollments(db: Session) -> List[Enrollment]:
+    """Get all enrollments without pagination"""
+    return enrollment_crud.get_all_enrollments(db)
 
 def get_enrollments_by_student(db: Session, student_id: UUID) -> List[Enrollment]:
     """Get enrollments for specific student"""
@@ -33,6 +37,10 @@ def create_enrollment(db: Session, enrollment_data: EnrollmentCreate | dict) -> 
         return enrollment_crud.create_enrollment(db, enrollment_create)
     return enrollment_crud.create_enrollment(db, enrollment_data)
 
+def update_enrollment(db: Session, enrollment_id: UUID, enrollment_data: EnrollmentUpdate) -> Optional[Enrollment]:
+    """Update enrollment"""
+    return enrollment_crud.update_enrollment(db, enrollment_id, enrollment_data)
+
 def delete_enrollment(db: Session, enrollment_id: UUID) -> bool:
     """Delete enrollment"""
     return enrollment_crud.delete_enrollment(db, enrollment_id)
@@ -43,4 +51,8 @@ def count_enrollments_by_student(db: Session, student_id: UUID) -> int:
 
 def count_enrollments_by_classroom(db: Session, class_id: UUID) -> int:
     """Count enrollments for a classroom"""
-    return enrollment_crud.count_enrollments_by_classroom(db, class_id) 
+    return enrollment_crud.count_enrollments_by_classroom(db, class_id)
+
+def get_students_by_teacher(db: Session, teacher_id: UUID):
+    """Get all students taught by a specific teacher"""
+    return enrollment_crud.get_students_by_teacher(db, teacher_id) 

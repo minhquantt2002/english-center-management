@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 from uuid import UUID
 from ..models.enrollment import Enrollment
-from ..schemas.enrollment import EnrollmentCreate
+from ..schemas.enrollment import EnrollmentCreate, EnrollmentUpdate
 
 def get_enrollment(db: Session, enrollment_id: UUID) -> Optional[Enrollment]:
     """Get enrollment by UUID"""
@@ -33,14 +33,28 @@ def get_enrollment_by_student_classroom(db: Session, student_id: UUID, class_id:
 
 def create_enrollment(db: Session, enrollment_data: EnrollmentCreate) -> Enrollment:
     """Create new enrollment"""
+    from datetime import date
     db_enrollment = Enrollment(
         student_id=enrollment_data.student_id,
         class_id=enrollment_data.class_id,
-        enrollment_at=enrollment_data.enrollment_date,
-        status=enrollment_data.status,
-        notes=enrollment_data.notes
+        enrollment_at=date.today(),
+        status=enrollment_data.status
     )
     db.add(db_enrollment)
+    db.commit()
+    db.refresh(db_enrollment)
+    return db_enrollment
+
+def update_enrollment(db: Session, enrollment_id: UUID, enrollment_update: EnrollmentUpdate) -> Optional[Enrollment]:
+    """Update enrollment"""
+    db_enrollment = get_enrollment(db, enrollment_id)
+    if not db_enrollment:
+        return None
+    
+    update_data = enrollment_update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_enrollment, field, value)
+    
     db.commit()
     db.refresh(db_enrollment)
     return db_enrollment
@@ -61,4 +75,18 @@ def count_enrollments_by_student(db: Session, student_id: UUID) -> int:
 
 def count_enrollments_by_classroom(db: Session, class_id: UUID) -> int:
     """Count enrollments for a classroom"""
-    return db.query(Enrollment).filter(Enrollment.class_id == class_id).count() 
+    return db.query(Enrollment).filter(Enrollment.class_id == class_id).count()
+
+def get_students_by_teacher(db: Session, teacher_id: UUID):
+    """Get all students taught by a specific teacher"""
+    from ..models.classroom import Class
+    from ..models.user import User
+    query = db.query(User).join(
+        Enrollment, User.id == Enrollment.student_id
+    ).join(
+        Class, Enrollment.class_id == Class.id
+    ).filter(
+        Class.teacher_id == teacher_id,
+        User.role_name == "student"
+    ).distinct()
+    return query.all() 

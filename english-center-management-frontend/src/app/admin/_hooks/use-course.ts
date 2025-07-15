@@ -4,48 +4,38 @@ import {
   CourseCreate,
   CourseUpdate,
   CourseResponse,
-} from '../../../types/course';
+} from '../../../types/admin';
 
 export const useCourseApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createCourse = useCallback(async (courseData: CourseCreate) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const apiData = {
-        course_name: courseData.course_name,
-        description: courseData.description,
-        level: courseData.level,
-        price: courseData.price,
-      };
-
-      const response = await api.post('/admin/courses', apiData);
-      return response;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const updateCourse = useCallback(
-    async (id: string, courseData: CourseUpdate) => {
+  const createCourse = useCallback(
+    async (courseData: CourseCreate): Promise<CourseResponse> => {
       setLoading(true);
       setError(null);
       try {
-        const apiData = {
-          course_name: courseData.course_name,
-          description: courseData.description,
-          level: courseData.level,
-          price: courseData.price,
-        };
+        const response = await api.post('/admin/courses', courseData);
+        return response as CourseResponse;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Có lỗi xảy ra';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
-        const response = await api.put(`/admin/courses/${id}`, apiData);
-        return response;
+  const updateCourse = useCallback(
+    async (id: string, courseData: CourseUpdate): Promise<CourseResponse> => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await api.put(`/admin/courses/${id}`, courseData);
+        return response as CourseResponse;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Có lỗi xảy ra';
@@ -78,7 +68,7 @@ export const useCourseApi = () => {
     setError(null);
     try {
       const response = await api.get('/admin/courses');
-      return response;
+      return response as CourseResponse[];
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
       setError(errorMessage);
@@ -94,7 +84,7 @@ export const useCourseApi = () => {
       setError(null);
       try {
         const response = await api.get(`/admin/courses/${id}`);
-        return response;
+        return response as CourseResponse;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Có lỗi xảy ra';

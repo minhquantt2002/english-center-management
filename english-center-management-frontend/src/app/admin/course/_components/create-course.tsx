@@ -1,34 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
+import { X, BookOpen, DollarSign, Save } from 'lucide-react';
 import {
-  X,
-  BookOpen,
-  Calendar,
-  DollarSign,
-  FileText,
-  Plus,
-  Save,
-} from 'lucide-react';
-import { CourseLevel, CourseStatus } from '../../../../types';
+  CourseCreate,
+  CourseLevel,
+  CourseStatus,
+} from '../../../../types/admin';
 
 interface CreateCourseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateCourse: (courseData: CourseFormData) => void;
-}
-
-export interface CourseFormData {
-  name: string;
-  description: string;
-  level: CourseLevel;
-  duration: string;
-  startDate: string;
-  endDate: string;
-  status: CourseStatus;
-  price?: number;
-  maxStudents?: number;
-  syllabus: string[];
+  onCreateCourse: (courseData: CourseCreate) => Promise<void>;
 }
 
 const levels: { value: CourseLevel; label: string }[] = [
@@ -52,69 +35,40 @@ export default function CreateCourseModal({
   onClose,
   onCreateCourse,
 }: CreateCourseModalProps) {
-  const [formData, setFormData] = useState<CourseFormData>({
-    name: '',
+  const [formData, setFormData] = useState<CourseCreate>({
+    course_name: '',
     description: '',
     level: 'beginner',
-    duration: '',
-    startDate: '',
-    endDate: '',
-    status: 'upcoming',
-    price: undefined,
-    maxStudents: undefined,
-    syllabus: [''],
+    total_weeks: 0,
+    price: 0,
   });
 
   const [errors, setErrors] = useState<
-    Partial<Record<keyof CourseFormData, string>>
+    Partial<Record<keyof CourseCreate, string>>
   >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Tên khóa học là bắt buộc';
+    if (!formData.course_name.trim()) {
+      newErrors.course_name = 'Tên khóa học là bắt buộc';
     }
 
     if (!formData.description.trim()) {
       newErrors.description = 'Mô tả khóa học là bắt buộc';
     }
 
-    if (!formData.duration.trim()) {
-      newErrors.duration = 'Thời lượng khóa học là bắt buộc';
+    if (!formData.total_weeks) {
+      newErrors.total_weeks = 'Thời lượng khóa học là bắt buộc';
     }
 
-    if (!formData.startDate) {
-      newErrors.startDate = 'Ngày bắt đầu là bắt buộc';
+    if (!formData.price) {
+      newErrors.price = 'Học phí là bắt buộc';
     }
 
-    if (!formData.endDate) {
-      newErrors.endDate = 'Ngày kết thúc là bắt buộc';
-    }
-
-    if (
-      formData.startDate &&
-      formData.endDate &&
-      new Date(formData.startDate) >= new Date(formData.endDate)
-    ) {
-      newErrors.endDate = 'Ngày kết thúc phải sau ngày bắt đầu';
-    }
-
-    if (formData.price !== undefined && formData.price < 0) {
-      newErrors.price = 'Học phí không được âm';
-    }
-
-    if (formData.maxStudents !== undefined && formData.maxStudents <= 0) {
-      newErrors.maxStudents = 'Số học viên tối đa phải lớn hơn 0';
-    }
-
-    // Validate syllabus
-    const validSyllabus = formData.syllabus.filter(
-      (item) => item.trim() !== ''
-    );
-    if (validSyllabus.length === 0) {
-      newErrors.syllabus = 'Phải có ít nhất một bài học trong giáo trình';
+    if (!formData.level) {
+      newErrors.level = 'Cấp độ khóa học là bắt buộc';
     }
 
     setErrors(newErrors);
@@ -127,16 +81,7 @@ export default function CreateCourseModal({
     if (validateForm()) {
       setIsSubmitting(true);
       try {
-        // Filter out empty syllabus items
-        const cleanSyllabus = formData.syllabus.filter(
-          (item) => item.trim() !== ''
-        );
-        const courseData = {
-          ...formData,
-          syllabus: cleanSyllabus,
-        };
-
-        await onCreateCourse(courseData);
+        await onCreateCourse(formData as CourseCreate);
         handleClose();
       } catch (error) {
         console.error('Error creating course:', error);
@@ -148,23 +93,18 @@ export default function CreateCourseModal({
 
   const handleClose = () => {
     setFormData({
-      name: '',
+      course_name: '',
       description: '',
       level: 'beginner',
-      duration: '',
-      startDate: '',
-      endDate: '',
-      status: 'upcoming',
-      price: undefined,
-      maxStudents: undefined,
-      syllabus: [''],
+      total_weeks: 0,
+      price: 0,
     });
     setErrors({});
     setIsSubmitting(false);
     onClose();
   };
 
-  const handleInputChange = (field: keyof CourseFormData, value: any) => {
+  const handleInputChange = (field: keyof CourseCreate, value: any) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -175,40 +115,6 @@ export default function CreateCourseModal({
       setErrors((prev) => ({
         ...prev,
         [field]: undefined,
-      }));
-    }
-  };
-
-  const handleSyllabusChange = (index: number, value: string) => {
-    const newSyllabus = [...formData.syllabus];
-    newSyllabus[index] = value;
-    setFormData((prev) => ({
-      ...prev,
-      syllabus: newSyllabus,
-    }));
-
-    // Clear syllabus error
-    if (errors.syllabus) {
-      setErrors((prev) => ({
-        ...prev,
-        syllabus: undefined,
-      }));
-    }
-  };
-
-  const addSyllabusItem = () => {
-    setFormData((prev) => ({
-      ...prev,
-      syllabus: [...prev.syllabus, ''],
-    }));
-  };
-
-  const removeSyllabusItem = (index: number) => {
-    if (formData.syllabus.length > 1) {
-      const newSyllabus = formData.syllabus.filter((_, i) => i !== index);
-      setFormData((prev) => ({
-        ...prev,
-        syllabus: newSyllabus,
       }));
     }
   };
@@ -257,15 +163,19 @@ export default function CreateCourseModal({
                 </label>
                 <input
                   type='text'
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  value={formData.course_name}
+                  onChange={(e) =>
+                    handleInputChange('course_name', e.target.value)
+                  }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.name ? 'border-red-500' : 'border-gray-300'
+                    errors.course_name ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder='Nhập tên khóa học'
                 />
-                {errors.name && (
-                  <p className='text-red-500 text-sm mt-1'>{errors.name}</p>
+                {errors.course_name && (
+                  <p className='text-red-500 text-sm mt-1'>
+                    {errors.course_name}
+                  </p>
                 )}
               </div>
 
@@ -294,17 +204,19 @@ export default function CreateCourseModal({
                 </label>
                 <input
                   type='text'
-                  value={formData.duration}
+                  value={formData.total_weeks}
                   onChange={(e) =>
-                    handleInputChange('duration', e.target.value)
+                    handleInputChange('total_weeks', e.target.value)
                   }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.duration ? 'border-red-500' : 'border-gray-300'
+                    errors.total_weeks ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder='VD: 8 tuần, 12 buổi'
                 />
-                {errors.duration && (
-                  <p className='text-red-500 text-sm mt-1'>{errors.duration}</p>
+                {errors.total_weeks && (
+                  <p className='text-red-500 text-sm mt-1'>
+                    {errors.total_weeks}
+                  </p>
                 )}
               </div>
 
@@ -313,9 +225,9 @@ export default function CreateCourseModal({
                   Trạng thái <span className='text-red-500'>*</span>
                 </label>
                 <select
-                  value={formData.status}
+                  value={formData.level}
                   onChange={(e) =>
-                    handleInputChange('status', e.target.value as CourseStatus)
+                    handleInputChange('level', e.target.value as CourseLevel)
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
                 >
@@ -351,59 +263,11 @@ export default function CreateCourseModal({
             </div>
           </div>
 
-          {/* Schedule Information */}
-          <div>
-            <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
-              <Calendar className='w-5 h-5 text-teal-600' />
-              Lịch học
-            </h3>
-
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Ngày bắt đầu <span className='text-red-500'>*</span>
-                </label>
-                <input
-                  type='date'
-                  value={formData.startDate}
-                  onChange={(e) =>
-                    handleInputChange('startDate', e.target.value)
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.startDate ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                {errors.startDate && (
-                  <p className='text-red-500 text-sm mt-1'>
-                    {errors.startDate}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Ngày kết thúc <span className='text-red-500'>*</span>
-                </label>
-                <input
-                  type='date'
-                  value={formData.endDate}
-                  onChange={(e) => handleInputChange('endDate', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.endDate ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                {errors.endDate && (
-                  <p className='text-red-500 text-sm mt-1'>{errors.endDate}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
           {/* Pricing and Capacity */}
           <div>
             <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
               <DollarSign className='w-5 h-5 text-teal-600' />
-              Học phí và sĩ số
+              Học phí
             </h3>
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -430,79 +294,7 @@ export default function CreateCourseModal({
                   <p className='text-red-500 text-sm mt-1'>{errors.price}</p>
                 )}
               </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Sĩ số tối đa
-                </label>
-                <input
-                  type='number'
-                  value={formData.maxStudents || ''}
-                  onChange={(e) =>
-                    handleInputChange(
-                      'maxStudents',
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.maxStudents ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder='VD: 20'
-                  min='1'
-                />
-                {errors.maxStudents && (
-                  <p className='text-red-500 text-sm mt-1'>
-                    {errors.maxStudents}
-                  </p>
-                )}
-              </div>
             </div>
-          </div>
-
-          {/* Syllabus */}
-          <div>
-            <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
-              <FileText className='w-5 h-5 text-teal-600' />
-              Giáo trình <span className='text-red-500'>*</span>
-            </h3>
-
-            <div className='space-y-3'>
-              {formData.syllabus.map((item, index) => (
-                <div key={index} className='flex gap-2'>
-                  <input
-                    type='text'
-                    value={item}
-                    onChange={(e) =>
-                      handleSyllabusChange(index, e.target.value)
-                    }
-                    className='flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
-                    placeholder={`Bài ${index + 1}: Nhập nội dung bài học`}
-                  />
-                  {formData.syllabus.length > 1 && (
-                    <button
-                      type='button'
-                      onClick={() => removeSyllabusItem(index)}
-                      className='px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors'
-                    >
-                      <X className='w-4 h-4' />
-                    </button>
-                  )}
-                </div>
-              ))}
-
-              <button
-                type='button'
-                onClick={addSyllabusItem}
-                className='flex items-center gap-2 text-teal-600 hover:text-teal-700 font-medium'
-              >
-                <Plus className='w-4 h-4' />
-                Thêm bài học
-              </button>
-            </div>
-
-            {errors.syllabus && (
-              <p className='text-red-500 text-sm mt-2'>{errors.syllabus}</p>
-            )}
           </div>
 
           {/* Footer */}

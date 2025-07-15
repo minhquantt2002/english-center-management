@@ -14,13 +14,10 @@ import {
 import { useStaffCourseApi, useStaffTeacherApi } from '../../_hooks';
 import {
   ClassroomCreate,
-  ClassStatus,
-  courseLevels,
-  weekdayOptions,
-} from '../../../../types/classroom';
-import { CourseLevel } from '../../../../types';
-import { CourseResponse } from '../../../../types/course';
-import { UserResponse } from '../../../../types/user';
+  CourseLevel,
+  CourseResponse,
+  TeacherResponse,
+} from '../../../../types/staff';
 
 interface CreateClassroomModalProps {
   isOpen: boolean;
@@ -37,11 +34,11 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
     class_name: '',
     course_id: '',
     teacher_id: '',
-    status: ClassStatus.ACTIVE,
+    status: 'active',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [teachers, setTeachers] = useState<UserResponse[]>([]);
+  const [teachers, setTeachers] = useState<TeacherResponse[]>([]);
   const [courses, setCourses] = useState<CourseResponse[]>([]);
   const { getCourses } = useStaffCourseApi();
   const [schedules, setSchedules] = useState([
@@ -176,7 +173,7 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
       class_name: '',
       course_id: '',
       teacher_id: '',
-      status: ClassStatus.ACTIVE,
+      status: 'active',
     });
     setErrors({});
     setSchedules([{ weekday: '', start_time: '', end_time: '' }]);
@@ -268,11 +265,10 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                 }
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
               >
-                {courseLevels.map((level) => (
-                  <option key={level.value} value={level.value}>
-                    {level.label}
-                  </option>
-                ))}
+                <option value='beginner'>Sơ cấp</option>
+                <option value='elementary'>Cơ bản</option>
+                <option value='intermediate'>Trung cấp</option>
+                <option value='advanced'>Nâng cao</option>
               </select>
             </div>
 
@@ -369,11 +365,13 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                       className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
                     >
                       <option value=''>Chọn thứ</option>
-                      {weekdayOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
+                      <option value='monday'>Thứ Hai</option>
+                      <option value='tuesday'>Thứ Ba</option>
+                      <option value='wednesday'>Thứ Tư</option>
+                      <option value='thursday'>Thứ Năm</option>
+                      <option value='friday'>Thứ Sáu</option>
+                      <option value='saturday'>Thứ Bảy</option>
+                      <option value='sunday'>Chủ Nhật</option>
                     </select>
                   </div>
                   {/* Start time */}

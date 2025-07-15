@@ -22,6 +22,28 @@ class FeedbackUpdate(BaseSchema):
     rating: Optional[int] = None
     feedback_type: Optional[str] = None
 
+
+# Nested schemas for relationships
+class TeacherNested(BaseSchema):
+    id: UUID
+    name: str
+    email: str
+
+class StudentNested(BaseSchema):
+    id: UUID
+    name: str
+    email: str
+
+class ClassroomNested(BaseSchema):
+    id: UUID
+    class_name: str
+    room: Optional[str] = None
+
+# Feedback with relationships
 class FeedbackResponse(FeedbackBase):
     id: UUID
-    created_at: datetime 
+    created_at: datetime
+
+    teacher: Optional[TeacherNested] = None
+    student: Optional[StudentNested] = None
+    classroom: Optional[ClassroomNested] = None 

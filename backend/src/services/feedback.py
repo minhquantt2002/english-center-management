@@ -13,6 +13,10 @@ def get_feedbacks(db: Session, skip: int = 0, limit: int = 100) -> List[Feedback
     """Get list of feedbacks with pagination"""
     return feedback_crud.get_feedbacks(db, skip=skip, limit=limit)
 
+def get_all_feedbacks(db: Session) -> List[Feedback]:
+    """Get all feedbacks without pagination"""
+    return feedback_crud.get_feedbacks(db, skip=0, limit=1000000)  # Large limit to get all
+
 def get_feedbacks_by_teacher(db: Session, teacher_id: UUID) -> List[Feedback]:
     """Get feedbacks given by specific teacher"""
     return feedback_crud.get_feedbacks_by_teacher(db, teacher_id)

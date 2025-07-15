@@ -28,6 +28,22 @@ class ScoreUpdate(BaseSchema):
     grade: Optional[str] = None
     comments: Optional[str] = None
 
+
+# Nested schemas for relationships
+class StudentNested(BaseSchema):
+    id: UUID
+    name: str
+    email: str
+
+class ExamNested(BaseSchema):
+    id: UUID
+    exam_name: str
+    exam_date: Optional[datetime] = None
+
+# Score with relationships
 class ScoreResponse(ScoreBase):
     id: UUID
-    created_at: datetime 
+    created_at: datetime
+
+    student: Optional[StudentNested] = None
+    exam: Optional[ExamNested] = None 

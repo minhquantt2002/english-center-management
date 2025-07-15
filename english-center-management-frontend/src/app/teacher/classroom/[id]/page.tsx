@@ -22,40 +22,27 @@ import {
   AttendanceManagement,
   GradeManagement,
 } from './_components';
+import { StudentInClass, ClassDetails } from '../../../../types/teacher';
 
 const ClassDetailPage = () => {
   const params = useParams();
   const classId = params.id as string;
-  const {
-    loading,
-    error,
-    getClassDetails,
-    getClassStudents,
-    getClassSchedule,
-  } = useTeacherApi();
+  const { loading, error, getClassDetails } = useTeacherApi();
   const [activeTab, setActiveTab] = useState('overview');
-  const [classDetails, setClassDetails] = useState<any>(null);
-  const [students, setStudents] = useState<any[]>([]);
-  const [schedule, setSchedule] = useState<any[]>([]);
+  const [classDetails, setClassDetails] = useState<ClassDetails | null>(null);
 
   useEffect(() => {
     const fetchClassData = async () => {
       try {
-        const [classData, studentsData, scheduleData] = await Promise.all([
-          getClassDetails(classId),
-          getClassStudents(classId),
-          getClassSchedule(classId),
-        ]);
+        const [classData] = await Promise.all([getClassDetails(classId)]);
         setClassDetails(classData);
-        setStudents(studentsData);
-        setSchedule(scheduleData);
       } catch (err) {
         console.error('Error fetching class data:', err);
       }
     };
 
     fetchClassData();
-  }, [classId, getClassDetails, getClassStudents, getClassSchedule]);
+  }, [classId, getClassDetails]);
 
   const tabs = [
     { id: 'overview', label: 'Tổng quan', icon: Book },
@@ -109,10 +96,10 @@ const ClassDetailPage = () => {
             </Link>
             <div>
               <h1 className='text-xl font-semibold text-gray-900'>
-                {classDetails.name}
+                {classDetails.class_name}
               </h1>
               <p className='text-sm text-gray-500'>
-                {classDetails.teacher} • {classDetails.room}
+                {classDetails.teacher.name} • {classDetails.room}
               </p>
             </div>
           </div>
@@ -132,10 +119,9 @@ const ClassDetailPage = () => {
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
         {/* Class Stats */}
         <ClassStats
-          totalStudents={classDetails?.totalStudents || 0}
-          maxStudents={classDetails?.maxStudents || 0}
+          totalStudents={classDetails?.enrollments.length || 0}
           room={classDetails?.room || ''}
-          currentUnit={classDetails?.currentUnit || ''}
+          currentUnit={classDetails?.course.level || ''}
         />
 
         {/* Tabs */}
@@ -165,12 +151,16 @@ const ClassDetailPage = () => {
           {/* Tab Content */}
           <div className='p-6'>
             {activeTab === 'overview' && (
-              <ClassOverview classDetails={classDetails || {}} />
+              <ClassOverview classDetails={classDetails} />
             )}
 
-            {activeTab === 'students' && <StudentList students={students} />}
+            {activeTab === 'students' && (
+              <StudentList students={classDetails.enrollments} />
+            )}
 
-            {activeTab === 'schedule' && <ClassSchedule sessions={schedule} />}
+            {activeTab === 'schedule' && (
+              <ClassSchedule sessions={classDetails.schedules} />
+            )}
 
             {activeTab === 'attendance' && <AttendanceManagement />}
 

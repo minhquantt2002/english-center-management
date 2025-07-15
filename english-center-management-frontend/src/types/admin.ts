@@ -1,0 +1,298 @@
+// Admin types based on backend schemas
+export type UserRole = 'admin' | 'staff' | 'teacher' | 'student';
+export type StudentStatus = 'active' | 'inactive' | 'suspended' | 'graduated';
+
+// Base User interfaces
+export interface UserBase {
+  name: string;
+  email: string;
+  role_name: UserRole;
+  bio?: string;
+  date_of_birth?: string;
+  phone_number?: string;
+  input_level?: string;
+  specialization?: string;
+  address?: string;
+  education?: string;
+  experience_years?: number;
+  level?: string;
+  parent_name?: string;
+  parent_phone?: string;
+  status?: StudentStatus;
+}
+
+export interface UserCreate extends UserBase {
+  password: string;
+}
+
+export interface UserUpdate {
+  name?: string;
+  email?: string;
+  role_name?: UserRole;
+  bio?: string;
+  date_of_birth?: string;
+  phone_number?: string;
+  input_level?: string;
+  specialization?: string;
+  address?: string;
+  education?: string;
+  experience_years?: number;
+  level?: string;
+  parent_name?: string;
+  parent_phone?: string;
+  student_id?: string;
+  status?: StudentStatus;
+}
+
+// Nested schemas for relationships
+export interface ClassroomNested {
+  id: string;
+  class_name: string;
+  room?: string;
+}
+
+export interface EnrollmentNested {
+  id: string;
+  enrollment_at: string;
+  status: string;
+}
+
+export interface ScoreNested {
+  id: string;
+  total_score?: number;
+  grade?: string;
+}
+
+export interface FeedbackNested {
+  id: string;
+  content?: string;
+  rating?: number;
+  feedback_type?: string;
+}
+
+// User with relationships
+export interface UserResponse extends UserBase {
+  id: string;
+  created_at: string;
+  taught_classes?: ClassroomNested[];
+  given_feedbacks?: FeedbackNested[];
+  enrollments?: EnrollmentNested[];
+  scores?: ScoreNested[];
+  received_feedbacks?: FeedbackNested[];
+}
+
+// Query parameters
+export interface GetUsersQuery {
+  role?: UserRole;
+  status?: StudentStatus;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface UpdateUserRoleRequest {
+  role_name: UserRole;
+}
+
+// Query parameters
+export interface GetClassroomsQuery {
+  course_id?: string;
+  teacher_id?: string;
+  status?: ClassStatus;
+}
+
+// Course types
+export interface CourseBase {
+  course_name: string;
+  description?: string;
+  level?: string;
+  total_weeks?: number;
+  price?: number;
+}
+
+export interface CourseCreate extends CourseBase {}
+
+export interface CourseUpdate {
+  course_name?: string;
+  description?: string;
+  level?: string;
+  total_weeks?: number;
+  price?: number;
+}
+
+export interface CourseResponse extends CourseBase {
+  id: string;
+  created_at: string;
+  classes?: ClassroomNested[];
+}
+
+// Classroom types
+export type ClassStatus = 'active' | 'completed' | 'cancelled';
+export type CourseStatus = 'active' | 'upcoming' | 'completed' | 'cancelled';
+export type CourseLevel =
+  | 'beginner'
+  | 'elementary'
+  | 'intermediate'
+  | 'upper-intermediate'
+  | 'advanced'
+  | 'proficiency';
+
+export interface ClassroomBase {
+  class_name: string;
+  course_id: string;
+  teacher_id: string;
+  room?: string;
+  course_level: CourseLevel;
+  status: ClassStatus;
+  start_date?: string;
+  end_date?: string;
+}
+
+export interface ClassroomCreate extends ClassroomBase {}
+
+export interface ClassroomUpdate {
+  class_name?: string;
+  course_id?: string;
+  teacher_id?: string;
+  room?: string;
+  course_level?: CourseLevel;
+  status?: ClassStatus;
+  start_date?: string;
+  end_date?: string;
+}
+
+export interface CourseNested {
+  id: string;
+  course_name: string;
+  level?: string;
+}
+
+export interface TeacherNested {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface ExamNested {
+  id: string;
+  exam_name: string;
+  exam_date?: string;
+}
+
+export interface ScheduleNested {
+  id: string;
+  weekday: string;
+  start_time: string;
+  end_time: string;
+}
+
+export interface ClassroomResponse extends ClassroomBase {
+  id: string;
+  created_at: string;
+  course?: CourseNested;
+  teacher?: TeacherNested;
+  enrollments?: EnrollmentNested[];
+  exams?: ExamNested[];
+  feedbacks?: FeedbackNested[];
+  schedules?: ScheduleNested[];
+}
+
+// Teacher specific types
+export interface TeacherBase {
+  name: string;
+  email: string;
+  specialization?: string;
+  address?: string;
+  education?: string;
+  experience_years?: number;
+  bio?: string;
+  date_of_birth?: string;
+  phone_number?: string;
+}
+
+export interface TeacherCreate extends TeacherBase {
+  password: string;
+}
+
+export interface TeacherUpdate {
+  name?: string;
+  email?: string;
+  specialization?: string;
+  address?: string;
+  education?: string;
+  experience_years?: number;
+  bio?: string;
+  date_of_birth?: string;
+  phone_number?: string;
+}
+
+export interface TeacherResponse extends TeacherBase {
+  id: string;
+  created_at: string;
+  taught_classes?: ClassroomNested[];
+  given_feedbacks?: FeedbackNested[];
+}
+
+// Student specific types
+export interface StudentBase {
+  name: string;
+  email: string;
+  input_level?: string;
+  parent_name?: string;
+  parent_phone?: string;
+  status: StudentStatus;
+  bio?: string;
+  date_of_birth?: string;
+  phone_number?: string;
+  address?: string;
+}
+
+export interface StudentCreate extends StudentBase {
+  password: string;
+}
+
+export interface StudentUpdate {
+  name?: string;
+  email?: string;
+  input_level?: string;
+  parent_name?: string;
+  parent_phone?: string;
+  status?: StudentStatus;
+  bio?: string;
+  date_of_birth?: string;
+  phone_number?: string;
+  address?: string;
+}
+
+export interface StudentResponse extends StudentBase {
+  id: string;
+  created_at: string;
+  enrollments?: EnrollmentNested[];
+  scores?: ScoreNested[];
+  received_feedbacks?: FeedbackNested[];
+}
+
+// Missing interfaces for hooks
+export interface AssignStudentRequest {
+  studentId: string;
+}
+
+export interface TeacherScheduleResponse {
+  teacher_id: string;
+  schedules: ScheduleNested[];
+}
+
+export interface DashboardStats {
+  totalStudents: number;
+  totalTeachers: number;
+  totalCourses: number;
+  totalClasses: number;
+  recentEnrollments: any[];
+}
+
+export interface DashboardStatCards {
+  totalStudents: number;
+  totalTeachers: number;
+  totalCourses: number;
+  totalClasses: number;
+}

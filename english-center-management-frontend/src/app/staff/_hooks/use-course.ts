@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { api } from '../../../lib/api';
-import { CourseResponse } from '../../../types/course';
+import { CourseResponse } from '../../../types/staff';
 
 export const useStaffCourseApi = () => {
   const [loading, setLoading] = useState(false);
