@@ -106,6 +106,7 @@ export interface CourseBase {
   course_name: string;
   description?: string;
   level?: string;
+  status?: string;
   total_weeks?: number;
   price?: number;
 }
@@ -116,6 +117,7 @@ export interface CourseUpdate {
   course_name?: string;
   description?: string;
   level?: string;
+  status?: string;
   total_weeks?: number;
   price?: number;
 }

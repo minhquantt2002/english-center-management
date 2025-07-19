@@ -22,7 +22,7 @@ const ViewCourseModal: React.FC<ViewCourseModalProps> = ({
       case 'beginner':
         return 'Sơ cấp';
       case 'elementary':
-        return 'Tiền trung cấp';
+        return 'Cơ bản';
       case 'intermediate':
         return 'Trung cấp';
       case 'upper-intermediate':
@@ -36,21 +36,39 @@ const ViewCourseModal: React.FC<ViewCourseModalProps> = ({
     }
   };
 
+  // const getLevelBadgeColor = (level: string) => {
+  //   switch (level) {
+  //     case 'beginner':
+  //     case 'elementary':
+  //       return 'bg-green-100 text-green-800';
+  //     case 'intermediate':
+  //     case 'upper-intermediate':
+  //       return 'bg-yellow-100 text-yellow-800';
+  //     case 'advanced':
+  //     case 'proficiency':
+  //       return 'bg-red-100 text-red-800';
+  //     default:
+  //       return 'bg-gray-100 text-gray-800';
+  //   }
+  // };
   const getLevelBadgeColor = (level: string) => {
-    switch (level) {
-      case 'beginner':
-      case 'elementary':
-        return 'bg-green-100 text-green-800';
-      case 'intermediate':
-      case 'upper-intermediate':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'advanced':
-      case 'proficiency':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  switch (level) {
+    case 'beginner':
+      return 'bg-blue-50 text-blue-700 border-blue-200';
+    case 'elementary':
+      return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    case 'intermediate':
+      return 'bg-amber-50 text-amber-700 border-amber-200';
+    case 'upper-intermediate':
+      return 'bg-purple-50 text-purple-700 border-purple-200';
+    case 'advanced':
+      return 'bg-rose-50 text-rose-700 border-rose-200';
+    case 'proficiency':
+      return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+    default:
+      return 'bg-gray-50 text-gray-700 border-gray-200';
+  }
+};
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('vi-VN', {

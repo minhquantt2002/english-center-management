@@ -12,6 +12,24 @@ from src.services.auth import get_password_hash
 
 router = APIRouter()
 
+# {
+#   "name": "Nguyễn Văn A",
+#   "email": "nguyenvana@example.com",
+#   "password": "nguyenvana", 
+#   "role_name": "student",
+#   "bio": "Sinh viên đam mê công nghệ, thích học hỏi và khám phá.",
+#   "date_of_birth": "2001-05-20",
+#   "phone_number": "0987654321",
+#   "input_level": "beginner",
+#   "specialization": "Công nghệ thông tin",
+#   "address": "123 Đường Lê Lợi, Quận 1, TP. Hồ Chí Minh",
+#   "education": "Đại học Bách Khoa TP.HCM",
+#   "experience_years": 1,
+#   "level": "Beginner",
+#   "parent_name": "Nguyễn Văn B",
+#   "parent_phone": "0912345678",
+#   "status": "active"
+# }
 def generate_fake_users():
     """Tạo danh sách users fake"""
     users = []

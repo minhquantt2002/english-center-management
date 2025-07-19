@@ -42,6 +42,7 @@ export default function EditCourseModal({
     course_name: '',
     description: '',
     level: 'beginner',
+    status: 'upcoming',
     price: 0,
     total_weeks: 0,
   });
@@ -59,6 +60,7 @@ export default function EditCourseModal({
         description: course.description || '',
         level: course.level as CourseLevel,
         total_weeks: course.total_weeks || 0,
+        status: course.status as CourseStatus,
         price: course.price || 0,
       });
       setErrors({});
@@ -117,6 +119,7 @@ export default function EditCourseModal({
       course_name: '',
       description: '',
       level: 'beginner',
+      status: 'upcoming',
       total_weeks: 0,
       price: 0,
     });
@@ -243,12 +246,12 @@ export default function EditCourseModal({
 
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Trình độ <span className='text-red-500'>*</span>
+                  Trạng thái <span className='text-red-500'>*</span>
                 </label>
                 <select
-                  value={formData.level}
+                  value={formData.status}
                   onChange={(e) =>
-                    handleInputChange('level', e.target.value as CourseLevel)
+                    handleInputChange('status', e.target.value as CourseStatus)
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 >

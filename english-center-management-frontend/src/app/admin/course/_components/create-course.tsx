@@ -39,6 +39,7 @@ export default function CreateCourseModal({
     course_name: '',
     description: '',
     level: 'beginner',
+    status: 'upcoming',
     total_weeks: 0,
     price: 0,
   });
@@ -96,6 +97,7 @@ export default function CreateCourseModal({
       course_name: '',
       description: '',
       level: 'beginner',
+      status: 'upcoming',
       total_weeks: 0,
       price: 0,
     });
@@ -225,9 +227,9 @@ export default function CreateCourseModal({
                   Trạng thái <span className='text-red-500'>*</span>
                 </label>
                 <select
-                  value={formData.level}
+                  value={formData.status}
                   onChange={(e) =>
-                    handleInputChange('level', e.target.value as CourseLevel)
+                    handleInputChange('status', e.target.value as CourseStatus)
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
                 >

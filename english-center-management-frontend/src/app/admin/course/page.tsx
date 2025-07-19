@@ -51,27 +51,58 @@ const CourseManagement = () => {
     }
   };
 
-  const getLevel = (level: string) => {
-    switch (level) {
-      case 'beginner':
-      case 'elementary':
-      case 'A1':
-      case 'A2':
-        return 'Cơ bản';
-      case 'intermediate':
-      case 'B1':
-      case 'B2':
-        return 'Trung cấp';
-      case 'advanced':
-      case 'upper-intermediate':
-      case 'proficiency':
-      case 'C1':
-      case 'C2':
-        return 'Nâng cao';
-      default:
-        return 'Cơ bản';
-    }
-  };
+  // const getLevel = (level: string) => {
+  //   switch (level) {
+  //     case 'beginner':
+  //     case 'elementary':
+  //     case 'A1':
+  //     case 'A2':
+  //       return 'Cơ bản';
+  //     case 'intermediate':
+  //     case 'B1':
+  //     case 'B2':
+  //       return 'Trung cấp';
+  //     case 'advanced':
+  //     case 'upper-intermediate':
+  //     case 'proficiency':
+  //     case 'C1':
+  //     case 'C2':
+  //       return 'Nâng cao';
+  //     default:
+  //       return 'Cơ bản';
+  //   }
+  // };
+  const getLevel = (level: string): string => {
+  switch (level.toLowerCase()) {
+    case 'beginner':
+    case 'a1':
+      return 'Sơ cấp';
+
+    case 'elementary':
+    case 'a2':
+      return 'Cơ bản';
+
+    case 'intermediate':
+    case 'b1':
+      return 'Trung cấp';
+
+    case 'upper-intermediate':
+    case 'b2':
+      return 'Cao trung cấp';
+
+    case 'advanced':
+    case 'c1':
+      return 'Nâng cao';
+
+    case 'proficiency':
+    case 'c2':
+      return 'Thành thạo';
+
+    default:
+      return 'Không xác định';
+  }
+};
+
 
   // Use courses data from API
   const coursesWithDisplay = courses.map((course: CourseResponse) => ({
@@ -83,18 +114,37 @@ const CourseManagement = () => {
       : 'Không có thông tin',
   }));
 
+  // const getLevelBadgeColor = (level: string) => {
+  //   switch (level) {
+  //     case 'Cơ bản':
+  //       return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+  //     case 'Trung cấp':
+  //       return 'bg-amber-50 text-amber-700 border-amber-200';
+  //     case 'Nâng cao':
+  //       return 'bg-red-50 text-red-700 border-red-200';
+  //     default:
+  //       return 'bg-gray-50 text-gray-700 border-gray-200';
+  //   }
+  // };
   const getLevelBadgeColor = (level: string) => {
-    switch (level) {
-      case 'Cơ bản':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'Trung cấp':
-        return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'Nâng cao':
-        return 'bg-red-50 text-red-700 border-red-200';
-      default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-    }
-  };
+  switch (level) {
+    case 'Sơ cấp':
+      return 'bg-blue-50 text-blue-700 border-blue-200';
+    case 'Cơ bản':
+      return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    case 'Trung cấp':
+      return 'bg-amber-50 text-amber-700 border-amber-200';
+    case 'Cao trung cấp':
+      return 'bg-purple-50 text-purple-700 border-purple-200';
+    case 'Nâng cao':
+      return 'bg-rose-50 text-rose-700 border-rose-200';
+    case 'Thành thạo':
+      return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+    default:
+      return 'bg-gray-50 text-gray-700 border-gray-200';
+  }
+};
+
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
