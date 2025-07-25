@@ -8,6 +8,7 @@ import {
   CourseResponse,
   CourseUpdate,
 } from '../../../../types/admin';
+import { levels, statuses } from './create-course';
 
 interface EditCourseModalProps {
   isOpen: boolean;
@@ -15,22 +16,6 @@ interface EditCourseModalProps {
   onUpdateCourse: (courseId: string, courseData: CourseUpdate) => void;
   course: CourseResponse | null;
 }
-
-const levels: { value: CourseLevel; label: string }[] = [
-  { value: 'beginner', label: 'Sơ cấp' },
-  { value: 'elementary', label: 'Cơ bản' },
-  { value: 'intermediate', label: 'Trung cấp' },
-  { value: 'upper-intermediate', label: 'Cao trung cấp' },
-  { value: 'advanced', label: 'Nâng cao' },
-  { value: 'proficiency', label: 'Thành thạo' },
-];
-
-const statuses: { value: CourseStatus; label: string }[] = [
-  { value: 'active', label: 'Đang hoạt động' },
-  { value: 'upcoming', label: 'Sắp diễn ra' },
-  { value: 'completed', label: 'Đã hoàn thành' },
-  { value: 'cancelled', label: 'Đã hủy' },
-];
 
 export default function EditCourseModal({
   isOpen,
@@ -44,6 +29,7 @@ export default function EditCourseModal({
     level: 'beginner',
     price: 0,
     total_weeks: 0,
+    status: 'active',
   });
 
   const [errors, setErrors] = useState<
@@ -60,6 +46,7 @@ export default function EditCourseModal({
         level: course.level as CourseLevel,
         total_weeks: course.total_weeks || 0,
         price: course.price || 0,
+        status: course.status || 'active',
       });
       setErrors({});
     }
@@ -86,6 +73,10 @@ export default function EditCourseModal({
 
     if (formData.price !== undefined && formData.price < 0) {
       newErrors.price = 'Học phí không được âm';
+    }
+
+    if (!formData.status) {
+      newErrors.status = 'Trạng thái khóa học là bắt buộc';
     }
 
     setErrors(newErrors);
@@ -119,6 +110,7 @@ export default function EditCourseModal({
       level: 'beginner',
       total_weeks: 0,
       price: 0,
+      status: 'active',
     });
     setErrors({});
     setIsSubmitting(false);
@@ -224,7 +216,7 @@ export default function EditCourseModal({
                   Thời lượng <span className='text-red-500'>*</span>
                 </label>
                 <input
-                  type='text'
+                  type='number'
                   value={formData.total_weeks}
                   onChange={(e) =>
                     handleInputChange('total_weeks', e.target.value)
@@ -246,10 +238,8 @@ export default function EditCourseModal({
                   Trình độ <span className='text-red-500'>*</span>
                 </label>
                 <select
-                  value={formData.level}
-                  onChange={(e) =>
-                    handleInputChange('level', e.target.value as CourseLevel)
-                  }
+                  value={formData.status}
+                  onChange={(e) => handleInputChange('status', e.target.value)}
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 >
                   {statuses.map((status) => (

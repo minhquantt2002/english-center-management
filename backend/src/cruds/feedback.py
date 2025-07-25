@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import delete
 from typing import Optional, List
 from uuid import UUID
 from ..models.feedback import Feedback
@@ -53,11 +54,8 @@ def update_feedback(db: Session, feedback_id: UUID, feedback_update: FeedbackUpd
 
 def delete_feedback(db: Session, feedback_id: UUID) -> bool:
     """Delete feedback"""
-    db_feedback = get_feedback(db, feedback_id)
-    if not db_feedback:
-        return False
-    
-    db.delete(db_feedback)
+    stmt = delete(Feedback).where(Feedback.id == feedback_id)
+    db.execute(stmt)
     db.commit()
     return True
 

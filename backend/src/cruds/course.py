@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import delete
 from typing import Optional, List
 from uuid import UUID
 from ..models.course import Course
@@ -27,7 +28,8 @@ def create_course(db: Session, course_data: CourseCreate) -> Course:
         description=course_data.description,
         level=course_data.level,
         total_weeks=course_data.total_weeks,
-        price=course_data.price
+        price=course_data.price,
+        status=course_data.status
     )
     db.add(db_course)
     db.commit()
@@ -50,11 +52,8 @@ def update_course(db: Session, course_id: UUID, course_update: CourseUpdate) -> 
 
 def delete_course(db: Session, course_id: UUID) -> bool:
     """Delete course"""
-    db_course = get_course(db, course_id)
-    if not db_course:
-        return False
-    
-    db.delete(db_course)
+    stmt = delete(Course).where(Course.id == course_id)
+    db.execute(stmt)
     db.commit()
     return True
 

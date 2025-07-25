@@ -11,7 +11,7 @@ class Exam(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     exam_name = Column(String(255), nullable=False)
-    class_id = Column(UUID(as_uuid=True), ForeignKey("classes.id"), nullable=False)
+    class_id = Column(UUID(as_uuid=True), ForeignKey("classes.id", ondelete='CASCADE'), nullable=False)
     exam_date = Column(Date)
     description = Column(Text) 
     duration = Column(Integer)  

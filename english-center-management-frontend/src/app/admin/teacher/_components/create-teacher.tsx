@@ -10,16 +10,18 @@ import {
   GraduationCap,
   Clock,
   FileText,
+  Calendar,
+  MapPin,
 } from 'lucide-react';
 import { TeacherCreate } from '../../../../types/admin';
 
 interface CreateTeacherModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateTeacher: (teacherData: TeacherCreate) => void;
+  onCreateTeacher: (teacherData: TeacherCreate) => Promise<void>;
 }
 
-const specializations = [
+export const specializations = [
   { value: 'general-english', label: 'Tiếng Anh tổng quát' },
   { value: 'business-english', label: 'Tiếng Anh thương mại' },
   { value: 'academic-english', label: 'Tiếng Anh học thuật' },
@@ -32,7 +34,7 @@ const specializations = [
   { value: 'pronunciation', label: 'Phát âm' },
 ];
 
-const qualifications = [
+export const qualifications = [
   { value: 'bachelor', label: 'Cử nhân' },
   { value: 'master', label: 'Thạc sĩ' },
   { value: 'phd', label: 'Tiến sĩ' },
@@ -43,7 +45,7 @@ const qualifications = [
   { value: 'other', label: 'Khác' },
 ];
 
-const experienceYears = [
+export const experienceYears = [
   { value: 0, label: 'Mới tốt nghiệp' },
   { value: 1, label: '1 năm' },
   { value: 2, label: '2 năm' },
@@ -55,19 +57,6 @@ const experienceYears = [
   { value: 8, label: '8 năm' },
   { value: 9, label: '9 năm' },
   { value: 10, label: '10+ năm' },
-];
-
-const commonLanguages = [
-  'Tiếng Anh',
-  'Tiếng Việt',
-  'Tiếng Trung',
-  'Tiếng Nhật',
-  'Tiếng Hàn',
-  'Tiếng Pháp',
-  'Tiếng Đức',
-  'Tiếng Tây Ban Nha',
-  'Tiếng Ý',
-  'Tiếng Nga',
 ];
 
 export default function CreateTeacherModal({
@@ -115,16 +104,19 @@ export default function CreateTeacherModal({
       newErrors.specialization = 'Chuyên môn là bắt buộc';
     }
 
+    if (!formData.date_of_birth) {
+      newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
-      onCreateTeacher(formData);
-      handleClose();
+      await onCreateTeacher(formData);
+      // handleClose();
     }
   };
 
@@ -136,6 +128,8 @@ export default function CreateTeacherModal({
       specialization: 'general-english',
       bio: '',
       password: '',
+      date_of_birth: '',
+      address: '',
     });
     setErrors({});
     onClose();
@@ -244,6 +238,48 @@ export default function CreateTeacherModal({
                   </p>
                 )}
               </div>
+
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
+                  Ngày sinh *
+                </label>
+                <div className='relative'>
+                  <Calendar className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
+                  <input
+                    type='date'
+                    value={formData.date_of_birth}
+                    onChange={(e) =>
+                      handleInputChange('date_of_birth', e.target.value)
+                    }
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      errors.date_of_birth
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                    }`}
+                  />
+                </div>
+                {errors.date_of_birth && (
+                  <p className='mt-1 text-sm text-red-600'>
+                    {errors.date_of_birth}
+                  </p>
+                )}
+              </div>
+            </div>
+            {/* Address */}
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Địa chỉ
+              </label>
+              <div className='relative'>
+                <MapPin className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
+                <input
+                  type='text'
+                  value={formData.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  className='w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                  placeholder='Nhập địa chỉ'
+                />
+              </div>
             </div>
           </div>
 
@@ -347,7 +383,7 @@ export default function CreateTeacherModal({
               value={formData.bio}
               onChange={(e) => handleInputChange('bio', e.target.value)}
               className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
-              rows={4}
+              rows={2}
               placeholder='Giới thiệu về bản thân, phương pháp giảng dạy, kinh nghiệm...'
             />
           </div>

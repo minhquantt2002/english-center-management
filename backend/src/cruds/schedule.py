@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import delete
 from typing import Optional, List
 from uuid import UUID
 from datetime import time
@@ -90,11 +91,8 @@ def update_schedule(db: Session, schedule_id: UUID, schedule_update: ScheduleUpd
 
 def delete_schedule(db: Session, schedule_id: UUID) -> bool:
     """Delete schedule"""
-    db_schedule = get_schedule(db, schedule_id)
-    if not db_schedule:
-        return False
-    
-    db.delete(db_schedule)
+    stmt = delete(Schedule).where(Schedule.id == schedule_id)
+    db.execute(stmt)
     db.commit()
     return True
 

@@ -7,116 +7,103 @@ import {
   Trash2,
   Plus,
   Eye,
-  GraduationCap,
   Mail,
   Phone,
   Users,
-  Award,
 } from 'lucide-react';
-import {
-  TeacherCreate,
-  TeacherResponse,
-  TeacherUpdate,
-} from '../../../types/admin';
-import CreateTeacherModal, {
-  specializations,
-} from './_components/create-teacher';
-import ViewTeacherModal from './_components/view-teacher';
-import EditTeacherModal from './_components/edit-teacher';
-import { useTeacherApi } from '../_hooks';
+import { UserCreate, UserResponse, UserUpdate } from '../../../types/admin';
+import { useStaffApi } from '../_hooks';
+import ViewStaffModal from './_components/view-staff';
+import EditStaffModal from './_components/edit-staff';
+import CreateStaffModal from './_components/create-staff';
 
-const TeacherManagement = () => {
+const StaffManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedTeacher, setSelectedTeacher] =
-    useState<TeacherResponse | null>(null);
-  const [teachers, setTeachers] = useState<TeacherResponse[]>([]);
+  const [selectedStaff, setSelectedStaff] = useState<UserResponse | null>(null);
+  const [staffs, setStaffs] = useState<UserResponse[]>([]);
 
-  const { createTeacher, updateTeacher, deleteTeacher, getTeachers } =
-    useTeacherApi();
+  const { createStaff, updateStaff, deleteStaff, getStaffs } = useStaffApi();
 
-  // Fetch teachers on component mount
+  // Fetch staffs on component mount
   useEffect(() => {
-    fetchTeachers();
+    fetchStaffs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchTeachers = async () => {
+  const fetchStaffs = async () => {
     try {
-      const data = await getTeachers();
-      setTeachers(data);
+      const data = await getStaffs();
+      setStaffs(data);
     } catch (err) {
-      console.error('Failed to fetch teachers:', err);
+      console.error('Failed to fetch staffs:', err);
     }
   };
 
-  // Use teachers data from API
-  const teachersList = teachers.map((teacher: TeacherResponse) => ({
-    id: teacher.id,
-    name: teacher.name,
-    specialization: specializations.find(
-      (s) => s.value === teacher.specialization
-    )?.label,
-    email: teacher.email,
-    phone: teacher.phone_number,
-    assignedClasses: teacher.taught_classes || [],
+  // Use staffs data from API
+  const staffsList = staffs.map((staff: UserResponse) => ({
+    id: staff.id,
+    name: staff.name,
+    email: staff.email,
+    phone: staff.phone_number,
+    assignedClasses: staff.taught_classes || [],
   }));
 
-  const filteredTeachers = teachersList.filter((teacher) => {
+  const filteredStaffs = staffsList.filter((staff) => {
     const matchesSearch =
-      teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.specialization.toLowerCase().includes(searchTerm.toLowerCase());
+      staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      staff.email.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
-  const handleCreateTeacher = async (teacherData: TeacherCreate) => {
+  const handleCreateStaff = async (staffData: UserCreate) => {
     try {
-      await createTeacher(teacherData);
+      await createStaff(staffData);
       setIsCreateModalOpen(false);
-      await fetchTeachers(); // Refresh the list
-      alert('Giáo viên mới đã được tạo thành công!');
+      await fetchStaffs(); // Refresh the list
+      alert('Nhân sự mới đã được tạo thành công!');
     } catch (error) {
-      console.error('Error creating teacher:', error);
-      alert('Có lỗi xảy ra khi tạo giáo viên mới!');
+      console.error('Error creating staff:', error);
+      alert('Có lỗi xảy ra khi tạo nhân sự mới!');
     }
   };
 
-  const handleViewTeacher = (teacher: TeacherResponse) => {
-    setSelectedTeacher(teacher);
+  const handleViewStaff = (staff: UserResponse) => {
+    setSelectedStaff(staff);
     setIsViewModalOpen(true);
   };
 
-  const handleEditTeacher = (teacher: TeacherResponse) => {
-    setSelectedTeacher(teacher);
+  const handleEditStaff = (staff: UserResponse) => {
+    setSelectedStaff(staff);
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateTeacher = async (teacherData: TeacherUpdate) => {
-    if (!selectedTeacher) return;
+  const handleUpdateStaff = async (staffData: UserUpdate) => {
+    if (!selectedStaff) return;
 
     try {
-      await updateTeacher(selectedTeacher.id, teacherData);
+      await updateStaff(selectedStaff.id, staffData);
       setIsEditModalOpen(false);
-      setSelectedTeacher(null);
-      await fetchTeachers(); // Refresh the list
-      alert('Thông tin giáo viên đã được cập nhật thành công!');
+      setSelectedStaff(null);
+      await fetchStaffs(); // Refresh the list
+      alert('Thông tin nhân sự đã được cập nhật thành công!');
     } catch (error) {
-      console.error('Error updating teacher:', error);
-      alert('Có lỗi xảy ra khi cập nhật thông tin giáo viên!');
+      console.error('Error updating staff:', error);
+      alert('Có lỗi xảy ra khi cập nhật thông tin nhân sự!');
     }
   };
 
-  const handleDeleteTeacher = async (teacherId: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa giáo viên này?')) {
+  const handleDeleteStaff = async (staffId: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa nhân sự này?')) {
       try {
-        await deleteTeacher(teacherId);
-        await fetchTeachers(); // Refresh the list
-        alert('Giáo viên đã được xóa thành công!');
+        await deleteStaff(staffId);
+        await fetchStaffs(); // Refresh the list
+        alert('Nhân sự đã được xóa thành công!');
       } catch (error) {
-        console.error('Error deleting teacher:', error);
-        alert('Có lỗi xảy ra khi xóa giáo viên!');
+        console.error('Error deleting staff:', error);
+        alert('Có lỗi xảy ra khi xóa nhân sự!');
       }
     }
   };
@@ -127,14 +114,14 @@ const TeacherManagement = () => {
       <div className='mb-8'>
         <div className='flex items-center gap-4 mb-4'>
           <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg'>
-            <GraduationCap className='w-6 h-6 text-white' />
+            <Users className='w-6 h-6 text-white' />
           </div>
           <div>
             <h1 className='text-3xl font-bold text-gray-900'>
-              Quản lý giáo viên
+              Quản lý nhân sự
             </h1>
             <p className='text-gray-600 mt-1'>
-              Quản lý và tổ chức đội ngũ giảng dạy của trung tâm
+              Quản lý và tổ chức đội ngũ nhân sự của trung tâm
             </p>
           </div>
         </div>
@@ -145,14 +132,14 @@ const TeacherManagement = () => {
             <div className='flex items-center justify-between'>
               <div>
                 <p className='text-gray-500 text-sm font-medium'>
-                  Tổng giáo viên
+                  Tổng nhân sự
                 </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {teachers.length}
+                  {staffs.length}
                 </p>
               </div>
               <div className='w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center'>
-                <GraduationCap className='w-6 h-6 text-green-600' />
+                <Users className='w-6 h-6 text-green-600' />
               </div>
             </div>
           </div>
@@ -164,7 +151,7 @@ const TeacherManagement = () => {
                   Lớp đang dạy
                 </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {teachers.reduce(
+                  {staffs.reduce(
                     (total, t) => total + (t.taught_classes?.length || 0),
                     0
                   )}
@@ -189,41 +176,35 @@ const TeacherManagement = () => {
             />
             <input
               type='text'
-              placeholder='Tìm kiếm giáo viên theo tên hoặc chuyên môn...'
+              placeholder='Tìm kiếm nhân sự theo tên hoặc chuyên môn...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
             />
           </div>
 
-          {/* Add Teacher Button */}
+          {/* Add Staff Button */}
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className='px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl'
           >
             <Plus className='h-5 w-5' />
-            <span className='font-semibold'>Thêm giáo viên</span>
+            <span className='font-semibold'>Thêm nhân sự</span>
           </button>
         </div>
       </div>
 
-      {/* Teachers Table */}
+      {/* Staffs Table */}
       <div className='bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden'>
         <div className='overflow-x-auto'>
           <table className='w-full'>
             <thead className='bg-gradient-to-r from-gray-50 to-gray-100'>
               <tr>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
-                  Giáo viên
+                  Nhân sự
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                   Liên hệ
-                </th>
-                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
-                  Chuyên môn
-                </th>
-                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
-                  Lớp đang dạy
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                   Thao tác
@@ -231,9 +212,9 @@ const TeacherManagement = () => {
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-100'>
-              {filteredTeachers.map((teacher) => (
+              {filteredStaffs.map((staff) => (
                 <tr
-                  key={teacher.id}
+                  key={staff.id}
                   className='hover:bg-gray-50 transition-colors'
                 >
                   <td className='px-6 py-4 whitespace-nowrap'>
@@ -244,12 +225,12 @@ const TeacherManagement = () => {
                           src={
                             'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
                           }
-                          alt={teacher.name}
+                          alt={staff.name}
                         />
                       </div>
                       <div className='ml-4'>
                         <div className='text-sm font-semibold text-gray-900'>
-                          {teacher.name}
+                          {staff.name}
                         </div>
                       </div>
                     </div>
@@ -258,39 +239,20 @@ const TeacherManagement = () => {
                     <div className='flex flex-col space-y-1'>
                       <div className='flex items-center text-sm text-gray-900'>
                         <Mail className='w-4 h-4 text-gray-400 mr-2' />
-                        {teacher.email}
+                        {staff.email}
                       </div>
                       <div className='flex items-center text-sm text-gray-500'>
                         <Phone className='w-4 h-4 text-gray-400 mr-2' />
-                        {teacher.phone || 'Chưa cập nhật'}
+                        {staff.phone || 'Chưa cập nhật'}
                       </div>
-                    </div>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <div className='flex items-center'>
-                      <Award className='w-4 h-4 text-green-500 mr-2' />
-                      <span className='text-sm font-medium text-gray-900'>
-                        {teacher.specialization}
-                      </span>
-                    </div>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <div className='text-sm text-gray-900'>
-                      {teacher.assignedClasses.length > 0 ? (
-                        <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800'>
-                          {teacher.assignedClasses.length} lớp
-                        </span>
-                      ) : (
-                        <span className='text-gray-500'>Chưa phân lớp</span>
-                      )}
                     </div>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                     <div className='flex items-center space-x-2'>
                       <button
                         onClick={() =>
-                          handleViewTeacher(
-                            teachers.find((t) => t.id === teacher.id)!
+                          handleViewStaff(
+                            staffs.find((t) => t.id === staff.id)!
                           )
                         }
                         className='text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors'
@@ -300,8 +262,8 @@ const TeacherManagement = () => {
                       </button>
                       <button
                         onClick={() =>
-                          handleEditTeacher(
-                            teachers.find((t) => t.id === teacher.id)!
+                          handleEditStaff(
+                            staffs.find((t) => t.id === staff.id)!
                           )
                         }
                         className='text-green-600 hover:text-green-900 p-1 rounded-lg hover:bg-green-50 transition-colors'
@@ -310,7 +272,7 @@ const TeacherManagement = () => {
                         <Edit className='w-4 h-4' />
                       </button>
                       <button
-                        onClick={() => handleDeleteTeacher(teacher.id)}
+                        onClick={() => handleDeleteStaff(staff.id)}
                         className='text-red-600 hover:text-red-900 p-1 rounded-lg hover:bg-red-50 transition-colors'
                         title='Xóa'
                       >
@@ -325,23 +287,23 @@ const TeacherManagement = () => {
         </div>
 
         {/* Empty State */}
-        {filteredTeachers.length === 0 && (
+        {filteredStaffs.length === 0 && (
           <div className='text-center py-12'>
-            <GraduationCap className='w-16 h-16 text-gray-300 mx-auto mb-4' />
+            <Users className='w-16 h-16 text-gray-300 mx-auto mb-4' />
             <h3 className='text-lg font-medium text-gray-900 mb-2'>
-              Không tìm thấy giáo viên
+              Không tìm thấy nhân sự
             </h3>
             <p className='text-gray-500 mb-6'>
               {searchTerm
                 ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm'
-                : 'Bắt đầu bằng cách thêm giáo viên mới'}
+                : 'Bắt đầu bằng cách thêm nhân sự mới'}
             </p>
             {!searchTerm && (
               <button
                 onClick={() => setIsCreateModalOpen(true)}
                 className='px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors'
               >
-                Thêm giáo viên đầu tiên
+                Thêm nhân sự đầu tiên
               </button>
             )}
           </div>
@@ -349,32 +311,32 @@ const TeacherManagement = () => {
       </div>
 
       {/* Modals */}
-      {isViewModalOpen && selectedTeacher && (
-        <ViewTeacherModal
-          teacher={selectedTeacher}
+      {isViewModalOpen && selectedStaff && (
+        <ViewStaffModal
+          staff={selectedStaff}
           isOpen={isViewModalOpen}
           onClose={() => setIsViewModalOpen(false)}
         />
       )}
 
-      {isEditModalOpen && selectedTeacher && (
-        <EditTeacherModal
-          teacher={selectedTeacher}
+      {isEditModalOpen && selectedStaff && (
+        <EditStaffModal
+          staff={selectedStaff}
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
-          onUpdateTeacher={handleUpdateTeacher}
+          onUpdateStaff={handleUpdateStaff}
         />
       )}
 
       {isCreateModalOpen && (
-        <CreateTeacherModal
+        <CreateStaffModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
-          onCreateTeacher={handleCreateTeacher}
+          onCreateStaff={handleCreateStaff}
         />
       )}
     </>
   );
 };
 
-export default TeacherManagement;
+export default StaffManagement;

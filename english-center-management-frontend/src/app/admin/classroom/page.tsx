@@ -5,6 +5,7 @@ import { Plus, Edit2, Trash2, Loader2 } from 'lucide-react';
 import { useClassroomApi } from '../_hooks';
 import { CreateClassroomModal, EditClassroomModal } from './_components';
 import { ClassroomResponse } from '../../../types/admin';
+import { levels } from '../course/_components/create-course';
 
 const ClassManagement: React.FC = () => {
   const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
@@ -40,17 +41,14 @@ const ClassManagement: React.FC = () => {
 
   const getLevelBadgeColor = (level: string) => {
     switch (level) {
-      case 'A1':
-      case 'A2':
-        return 'bg-green-100 text-green-700';
-      case 'B1':
-      case 'B2':
-        return 'bg-blue-100 text-blue-700';
-      case 'C1':
-      case 'C2':
-        return 'bg-purple-100 text-purple-700';
+      case 'Cơ bản':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'Trung cấp':
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'Nâng cao':
+        return 'bg-red-50 text-red-700 border-red-200';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
@@ -178,7 +176,7 @@ const ClassManagement: React.FC = () => {
                       {classroom.class_name}
                     </p>
                     <p className='text-sm text-gray-500'>
-                      {classroom.course.course_name}
+                      {classroom.course?.course_name || 'Không tồn tại'}
                     </p>
                   </div>
 
@@ -186,10 +184,17 @@ const ClassManagement: React.FC = () => {
                   <div className='col-span-2'>
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${getLevelBadgeColor(
-                        classroom.course.level
+                        classroom.course?.level
+                          ? levels.find(
+                              (v) => v.value === classroom.course.level
+                            )?.label
+                          : 'Không tồn tại'
                       )}`}
                     >
-                      {classroom.course.level}
+                      {classroom.course?.level
+                        ? levels.find((v) => v.value === classroom.course.level)
+                            ?.label
+                        : 'Không tồn tại'}
                     </span>
                   </div>
 
@@ -198,12 +203,13 @@ const ClassManagement: React.FC = () => {
                     <div className='flex items-center gap-2'>
                       <div className='w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center'>
                         <span className='text-blue-600 font-medium text-sm'>
-                          {classroom.teacher.name.charAt(0)}
+                          {classroom.teacher?.name?.charAt(0) ||
+                            'Không tồn tại'}
                         </span>
                       </div>
                       <div>
                         <span className='text-gray-700 font-medium'>
-                          {classroom.teacher.name}
+                          {classroom.teacher?.name || 'Không tồn tại'}
                         </span>
                       </div>
                     </div>
@@ -212,8 +218,7 @@ const ClassManagement: React.FC = () => {
                   {/* Students */}
                   <div className='col-span-1'>
                     <span className='text-gray-900 font-medium'>
-                      {/* {classroom.course.current_students} */}
-                      100
+                      {classroom.enrollments.length}
                     </span>
                   </div>
 

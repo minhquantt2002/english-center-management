@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import delete
 from typing import Optional, List
 from uuid import UUID
 from ..models.user import User
@@ -80,11 +81,8 @@ def update_user_role(db: Session, user_id: UUID, new_role: str) -> Optional[User
 
 def delete_user(db: Session, user_id: UUID) -> bool:
     """Delete user"""
-    db_user = get_user(db, user_id)
-    if not db_user:
-        return False
-    
-    db.delete(db_user)
+    stmt = delete(User).where(User.id == user_id)
+    db.execute(stmt)
     db.commit()
     return True
 

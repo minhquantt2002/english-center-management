@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import delete
 from typing import Optional, List
 from uuid import UUID
 from ..models.enrollment import Enrollment
@@ -61,11 +62,8 @@ def update_enrollment(db: Session, enrollment_id: UUID, enrollment_update: Enrol
 
 def delete_enrollment(db: Session, enrollment_id: UUID) -> bool:
     """Delete enrollment"""
-    db_enrollment = get_enrollment(db, enrollment_id)
-    if not db_enrollment:
-        return False
-    
-    db.delete(db_enrollment)
+    stmt = delete(Enrollment).where(Enrollment.id == enrollment_id)
+    db.execute(stmt)
     db.commit()
     return True
 

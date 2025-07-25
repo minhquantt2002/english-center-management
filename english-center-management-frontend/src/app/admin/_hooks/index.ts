@@ -15,3 +15,6 @@ export { useStudentApi } from './use-student';
 
 // Teacher hooks
 export { useTeacherApi } from './use-teacher';
+
+// Staff hooks
+export { useStaffApi } from './use-staff';

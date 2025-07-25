@@ -9,6 +9,7 @@ class CourseBase(BaseSchema):
     level: Optional[str] = None
     total_weeks: Optional[int] = None
     price: Optional[float] = None 
+    status: Optional[str] = None
 
 class CourseCreate(CourseBase):
     pass
@@ -19,9 +20,9 @@ class CourseUpdate(BaseSchema):
     level: Optional[str] = None
     total_weeks: Optional[int] = None
     price: Optional[float] = None
+    status: Optional[str] = None
 
-
-# Nested schemas for relationships
+# Nested schemas for relationships  
 class ClassroomNested(BaseSchema):
     id: UUID
     class_name: str

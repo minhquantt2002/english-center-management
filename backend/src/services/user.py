@@ -84,6 +84,7 @@ def create_student(db: Session, student_data: UserCreate) -> User:
     """Create new student"""
     # Hash password before saving
     hashed_password = get_password_hash(student_data.password)
+    print(hashed_password)
     return user_crud.create_user(db, student_data, hashed_password)
 
 def update_student(db: Session, student_id: UUID, student_data: UserUpdate) -> Optional[User]:
@@ -97,3 +98,26 @@ def delete_student(db: Session, student_id: UUID) -> bool:
 def get_student(db: Session, student_id: UUID) -> Optional[User]:
     """Get student by ID"""
     return user_crud.get_user(db, student_id)
+
+# Staff
+
+def get_staff(db: Session) -> List[User]:
+    """Get list of staff"""
+    return user_crud.get_users_by_role(db, "staff")
+
+def create_staff(db: Session, staff_data: UserCreate) -> User:
+    """Create new staff"""
+    hashed_password = get_password_hash(staff_data.password)
+    return user_crud.create_user(db, staff_data, hashed_password)
+
+def update_staff(db: Session, staff_id: UUID, staff_data: UserUpdate) -> Optional[User]:
+    """Update staff"""
+    return user_crud.update_user(db, staff_id, staff_data)
+
+def delete_staff(db: Session, staff_id: UUID) -> bool:
+    """Delete staff"""
+    return user_crud.delete_user(db, staff_id)
+
+def get_staff_by_id(db: Session, staff_id: UUID) -> Optional[User]:
+    """Get staff by ID"""
+    return user_crud.get_user(db, staff_id)

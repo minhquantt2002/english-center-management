@@ -22,7 +22,7 @@ export interface UserBase {
 }
 
 export interface UserCreate extends UserBase {
-  password: string;
+  password?: string;
 }
 
 export interface UserUpdate {
@@ -108,6 +108,7 @@ export interface CourseBase {
   level?: string;
   total_weeks?: number;
   price?: number;
+  status?: string;
 }
 
 export interface CourseCreate extends CourseBase {}
@@ -118,6 +119,7 @@ export interface CourseUpdate {
   level?: string;
   total_weeks?: number;
   price?: number;
+  status?: string;
 }
 
 export interface CourseResponse extends CourseBase {

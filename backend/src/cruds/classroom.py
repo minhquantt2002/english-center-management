@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import delete
 from typing import Optional, List
 from uuid import UUID
 from ..models.classroom import Class
@@ -117,11 +118,8 @@ def update_classroom(db: Session, classroom_id: UUID, classroom_update: Classroo
 
 def delete_classroom(db: Session, classroom_id: UUID) -> bool:
     """Delete classroom"""
-    db_classroom = get_classroom(db, classroom_id)
-    if not db_classroom:
-        return False
-    
-    db.delete(db_classroom)
+    stmt = delete(Class).where(Class.id == classroom_id)
+    db.execute(stmt)
     db.commit()
     return True
 
