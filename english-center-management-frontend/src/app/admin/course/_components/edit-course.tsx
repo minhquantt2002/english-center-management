@@ -27,7 +27,6 @@ export default function EditCourseModal({
     course_name: '',
     description: '',
     level: 'beginner',
-    status: 'upcoming',
     price: 0,
     total_weeks: 0,
     status: 'active',
@@ -46,7 +45,6 @@ export default function EditCourseModal({
         description: course.description || '',
         level: course.level as CourseLevel,
         total_weeks: course.total_weeks || 0,
-        status: course.status as CourseStatus,
         price: course.price || 0,
         status: course.status || 'active',
       });
@@ -110,7 +108,6 @@ export default function EditCourseModal({
       course_name: '',
       description: '',
       level: 'beginner',
-      status: 'upcoming',
       total_weeks: 0,
       price: 0,
       status: 'active',
