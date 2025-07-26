@@ -10,12 +10,12 @@ class Feedback(Base):
     __tablename__ = "feedbacks"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    teacher_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    student_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    class_id = Column(UUID(as_uuid=True), ForeignKey("classes.id"), nullable=False)
+    teacher_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    student_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    class_id = Column(UUID(as_uuid=True), ForeignKey("classes.id", ondelete='CASCADE'), nullable=False)
     content = Column(Text)
-    rating = Column(Integer)  # Đánh giá từ 1-5
-    feedback_type = Column(String(50))  # academic, behavior
+    rating = Column(Integer)
+    feedback_type = Column(String(50)) 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships

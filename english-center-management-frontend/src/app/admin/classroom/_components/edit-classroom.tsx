@@ -214,7 +214,7 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
                 <option value=''>Chọn khóa học</option>
                 {courses.map((course) => (
                   <option key={course.id} value={course.id}>
-                    {course.course_name} - {course.level}
+                    {course.course_name}
                   </option>
                 ))}
               </select>
@@ -239,7 +239,7 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
                 <option value=''>Chọn giáo viên</option>
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
-                    {teacher.name} - {teacher.specialization}
+                    {teacher.name}
                   </option>
                 ))}
               </select>
@@ -312,10 +312,9 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
             </div>
             <p className='text-sm text-blue-700'>
               Số học viên hiện tại:{' '}
-              <span className='font-medium'>{classroom.current_students}</span>
-              {classroom.max_students && (
-                <span> / {classroom.max_students}</span>
-              )}
+              <span className='font-medium'>
+                {classroom.enrollments.length}
+              </span>
             </p>
           </div>
 

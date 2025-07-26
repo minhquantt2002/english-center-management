@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import delete
 from typing import Optional, List
 from uuid import UUID
 from ..models.score import Score
@@ -60,11 +61,8 @@ def update_score(db: Session, score_id: UUID, score_update: ScoreUpdate) -> Opti
 
 def delete_score(db: Session, score_id: UUID) -> bool:
     """Delete score"""
-    db_score = get_score(db, score_id)
-    if not db_score:
-        return False
-    
-    db.delete(db_score)
+    stmt = delete(Score).where(Score.id == score_id)
+    db.execute(stmt)
     db.commit()
     return True
 

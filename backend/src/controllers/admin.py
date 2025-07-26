@@ -9,7 +9,7 @@ from ..services import user as user_service
 from ..services import course as course_service
 from ..services import classroom as classroom_service
 from ..services import schedule as schedule_service
-from ..schemas.user import UserResponse, UserCreate, UserUpdate, TeacherResponse, StudentResponse
+from ..schemas.user import UserResponse, UserCreate, UserUpdate, TeacherResponse, StudentResponse, UserRole
 from ..schemas.course import CourseResponse, CourseCreate, CourseUpdate
 from ..schemas.classroom import ClassroomResponse, ClassroomCreate, ClassroomUpdate
 
@@ -631,7 +631,12 @@ async def create_teacher(
             detail="Email đã được sử dụng"
         )
     
-    teacher = user_service.create_teacher(db, teacher_data)
+    teacher = user_service.create_teacher(db, teacher_data.model_copy(
+            update={
+                "role_name": UserRole.TEACHER,
+                "password": teacher_data.date_of_birth.strftime("%d%m%Y")
+            }
+        ))
     return teacher
 
 @router.put("/teachers/{teacher_id}", response_model=TeacherResponse)
@@ -775,7 +780,15 @@ async def create_student(
             detail="Email đã được sử dụng"
         )
     
-    student = user_service.create_student(db, student_data)
+    student = user_service.create_student(
+        db,
+        student_data.model_copy(
+            update={
+                "role_name": UserRole.STUDENT,
+                "password": student_data.date_of_birth.strftime("%d%m%Y")
+            }
+        )
+    )
     return student
 
 @router.put("/students/{student_id}", response_model=StudentResponse)
@@ -838,3 +851,117 @@ async def delete_student(
     
     user_service.delete_student(db, student_uuid)
     return {"message": "Xóa học sinh thành công"}
+
+# ==================== STAFF MANAGEMENT ====================
+@router.get("/staff", response_model=List[UserResponse])
+async def get_all_staff(
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy danh sách tất cả nhân viên (staff)
+    """
+    staff = user_service.get_staff(db)
+    return staff
+
+@router.get("/staff/{staff_id}", response_model=UserResponse)
+async def get_staff_by_id(
+    staff_id: str,
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy thông tin nhân viên theo ID
+    """
+    try:
+        staff_uuid = UUID(staff_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="staff_id không hợp lệ"
+        )
+    staff = user_service.get_staff_by_id(db, staff_uuid)
+    if not staff:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Nhân viên không tồn tại"
+        )
+    return staff
+
+@router.post("/staff", response_model=UserResponse)
+async def create_staff(
+    staff_data: UserCreate,
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Tạo nhân viên mới
+    """
+    if user_service.get_user_by_email(db, staff_data.email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email đã được sử dụng"
+        )
+    staff = user_service.create_staff(db, staff_data.model_copy(
+        update={
+            "role_name": UserRole.STAFF,
+            "password": staff_data.date_of_birth.strftime("%d%m%Y")
+        }
+    ))
+    return staff
+
+@router.put("/staff/{staff_id}", response_model=UserResponse)
+async def update_staff(
+    staff_id: str,
+    staff_data: UserUpdate,
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Cập nhật thông tin nhân viên
+    """
+    try:
+        staff_uuid = UUID(staff_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="staff_id không hợp lệ"
+        )
+    staff = user_service.get_staff_by_id(db, staff_uuid)
+    if not staff:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Nhân viên không tồn tại"
+        )
+    updated_staff = user_service.update_staff(db, staff_uuid, staff_data)
+    return updated_staff
+
+@router.delete("/staff/{staff_id}")
+async def delete_staff(
+    staff_id: str,
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Xóa nhân viên
+    """
+    try:
+        staff_uuid = UUID(staff_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="staff_id không hợp lệ"
+        )
+    if staff_uuid == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Không thể xóa chính mình"
+        )
+    staff = user_service.get_staff_by_id(db, staff_uuid)
+    if not staff:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Nhân viên không tồn tại"
+        )
+    user_service.delete_staff(db, staff_uuid)
+    return {"message": "Xóa nhân viên thành công"}

@@ -8,7 +8,7 @@ interface EditStudentModalProps {
   student: UserUpdate | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (updatedStudent: UserUpdate) => void;
+  onSave: (updatedStudent: UserUpdate) => Promise<void>;
 }
 
 const EditStudentModal: React.FC<EditStudentModalProps> = ({
@@ -19,7 +19,7 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<Partial<UserUpdate>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
-
+  console.log(student);
   useEffect(() => {
     if (student) {
       setFormData({
@@ -66,7 +66,7 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
       newErrors.phone = 'Số điện thoại là bắt buộc';
     }
 
-    if (!formData.level) {
+    if (!formData.input_level) {
       newErrors.level = 'Trình độ là bắt buộc';
     }
 
@@ -103,8 +103,7 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
               <img
                 className='h-12 w-12 rounded-full object-cover'
                 src={
-                  formData.avatar ||
-                  'https://images.unsplash.com/photo-1494790108755-2616b612b3fd?w=150&h=150&fit=crop&crop=face'
+                  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
                 }
                 alt={formData.name}
               />
@@ -161,7 +160,13 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   </label>
                   <input
                     type='date'
-                    value={formData.date_of_birth || ''}
+                    value={
+                      formData.date_of_birth
+                        ? new Date(formData.date_of_birth)
+                            .toISOString()
+                            .split('T')[0]
+                        : ''
+                    }
                     onChange={(e) =>
                       handleInputChange('date_of_birth', e.target.value)
                     }
@@ -173,13 +178,12 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   <label className='block text-sm font-medium text-gray-700 mb-1'>
                     Địa chỉ
                   </label>
-                  <textarea
+                  <input
                     value={formData.address || ''}
                     onChange={(e) =>
                       handleInputChange('address', e.target.value)
                     }
                     className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                    rows={3}
                     placeholder='Nhập địa chỉ'
                   />
                 </div>
@@ -237,21 +241,6 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                     </p>
                   )}
                 </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>
-                    Liên hệ phụ huynh
-                  </label>
-                  <input
-                    type='tel'
-                    value={formData.parent_phone || ''}
-                    onChange={(e) =>
-                      handleInputChange('parent_phone', e.target.value)
-                    }
-                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                    placeholder='Nhập số điện thoại phụ huynh'
-                  />
-                </div>
               </div>
             </div>
           </div>
@@ -263,42 +252,18 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
               Thông tin học tập
             </h3>
 
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
-                  Mã số học viên *
-                </label>
-                <input
-                  type='text'
-                  value={formData.student_id || ''}
-                  onChange={(e) =>
-                    handleInputChange('student_id', e.target.value)
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.student_id ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder='Nhập mã số học viên'
-                />
-                {errors.student_id && (
-                  <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
-                    <AlertCircle size={14} />
-                    {errors.student_id}
-                  </p>
-                )}
-              </div>
-
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-1'>
                   Trình độ *
                 </label>
                 <select
-                  value={formData.level || ''}
-                  onChange={(e) => handleInputChange('level', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.level ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  value={formData.input_level}
+                  onChange={(e) =>
+                    handleInputChange('input_level', e.target.value)
+                  }
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                 >
-                  <option value=''>Chọn trình độ</option>
                   <option value='beginner'>Sơ cấp</option>
                   <option value='elementary'>Cơ bản</option>
                   <option value='intermediate'>Trung cấp</option>
@@ -306,7 +271,7 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   <option value='advanced'>Cao cấp</option>
                   <option value='proficiency'>Thành thạo</option>
                 </select>
-                {errors.level && (
+                {errors.input_level && (
                   <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
                     <AlertCircle size={14} />
                     {errors.level}
@@ -319,13 +284,10 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   Trạng thái *
                 </label>
                 <select
-                  value={formData.status || ''}
+                  value={formData.status}
                   onChange={(e) => handleInputChange('status', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.status ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                 >
-                  <option value=''>Chọn trạng thái</option>
                   <option value='active'>Đang học</option>
                   <option value='inactive'>Tạm nghỉ</option>
                   <option value='suspended'>Tạm đình chỉ</option>
@@ -345,10 +307,10 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
           <div className='space-y-4'>
             <h3 className='text-lg font-medium text-gray-900 flex items-center gap-2'>
               <AlertCircle size={20} className='text-red-500' />
-              Thông tin liên hệ khẩn cấp
+              Thông tin liên hệ khác
             </h3>
 
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-1'>
                   Họ và tên
@@ -376,21 +338,6 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                   placeholder='Nhập số điện thoại'
-                />
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
-                  Mối quan hệ
-                </label>
-                <input
-                  type='text'
-                  value={formData.parent_name || ''}
-                  onChange={(e) =>
-                    handleInputChange('parent_name', e.target.value)
-                  }
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='Ví dụ: Bố, Mẹ, Anh trai...'
                 />
               </div>
             </div>

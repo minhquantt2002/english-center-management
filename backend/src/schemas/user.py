@@ -24,9 +24,9 @@ class StudentStatus(str, enum.Enum):
 class UserBase(BaseSchema):
     name: str
     email: EmailStr
-    role_name: UserRole
+    role_name: Optional[UserRole] = None
     bio: Optional[str] = None
-    date_of_birth: Optional[date] = None
+    date_of_birth: Optional[datetime] = None
     phone_number: Optional[str] = None
     input_level: Optional[str] = None
     
@@ -43,7 +43,7 @@ class UserBase(BaseSchema):
 
 
 class UserCreate(UserBase):
-    password: str
+    password: Optional[str] = None
 
 
 class UserUpdate(BaseSchema):
@@ -51,7 +51,7 @@ class UserUpdate(BaseSchema):
     email: Optional[EmailStr] = None
     role_name: Optional[UserRole] = None
     bio: Optional[str] = None
-    date_of_birth: Optional[date] = None
+    date_of_birth: Optional[datetime] = None
     phone_number: Optional[str] = None
     input_level: Optional[str] = None
     
@@ -76,12 +76,12 @@ class TeacherBase(BaseSchema):
     education: Optional[str] = None
     experience_years: Optional[int] = None
     bio: Optional[str] = None
-    date_of_birth: Optional[date] = None
+    date_of_birth: Optional[datetime] = None
     phone_number: Optional[str] = None
 
 
 class TeacherCreate(TeacherBase):
-    password: str
+    password: Optional[str] = None
 
 
 class TeacherUpdate(BaseSchema):
@@ -92,7 +92,7 @@ class TeacherUpdate(BaseSchema):
     education: Optional[str] = None
     experience_years: Optional[int] = None
     bio: Optional[str] = None
-    date_of_birth: Optional[date] = None
+    date_of_birth: Optional[datetime] = None
     phone_number: Optional[str] = None
 
 
@@ -105,12 +105,12 @@ class StudentBase(BaseSchema):
     parent_phone: Optional[str] = None
     status: StudentStatus = StudentStatus.ACTIVE
     bio: Optional[str] = None
-    date_of_birth: Optional[date] = None
+    date_of_birth: Optional[datetime] = None
     phone_number: Optional[str] = None
 
 
 class StudentCreate(StudentBase):
-    password: str
+    password: Optional[str] = None  
 
 
 class StudentUpdate(BaseSchema):
@@ -121,7 +121,7 @@ class StudentUpdate(BaseSchema):
     parent_phone: Optional[str] = None
     status: Optional[StudentStatus] = None
     bio: Optional[str] = None
-    date_of_birth: Optional[date] = None
+    date_of_birth: Optional[datetime] = None
     phone_number: Optional[str] = None
 
 

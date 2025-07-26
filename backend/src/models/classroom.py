@@ -25,8 +25,8 @@ class Class(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     class_name = Column(String(255), nullable=False)
-    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id"), nullable=False)
-    teacher_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id", ondelete='CASCADE'), nullable=False)
+    teacher_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
     room = Column(String(255)) 
 
     course_level = Column(Enum(CourseLevel), nullable=False, default=CourseLevel.BEGINNER)

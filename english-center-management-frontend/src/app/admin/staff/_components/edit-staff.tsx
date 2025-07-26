@@ -6,56 +6,45 @@ import {
   User,
   Phone,
   Mail,
-  BookOpen,
-  GraduationCap,
-  Clock,
   FileText,
   Edit,
   Calendar,
   MapPin,
 } from 'lucide-react';
-import { TeacherUpdate } from '../../../../types/admin';
-import {
-  experienceYears,
-  qualifications,
-  specializations,
-} from './create-teacher';
+import { UserUpdate } from '../../../../types/admin';
 
-interface EditTeacherModalProps {
+interface EditStaffModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpdateTeacher: (teacherData: TeacherUpdate) => void;
-  teacher: TeacherUpdate | null;
+  onUpdateStaff: (staffData: UserUpdate) => void;
+  staff: UserUpdate | null;
 }
 
-export default function EditTeacherModal({
+export default function EditStaffModal({
   isOpen,
   onClose,
-  onUpdateTeacher,
-  teacher,
-}: EditTeacherModalProps) {
-  const [formData, setFormData] = useState<TeacherUpdate>({
+  onUpdateStaff,
+  staff,
+}: EditStaffModalProps) {
+  const [formData, setFormData] = useState<UserUpdate>({
     name: '',
     email: '',
     phone_number: '',
-    specialization: '',
-    education: 'bachelor',
-    experience_years: 0,
     bio: '',
   });
 
   const [errors, setErrors] = useState<
-    Partial<Record<keyof TeacherUpdate, string>>
+    Partial<Record<keyof UserUpdate, string>>
   >({});
 
-  // Load teacher data when modal opens
+  // Load staff data when modal opens
   useEffect(() => {
-    if (teacher && isOpen) {
+    if (staff && isOpen) {
       setFormData({
-        ...teacher,
+        ...staff,
       });
     }
-  }, [teacher, isOpen]);
+  }, [staff, isOpen]);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -78,14 +67,6 @@ export default function EditTeacherModal({
       newErrors.phone_number = 'Số điện thoại không hợp lệ';
     }
 
-    if (!formData.specialization) {
-      newErrors.specialization = 'Chuyên môn là bắt buộc';
-    }
-
-    if (!formData.education) {
-      newErrors.education = 'Bằng cấp là bắt buộc';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -94,7 +75,7 @@ export default function EditTeacherModal({
     e.preventDefault();
 
     if (validateForm()) {
-      onUpdateTeacher(formData);
+      onUpdateStaff(formData);
       handleClose();
     }
   };
@@ -104,16 +85,13 @@ export default function EditTeacherModal({
       name: '',
       email: '',
       phone_number: '',
-      specialization: '',
-      education: 'bachelor',
-      experience_years: 0,
       bio: '',
     });
     setErrors({});
     onClose();
   };
 
-  const handleInputChange = (field: keyof TeacherUpdate, value: any) => {
+  const handleInputChange = (field: keyof UserUpdate, value: any) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -128,7 +106,7 @@ export default function EditTeacherModal({
     }
   };
 
-  if (!isOpen || !teacher) return null;
+  if (!isOpen || !staff) return null;
 
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
@@ -137,7 +115,7 @@ export default function EditTeacherModal({
         <div className='flex items-center justify-between p-6 border-b border-gray-200'>
           <h2 className='text-xl font-semibold text-gray-900 flex items-center gap-2'>
             <Edit className='w-6 h-6 text-blue-600' />
-            Chỉnh sửa thông tin giáo viên
+            Chỉnh sửa thông tin nhân viên
           </h2>
           <button
             onClick={handleClose}
@@ -253,82 +231,6 @@ export default function EditTeacherModal({
             </div>
           </div>
 
-          {/* Qualifications and Experience */}
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-            <div>
-              <label className=' text-sm font-medium text-gray-700 mb-2 flex items-center gap-2'>
-                <BookOpen className='w-4 h-4' />
-                Chuyên môn
-              </label>
-              <select
-                value={formData.specialization}
-                onChange={(e) =>
-                  handleInputChange('specialization', e.target.value)
-                }
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.specialization ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                {specializations.map((spec) => (
-                  <option key={spec.value} value={spec.value}>
-                    {spec.label}
-                  </option>
-                ))}
-              </select>
-              {errors.specialization && (
-                <p className='text-red-500 text-sm mt-1'>
-                  {errors.specialization}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className=' text-sm font-medium text-gray-700 mb-2 flex items-center gap-2'>
-                <GraduationCap className='w-4 h-4' />
-                Bằng cấp
-              </label>
-              <select
-                value={formData.education}
-                onChange={(e) => handleInputChange('education', e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.education ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                {qualifications.map((qual) => (
-                  <option key={qual.value} value={qual.value}>
-                    {qual.label}
-                  </option>
-                ))}
-              </select>
-              {errors.education && (
-                <p className='text-red-500 text-sm mt-1'>{errors.education}</p>
-              )}
-            </div>
-
-            <div>
-              <label className=' text-sm font-medium text-gray-700 mb-2 flex items-center gap-2'>
-                <Clock className='w-4 h-4' />
-                Kinh nghiệm
-              </label>
-              <select
-                value={formData.experience_years}
-                onChange={(e) =>
-                  handleInputChange(
-                    'experience_years',
-                    parseInt(e.target.value)
-                  )
-                }
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-              >
-                {experienceYears.map((exp) => (
-                  <option key={exp.value} value={exp.value}>
-                    {exp.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
           {/* Bio */}
           <div>
             <label className=' text-sm font-medium text-gray-700 mb-2 flex items-center gap-2'>
@@ -340,7 +242,7 @@ export default function EditTeacherModal({
               onChange={(e) => handleInputChange('bio', e.target.value)}
               rows={4}
               className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-              placeholder='Nhập tiểu sử giáo viên...'
+              placeholder='Nhập tiểu sử nhân viên...'
             />
           </div>
 

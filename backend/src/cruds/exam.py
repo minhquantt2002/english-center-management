@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import delete
 from typing import Optional, List
 from uuid import UUID
 from ..models.exam import Exam
@@ -44,11 +45,9 @@ def update_exam(db: Session, exam_id: UUID, exam_update: ExamUpdate) -> Optional
 
 def delete_exam(db: Session, exam_id: UUID) -> bool:
     """Delete exam"""
-    db_exam = get_exam(db, exam_id)
-    if not db_exam:
-        return False
     
-    db.delete(db_exam)
+    stmt = delete(Exam).where(Exam.id == exam_id)
+    db.execute(stmt)
     db.commit()
     return True
 

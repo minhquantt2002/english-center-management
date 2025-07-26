@@ -14,16 +14,13 @@ interface CreateCourseModalProps {
   onCreateCourse: (courseData: CourseCreate) => Promise<void>;
 }
 
-const levels: { value: CourseLevel; label: string }[] = [
-  { value: 'beginner', label: 'Sơ cấp' },
+export const levels: { value: CourseLevel; label: string }[] = [
   { value: 'elementary', label: 'Cơ bản' },
   { value: 'intermediate', label: 'Trung cấp' },
-  { value: 'upper-intermediate', label: 'Cao trung cấp' },
   { value: 'advanced', label: 'Nâng cao' },
-  { value: 'proficiency', label: 'Thành thạo' },
 ];
 
-const statuses: { value: CourseStatus; label: string }[] = [
+export const statuses: { value: CourseStatus; label: string }[] = [
   { value: 'active', label: 'Đang hoạt động' },
   { value: 'upcoming', label: 'Sắp diễn ra' },
   { value: 'completed', label: 'Đã hoàn thành' },
@@ -38,10 +35,10 @@ export default function CreateCourseModal({
   const [formData, setFormData] = useState<CourseCreate>({
     course_name: '',
     description: '',
-    level: 'beginner',
-    status: 'upcoming',
+    level: 'elementary',
     total_weeks: 0,
     price: 0,
+    status: 'active',
   });
 
   const [errors, setErrors] = useState<
@@ -72,6 +69,10 @@ export default function CreateCourseModal({
       newErrors.level = 'Cấp độ khóa học là bắt buộc';
     }
 
+    if (!formData.status) {
+      newErrors.status = 'Trạng thái khóa học là bắt buộc';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -83,7 +84,7 @@ export default function CreateCourseModal({
       setIsSubmitting(true);
       try {
         await onCreateCourse(formData as CourseCreate);
-        handleClose();
+        // handleClose();
       } catch (error) {
         console.error('Error creating course:', error);
       } finally {
@@ -96,10 +97,10 @@ export default function CreateCourseModal({
     setFormData({
       course_name: '',
       description: '',
-      level: 'beginner',
-      status: 'upcoming',
+      level: 'elementary',
       total_weeks: 0,
       price: 0,
+      status: 'active',
     });
     setErrors({});
     setIsSubmitting(false);
@@ -187,9 +188,7 @@ export default function CreateCourseModal({
                 </label>
                 <select
                   value={formData.level}
-                  onChange={(e) =>
-                    handleInputChange('level', e.target.value as CourseLevel)
-                  }
+                  onChange={(e) => handleInputChange('level', e.target.value)}
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
                 >
                   {levels.map((level) => (
@@ -202,10 +201,10 @@ export default function CreateCourseModal({
 
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Thời lượng <span className='text-red-500'>*</span>
+                  Thời lượng (tuần) <span className='text-red-500'>*</span>
                 </label>
                 <input
-                  type='text'
+                  type='number'
                   value={formData.total_weeks}
                   onChange={(e) =>
                     handleInputChange('total_weeks', e.target.value)
@@ -228,9 +227,7 @@ export default function CreateCourseModal({
                 </label>
                 <select
                   value={formData.status}
-                  onChange={(e) =>
-                    handleInputChange('status', e.target.value as CourseStatus)
-                  }
+                  onChange={(e) => handleInputChange('status', e.target.value)}
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
                 >
                   {statuses.map((status) => (

@@ -60,10 +60,10 @@ const AdminSidebar: React.FC = () => {
       description: 'Quản lý lớp học',
     },
     {
-      name: 'Vai trò & Quyền',
-      href: '/admin/role',
+      name: 'Nhân viên',
+      href: '/admin/staff',
       icon: <Shield className='w-5 h-5' />,
-      description: 'Phân quyền hệ thống',
+      description: 'Quản lý nhân viên',
     },
   ];
 

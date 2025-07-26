@@ -51,64 +51,24 @@ const CourseManagement = () => {
     }
   };
 
-  // const getLevel = (level: string) => {
-  //   switch (level) {
-  //     case 'beginner':
-  //     case 'elementary':
-  //     case 'A1':
-  //     case 'A2':
-  //       return 'Cơ bản';
-  //     case 'intermediate':
-  //     case 'B1':
-  //     case 'B2':
-  //       return 'Trung cấp';
-  //     case 'advanced':
-  //     case 'upper-intermediate':
-  //     case 'proficiency':
-  //     case 'C1':
-  //     case 'C2':
-  //       return 'Nâng cao';
-  //     default:
-  //       return 'Cơ bản';
-  //   }
-  // };
-  const getLevel = (level: string): string => {
-  switch (level.toLowerCase()) {
-    case 'beginner':
-    case 'a1':
-      return 'Sơ cấp';
-
-    case 'elementary':
-    case 'a2':
-      return 'Cơ bản';
-
-    case 'intermediate':
-    case 'b1':
-      return 'Trung cấp';
-
-    case 'upper-intermediate':
-    case 'b2':
-      return 'Cao trung cấp';
-
-    case 'advanced':
-    case 'c1':
-      return 'Nâng cao';
-
-    case 'proficiency':
-    case 'c2':
-      return 'Thành thạo';
-
-    default:
-      return 'Không xác định';
-  }
-};
-
+  const getLevel = (level: string) => {
+    switch (level) {
+      case 'elementary':
+        return 'Cơ bản';
+      case 'intermediate':
+        return 'Trung cấp';
+      case 'advanced':
+        return 'Nâng cao';
+      default:
+        return 'Cơ bản';
+    }
+  };
 
   // Use courses data from API
   const coursesWithDisplay = courses.map((course: CourseResponse) => ({
     ...course,
     name: course.course_name || 'Không có tên',
-    displayLevel: getLevel(course.level || 'beginner'),
+    displayLevel: getLevel(course.level || 'elementary'),
     displayDuration: course.total_weeks
       ? `${course.total_weeks} tuần`
       : 'Không có thông tin',
@@ -145,19 +105,6 @@ const CourseManagement = () => {
   }
 };
 
-
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'Đang hoạt động':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'Sắp diễn ra':
-        return 'bg-purple-50 text-purple-700 border-purple-200';
-      case 'Đã hoàn thành':
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-      default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-    }
-  };
 
   const filteredCourses = coursesWithDisplay.filter((course) => {
     const courseName = course.course_name || course.name || '';
@@ -286,7 +233,7 @@ const CourseManagement = () => {
                 </p>
                 <p className='text-3xl font-bold text-green-600'>
                   {
-                    courses.filter((course) => course.level === 'beginner')
+                    courses.filter((course) => course.level === 'elementary')
                       .length
                   }
                 </p>
@@ -446,7 +393,7 @@ const CourseManagement = () => {
                       </td>
                       <td className='px-6 py-4'>
                         <span
-                          className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getLevelBadgeColor(
+                          className={`inline-flex px-3 py-1 text-xs text-center font-semibold rounded-full border ${getLevelBadgeColor(
                             course.displayLevel
                           )}`}
                         >
@@ -532,21 +479,21 @@ const CourseManagement = () => {
                     <div className='flex items-center justify-center gap-2 pt-4 border-t border-gray-200'>
                       <button
                         onClick={() => handleViewCourse(course)}
-                        className='flex-1 bg-green-50 text-green-700 hover:bg-green-100 px-3 py-2 rounded-lg text-sm font-medium transition-colors'
+                        className='flex-1 bg-green-50 text-green-700 items-center flex justify-center hover:bg-green-100 px-3 py-2 rounded-lg text-sm font-medium transition-colors'
                       >
                         <Eye size={14} className='mr-1' />
                         Xem
                       </button>
                       <button
                         onClick={() => handleEditCourse(course)}
-                        className='flex-1 bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-2 rounded-lg text-sm font-medium transition-colors'
+                        className='flex-1 bg-blue-50 text-blue-700 items-center flex justify-center hover:bg-blue-100 px-3 py-2 rounded-lg text-sm font-medium transition-colors'
                       >
                         <Edit size={14} className='mr-1' />
                         Sửa
                       </button>
                       <button
                         onClick={() => handleDeleteCourse(course.id)}
-                        className='flex-1 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-2 rounded-lg text-sm font-medium transition-colors'
+                        className='flex-1 bg-red-50 text-red-700 items-center flex justify-center hover:bg-red-100 px-3 py-2 rounded-lg text-sm font-medium transition-colors'
                       >
                         <Trash2 size={14} className='mr-1' />
                         Xóa
