@@ -14,9 +14,32 @@ export default function HomePage() {
     }
 
     if (status === 'unauthenticated' || !session) {
+      console.log('unauthenticated');
       router.replace('/auth/login');
     } else {
-      router.replace('/staff/');
+      // router.replace('/staff/');
+      // Lấy role_name từ localStorage
+      const userDataStr = localStorage.getItem('userData');
+      if (userDataStr) {
+        const userData = JSON.parse(userDataStr);
+        const role = userData?.role_name;
+        switch (role) {
+          case 'admin':
+            router.replace('/admin');
+            break;
+          case 'teacher':
+            router.replace('/teacher');
+            break;
+          case 'student':
+            router.replace('/student');
+            break;
+          case 'staff':
+            router.replace('/staff');
+            break;
+          default:
+            router.replace('/');
+        }
+      }
     }
   }, [session, status, router]);
 

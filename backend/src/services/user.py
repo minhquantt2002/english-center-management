@@ -121,3 +121,7 @@ def delete_staff(db: Session, staff_id: UUID) -> bool:
 def get_staff_by_id(db: Session, staff_id: UUID) -> Optional[User]:
     """Get staff by ID"""
     return user_crud.get_user(db, staff_id)
+
+def get_student_academic_summary(db: Session, student_id: UUID) -> dict:
+    """Get student academic summary"""
+    return user_crud.get_student_academic_summary(db, student_id)

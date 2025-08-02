@@ -95,6 +95,13 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
         status: formData.status,
       };
 
+      // Trước khi gửi studentData lên API, chuyển đổi date_of_birth nếu có
+      if (newStudent.date_of_birth) {
+        // Chuyển sang định dạng ISO 8601 đầy đủ
+        const date = new Date(newStudent.date_of_birth);
+        newStudent.date_of_birth = date.toISOString().split("T")[0] + "T00:00:00";
+      }
+
       await onSave(newStudent);
 
       setFormData({

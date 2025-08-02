@@ -2,12 +2,11 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 
 const ZenlishLogin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('Quản trị');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -30,26 +29,60 @@ const ZenlishLogin: React.FC = () => {
 
       if (result?.error) {
         setError('Email hoặc mật khẩu không đúng');
+        setIsLoading(false);
         return;
       }
 
       if (result?.ok) {
-        // Chuyển hướng dựa trên role được chọn
+        // Lấy session để lấy role_name
+        let tries = 0;
+        let session = null;
+        while (tries < 10) {
+          session = await getSession();
+          // Nếu session đã có accessToken thì break
+          if (session?.accessToken) break;
+          await new Promise((r) => setTimeout(r, 200));
+          tries++;
+        }
+        if (!session) {
+          setError('Không lấy được thông tin phiên đăng nhập');
+          setIsLoading(false);
+          return;
+        }
+        // Gọi lại /auth/me để lấy user info (nếu cần), hoặc lấy từ session nếu đã có
+        const accessToken = session.accessToken;
+        const userRes = await fetch('http://localhost:8000/auth/me', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!userRes.ok) {
+          setError('Không lấy được thông tin người dùng');
+          setIsLoading(false);
+          return;
+        }
+        const userData = await userRes.json();
+        // Lưu userData vào localStorage
+        localStorage.setItem('userData', JSON.stringify(userData));
+        
+        const role = userData?.role_name;
+        // Redirect theo role
         switch (role) {
-          case 'Quản trị':
+          case 'admin':
             router.push('/admin');
             break;
-          case 'Giáo viên':
+          case 'teacher':
             router.push('/teacher');
             break;
-          case 'Học viên':
+          case 'student':
             router.push('/student');
             break;
-          case 'Tuyển sinh':
+          case 'staff':
             router.push('/staff');
             break;
           default:
-            router.push('/admin');
+            router.push('/');
         }
       }
     } catch (error: any) {
@@ -120,28 +153,6 @@ const ZenlishLogin: React.FC = () => {
               className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 text-gray-700 placeholder-gray-400'
               disabled={isLoading}
             />
-          </div>
-
-          {/* Role Selection */}
-          <div>
-            <label
-              htmlFor='role'
-              className='block text-sm font-medium text-gray-700 mb-2'
-            >
-              Vai trò
-            </label>
-            <select
-              id='role'
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 text-gray-700 bg-white'
-              disabled={isLoading}
-            >
-              <option value='Quản trị'>Quản trị</option>
-              <option value='Giáo viên'>Giáo viên</option>
-              <option value='Học viên'>Học viên</option>
-              <option value='Tuyển sinh'>Tuyển sinh</option>
-            </select>
           </div>
 
           {/* Sign In Button */}

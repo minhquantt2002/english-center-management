@@ -105,8 +105,9 @@ class StudentBase(BaseSchema):
     parent_phone: Optional[str] = None
     status: StudentStatus = StudentStatus.ACTIVE
     bio: Optional[str] = None
-    date_of_birth: Optional[datetime] = None
     phone_number: Optional[str] = None
+    date_of_birth: Optional[datetime] = None 
+    address: Optional[str] = None 
 
 
 class StudentCreate(StudentBase):
