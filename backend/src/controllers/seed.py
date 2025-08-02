@@ -158,49 +158,42 @@ def generate_fake_users():
 def generate_fake_courses():
     """Tạo danh sách courses fake"""
     return [
-        {
-            "course_name": "Tiếng Anh Giao Tiếp Cơ Bản",
-            "description": "Khóa học dành cho người mới bắt đầu học tiếng Anh, tập trung vào kỹ năng giao tiếp hàng ngày",
-            "level": "beginner",
-            "total_weeks": 12,
-            "price": 2500000
-        },
-        {
-            "course_name": "Tiếng Anh Giao Tiếp Nâng Cao", 
-            "description": "Khóa học nâng cao kỹ năng giao tiếp, phù hợp cho người đã có nền tảng tiếng Anh",
-            "level": "intermediate",
-            "total_weeks": 16,
-            "price": 3200000
-        },
-        {
-            "course_name": "Luyện Thi IELTS",
-            "description": "Khóa học chuyên luyện thi IELTS với giáo viên có kinh nghiệm",
-            "level": "advanced",
-            "total_weeks": 20,
-            "price": 4500000
-        },
-        {
-            "course_name": "Luyện Thi TOEIC",
-            "description": "Khóa học luyện thi TOEIC với các bài tập thực hành",
-            "level": "intermediate",
-            "total_weeks": 18,
-            "price": 3800000
-        },
-        {
-            "course_name": "Tiếng Anh Trẻ Em",
-            "description": "Khóa học tiếng Anh dành cho trẻ em từ 6-12 tuổi",
-            "level": "beginner",
-            "total_weeks": 10,
-            "price": 2000000
-        },
-        {
-            "course_name": "Tiếng Anh Doanh Nghiệp",
-            "description": "Khóa học tiếng Anh chuyên ngành cho môi trường công việc",
-            "level": "upper-intermediate",
-            "total_weeks": 14,
-            "price": 3500000
-        }
-    ]
+  {
+    "course_name": "FOUNDATION (Xoá mất gốc)",
+    "description": "Khóa học giúp học viên lấy lại căn bản tiếng Anh, phù hợp cho người mất gốc hoặc mới bắt đầu.",
+    "level": "A1",
+    "total_weeks": 12,
+    "price": 2500000
+  },
+  {
+    "course_name": "BEGINNER (Cam kết đầu ra 350 LR)",
+    "description": "Khóa học xây nền tảng kỹ năng Nghe - Đọc TOEIC, hướng đến mục tiêu 350+ TOEIC LR.",
+    "level": "A2",
+    "total_weeks": 16,
+    "price": 3200000
+  },
+  {
+    "course_name": "CAMP BOMB (Cam kết đầu ra 450 LR)",
+    "description": "Khóa học cường độ cao, luyện đề liên tục để đạt mục tiêu 450+ TOEIC Listening & Reading.",
+    "level": "B1",
+    "total_weeks": 18,
+    "price": 3800000
+  },
+  {
+    "course_name": "SUBMARINE (Cam kết đầu ra 700 LR)",
+    "description": "Khóa học chuyên sâu, tập trung kỹ năng làm bài TOEIC LR để đạt mục tiêu 700+ điểm.",
+    "level": "B2",
+    "total_weeks": 20,
+    "price": 4500000
+  },
+  {
+    "course_name": "MASTER (Cam kết đầu ra 250 SW)",
+    "description": "Khóa học luyện Speaking & Writing TOEIC chuyên biệt, hướng đến đầu ra 250+ TOEIC SW.",
+    "level": "C1",
+    "total_weeks": 10,
+    "price": 3000000
+  }
+]
 
 @router.post("/seed-all")
 async def seed_all_data(db: Session = Depends(get_db)):

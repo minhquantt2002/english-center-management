@@ -13,13 +13,11 @@ class ClassStatus(enum.Enum):
     CANCELLED = "cancelled"
 
 class CourseLevel(enum.Enum):
-    BEGINNER = "beginner"
-    ELEMENTARY = "elementary" 
-    INTERMEDIATE = "intermediate"
-    UPPER_INTERMEDIATE = "upper-intermediate"
-    ADVANCED = "advanced"
-    PROFICIENCY = "proficiency"
-
+    A1 = "A1"  # TOEIC 0–250 (FOUNDATION) - Mất gốc
+    A2 = "A2"  # TOEIC 250–450 (BEGINNER) - Sơ cấp 
+    B1 = "B1"  # TOEIC 450–600 (CAMP BOMB) - Trung cấp thấp 
+    B2 = "B2"  # TOEIC 600–850 (SUBMARINE) - Trung cấp cao 
+    C1 = "C1"  # TOEIC SW 250+ (MASTER) - Nâng cao kỹ năng Nói/Viết
 class Class(Base):
     __tablename__ = "classes"
 
@@ -29,7 +27,7 @@ class Class(Base):
     teacher_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
     room = Column(String(255)) 
 
-    course_level = Column(Enum(CourseLevel), nullable=False, default=CourseLevel.BEGINNER)
+    course_level = Column(Enum(CourseLevel), nullable=False, default=CourseLevel.A1)
     status = Column(Enum(ClassStatus), nullable=False, default=ClassStatus.ACTIVE)
     
     start_date = Column(Date)

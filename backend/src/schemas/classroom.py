@@ -11,13 +11,12 @@ class ClassStatus(str, enum.Enum):
     CANCELLED = "cancelled"
 
 
-class CourseLevel(str, enum.Enum):
-    BEGINNER = "beginner"
-    ELEMENTARY = "elementary"
-    INTERMEDIATE = "intermediate"
-    UPPER_INTERMEDIATE = "upper-intermediate"
-    ADVANCED = "advanced"
-    PROFICIENCY = "proficiency"
+class CourseLevel(enum.Enum):
+    A1 = "A1"  # TOEIC 0–250 (FOUNDATION) - Mất gốc
+    A2 = "A2"  # TOEIC 250–450 (BEGINNER) - Sơ cấp 
+    B1 = "B1"  # TOEIC 450–600 (CAMP BOMB) - Trung cấp thấp 
+    B2 = "B2"  # TOEIC 600–850 (SUBMARINE) - Trung cấp cao 
+    C1 = "C1"  # TOEIC SW 250+ (MASTER) - Nâng cao kỹ năng Nói/Viết
 
 
 class ClassroomBase(BaseSchema):
@@ -25,7 +24,7 @@ class ClassroomBase(BaseSchema):
     course_id: UUID
     teacher_id: UUID
     room: Optional[str] = None
-    course_level: CourseLevel = CourseLevel.BEGINNER
+    course_level: CourseLevel = CourseLevel.A1
     status: ClassStatus = ClassStatus.ACTIVE
     start_date: Optional[date] = None
     end_date: Optional[date] = None
