@@ -93,3 +93,20 @@ def count_total_users(db: Session) -> int:
 def count_users_by_role(db: Session, role_name: str) -> int:
     """Count users by role name"""
     return db.query(User).filter(User.role_name == role_name).count()
+
+def get_student_academic_summary(db: Session, student_id: UUID) -> dict:
+    """Get student academic summary"""
+    user = db.query(User).filter(User.id == student_id).first()
+    if not user:
+        return {}
+    return{
+        "id": str(user.id),
+        "name": user.name,
+        "email": user.email,
+        "phone_number": user.phone_number,
+        "input_level": user.input_level,
+        "status": user.status,
+        "total_enrollments": len(user.enrollments),
+        "total_scores": len(user.scores),
+        "average_score": sum(score.total_score for score in user.scores) / len(user.scores) if user.scores else 0,
+    }
