@@ -78,11 +78,12 @@ def get_classrooms_by_course(db: Session, course_id: UUID) -> List[Class]:
     """Get classrooms for specific course"""
     return db.query(Class).filter(Class.course_id == course_id).all()
 
-def get_classrooms_by_student(db: Session, student_id: UUID) -> List[Class]:
+def get_classrooms_by_student(db: Session, student_id: UUID, status: Optional[str] = None) -> List[Class]:
     """Get classrooms where student is enrolled"""
     return db.query(Class)\
         .join(Enrollment, Class.id == Enrollment.class_id)\
         .filter(Enrollment.student_id == student_id)\
+        .filter(Class.status == status)\
         .all()
 
 def create_classroom(db: Session, classroom_data: ClassroomCreate) -> Class:

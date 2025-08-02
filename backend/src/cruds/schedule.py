@@ -32,14 +32,24 @@ def get_schedules_by_classroom(db: Session, class_id: UUID) -> List[Schedule]:
         .options(joinedload(Schedule.classroom))\
         .filter(Schedule.class_id == class_id).all()
 
-def get_schedules_by_student(db: Session, student_id: UUID) -> List[Schedule]:
+def get_schedules_by_student(db: Session, student_id: UUID,classroom_id: Optional[UUID] = None, weekday: Optional[str] = None) -> List[Schedule]:
     """Get schedules for specific student (through enrollments)"""
-    return db.query(Schedule)\
+    query = db.query(Schedule)\
         .options(joinedload(Schedule.classroom))\
         .join(Class, Schedule.class_id == Class.id)\
-        .join(Enrollment, Class.id == Enrollment.class_id)\
-        .filter(Enrollment.student_id == student_id)\
-        .all()
+        .join(Enrollment, Class.id == Enrollment.class_id)
+    
+    if classroom_id:
+        query = query.filter(Schedule.class_id == classroom_id)
+    if weekday:
+        # Convert string to Weekday enum
+        try:
+            weekday_enum = Weekday(weekday.lower())
+            query = query.filter(Schedule.weekday == weekday_enum)
+        except ValueError:
+            # If invalid weekday, return empty list
+            return []
+    return query.filter(Enrollment.student_id == student_id).all()
 
 def get_schedules_by_room(db: Session, room: str) -> List[Schedule]:
     """Get schedules for specific room"""
@@ -110,21 +120,35 @@ def get_schedules_by_teacher(db: Session, teacher_id: UUID) -> List[Schedule]:
 
 def get_schedules_by_student_weekday(db: Session, student_id: UUID, weekday: str) -> List[Schedule]:
     """Get schedules for specific student on specific weekday"""
+    # Convert string to Weekday enum
+    try:
+        weekday_enum = Weekday(weekday.lower())
+    except ValueError:
+        # If invalid weekday, return empty list
+        return []
+    
     return db.query(Schedule)\
         .options(joinedload(Schedule.classroom))\
         .join(Class, Schedule.class_id == Class.id)\
         .join(Enrollment, Class.id == Enrollment.class_id)\
         .filter(Enrollment.student_id == student_id)\
-        .filter(Schedule.weekday == weekday)\
+        .filter(Schedule.weekday == weekday_enum)\
         .all()
 
 def get_schedules_by_teacher_weekday(db: Session, teacher_id: UUID, weekday: str) -> List[Schedule]:
     """Get schedules for specific teacher on specific weekday"""
+    # Convert string to Weekday enum
+    try:
+        weekday_enum = Weekday(weekday.lower())
+    except ValueError:
+        # If invalid weekday, return empty list
+        return []
+    
     return db.query(Schedule)\
         .options(joinedload(Schedule.classroom))\
         .join(Class, Schedule.class_id == Class.id)\
         .filter(Class.teacher_id == teacher_id)\
-        .filter(Schedule.weekday == weekday)\
+        .filter(Schedule.weekday == weekday_enum)\
         .all()
 
 def get_schedules_with_filters(
@@ -144,6 +168,12 @@ def get_schedules_with_filters(
                     .filter(Class.teacher_id == teacher_id)
     
     if weekday:
-        query = query.filter(Schedule.weekday == weekday)
+        # Convert string to Weekday enum
+        try:
+            weekday_enum = Weekday(weekday.lower())
+            query = query.filter(Schedule.weekday == weekday_enum)
+        except ValueError:
+            # If invalid weekday, return empty list
+            return []
     
     return query.all() 

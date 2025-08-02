@@ -53,7 +53,8 @@ const StudentDashboard = () => {
 
       setStudentProfile(dashboard);
 
-      // Get upcoming classes (next 3 classes)
+      // Get upcoming classes (next 3 classes) 
+      // TODO: gây lỗi fail to fetch data
       const upcoming = classes
         .filter((cls: any) => cls.status === 'In Progress')
         .slice(0, 3);

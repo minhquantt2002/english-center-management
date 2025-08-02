@@ -12,7 +12,7 @@ def _schedule_to_dict(schedule: Schedule) -> Dict[str, Any]:
         "id": schedule.id,
         "class_id": schedule.class_id,
         "room": schedule.classroom.room if schedule.classroom else None,
-        "weekday": schedule.weekday,
+        "weekday": schedule.weekday.value if schedule.weekday else None,
         "start_time": schedule.start_time,
         "end_time": schedule.end_time,
         "title": getattr(schedule, "title", None),
@@ -60,9 +60,9 @@ def get_schedules_by_classroom(db: Session, class_id: UUID) -> List[Dict[str, An
     schedules = schedule_crud.get_schedules_by_classroom(db, class_id)
     return [_schedule_to_dict(schedule) for schedule in schedules]
 
-def get_schedules_by_student(db: Session, student_id: UUID) -> List[Dict[str, Any]]:
+def get_schedules_by_student(db: Session, student_id: UUID, classroom_id: Optional[UUID] = None, weekday: Optional[str] = None) -> List[Dict[str, Any]]:
     """Get schedules for specific student (through enrollments)"""
-    schedules = schedule_crud.get_schedules_by_student(db, student_id)
+    schedules = schedule_crud.get_schedules_by_student(db, student_id, classroom_id, weekday)
     return [_schedule_to_dict(schedule) for schedule in schedules]
 
 def get_schedules_by_teacher(db: Session, teacher_id: UUID) -> List[Dict[str, Any]]:
@@ -83,14 +83,14 @@ def get_schedules_by_teacher_weekday(db: Session, teacher_id: UUID, weekday: str
 def get_today_schedules_by_student(db: Session, student_id: UUID) -> List[Dict[str, Any]]:
     """Get today's schedules for specific student"""
     today = date.today()
-    weekday = today.strftime("%A").upper()
+    weekday = today.strftime("%A").lower()
     schedules = schedule_crud.get_schedules_by_student_weekday(db, student_id, weekday)
     return [_schedule_to_dict(schedule) for schedule in schedules]
 
 def get_today_schedules_by_teacher(db: Session, teacher_id: UUID) -> List[Dict[str, Any]]:
     """Get today's schedules for specific teacher"""
     today = date.today()
-    weekday = today.strftime("%A").upper()
+    weekday = today.strftime("%A").lower()
     schedules = schedule_crud.get_schedules_by_teacher_weekday(db, teacher_id, weekday)
     return [_schedule_to_dict(schedule) for schedule in schedules]
 

@@ -34,9 +34,9 @@ def get_classrooms_by_course(db: Session, course_id: UUID) -> List[Class]:
     """Get classrooms for specific course"""
     return classroom_crud.get_classrooms_by_course(db, course_id)
 
-def get_classrooms_by_student(db: Session, student_id: UUID) -> List[Class]:
+def get_classrooms_by_student(db: Session, student_id: UUID, status: Optional[str] = None) -> List[Class]:
     """Get classrooms where student is enrolled"""
-    return classroom_crud.get_classrooms_by_student(db, student_id)
+    return classroom_crud.get_classrooms_by_student(db, student_id, status)
 
 def get_upcoming_classes_by_student(db: Session, student_id: UUID) -> List[Class]:
     """Get upcoming classes for student"""

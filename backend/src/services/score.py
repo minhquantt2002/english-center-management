@@ -17,9 +17,9 @@ def get_all_scores(db: Session) -> List[Score]:
     """Get all scores without pagination"""
     return score_crud.get_scores(db, skip=0, limit=1000000)  # Large limit to get all
 
-def get_scores_by_student(db: Session, student_id: UUID) -> List[Score]:
+def get_scores_by_student(db: Session, student_id: UUID, exam_id: Optional[UUID] = None, classroom_id: Optional[UUID] = None) -> List[Score]:
     """Get scores for specific student"""
-    return score_crud.get_scores_by_student(db, student_id)
+    return score_crud.get_scores_by_student(db, student_id, exam_id, classroom_id)
 
 def get_scores_by_exam(db: Session, exam_id: UUID) -> List[Score]:
     """Get scores for specific exam"""

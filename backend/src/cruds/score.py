@@ -14,9 +14,14 @@ def get_scores(db: Session, skip: int = 0, limit: int = 100) -> List[Score]:
     """Get scores with pagination"""
     return db.query(Score).offset(skip).limit(limit).all()
 
-def get_scores_by_student(db: Session, student_id: UUID) -> List[Score]:
+def get_scores_by_student(db: Session, student_id: UUID, exam_id: Optional[UUID] = None, classroom_id: Optional[UUID] = None) -> List[Score]:
     """Get scores for specific student"""
-    return db.query(Score).filter(Score.student_id == student_id).all()
+    query = db.query(Score).filter(Score.student_id == student_id)
+    if exam_id:
+        query = query.filter(Score.exam_id == exam_id)
+    if classroom_id:
+        query = query.join(Exam, Score.exam_id == Exam.id).filter(Exam.class_id == classroom_id)
+    return query.all()
 
 def get_scores_by_exam(db: Session, exam_id: UUID) -> List[Score]:
     """Get scores for specific exam"""
