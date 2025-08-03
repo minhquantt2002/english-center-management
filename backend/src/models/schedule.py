@@ -6,7 +6,7 @@ import enum
 import uuid
 
 
-class Weekday(enum.Enum):
+class Weekday(str, enum.Enum):
     MONDAY = "monday"
     TUESDAY = "tuesday"
     WEDNESDAY = "wednesday"

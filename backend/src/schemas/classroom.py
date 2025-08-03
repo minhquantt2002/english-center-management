@@ -11,7 +11,7 @@ class ClassStatus(str, enum.Enum):
     CANCELLED = "cancelled"
 
 
-class CourseLevel(enum.Enum):
+class CourseLevel(str, enum.Enum):
     A1 = "A1"  # TOEIC 0–250 (FOUNDATION) - Mất gốc
     A2 = "A2"  # TOEIC 250–450 (BEGINNER) - Sơ cấp 
     B1 = "B1"  # TOEIC 450–600 (CAMP BOMB) - Trung cấp thấp 

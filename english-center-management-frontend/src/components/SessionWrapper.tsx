@@ -5,10 +5,36 @@ import { ReactNode } from 'react';
 import { PersonalInfoProvider, usePersonalInfo } from './PersonalInfoContext';
 import { UserInfoProvider } from './UserInfoContext';
 import PersonalInfoModal from './PersonalInfoModal';
+import TokenExpirationModal from './TokenExpirationModal';
+import TokenWarningModal from './TokenWarningModal';
 
 interface SessionWrapperProps {
   children: ReactNode;
 }
+
+// Component để xử lý token expiration
+const TokenExpirationHandler = () => {
+  const { useTokenExpiration } = require('../hooks/useTokenExpiration');
+  const { 
+    showExpirationModal, 
+    showWarningModal,
+    handleExpirationModalClose,
+    handleWarningModalClose
+  } = useTokenExpiration();
+  
+  return (
+    <>
+      <TokenExpirationModal 
+        isOpen={showExpirationModal} 
+        onClose={handleExpirationModalClose} 
+      />
+      <TokenWarningModal 
+        isOpen={showWarningModal} 
+        onClose={handleWarningModalClose} 
+      />
+    </>
+  );
+};
 
 // Component để render modal
 const PersonalInfoModalRenderer = () => {
@@ -28,6 +54,7 @@ export default function SessionWrapper({ children }: SessionWrapperProps) {
     <SessionProvider>
       <UserInfoProvider>
         <PersonalInfoProvider>
+          <TokenExpirationHandler />
           {children}
           <PersonalInfoModalRenderer />
         </PersonalInfoProvider>

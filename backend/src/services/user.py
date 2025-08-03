@@ -2,6 +2,7 @@ from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
 from ..cruds import user as user_crud
+from ..cruds import enrollment as enrollment_crud
 from ..schemas.user import UserCreate, UserUpdate
 from ..models.user import User
 from .auth import get_password_hash
@@ -125,3 +126,36 @@ def get_staff_by_id(db: Session, staff_id: UUID) -> Optional[User]:
 def get_student_academic_summary(db: Session, student_id: UUID) -> dict:
     """Get student academic summary"""
     return user_crud.get_student_academic_summary(db, student_id)
+
+def check_student_enrollment_permission(db: Session, student_id: UUID, classroom_id: UUID) -> bool:
+    """
+    Kiểm tra xem student có đăng ký lớp học đó không
+    
+    Args:
+        db (Session): Database session
+        student_id (UUID): ID của student
+        classroom_id (UUID): ID của classroom
+        
+    Returns:
+        bool: True nếu student đã đăng ký lớp học và status là active/completed, 
+              False nếu chưa đăng ký hoặc status là dropped/inactive
+              
+    Example:
+        # Kiểm tra quyền truy cập
+        has_permission = check_student_enrollment_permission(db, student_id, classroom_id)
+        if not has_permission:
+            raise HTTPException(status_code=403, detail="Bạn chưa đăng ký lớp học này")
+    """
+    # Kiểm tra xem student có tồn tại không
+    student = get_user(db, student_id)
+    if not student or student.role_name != "student":
+        return False
+    
+    # Kiểm tra enrollment
+    enrollment = enrollment_crud.get_enrollment_by_student_classroom(db, student_id, classroom_id)
+    
+    # Chỉ trả về True nếu có enrollment và status là active hoặc completed
+    if enrollment and enrollment.status in ["active", "completed"]:
+        return True
+    
+    return False

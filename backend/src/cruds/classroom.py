@@ -80,11 +80,22 @@ def get_classrooms_by_course(db: Session, course_id: UUID) -> List[Class]:
 
 def get_classrooms_by_student(db: Session, student_id: UUID, status: Optional[str] = None) -> List[Class]:
     """Get classrooms where student is enrolled"""
-    return db.query(Class)\
+    from sqlalchemy.orm import joinedload
+    
+    query = db.query(Class)\
         .join(Enrollment, Class.id == Enrollment.class_id)\
         .filter(Enrollment.student_id == student_id)\
-        .filter(Class.status == status)\
-        .all()
+        .options(
+            joinedload(Class.course),
+            joinedload(Class.teacher),
+            joinedload(Class.schedules)
+        )
+    
+    # Chỉ filter theo status khi status không phải None
+    if status is not None:
+        query = query.filter(Class.status == status)
+    
+    return query.all()
 
 def create_classroom(db: Session, classroom_data: ClassroomCreate) -> Class:
     """Create new classroom"""

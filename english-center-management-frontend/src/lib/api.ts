@@ -1,4 +1,4 @@
-import { getSession } from 'next-auth/react';
+import { getSession, signOut } from 'next-auth/react';
 
 const API_BASE_URL = 'http://localhost:8000';
 
@@ -26,6 +26,38 @@ const getAuthToken = async () => {
   }
 };
 
+// Helper function to handle token expiration
+const handleTokenExpiration = async () => {
+  console.log('Token expired, logging out...');
+  
+  // Clear localStorage
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
+  }
+  
+  // Sign out from NextAuth
+  await signOut({ 
+    callbackUrl: '/auth/login',
+    redirect: true 
+  });
+};
+
+// Helper function to check if error is due to token expiration
+const isTokenExpiredError = (error: any): boolean => {
+  if (error instanceof Error) {
+    const message = error.message.toLowerCase();
+    return (
+      message.includes('401') ||
+      message.includes('unauthorized') ||
+      message.includes('token') ||
+      message.includes('expired') ||
+      message.includes('invalid token')
+    );
+  }
+  return false;
+};
+
 // Generic API client
 export const api = {
   async get(endpoint: string) {
@@ -42,6 +74,13 @@ export const api = {
       console.error('API Error:', response.status, response.statusText);
       const errorText = await response.text();
       console.error('Error response:', errorText);
+      
+      // Check if it's a token expiration error
+      if (response.status === 401 || isTokenExpiredError(errorText)) {
+        await handleTokenExpiration();
+        return;
+      }
+      
       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 
@@ -60,7 +99,15 @@ export const api = {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      
+      // Check if it's a token expiration error
+      if (response.status === 401 || isTokenExpiredError(errorText)) {
+        await handleTokenExpiration();
+        return;
+      }
+      
+      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 
     return response.json();
@@ -78,7 +125,15 @@ export const api = {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      
+      // Check if it's a token expiration error
+      if (response.status === 401 || isTokenExpiredError(errorText)) {
+        await handleTokenExpiration();
+        return;
+      }
+      
+      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 
     return response.json();
@@ -95,7 +150,15 @@ export const api = {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      
+      // Check if it's a token expiration error
+      if (response.status === 401 || isTokenExpiredError(errorText)) {
+        await handleTokenExpiration();
+        return;
+      }
+      
+      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 
     return response.json();

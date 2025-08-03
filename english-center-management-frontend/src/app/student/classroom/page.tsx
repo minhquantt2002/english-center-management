@@ -24,9 +24,16 @@ const StudentClassroomPage: React.FC = () => {
     const fetchData = async () => {
       try {
         const classesData = await getStudentClasses();
-        setClasses(classesData);
+        // Đảm bảo classesData luôn là array
+        if (Array.isArray(classesData)) {
+          setClasses(classesData);
+        } else {
+          console.warn('getStudentClasses returned non-array data:', classesData);
+          setClasses([]);
+        }
       } catch (err) {
         console.error('Error fetching student data:', err);
+        setClasses([]); // Set empty array nếu có lỗi
       }
     };
 
@@ -105,6 +112,9 @@ const StudentClassroomPage: React.FC = () => {
     router.push(`/student/classroom/${classId}`);
   };
 
+  // Đảm bảo classes luôn là array
+  const safeClasses = classes || [];
+
   return (
     <div className='space-y-6'>
       {/* Loading state */}
@@ -132,7 +142,7 @@ const StudentClassroomPage: React.FC = () => {
         <div className='flex items-center gap-3'>
           <div className='flex items-center gap-2 text-sm text-gray-600'>
             <BookOpen className='w-4 h-4' />
-            <span>{classes.length} lớp học</span>
+            <span>{safeClasses.length} lớp học</span>
           </div>
         </div>
       </div>
@@ -147,7 +157,7 @@ const StudentClassroomPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Tổng số lớp</p>
               <p className='text-xl font-bold text-gray-900'>
-                {classes.length}
+                {safeClasses.length}
               </p>
             </div>
           </div>
@@ -161,7 +171,7 @@ const StudentClassroomPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Đang học</p>
               <p className='text-xl font-bold text-gray-900'>
-                {classes.filter((c) => c.status === 'active').length}
+                {safeClasses.filter((c) => c.status === 'active').length}
               </p>
             </div>
           </div>
@@ -175,7 +185,7 @@ const StudentClassroomPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Hoàn thành</p>
               <p className='text-xl font-bold text-gray-900'>
-                {classes.filter((c) => c.status === 'completed').length}
+                {safeClasses.filter((c) => c.status === 'completed').length}
               </p>
             </div>
           </div>
@@ -189,7 +199,7 @@ const StudentClassroomPage: React.FC = () => {
             <div>
               <p className='text-sm text-gray-600'>Sắp tới</p>
               <p className='text-xl font-bold text-gray-900'>
-                {classes.filter((c) => c.status === 'cancelled').length}
+                {safeClasses.filter((c) => c.status === 'cancelled').length}
               </p>
             </div>
           </div>
@@ -198,7 +208,7 @@ const StudentClassroomPage: React.FC = () => {
 
       {/* Classes Grid */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-        {classes.map((classItem) => (
+        {safeClasses.map((classItem) => (
           <div
             key={classItem.id}
             className='bg-white rounded-lg border border-gray-200 p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-purple-300 group'
@@ -273,7 +283,7 @@ const StudentClassroomPage: React.FC = () => {
       </div>
 
       {/* Empty State */}
-      {classes.length === 0 && !loading && (
+      {safeClasses.length === 0 && !loading && (
         <div className='text-center py-12'>
           <BookOpen className='w-16 h-16 text-gray-300 mx-auto mb-4' />
           <h3 className='text-lg font-medium text-gray-900 mb-2'>
