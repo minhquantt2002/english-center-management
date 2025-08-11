@@ -24,7 +24,7 @@ export const useStudentApi = () => {
       setError(null);
       try {
         const response = await api.get('/student/dashboard');
-        return response.data;
+        return response;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Có lỗi xảy ra';
@@ -36,82 +36,59 @@ export const useStudentApi = () => {
     }, []);
 
   // Get student's classes
-  const getStudentClasses = useCallback(
-    async (params?: GetStudentClassesParams): Promise<ClassroomResponse[]> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const queryString = params
-          ? `?${new URLSearchParams(
-              params as Record<string, string>
-            ).toString()}`
-          : '';
-        const response = await api.get(`/student/classes${queryString}`);
-        return response.data || [];
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Có lỗi xảy ra';
-        setError(errorMessage);
-        console.error('Error fetching student classes:', err);
-        return []; // Trả về array rỗng thay vì throw error
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
+  const getStudentClasses = useCallback(async (): Promise<
+    ClassroomResponse[]
+  > => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get(`/student/classes`);
+      return response || [];
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
+      setError(errorMessage);
+      console.error('Error fetching student classes:', err);
+      return []; // Trả về array rỗng thay vì throw error
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   // Get student's schedule
-  const getStudentSchedule = useCallback(
-    async (params?: GetStudentScheduleParams): Promise<ScheduleResponse[]> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const queryString = params
-          ? `?${new URLSearchParams(
-              params as Record<string, string>
-            ).toString()}`
-          : '';
-        const response = await api.get(`/student/schedule${queryString}`);
-        return response.data || [];
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Có lỗi xảy ra';
-        setError(errorMessage);
-        console.error('Error fetching student schedule:', err);
-        return []; // Trả về array rỗng thay vì throw error
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
+  const getStudentSchedule = useCallback(async (): Promise<
+    ScheduleResponse[]
+  > => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get(`/student/schedule`);
+      return response;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
+      setError(errorMessage);
+      console.error('Error fetching student schedule:', err);
+      return []; // Trả về array rỗng thay vì throw error
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   // Get student's scores
-  const getStudentScores = useCallback(
-    async (params?: GetStudentScoresParams): Promise<ScoreResponse[]> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const queryString = params
-          ? `?${new URLSearchParams(
-              params as Record<string, string>
-            ).toString()}`
-          : '';
-        const response = await api.get(`/student/scores${queryString}`);
-        return response.data || [];
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Có lỗi xảy ra';
-        setError(errorMessage);
-        console.error('Error fetching student scores:', err);
-        return []; // Trả về array rỗng thay vì throw error
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
+  const getStudentScores = useCallback(async (): Promise<ScoreResponse[]> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get(`/student/scores`);
+      return response || [];
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
+      setError(errorMessage);
+      console.error('Error fetching student scores:', err);
+      return []; // Trả về array rỗng thay vì throw error
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   // Get class details
   const getClassDetails = useCallback(
@@ -120,7 +97,7 @@ export const useStudentApi = () => {
       setError(null);
       try {
         const response = await api.get(`/student/classes/${classId}`);
-        return response.data;
+        return response;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Có lỗi xảy ra';
@@ -135,21 +112,23 @@ export const useStudentApi = () => {
   );
 
   // Get student profile
-  const getStudentProfile = useCallback(async (): Promise<StudentResponse | null> => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.get('/student/profile');
-      return response.data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
-      setError(errorMessage);
-      console.error('Error fetching student profile:', err);
-      return null; // Trả về null thay vì throw error
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const getStudentProfile =
+    useCallback(async (): Promise<StudentResponse | null> => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await api.get('/student/profile');
+        return response;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Có lỗi xảy ra';
+        setError(errorMessage);
+        console.error('Error fetching student profile:', err);
+        return null; // Trả về null thay vì throw error
+      } finally {
+        setLoading(false);
+      }
+    }, []);
 
   // Update student profile
   const updateStudentProfile = useCallback(
@@ -158,7 +137,7 @@ export const useStudentApi = () => {
       setError(null);
       try {
         const response = await api.put('/student/profile', profileData);
-        return response.data;
+        return response;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Có lỗi xảy ra';
@@ -179,7 +158,7 @@ export const useStudentApi = () => {
       setError(null);
       try {
         const response = await api.get(`/student/classes/${classId}/schedules`);
-        return response.data || [];
+        return response || [];
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Có lỗi xảy ra';
@@ -200,7 +179,7 @@ export const useStudentApi = () => {
       setError(null);
       try {
         const response = await api.get(`/student/classes/${classId}/scores`);
-        return response.data || [];
+        return response || [];
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Có lỗi xảy ra';

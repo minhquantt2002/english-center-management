@@ -2,8 +2,6 @@ import { useState, useCallback } from 'react';
 import { api } from '../../../lib/api';
 import {
   TeacherDashboard,
-  TeacherClassesParams,
-  TeacherScheduleResponse,
   TeacherClassroomResponse,
   AttendanceData,
   AttendanceEntry,
@@ -12,8 +10,8 @@ import {
   StudentScore,
   GradesData,
   ScheduleData,
-  TeachingSchedule,
 } from '../../../types/teacher';
+import { ScheduleResponse } from '../../../types/student';
 
 // Teacher API hooks
 export const useTeacherApi = () => {
@@ -39,30 +37,47 @@ export const useTeacherApi = () => {
     }, []);
 
   // Get teacher's teaching schedule
-  const getTeachingSchedule =
-    useCallback(async (): Promise<TeacherScheduleResponse> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await api.get(`/teacher/schedule`);
-        return response;
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Có lỗi xảy ra';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    }, []);
+  const getTeachingSchedule = useCallback(async (): Promise<
+    ScheduleResponse[]
+  > => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get(`/teacher/schedule`);
+      return response;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   // Get class details
-  const getClassDetails = useCallback(
-    async (classId: string): Promise<TeacherClassroomResponse> => {
+  const getClassrooms = useCallback(async (): Promise<
+    TeacherClassroomResponse[]
+  > => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get(`/teacher/classes`);
+      return response;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const getClassroomDetail = useCallback(
+    async (classroomId: string): Promise<TeacherClassroomResponse> => {
       setLoading(true);
       setError(null);
       try {
-        const response = await api.get(`/teacher/classes/${classId}`);
+        const response = await api.get(`/teacher/classes/${classroomId}`);
         return response;
       } catch (err) {
         const errorMessage =
@@ -200,11 +215,12 @@ export const useTeacherApi = () => {
     error,
     getTeacherDashboard,
     getTeachingSchedule,
-    getClassDetails,
+    getClassrooms,
     updateAttendance,
     createStudentScore,
     updateStudentScore,
     updateGrades,
     getClassSchedule,
+    getClassroomDetail,
   };
 };

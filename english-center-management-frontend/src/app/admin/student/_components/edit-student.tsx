@@ -85,7 +85,7 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
       const updatedStudent: UserUpdate = {
         ...student,
         ...formData,
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date().toLocaleDateString('vi-VN'),
       } as UserUpdate;
 
       onSave(updatedStudent);
@@ -163,7 +163,7 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                     value={
                       formData.date_of_birth
                         ? new Date(formData.date_of_birth)
-                            .toISOString()
+                            .toLocaleDateString('vi-VN')
                             .split('T')[0]
                         : ''
                     }

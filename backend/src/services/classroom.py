@@ -30,6 +30,10 @@ def get_classrooms_by_teacher(db: Session, teacher_id: UUID) -> List[Class]:
     """Get classrooms taught by specific teacher"""
     return classroom_crud.get_classrooms_by_teacher(db, teacher_id)
 
+def get_classroom_by_id(db: Session, classroom_id: UUID) -> Class:
+    """Get classrooms taught by specific teacher"""
+    return classroom_crud.get_classrooms_by_id(db, classroom_id)
+
 def get_classrooms_by_course(db: Session, course_id: UUID) -> List[Class]:
     """Get classrooms for specific course"""
     return classroom_crud.get_classrooms_by_course(db, course_id)

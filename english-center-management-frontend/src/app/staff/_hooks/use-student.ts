@@ -27,6 +27,25 @@ export const useStaffStudentApi = () => {
     }
   }, []);
 
+  const getStudentById = useCallback(
+    async (id: string): Promise<StudentResponse> => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await api.get(`/staff/students/${id}/`);
+        return response;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Có lỗi xảy ra';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
   const createStudent = useCallback(
     async (studentData: StudentCreate): Promise<StudentResponse> => {
       setLoading(true);
@@ -134,5 +153,6 @@ export const useStaffStudentApi = () => {
     getAvailableStudents,
     getStudentAchievements,
     getStudentInvoices,
+    getStudentById,
   };
 };

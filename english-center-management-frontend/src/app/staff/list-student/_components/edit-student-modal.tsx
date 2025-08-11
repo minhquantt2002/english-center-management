@@ -74,7 +74,11 @@ export default function EditStudentModal({
         name: student.name || '',
         email: student.email || '',
         phone_number: student.phone_number || '',
-        date_of_birth: student.date_of_birth || '',
+        date_of_birth: student.date_of_birth
+          ? new Date(student.date_of_birth)
+              .toLocaleDateString('vi-VN')
+              .split('T')[0]
+          : '',
         input_level: student.input_level || 'beginner',
         bio: student.bio || '',
         parent_name: student.parent_name || '',
@@ -285,7 +289,7 @@ export default function EditStudentModal({
                 />
               </div>
 
-              <div>
+              {/* <div>
                 <label className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-1'>
                   <BookOpen className='w-4 h-4' />
                   Trình độ
@@ -303,7 +307,7 @@ export default function EditStudentModal({
                     </option>
                   ))}
                 </select>
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -314,7 +318,7 @@ export default function EditStudentModal({
               Thông tin liên hệ khẩn cấp
             </h3>
 
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Họ tên <span className='text-red-500'>*</span>

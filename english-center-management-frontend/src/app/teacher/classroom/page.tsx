@@ -15,8 +15,39 @@ import {
 import { useTeacherApi } from '../_hooks/use-api';
 import { TeacherClassroomResponse } from '../../../types/teacher';
 
+const getDays = (day: string) => {
+  let res = '';
+  switch (day.toLowerCase()) {
+    case 'monday':
+      res = 'Thứ 2';
+      break;
+    case 'tuesday':
+      res = 'Thứ 3';
+      break;
+    case 'wednesday':
+      res = 'Thứ 4';
+      break;
+    case 'thursday':
+      res = 'Thứ 5';
+      break;
+    case 'friday':
+      res = 'Thứ 6';
+      break;
+    case 'saturday':
+      res = 'Thứ 7';
+      break;
+    case 'sunday':
+      res = 'Chủ nhật';
+      break;
+    default:
+      res = 'Không xác định';
+      break;
+  }
+  return res;
+};
+
 const MyClassesDashboard = () => {
-  const { loading, error, getTeacherClasses } = useTeacherApi();
+  const { loading, getClassrooms } = useTeacherApi();
   const [classes, setClasses] = useState<TeacherClassroomResponse[]>([]);
   const [stats, setStats] = useState([
     {
@@ -52,7 +83,7 @@ const MyClassesDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const classesData = await getTeacherClasses();
+        const classesData = await getClassrooms();
 
         setClasses(classesData);
 
@@ -69,11 +100,11 @@ const MyClassesDashboard = () => {
     };
 
     fetchData();
-  }, [getTeacherClasses]);
+  }, [getClassrooms]);
 
   return (
-    <div className='min-h-screen bg-gray-50 p-6'>
-      <div className='max-w-7xl mx-auto'>
+    <div className='p-4'>
+      <div className='mx-auto'>
         {/* Loading state */}
         {loading && (
           <div className='flex justify-center items-center py-8'>
@@ -81,24 +112,17 @@ const MyClassesDashboard = () => {
           </div>
         )}
 
-        {/* Error state */}
-        {error && (
-          <div className='bg-red-50 border border-red-200 rounded-lg p-4 mb-6'>
-            <p className='text-red-800'>{error}</p>
-          </div>
-        )}
-
         {/* Header */}
         <div className='flex justify-between items-start mb-8'>
           <div>
             <h1 className='text-2xl font-semibold text-gray-900 mb-1'>
-              Lớp học của tôi
+              Lớp đang dạy
             </h1>
             <p className='text-gray-500'>
               Quản lý và theo dõi các lớp học của bạn
             </p>
           </div>
-          <div className='flex items-center space-x-3'>
+          {/* <div className='flex items-center space-x-3'>
             <div className='relative'>
               <Search className='w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400' />
               <input
@@ -111,7 +135,7 @@ const MyClassesDashboard = () => {
               Lọc
               <ChevronDown className='w-4 h-4 ml-1' />
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Stats Cards */}
@@ -159,8 +183,7 @@ const MyClassesDashboard = () => {
                 <div className='text-right'>
                   <div className='flex items-center text-sm text-gray-600 mb-1'>
                     <Users className='w-4 h-4 mr-1' />
-                    {/* {classItem.course.current_students} */}
-                    100
+                    {classItem.enrollments.length}
                   </div>
                 </div>
               </div>
@@ -170,7 +193,7 @@ const MyClassesDashboard = () => {
                 <div className='flex items-center text-sm text-gray-600'>
                   <Calendar className='w-4 h-4 mr-2' />
                   {classItem.schedules
-                    .map((schedule) => schedule.weekday)
+                    .map((schedule) => getDays(schedule.weekday))
                     .join(', ')}
                 </div>
                 <div className='flex items-center text-sm text-gray-600'>

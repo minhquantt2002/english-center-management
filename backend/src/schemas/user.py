@@ -2,6 +2,7 @@ from datetime import date, datetime
 from typing import Optional, List
 from pydantic import BaseModel, EmailStr
 from src.schemas.base import BaseSchema
+from src.schemas.exam import ExamBase
 import enum
 from uuid import UUID
 
@@ -138,12 +139,20 @@ class EnrollmentNested(BaseSchema):
     id: UUID
     enrollment_at: date
     status: str
+    classroom: Optional[ClassroomNested] = None
 
 
 class ScoreNested(BaseSchema):
     id: UUID
     total_score: Optional[float] = None
     grade: Optional[str] = None
+
+    listening: Optional[float] = None
+    reading: Optional[float] = None
+    speaking: Optional[float] = None
+    writing: Optional[float] = None
+
+    exam: Optional[ExamBase] = None
 
 
 class FeedbackNested(BaseSchema):

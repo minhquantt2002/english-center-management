@@ -99,7 +99,8 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
       if (newStudent.date_of_birth) {
         // Chuyển sang định dạng ISO 8601 đầy đủ
         const date = new Date(newStudent.date_of_birth);
-        newStudent.date_of_birth = date.toISOString().split("T")[0] + "T00:00:00";
+        newStudent.date_of_birth =
+          date.toLocaleDateString('vi-VN').split('T')[0] + 'T00:00:00';
       }
 
       await onSave(newStudent);

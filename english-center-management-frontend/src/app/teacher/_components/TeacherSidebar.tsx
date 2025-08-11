@@ -15,7 +15,6 @@ interface MenuItem {
   name: string;
   href: string;
   icon: React.ReactNode;
-  badge?: string;
   description?: string;
 }
 
@@ -33,14 +32,12 @@ const TeacherSidebar: React.FC = () => {
       name: 'Lịch giảng dạy',
       href: '/teacher/teaching-schedule',
       icon: <Calendar className='w-5 h-5' />,
-      badge: '12',
       description: 'Lịch dạy học',
     },
     {
       name: 'Lớp học',
       href: '/teacher/classroom',
       icon: <School className='w-5 h-5' />,
-      badge: '4',
       description: 'Quản lý lớp học',
     },
   ];
@@ -55,7 +52,7 @@ const TeacherSidebar: React.FC = () => {
   return (
     <div className='h-screen w-64 bg-gradient-to-b from-orange-50 to-white border-r border-gray-200 fixed left-0 top-0 z-30'>
       {/* Logo */}
-      <div className='h-20 flex items-center px-6 border-b border-gray-200 bg-white'>
+      <div className='h-16 flex items-center px-6 border-b border-gray-200 bg-white'>
         <div className='flex items-center gap-3'>
           <div className='w-10 h-10 bg-gradient-to-r from-orange-600 to-red-600 rounded-xl flex items-center justify-center shadow-lg'>
             <GraduationCap className='w-6 h-6 text-white' />
@@ -107,20 +104,6 @@ const TeacherSidebar: React.FC = () => {
               </div>
 
               <div className='flex items-center gap-2'>
-                {item.badge && (
-                  <span
-                    className={`
-                    px-2.5 py-1 text-xs font-bold rounded-full transition-all duration-200
-                    ${
-                      isActive(item.href)
-                        ? 'bg-orange-600 text-white shadow-sm'
-                        : 'bg-gray-200 text-gray-600 group-hover:bg-gray-300'
-                    }
-                  `}
-                  >
-                    {item.badge}
-                  </span>
-                )}
                 {isActive(item.href) && (
                   <ChevronRight className='w-4 h-4 text-orange-600' />
                 )}

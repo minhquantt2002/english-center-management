@@ -85,7 +85,6 @@ def create_student(db: Session, student_data: UserCreate) -> User:
     """Create new student"""
     # Hash password before saving
     hashed_password = get_password_hash(student_data.password)
-    print(hashed_password)
     return user_crud.create_user(db, student_data, hashed_password)
 
 def update_student(db: Session, student_id: UUID, student_data: UserUpdate) -> Optional[User]:

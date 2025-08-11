@@ -49,6 +49,10 @@ def get_classrooms_by_teacher(db: Session, teacher_id: UUID) -> List[Class]:
     """Get classrooms taught by specific teacher"""
     return db.query(Class).filter(Class.teacher_id == teacher_id).all()
 
+def get_classrooms_by_id(db: Session, classroom_id: UUID) ->Class:
+    """Get classrooms taught by specific teacher"""
+    return db.query(Class).filter(Class.id == classroom_id).first()
+
 def get_upcoming_classes_by_teacher(db: Session, teacher_id: UUID) -> List[Class]:
     """Get upcoming classes taught by specific teacher"""
     from datetime import date

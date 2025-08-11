@@ -17,7 +17,6 @@ interface MenuItem {
   name: string;
   href: string;
   icon: React.ReactNode;
-  badge?: string;
   description?: string;
 }
 
@@ -29,41 +28,31 @@ const StaffSidebar: React.FC = () => {
       name: 'Tổng quan',
       href: '/staff',
       icon: <LayoutDashboard className='w-5 h-5' />,
-      description: 'Dashboard chính',
+      description: 'Dashboard',
     },
     {
       name: 'Học viên',
       href: '/staff/list-student',
       icon: <Users className='w-5 h-5' />,
-      badge: '98',
       description: 'Quản lý học viên',
     },
     {
       name: 'Giáo viên',
       href: '/staff/list-teacher',
       icon: <GraduationCap className='w-5 h-5' />,
-      badge: '12',
       description: 'Xem danh sách giáo viên',
     },
-    {
-      name: 'Khóa học',
-      href: '/staff/list-course',
-      icon: <BookOpen className='w-5 h-5' />,
-      badge: '6',
-      description: 'Quản lý khóa học',
-    },
+    // {
+    //   name: 'Khóa học',
+    //   href: '/staff/list-course',
+    //   icon: <BookOpen className='w-5 h-5' />,
+    //   description: 'Quản lý khóa học',
+    // },
     {
       name: 'Lớp học',
       href: '/staff/list-classroom',
       icon: <School className='w-5 h-5' />,
-      badge: '8',
       description: 'Quản lý lớp học',
-    },
-    {
-      name: 'Tạo hóa đơn',
-      href: '/staff/create-student-invoice',
-      icon: <Receipt className='w-5 h-5' />,
-      description: 'Tạo hóa đơn học viên',
     },
   ];
 
@@ -77,7 +66,7 @@ const StaffSidebar: React.FC = () => {
   return (
     <div className='h-screen w-64 bg-gradient-to-b from-gray-50 to-white border-r border-gray-200 fixed left-0 top-0 z-30'>
       {/* Logo */}
-      <div className='h-20 flex items-center px-6 border-b border-gray-200 bg-white'>
+      <div className='h-16 flex items-center px-6 border-b border-gray-200 bg-white'>
         <div className='flex items-center gap-3'>
           <div className='w-10 h-10 bg-gradient-to-r from-green-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
             <span className='text-white font-bold text-lg'>S</span>
@@ -129,20 +118,6 @@ const StaffSidebar: React.FC = () => {
               </div>
 
               <div className='flex items-center gap-2'>
-                {item.badge && (
-                  <span
-                    className={`
-                    px-2.5 py-1 text-xs font-bold rounded-full transition-all duration-200
-                    ${
-                      isActive(item.href)
-                        ? 'bg-green-600 text-white shadow-sm'
-                        : 'bg-gray-200 text-gray-600 group-hover:bg-gray-300'
-                    }
-                  `}
-                  >
-                    {item.badge}
-                  </span>
-                )}
                 {isActive(item.href) && (
                   <ChevronRight className='w-4 h-4 text-green-600' />
                 )}

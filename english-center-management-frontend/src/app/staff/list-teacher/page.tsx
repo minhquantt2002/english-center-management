@@ -24,7 +24,7 @@ export default function TeacherManagement() {
   const [teachers, setTeachers] = useState<TeacherResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { error, getTeachers, getTeacherSchedule } = useStaffTeacherApi();
+  const { getTeachers, getTeacherSchedule } = useStaffTeacherApi();
 
   // Fetch teachers on component mount
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function TeacherManagement() {
     (teacher: TeacherResponse, index: number) => ({
       id: teacher.id,
       name: teacher.name,
-      role: teacher.experience_years
+      experience_years: teacher.experience_years
         ? `${teacher.experience_years} năm kinh nghiệm`
         : 'Giáo viên',
       phone: teacher.phone_number || 'N/A',
@@ -59,6 +59,7 @@ export default function TeacherManagement() {
           ? 'bg-blue-100 text-blue-800 border-blue-200'
           : 'bg-purple-100 text-purple-800 border-purple-200',
       levelColor: 'bg-green-100 text-green-800 border-green-200',
+      taught_classes: teacher.taught_classes || [],
     })
   );
 
@@ -98,25 +99,6 @@ export default function TeacherManagement() {
     );
   }
 
-  if (error) {
-    return (
-      <div className='bg-red-50 border border-red-200 rounded-xl p-6 mb-6'>
-        <div className='flex items-center gap-3'>
-          <AlertCircle className='w-5 h-5 text-red-500' />
-          <p className='text-red-800 font-medium'>
-            Có lỗi xảy ra khi tải dữ liệu
-          </p>
-        </div>
-        <button
-          onClick={fetchTeachers}
-          className='mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors'
-        >
-          Thử lại
-        </button>
-      </div>
-    );
-  }
-
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -137,9 +119,6 @@ export default function TeacherManagement() {
             <h1 className='text-3xl font-bold text-gray-900'>
               Danh sách giáo viên
             </h1>
-            <p className='text-gray-600 mt-1'>
-              Quản lý và theo dõi thông tin giáo viên của trung tâm
-            </p>
           </div>
         </div>
 
@@ -269,7 +248,7 @@ export default function TeacherManagement() {
                           {teacher.name}
                         </div>
                         <div className='text-sm text-gray-500'>
-                          {teacher.role}
+                          {teacher.experience_years}
                         </div>
                       </div>
                     </div>
@@ -294,7 +273,7 @@ export default function TeacherManagement() {
                     </span>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                    {Math.floor(Math.random() * 5) + 1} lớp
+                    {teacher.taught_classes.length} lớp
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                     <button
@@ -331,8 +310,6 @@ export default function TeacherManagement() {
       {showScheduleModal && selectedTeacher && (
         <TeachingScheduleModal
           teacherId={selectedTeacher.id}
-          teacherName={selectedTeacher.name}
-          isOpen={showScheduleModal}
           onClose={closeScheduleModal}
         />
       )}

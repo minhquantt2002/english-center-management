@@ -137,10 +137,9 @@ const ClassDetailPage: React.FC = () => {
           <span>Quay lại</span>
         </button>
         <div className='flex-1'>
-          <h1 className='text-2xl font-bold text-gray-900'>
+          <h1 className='text-xl font-bold text-gray-900'>
             {classData.class_name}
           </h1>
-          <p className='text-gray-600 mt-1'>Chi tiết lớp học</p>
         </div>
         <div className='flex items-center gap-3'>
           <button className='px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors'>
@@ -328,52 +327,6 @@ const ClassDetailPage: React.FC = () => {
                         {classData.status === 'cancelled' && 'Đã hủy'}
                         {classData.status === 'completed' && 'Hoàn thành'}
                       </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className='space-y-6'>
-                  {/* Tiến độ học tập và buổi học tiếp theo đã bị loại bỏ vì không có dữ liệu phù hợp */}
-                </div>
-              </div>
-
-              {/* Recent Activities */}
-              <div>
-                <h3 className='text-lg font-semibold text-gray-900 mb-4'>
-                  Hoạt động gần đây
-                </h3>
-                <div className='space-y-3'>
-                  <div className='flex items-center gap-3 p-4 bg-gray-50 rounded-lg'>
-                    <div className='w-10 h-10 bg-green-100 rounded-full flex items-center justify-center'>
-                      <CheckCircle className='w-5 h-5 text-green-600' />
-                    </div>
-                    <div className='flex-1'>
-                      <p className='text-sm font-medium text-gray-900'>
-                        Hoàn thành bài tập Unit 5
-                      </p>
-                      <p className='text-xs text-gray-500'>2 giờ trước</p>
-                    </div>
-                  </div>
-                  <div className='flex items-center gap-3 p-4 bg-gray-50 rounded-lg'>
-                    <div className='w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center'>
-                      <Video className='w-5 h-5 text-blue-600' />
-                    </div>
-                    <div className='flex-1'>
-                      <p className='text-sm font-medium text-gray-900'>
-                        Xem video bài giảng
-                      </p>
-                      <p className='text-xs text-gray-500'>1 ngày trước</p>
-                    </div>
-                  </div>
-                  <div className='flex items-center gap-3 p-4 bg-gray-50 rounded-lg'>
-                    <div className='w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center'>
-                      <BarChart3 className='w-5 h-5 text-purple-600' />
-                    </div>
-                    <div className='flex-1'>
-                      <p className='text-sm font-medium text-gray-900'>
-                        Nhận điểm kiểm tra giữa kỳ
-                      </p>
-                      <p className='text-xs text-gray-500'>3 ngày trước</p>
                     </div>
                   </div>
                 </div>

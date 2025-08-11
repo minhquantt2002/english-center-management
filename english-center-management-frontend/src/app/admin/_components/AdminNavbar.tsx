@@ -5,10 +5,8 @@ import { usePathname } from 'next/navigation';
 import {
   User,
   LogOut,
-  Settings,
   ChevronDown,
   Menu,
-  Search,
   Home,
   ArrowRight,
 } from 'lucide-react';

@@ -68,7 +68,7 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
 
         {/* Page content */}
         <main className='flex-1 overflow-x-hidden overflow-y-auto pt-16 pb-6'>
-          <div className='container mx-auto px-6 py-6'>{children}</div>
+          <div className='container mx-auto p-2'>{children}</div>
         </main>
       </div>
 

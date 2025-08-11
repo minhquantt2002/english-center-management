@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { api } from '../../../lib/api';
-import { TeacherResponse, TeacherScheduleResponse } from '../../../types/staff';
+import { TeacherResponse } from '../../../types/staff';
+import { ScheduleResponse } from '../../../types/student';
 
 export const useStaffTeacherApi = () => {
   const [loading, setLoading] = useState(false);
@@ -22,11 +23,13 @@ export const useStaffTeacherApi = () => {
   }, []);
 
   const getTeacherSchedule = useCallback(
-    async (teacherId: string): Promise<TeacherScheduleResponse> => {
+    async (teacherId: string): Promise<ScheduleResponse[]> => {
       setLoading(true);
       setError(null);
       try {
-        const response = await api.get(`/staff/teachers/${teacherId}/schedule`);
+        const response = await api.get(
+          `/staff/teachers/${teacherId}/schedule/`
+        );
         return response;
       } catch (err) {
         const errorMessage =

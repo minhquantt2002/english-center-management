@@ -71,7 +71,7 @@ async def get_teacher_classroom(
             detail="classroom_id không hợp lệ"
         )
     
-    classroom = classroom_service.get_classroom_by_teacher(db, classroom_uuid, current_user.id)
+    classroom = classroom_service.get_classroom_by_id(db, classroom_uuid)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -80,10 +80,8 @@ async def get_teacher_classroom(
     return classroom
 
 # ==================== SCHEDULE MANAGEMENT ====================
-@router.get("/schedule", response_model=List[ScheduleResponse])
+@router.get("/schedule")
 async def get_teaching_schedule(
-    classroom_id: Optional[str] = Query(None, description="Filter by classroom ID"),
-    weekday: Optional[str] = Query(None, description="Filter by weekday"),
     current_user: User = Depends(get_current_teacher_user),
     db: Session = Depends(get_db)
 ):
@@ -92,8 +90,6 @@ async def get_teaching_schedule(
     """
     schedules = schedule_service.get_schedules_with_filters(
         db,
-        classroom_id=classroom_id,
         teacher_id=current_user.id,
-        weekday=weekday,
     )
     return schedules

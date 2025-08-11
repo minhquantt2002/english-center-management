@@ -33,6 +33,7 @@ export interface StudentCreate {
   input_level?: string;
   parent_name?: string;
   parent_phone?: string;
+  role_name: UserRole;
   bio?: string;
   date_of_birth?: string;
   phone_number?: string;
@@ -336,12 +337,30 @@ export interface EnrollmentNested {
   enrollment_at: string;
   status: string;
   class_id?: string;
+  classroom: ClassroomNested;
+}
+
+export interface ExamBase {
+  exam_name: string;
+  class_id: string;
+  exam_date?: string;
+  description?: string;
+  duration?: number;
+  total_points?: number;
+  exam_type?: string;
 }
 
 export interface ScoreNested {
   id: string;
   total_score?: number;
   grade?: string;
+
+  listening?: number;
+  reading?: number;
+  speaking?: number;
+  writing?: number;
+
+  exam?: ExamBase;
 }
 
 export interface FeedbackNested {

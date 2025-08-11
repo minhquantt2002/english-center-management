@@ -5,17 +5,10 @@ import { usePathname } from 'next/navigation';
 import {
   User,
   LogOut,
-  Settings,
   ChevronDown,
   Menu,
-  Calendar,
-  Bell,
-  Search,
   Home,
   ArrowRight,
-  BookOpen,
-  MessageSquare,
-  BarChart3,
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { usePersonalInfo } from '../../../components/PersonalInfoContext';
@@ -28,7 +21,6 @@ interface TeacherNavbarProps {
 const TeacherNavbar: React.FC<TeacherNavbarProps> = ({ onToggleSidebar }) => {
   const pathname = usePathname();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const { openModal } = usePersonalInfo();
   const { userInfo, loading } = useUserInfo();
 
@@ -206,82 +198,6 @@ const TeacherNavbar: React.FC<TeacherNavbarProps> = ({ onToggleSidebar }) => {
 
         {/* Right side - Search, Notifications, Profile */}
         <div className='flex items-center gap-4'>
-          {/* Search */}
-          <div className='relative hidden md:block'>
-            <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-              <Search className='h-4 w-4 text-gray-400' />
-            </div>
-            <input
-              type='text'
-              placeholder='Tìm kiếm...'
-              className='block w-64 pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent'
-            />
-          </div>
-
-          {/* Notifications */}
-          <div className='relative'>
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              className='relative p-2 rounded-lg hover:bg-gray-100 transition-colors'
-            >
-              <Bell className='w-5 h-5 text-gray-600' />
-              {unreadCount > 0 && (
-                <span className='absolute -top-1 -right-1 w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-bold'>
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-
-            {/* Notifications dropdown */}
-            {showNotifications && (
-              <div className='absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50'>
-                <div className='p-4 border-b border-gray-200'>
-                  <div className='flex items-center justify-between'>
-                    <h3 className='text-lg font-semibold text-gray-900'>
-                      Thông báo
-                    </h3>
-                    <button className='text-orange-600 text-sm font-medium hover:text-orange-700'>
-                      Đánh dấu đã đọc
-                    </button>
-                  </div>
-                </div>
-                <div className='max-h-96 overflow-y-auto'>
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer ${
-                        notification.unread ? 'bg-orange-50' : ''
-                      }`}
-                    >
-                      <div className='flex items-start gap-3'>
-                        <div className='w-2 h-2 rounded-full bg-orange-500 mt-2 flex-shrink-0'></div>
-                        <div className='flex-1'>
-                          <p className='font-medium text-gray-900'>
-                            {notification.title}
-                          </p>
-                          <p className='text-sm text-gray-600 mt-1'>
-                            {notification.message}
-                          </p>
-                          <p className='text-xs text-gray-400 mt-2'>
-                            {notification.time}
-                          </p>
-                        </div>
-                        {notification.unread && (
-                          <div className='w-2 h-2 rounded-full bg-orange-500 flex-shrink-0 mt-2'></div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className='p-4 border-t border-gray-200'>
-                  <button className='w-full text-center text-orange-600 text-sm font-medium hover:text-orange-700'>
-                    Xem tất cả thông báo
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* User Profile */}
           <div className='relative'>
             <button
@@ -338,26 +254,6 @@ const TeacherNavbar: React.FC<TeacherNavbarProps> = ({ onToggleSidebar }) => {
                   >
                     <User className='w-4 h-4' />
                     Hồ sơ cá nhân
-                  </button>
-                  <button className='w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors'>
-                    <Calendar className='w-4 h-4' />
-                    Lịch giảng dạy
-                  </button>
-                  <button className='w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors'>
-                    <BookOpen className='w-4 h-4' />
-                    Lớp học của tôi
-                  </button>
-                  <button className='w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors'>
-                    <MessageSquare className='w-4 h-4' />
-                    Nhận xét học viên
-                  </button>
-                  <button className='w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors'>
-                    <BarChart3 className='w-4 h-4' />
-                    Báo cáo hiệu suất
-                  </button>
-                  <button className='w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors'>
-                    <Settings className='w-4 h-4' />
-                    Cài đặt tài khoản
                   </button>
                   <hr className='my-2 border-gray-200' />
                   <button

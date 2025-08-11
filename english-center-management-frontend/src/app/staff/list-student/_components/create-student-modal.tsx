@@ -29,6 +29,7 @@ export default function CreateStudentModal({
     phone_number: '',
     date_of_birth: '',
     input_level: 'beginner',
+    role_name: 'student',
     parent_name: '',
     parent_phone: '',
     bio: '',
@@ -105,6 +106,7 @@ export default function CreateStudentModal({
       date_of_birth: '',
       input_level: 'beginner',
       parent_name: '',
+      role_name: 'student',
       parent_phone: '',
       bio: '',
       status: 'active',
@@ -252,7 +254,7 @@ export default function CreateStudentModal({
                 />
               </div>
 
-              <div>
+              {/* <div>
                 <label className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-1'>
                   <BookOpen className='w-4 h-4' />
                   Trình độ
@@ -270,7 +272,7 @@ export default function CreateStudentModal({
                     </option>
                   ))}
                 </select>
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -281,7 +283,7 @@ export default function CreateStudentModal({
               Thông tin liên hệ khẩn cấp
             </h3>
 
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Họ tên <span className='text-red-500'>*</span>

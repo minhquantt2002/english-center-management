@@ -37,7 +37,6 @@ def _schedule_to_dict(schedule: Schedule) -> Dict[str, Any]:
             "end_date": schedule.classroom.end_date,
             "created_at": schedule.classroom.created_at
         }
-    
     return schedule_dict
 
 def get_schedule(db: Session, schedule_id: UUID) -> Optional[Dict[str, Any]]:
@@ -60,15 +59,15 @@ def get_schedules_by_classroom(db: Session, class_id: UUID) -> List[Dict[str, An
     schedules = schedule_crud.get_schedules_by_classroom(db, class_id)
     return [_schedule_to_dict(schedule) for schedule in schedules]
 
-def get_schedules_by_student(db: Session, student_id: UUID, classroom_id: Optional[UUID] = None, weekday: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_schedules_by_student(db: Session, student_id: UUID) -> List[Dict[str, Any]]:
     """Get schedules for specific student (through enrollments)"""
-    schedules = schedule_crud.get_schedules_by_student(db, student_id, classroom_id, weekday)
+    schedules = schedule_crud.get_schedules_by_student(db, student_id)
     return [_schedule_to_dict(schedule) for schedule in schedules]
 
 def get_schedules_by_teacher(db: Session, teacher_id: UUID) -> List[Dict[str, Any]]:
     """Get schedules for specific teacher"""
-    schedules = schedule_crud.get_schedules_by_teacher(db, teacher_id)
-    return [_schedule_to_dict(schedule) for schedule in schedules]
+    schedules = schedule_crud.get_schedules_by_teacher(db)
+    return [_schedule_to_dict(schedule) for schedule in schedules if str(schedule.classroom.teacher_id) == str(teacher_id)]
 
 def get_schedules_by_student_weekday(db: Session, student_id: UUID, weekday: str) -> List[Dict[str, Any]]:
     """Get schedules for specific student on specific weekday"""
@@ -129,12 +128,10 @@ def count_schedules_by_classroom(db: Session, class_id: UUID) -> int:
 
 def get_schedules_with_filters(
     db: Session, 
-    classroom_id: Optional[UUID] = None,
     teacher_id: Optional[UUID] = None,
-    weekday: Optional[str] = None
 ) -> List[Dict[str, Any]]:
     """Get schedules with optional filters"""
-    schedules = schedule_crud.get_schedules_with_filters(db, classroom_id, teacher_id, weekday)
+    schedules = schedule_crud.get_schedules_with_filters(db, teacher_id)
     return [_schedule_to_dict(schedule) for schedule in schedules]
 
 def get_upcoming_schedules_by_teacher(db: Session, teacher_id: UUID):

@@ -28,6 +28,31 @@ async def get_all_students(
     students = user_service.get_students(db)
     return students
 
+@router.get("/students/{student_id}/", response_model=StudentResponse)
+async def get_student_by_id(
+    student_id: str,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):  
+    """
+    Lấy thông tin học sinh theo ID
+    """
+    try:
+        student_uuid = UUID(student_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="student_id không hợp lệ"
+        )
+    
+    student = user_service.get_student(db, student_uuid)
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Học sinh không tồn tại"
+        )
+    return student
+
 @router.post("/students", response_model=StudentResponse)
 async def create_student(
     student_data: UserCreate,
@@ -139,7 +164,7 @@ async def get_all_teachers(
     teachers = user_service.get_teachers(db)
     return teachers
 
-@router.get("/teachers/{teacher_id}/schedule")
+@router.get("/teachers/{teacher_id}/schedule/")
 async def get_teacher_schedule(
     teacher_id: str,
     current_user: User = Depends(get_current_staff_user),
@@ -156,8 +181,8 @@ async def get_teacher_schedule(
             detail="teacher_id không hợp lệ"
         )
     
-    # TODO: Implement logic to get teacher schedule
-    return {"schedule": []}
+    
+    return schedule_service.get_schedules_by_teacher(db=db, teacher_id=teacher_id)
 
 # ==================== COURSE MANAGEMENT ====================
 @router.get("/courses", response_model=List[CourseResponse])

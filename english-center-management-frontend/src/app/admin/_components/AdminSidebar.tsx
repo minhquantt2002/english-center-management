@@ -17,7 +17,6 @@ interface MenuItem {
   name: string;
   href: string;
   icon: React.ReactNode;
-  badge?: string;
   description?: string;
 }
 
@@ -35,28 +34,24 @@ const AdminSidebar: React.FC = () => {
       name: 'Học viên',
       href: '/admin/student',
       icon: <Users className='w-5 h-5' />,
-      badge: '156',
       description: 'Quản lý học viên',
     },
     {
       name: 'Giáo viên',
       href: '/admin/teacher',
       icon: <GraduationCap className='w-5 h-5' />,
-      badge: '12',
       description: 'Quản lý giáo viên',
     },
     {
       name: 'Khóa học',
       href: '/admin/course',
       icon: <BookOpen className='w-5 h-5' />,
-      badge: '8',
       description: 'Quản lý khóa học',
     },
     {
       name: 'Lớp học',
       href: '/admin/classroom',
       icon: <School className='w-5 h-5' />,
-      badge: '15',
       description: 'Quản lý lớp học',
     },
     {
@@ -129,20 +124,6 @@ const AdminSidebar: React.FC = () => {
               </div>
 
               <div className='flex items-center gap-2'>
-                {item.badge && (
-                  <span
-                    className={`
-                    px-2.5 py-1 text-xs font-bold rounded-full transition-all duration-200
-                    ${
-                      isActive(item.href)
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-gray-200 text-gray-600 group-hover:bg-gray-300'
-                    }
-                  `}
-                  >
-                    {item.badge}
-                  </span>
-                )}
                 {isActive(item.href) && (
                   <ChevronRight className='w-4 h-4 text-blue-600' />
                 )}

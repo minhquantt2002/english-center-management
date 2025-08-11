@@ -24,11 +24,15 @@ const StudentClassroomPage: React.FC = () => {
     const fetchData = async () => {
       try {
         const classesData = await getStudentClasses();
+        console.log('classesData:', classesData);
         // Đảm bảo classesData luôn là array
         if (Array.isArray(classesData)) {
           setClasses(classesData);
         } else {
-          console.warn('getStudentClasses returned non-array data:', classesData);
+          console.warn(
+            'getStudentClasses returned non-array data:',
+            classesData
+          );
           setClasses([]);
         }
       } catch (err) {
@@ -38,7 +42,6 @@ const StudentClassroomPage: React.FC = () => {
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getLevelColor = (level: string) => {
@@ -59,7 +62,7 @@ const StudentClassroomPage: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'in progress':
+      case 'active':
         return 'bg-blue-100 text-blue-800';
       case 'upcoming':
         return 'bg-yellow-100 text-yellow-800';
@@ -72,7 +75,7 @@ const StudentClassroomPage: React.FC = () => {
 
   const getStatusText = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'in progress':
+      case 'active':
         return 'Đang học';
       case 'upcoming':
         return 'Sắp tới';
@@ -113,7 +116,8 @@ const StudentClassroomPage: React.FC = () => {
   };
 
   // Đảm bảo classes luôn là array
-  const safeClasses = classes || [];
+  const safeClasses = classes;
+  console.log('Classes:', safeClasses);
 
   return (
     <div className='space-y-6'>
@@ -267,7 +271,7 @@ const StudentClassroomPage: React.FC = () => {
               </div>
               <div className='flex items-center gap-2 text-sm text-gray-600'>
                 <MapPin className='w-4 h-4' />
-                <span>Phòng {classItem.room}</span>
+                <span>Phòng: {classItem.room}</span>
               </div>
             </div>
 

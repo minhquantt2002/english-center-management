@@ -156,7 +156,7 @@ export default function EnglishCourseInterface() {
 
   if (error) {
     return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+      <div className='h-full bg-gray-50 flex items-center justify-center'>
         <div className='text-center'>
           <p className='text-red-600 mb-2'>Có lỗi xảy ra khi tải dữ liệu</p>
           <button
@@ -171,8 +171,8 @@ export default function EnglishCourseInterface() {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50'>
-      <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+    <div className='h-full w-full'>
+      <main className='mx-auto'>
         <div className='flex items-center justify-between mb-8'>
           <h1 className='text-3xl font-bold text-gray-900 mb-2'>
             Danh sách lớp học
@@ -275,25 +275,6 @@ export default function EnglishCourseInterface() {
           ))}
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className='bg-white border-t mt-16'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
-          <div className='flex items-center justify-between'>
-            <div className='text-sm text-gray-500'>
-              © 2024 Zenlish English Center. All rights reserved.
-            </div>
-            <div className='flex items-center space-x-6 text-sm'>
-              <a href='#' className='text-gray-600 hover:text-gray-900'>
-                Chính sách
-              </a>
-              <a href='#' className='text-gray-600 hover:text-gray-900'>
-                Liên hệ
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
 
       {/* Create Classroom Modal */}
       <CreateClassroomModal

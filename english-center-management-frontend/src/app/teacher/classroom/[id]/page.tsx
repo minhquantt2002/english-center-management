@@ -22,19 +22,20 @@ import {
   AttendanceManagement,
   GradeManagement,
 } from './_components';
-import { StudentInClass, ClassDetails } from '../../../../types/teacher';
+import { TeacherClassroomResponse } from '../../../../types/teacher';
 
 const ClassDetailPage = () => {
   const params = useParams();
   const classId = params.id as string;
-  const { loading, error, getClassDetails } = useTeacherApi();
+  const { loading, error, getClassroomDetail } = useTeacherApi();
   const [activeTab, setActiveTab] = useState('overview');
-  const [classDetails, setClassDetails] = useState<ClassDetails | null>(null);
+  const [classDetails, setClassDetails] =
+    useState<TeacherClassroomResponse>(null);
 
   useEffect(() => {
     const fetchClassData = async () => {
       try {
-        const [classData] = await Promise.all([getClassDetails(classId)]);
+        const [classData] = await Promise.all([getClassroomDetail(classId)]);
         setClassDetails(classData);
       } catch (err) {
         console.error('Error fetching class data:', err);
@@ -42,7 +43,7 @@ const ClassDetailPage = () => {
     };
 
     fetchClassData();
-  }, [classId, getClassDetails]);
+  }, [classId, getClassroomDetail]);
 
   const tabs = [
     { id: 'overview', label: 'Tổng quan', icon: Book },
@@ -63,29 +64,10 @@ const ClassDetailPage = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-        <div className='text-center'>
-          <h2 className='text-2xl font-bold text-gray-900 mb-4'>
-            Có lỗi xảy ra
-          </h2>
-          <p className='text-gray-600 mb-6'>{error}</p>
-          <Link
-            href='/teacher/classroom'
-            className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors'
-          >
-            Quay lại
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <div className='p-4'>
       {/* Header */}
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+      <div className='mx-auto'>
         <div className='flex items-center justify-between h-16'>
           <div className='flex items-center space-x-4'>
             <Link

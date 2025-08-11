@@ -12,7 +12,6 @@ import {
   BookOpen,
   Calendar,
   GraduationCap,
-  AlertCircle,
 } from 'lucide-react';
 import CreateStudentModal from './_components/create-student-modal';
 import EditStudentModal from './_components/edit-student-modal';
@@ -34,8 +33,7 @@ export default function StudentManagement() {
   const [students, setStudents] = useState<StudentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { error, getStudents, createStudent, updateStudent } =
-    useStaffStudentApi();
+  const { getStudents, createStudent, updateStudent } = useStaffStudentApi();
 
   // Fetch students on component mount
   useEffect(() => {
@@ -126,19 +124,7 @@ export default function StudentManagement() {
   };
 
   const handleEditStudent = (student: StudentResponse) => {
-    // Convert student data to StudentProfile format for the modal
-    const studentProfile: StudentResponse = {
-      id: student.id,
-      name: student.name,
-      email: student.email,
-      phone_number: student.phone_number,
-      input_level: student.input_level,
-      enrollments: student.enrollments,
-      status: student.status,
-      created_at: student.created_at,
-    };
-
-    setSelectedStudent(studentProfile);
+    setSelectedStudent(student);
     setIsEditModalOpen(true);
   };
 
@@ -186,29 +172,9 @@ export default function StudentManagement() {
     );
   }
 
-  if (error) {
-    return (
-      <div className='bg-red-50 border border-red-200 rounded-xl p-6 mb-6'>
-        <div className='flex items-center gap-3'>
-          <AlertCircle className='w-5 h-5 text-red-500' />
-          <p className='text-red-800 font-medium'>
-            Có lỗi xảy ra khi tải dữ liệu
-          </p>
-        </div>
-        <button
-          onClick={fetchStudents}
-          className='mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors'
-        >
-          Thử lại
-        </button>
-      </div>
-    );
-  }
-
   const statusLabels = {
     active: 'Đang học',
     inactive: 'Tạm nghỉ',
-    suspended: 'Chờ phân lớp',
   };
 
   const getInitials = (name: string) => {
@@ -352,9 +318,6 @@ export default function StudentManagement() {
                   Liên hệ
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
-                  Trình độ
-                </th>
-                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                   Lớp học hiện tại
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
@@ -397,21 +360,8 @@ export default function StudentManagement() {
                       </div>
                     </div>
                   </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <span
-                      className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getLevelBadgeColor(
-                        student.input_level
-                      )}`}
-                    >
-                      {student.input_level === 'Beginner'
-                        ? 'Sơ cấp'
-                        : student.input_level === 'Intermediate'
-                        ? 'Trung cấp'
-                        : 'Cao cấp'}
-                    </span>
-                  </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                    {student.enrollments?.[0]?.class_id}
+                    {student.enrollments.length} lớp
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap'>
                     <span

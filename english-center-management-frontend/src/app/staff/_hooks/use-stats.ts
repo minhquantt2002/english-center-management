@@ -11,7 +11,7 @@ export const useStaffStatsApi = () => {
     setError(null);
     try {
       const response = await api.get('/staff/stats');
-      return response.data;
+      return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
       setError(errorMessage);
@@ -26,7 +26,7 @@ export const useStaffStatsApi = () => {
     setError(null);
     try {
       const response = await api.get('/staff/rooms');
-      return response.data;
+      return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
       setError(errorMessage);

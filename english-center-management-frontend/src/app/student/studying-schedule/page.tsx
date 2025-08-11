@@ -14,19 +14,18 @@ import {
   Info,
 } from 'lucide-react';
 import { useStudentApi } from '../_hooks/use-api';
-import { ScheduleResponse } from '../../../types/student';
 
-const StudyingSchedule: React.FC = () => {
-  const { loading, error, getStudentSchedule } = useStudentApi();
+const StudyingSchedule = () => {
+  const { loading, getStudentSchedule } = useStudentApi();
   const [currentWeek, setCurrentWeek] = useState(new Date(2024, 0, 22)); // January 22, 2024
-  const [selectedSchedule, setSelectedSchedule] =
-    useState<ScheduleResponse | null>(null);
-  const [schedules, setSchedules] = useState<ScheduleResponse[]>([]);
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
+  const [schedules, setSchedules] = useState([]);
 
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
         const schedulesData = await getStudentSchedule();
+        console.log('schedulesData: ', schedulesData);
         setSchedules(schedulesData);
       } catch (err) {
         console.error('Error fetching schedules:', err);
@@ -36,16 +35,15 @@ const StudyingSchedule: React.FC = () => {
     fetchSchedules();
   }, [getStudentSchedule]);
 
-  // Time slots for the timetable
+  // Time slots for the timetable - Updated to match your actual schedule times
   const timeSlots = [
     { id: '1', startTime: '07:00', endTime: '08:30', label: '07:00 - 08:30' },
     { id: '2', startTime: '08:30', endTime: '10:00', label: '08:30 - 10:00' },
-    { id: '3', startTime: '10:00', endTime: '11:30', label: '10:00 - 11:30' },
-    { id: '4', startTime: '14:00', endTime: '15:30', label: '14:00 - 15:30' },
-    { id: '5', startTime: '15:30', endTime: '17:00', label: '15:30 - 17:00' },
-    { id: '6', startTime: '17:00', endTime: '18:30', label: '17:00 - 18:30' },
-    { id: '7', startTime: '18:30', endTime: '20:00', label: '18:30 - 20:00' },
-    { id: '8', startTime: '20:00', endTime: '21:30', label: '20:00 - 21:30' },
+    { id: '3', startTime: '10:00', endTime: '12:00', label: '10:00 - 12:00' }, // Updated for 10-12 class
+    { id: '4', startTime: '14:00', endTime: '16:00', label: '14:00 - 16:00' }, // Updated for 14-16 class
+    { id: '5', startTime: '16:00', endTime: '18:00', label: '16:00 - 18:00' }, // Updated for 16-18 classes
+    { id: '6', startTime: '18:00', endTime: '20:00', label: '18:00 - 20:00' }, // Updated for 18-20 class
+    { id: '7', startTime: '20:00', endTime: '21:30', label: '20:00 - 21:30' },
   ];
 
   const dayNames = {
@@ -59,7 +57,7 @@ const StudyingSchedule: React.FC = () => {
   };
 
   // Get week range for current week
-  const getWeekRange = (date: Date) => {
+  const getWeekRange = (date) => {
     const start = new Date(date);
     const dayOfWeek = start.getDay();
     const diff = start.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust for Sunday
@@ -68,7 +66,7 @@ const StudyingSchedule: React.FC = () => {
     const end = new Date(start);
     end.setDate(start.getDate() + 6);
 
-    const formatDate = (d: Date) => {
+    const formatDate = (d) => {
       return d.toLocaleDateString('vi-VN', { month: 'long', day: 'numeric' });
     };
 
@@ -76,7 +74,7 @@ const StudyingSchedule: React.FC = () => {
   };
 
   // Get week number
-  const getWeekNumber = (date: Date) => {
+  const getWeekNumber = (date) => {
     const start = new Date(date.getFullYear(), 0, 1);
     const days = Math.floor(
       (date.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)
@@ -85,7 +83,7 @@ const StudyingSchedule: React.FC = () => {
   };
 
   // Navigate between weeks
-  const navigateWeek = (direction: 'prev' | 'next') => {
+  const navigateWeek = (direction) => {
     const newDate = new Date(currentWeek);
     newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
     setCurrentWeek(newDate);
@@ -93,7 +91,6 @@ const StudyingSchedule: React.FC = () => {
 
   // Get schedules for current week
   const weekSchedules = useMemo(() => {
-    // Map weekday string to JS day index (Monday=1, Sunday=0)
     const startOfWeek = new Date(currentWeek);
     const dayOfWeek = startOfWeek.getDay();
     const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
@@ -101,9 +98,8 @@ const StudyingSchedule: React.FC = () => {
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
 
-    // Helper to get date for a given weekday string
-    function getDateOfWeekday(weekday: string) {
-      const weekdayMap: Record<string, number> = {
+    function getDateOfWeekday(weekday) {
+      const weekdayMap = {
         monday: 1,
         tuesday: 2,
         wednesday: 3,
@@ -120,24 +116,48 @@ const StudyingSchedule: React.FC = () => {
       return date;
     }
 
-    // Attach a computed date field for filtering
     return schedules
       .map((sch) => ({
         ...sch,
         _date: getDateOfWeekday(sch.weekday),
       }))
       .filter((schedule) => {
-        return schedule._date >= startOfWeek && schedule._date <= endOfWeek;
+        // Kiểm tra tuần hiện tại có nằm trong khoảng thời gian của lớp học không
+        const classStartDate = new Date(schedule.classroom.start_date);
+        const classEndDate = new Date(schedule.classroom.end_date);
+
+        // Kiểm tra xem tuần hiện tại có giao nhau với thời gian của lớp học không
+        const weekInRange =
+          startOfWeek <= classEndDate && endOfWeek >= classStartDate;
+
+        return (
+          schedule._date >= startOfWeek &&
+          schedule._date <= endOfWeek &&
+          weekInRange
+        );
       });
   }, [currentWeek, schedules]);
 
+  // Helper function to check if two time ranges overlap or match
+  const timeRangesMatch = (scheduleStart, scheduleEnd, slotStart, slotEnd) => {
+    // Convert time strings to minutes for easier comparison
+    const timeToMinutes = (timeStr) => {
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      return hours * 60 + minutes;
+    };
+
+    const schedStartMin = timeToMinutes(scheduleStart);
+    const schedEndMin = timeToMinutes(scheduleEnd);
+    const slotStartMin = timeToMinutes(slotStart);
+    const slotEndMin = timeToMinutes(slotEnd);
+
+    // Check if the schedule overlaps with the slot
+    return schedStartMin < slotEndMin && schedEndMin > slotStartMin;
+  };
+
   // Helper function to get session for a specific day and time slot
-  const getSessionForSlot = (
-    day: string,
-    timeSlot: { startTime: string; endTime: string }
-  ) => {
-    // Map UI day to backend weekday
-    const dayMap: Record<string, string> = {
+  const getSessionForSlot = (day, timeSlot) => {
+    const dayMap = {
       Monday: 'monday',
       Tuesday: 'tuesday',
       Wednesday: 'wednesday',
@@ -146,70 +166,24 @@ const StudyingSchedule: React.FC = () => {
       Saturday: 'saturday',
       Sunday: 'sunday',
     };
+
     return weekSchedules.find((schedule) => {
       return (
         schedule.weekday === dayMap[day] &&
-        schedule.start_time === timeSlot.startTime &&
-        schedule.end_time === timeSlot.endTime
+        timeRangesMatch(
+          schedule.start_time,
+          schedule.end_time,
+          timeSlot.startTime + ':00',
+          timeSlot.endTime + ':00'
+        )
       );
     });
   };
 
-  // Get status color
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'upcoming':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'completed':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 border-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
+  const formatTime = (timeString) => {
+    return timeString.substring(0, 5); // Remove seconds from HH:MM:SS
   };
 
-  // Get status text
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'upcoming':
-        return 'Sắp tới';
-      case 'completed':
-        return 'Đã hoàn thành';
-      case 'cancelled':
-        return 'Đã hủy';
-      default:
-        return status;
-    }
-  };
-
-  // Get type text
-  const getTypeText = (type: string) => {
-    switch (type) {
-      case 'class':
-        return 'Lớp học';
-      case 'exam':
-        return 'Kiểm tra';
-      case 'extra':
-        return 'Luyện tập';
-      default:
-        return 'Khác';
-    }
-  };
-
-  // Get type color
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'class':
-        return 'bg-blue-500';
-      case 'exam':
-        return 'bg-red-500';
-      case 'extra':
-        return 'bg-green-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
   return (
     <div className='min-h-screen bg-gray-50 p-6'>
       <div className='max-w-7xl mx-auto'>
@@ -217,13 +191,6 @@ const StudyingSchedule: React.FC = () => {
         {loading && (
           <div className='flex justify-center items-center py-8'>
             <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
-          </div>
-        )}
-
-        {/* Error state */}
-        {error && (
-          <div className='bg-red-50 border border-red-200 rounded-lg p-4 mb-6'>
-            <p className='text-red-800'>{error}</p>
           </div>
         )}
 
@@ -277,12 +244,6 @@ const StudyingSchedule: React.FC = () => {
 
         {/* Timetable */}
         <div className='bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden'>
-          <div className='p-6 border-b border-gray-200'>
-            <h3 className='text-lg font-semibold text-gray-900'>
-              Thời khóa biểu tuần
-            </h3>
-          </div>
-
           <div className='overflow-x-auto'>
             <div className='min-w-[800px]'>
               {/* Header Row */}
@@ -311,30 +272,30 @@ const StudyingSchedule: React.FC = () => {
                     return (
                       <div
                         key={day}
-                        className='p-2 border border-gray-200 min-h-[80px] relative'
+                        className='p-2 border border-gray-200 min-h-[100px] relative'
                       >
                         {session ? (
-                          <div className='h-full'>
+                          <div className='h-full bg-blue-50 border-l-4 border-blue-500 rounded p-2'>
                             <div className='h-full flex flex-col'>
-                              <div className='flex items-start justify-between mb-1'>
-                                <div className='text-xs font-medium text-gray-900 truncate'>
+                              <div className='flex items-start justify-between mb-2'>
+                                <div className='text-xs font-semibold text-blue-900 line-clamp-2'>
                                   {session.classroom?.class_name || 'Lớp học'}
                                 </div>
                                 <button
                                   onClick={() => setSelectedSchedule(session)}
-                                  className='text-blue-600 hover:text-blue-800 text-xs ml-1'
+                                  className='text-blue-600 hover:text-blue-800 text-xs ml-1 flex-shrink-0'
                                 >
                                   <Eye className='w-3 h-3' />
                                 </button>
                               </div>
-                              <div className='text-xs text-gray-600 mb-1'>
-                                {session.classroom?.room || ''}
+                              <div className='text-xs text-blue-700 mb-1 flex items-center gap-1'>
+                                <MapPin className='w-3 h-3' />
+                                {session.classroom?.room || 'N/A'}
                               </div>
-                              <div className='text-xs text-gray-600 mb-1'>
-                                {''}
-                              </div>
-                              <div className='flex items-center gap-1 mb-1'>
-                                {/* Type info not available in ScheduleResponse */}
+                              <div className='text-xs text-blue-600 flex items-center gap-1'>
+                                <Clock className='w-3 h-3' />
+                                {formatTime(session.start_time)} -{' '}
+                                {formatTime(session.end_time)}
                               </div>
                             </div>
                           </div>
@@ -348,37 +309,6 @@ const StudyingSchedule: React.FC = () => {
                   })}
                 </div>
               ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className='mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4'>
-          <h3 className='font-medium text-gray-900 mb-3'>Chú thích</h3>
-          <div className='flex flex-wrap gap-4'>
-            <div className='flex items-center space-x-2'>
-              <div className='w-4 h-4 bg-blue-500 rounded'></div>
-              <span className='text-sm text-gray-700'>Lớp học thường</span>
-            </div>
-            <div className='flex items-center space-x-2'>
-              <div className='w-4 h-4 bg-red-500 rounded'></div>
-              <span className='text-sm text-gray-700'>Kiểm tra</span>
-            </div>
-            <div className='flex items-center space-x-2'>
-              <div className='w-4 h-4 bg-green-500 rounded'></div>
-              <span className='text-sm text-gray-700'>Luyện tập thêm</span>
-            </div>
-            <div className='flex items-center space-x-2'>
-              <div className='w-4 h-4 bg-blue-100 border border-blue-200 rounded'></div>
-              <span className='text-sm text-gray-700'>Sắp tới</span>
-            </div>
-            <div className='flex items-center space-x-2'>
-              <div className='w-4 h-4 bg-green-100 border border-green-200 rounded'></div>
-              <span className='text-sm text-gray-700'>Đã hoàn thành</span>
-            </div>
-            <div className='flex items-center space-x-2'>
-              <div className='w-4 h-4 bg-red-100 border border-red-200 rounded'></div>
-              <span className='text-sm text-gray-700'>Đã hủy</span>
             </div>
           </div>
         </div>
@@ -423,8 +353,8 @@ const StudyingSchedule: React.FC = () => {
                     <div>
                       <p className='text-sm text-gray-600'>Thời gian</p>
                       <p className='font-medium text-gray-900'>
-                        {selectedSchedule.start_time} -{' '}
-                        {selectedSchedule.end_time}
+                        {formatTime(selectedSchedule.start_time)} -{' '}
+                        {formatTime(selectedSchedule.end_time)}
                       </p>
                     </div>
                   </div>
@@ -447,24 +377,10 @@ const StudyingSchedule: React.FC = () => {
                     <div>
                       <p className='text-sm text-gray-600'>Phòng học</p>
                       <p className='font-medium text-gray-900'>
-                        {selectedSchedule.classroom?.room || ''}
+                        {selectedSchedule.classroom?.room || 'Chưa xác định'}
                       </p>
                     </div>
                   </div>
-
-                  <div className='flex items-center space-x-3'>
-                    <User className='w-5 h-5 text-gray-500' />
-                    <div>
-                      <p className='text-sm text-gray-600'>Giáo viên</p>
-                      <p className='font-medium text-gray-900'>{''}</p>
-                    </div>
-                  </div>
-
-                  {/* Topic info not available in ScheduleResponse */}
-
-                  {/* Type info not available in ScheduleResponse */}
-
-                  {/* Status info not available in ScheduleResponse */}
                 </div>
               </div>
 
