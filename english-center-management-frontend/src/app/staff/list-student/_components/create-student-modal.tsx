@@ -117,18 +117,34 @@ export default function CreateStudentModal({
   };
 
   const handleInputChange = (field: keyof StudentCreate, value: any) => {
+    if (field === "date_of_birth") {
+      const selectedDate = new Date(value);
+      const today = new Date();
+
+      if (selectedDate > today) {
+        setErrors((prev) => ({
+          ...prev,
+          date_of_birth: "Ngày sinh không được vượt quá ngày hiện tại",
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          date_of_birth: undefined,
+        }));
+      }
+    } else {
+      if (errors[field]) {
+        setErrors((prev) => ({
+          ...prev,
+          [field]: undefined,
+        }));
+      }
+    }
+
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
-
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: undefined,
-      }));
-    }
   };
 
   if (!isOpen) return null;
@@ -167,9 +183,8 @@ export default function CreateStudentModal({
                   type='text'
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.name ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.name ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder='Nhập họ và tên'
                 />
                 {errors.name && (
@@ -187,9 +202,8 @@ export default function CreateStudentModal({
                   onChange={(e) =>
                     handleInputChange('date_of_birth', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.date_of_birth ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.date_of_birth ? 'border-red-500' : 'border-gray-300'
+                    }`}
                 />
                 {errors.date_of_birth && (
                   <p className='text-red-500 text-sm mt-1'>
@@ -207,9 +221,8 @@ export default function CreateStudentModal({
                   type='email'
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder='example@email.com'
                 />
                 {errors.email && (
@@ -228,9 +241,8 @@ export default function CreateStudentModal({
                   onChange={(e) =>
                     handleInputChange('phone_number', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.phone_number ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.phone_number ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder='0123456789'
                 />
                 {errors.phone_number && (
@@ -294,9 +306,8 @@ export default function CreateStudentModal({
                   onChange={(e) =>
                     handleInputChange('parent_name', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.parent_name ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.parent_name ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder='Tên người liên hệ'
                 />
                 {errors.parent_name && (
@@ -316,9 +327,8 @@ export default function CreateStudentModal({
                   onChange={(e) =>
                     handleInputChange('parent_phone', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.parent_phone ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.parent_phone ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder='0123456789'
                 />
                 {errors.parent_phone && (

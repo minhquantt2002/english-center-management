@@ -27,7 +27,7 @@ class UserBase(BaseSchema):
     email: EmailStr
     role_name: Optional[UserRole] = None
     bio: Optional[str] = None
-    date_of_birth: Optional[datetime] = None
+    date_of_birth: Optional[date] = None
     phone_number: Optional[str] = None
     input_level: Optional[str] = None
     
@@ -52,7 +52,7 @@ class UserUpdate(BaseSchema):
     email: Optional[EmailStr] = None
     role_name: Optional[UserRole] = None
     bio: Optional[str] = None
-    date_of_birth: Optional[datetime] = None
+    date_of_birth: Optional[date] = None
     phone_number: Optional[str] = None
     input_level: Optional[str] = None
     
@@ -77,7 +77,7 @@ class TeacherBase(BaseSchema):
     education: Optional[str] = None
     experience_years: Optional[int] = None
     bio: Optional[str] = None
-    date_of_birth: Optional[datetime] = None
+    date_of_birth: Optional[date] = None
     phone_number: Optional[str] = None
 
 
@@ -93,7 +93,7 @@ class TeacherUpdate(BaseSchema):
     education: Optional[str] = None
     experience_years: Optional[int] = None
     bio: Optional[str] = None
-    date_of_birth: Optional[datetime] = None
+    date_of_birth: Optional[date] = None
     phone_number: Optional[str] = None
 
 
@@ -107,7 +107,7 @@ class StudentBase(BaseSchema):
     status: StudentStatus = StudentStatus.ACTIVE
     bio: Optional[str] = None
     phone_number: Optional[str] = None
-    date_of_birth: Optional[datetime] = None 
+    date_of_birth: Optional[date] = None 
     address: Optional[str] = None 
 
 
@@ -123,7 +123,7 @@ class StudentUpdate(BaseSchema):
     parent_phone: Optional[str] = None
     status: Optional[StudentStatus] = None
     bio: Optional[str] = None
-    date_of_birth: Optional[datetime] = None
+    date_of_birth: Optional[date] = None
     phone_number: Optional[str] = None
 
 

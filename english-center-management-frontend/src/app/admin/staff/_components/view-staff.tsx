@@ -132,6 +132,14 @@ export default function ViewStaffModal({
                 <p className='text-gray-900 capitalize'>Nhân viên</p>
               </div>
             </div>
+            {staff.bio && (
+              <div>
+                <label className='text-sm font-medium text-gray-500'>
+                  Tiểu sử
+                </label>
+                <p className='text-gray-900'>{staff.bio}</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -141,10 +149,6 @@ export default function ViewStaffModal({
             Cập nhật lần cuối: {new Date().toLocaleDateString('vi-VN')}
           </div>
           <div className='flex items-center gap-3'>
-            <button className='px-4 py-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-2'>
-              <Edit className='w-4 h-4' />
-              Chỉnh sửa
-            </button>
             <button
               onClick={onClose}
               className='px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors'

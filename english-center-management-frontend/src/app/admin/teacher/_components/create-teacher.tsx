@@ -136,18 +136,47 @@ export default function CreateTeacherModal({
   };
 
   const handleInputChange = (field: keyof TeacherCreate, value: any) => {
+    // Xử lý riêng cho ngày sinh
+    if (field === "date_of_birth") {
+      const selectedDate = new Date(value);
+      const today = new Date();
+      const minBirthDate = new Date(
+        today.getFullYear() - 16,
+        today.getMonth(),
+        today.getDate()
+      );
+
+      if (selectedDate > today) {
+        setErrors((prev) => ({
+          ...prev,
+          date_of_birth: "Ngày sinh không được vượt quá ngày hiện tại",
+        }));
+      } else if (selectedDate > minBirthDate) {
+        setErrors((prev) => ({
+          ...prev,
+          date_of_birth: "Giáo viên phải đủ 18 tuổi",
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          date_of_birth: undefined,
+        }));
+      }
+    } else {
+      // Clear error khi user nhập các field khác
+      if (errors[field]) {
+        setErrors((prev) => ({
+          ...prev,
+          [field]: undefined,
+        }));
+      }
+    }
+
+    // Cập nhật formData
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
-
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: undefined,
-      }));
-    }
   };
 
   if (!isOpen) return null;
@@ -187,9 +216,8 @@ export default function CreateTeacherModal({
                   type='text'
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.name ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.name ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder='Nhập họ và tên'
                 />
                 {errors.name && (
@@ -206,9 +234,8 @@ export default function CreateTeacherModal({
                   type='email'
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder='example@email.com'
                 />
                 {errors.email && (
@@ -227,9 +254,8 @@ export default function CreateTeacherModal({
                   onChange={(e) =>
                     handleInputChange('phone_number', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.phone_number ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.phone_number ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder='0123456789'
                 />
                 {errors.phone_number && (
@@ -251,11 +277,10 @@ export default function CreateTeacherModal({
                     onChange={(e) =>
                       handleInputChange('date_of_birth', e.target.value)
                     }
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.date_of_birth
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.date_of_birth
                         ? 'border-red-500'
                         : 'border-gray-300'
-                    }`}
+                      }`}
                   />
                 </div>
                 {errors.date_of_birth && (
@@ -300,9 +325,8 @@ export default function CreateTeacherModal({
                   onChange={(e) =>
                     handleInputChange('specialization', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.specialization ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.specialization ? 'border-red-500' : 'border-gray-300'
+                    }`}
                 >
                   {specializations.map((spec) => (
                     <option key={spec.value} value={spec.value}>
@@ -326,9 +350,8 @@ export default function CreateTeacherModal({
                   onChange={(e) =>
                     handleInputChange('education', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.education ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.education ? 'border-red-500' : 'border-gray-300'
+                    }`}
                 >
                   {qualifications.map((qual) => (
                     <option key={qual.value} value={qual.value}>
@@ -356,11 +379,10 @@ export default function CreateTeacherModal({
                       Number(e.target.value)
                     )
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                    errors.experience_years
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.experience_years
                       ? 'border-red-500'
                       : 'border-gray-300'
-                  }`}
+                    }`}
                 >
                   {experienceYears.map((exp) => (
                     <option key={exp.value} value={exp.value}>

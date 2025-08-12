@@ -292,10 +292,6 @@ export default function ViewTeacherModal({
             Cập nhật lần cuối: {new Date().toLocaleDateString('vi-VN')}
           </div>
           <div className='flex items-center gap-3'>
-            <button className='px-4 py-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-2'>
-              <Edit className='w-4 h-4' />
-              Chỉnh sửa
-            </button>
             <button
               onClick={onClose}
               className='px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors'
