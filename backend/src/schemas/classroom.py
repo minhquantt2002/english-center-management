@@ -1,6 +1,7 @@
 from datetime import date, datetime, time
 from typing import Optional, List
 from src.schemas.base import BaseSchema
+from src.schemas.user import StudentBase
 import enum
 from uuid import UUID
 
@@ -62,6 +63,7 @@ class EnrollmentNested(BaseSchema):
     id: UUID
     enrollment_at: date
     status: str
+    student: Optional[StudentBase]
 
 
 class ExamNested(BaseSchema):

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Phone, User, BookOpen, Save, AlertCircle } from 'lucide-react';
+import { X, Phone, User, BookOpen, Save, AlertCircle, Calendar } from 'lucide-react';
 import { UserUpdate } from '../../../../types/admin';
 
 interface EditStudentModalProps {
@@ -35,18 +35,38 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
     field: string,
     value: string | number | boolean | any
   ) => {
+    // Xử lý riêng cho ngày sinh
+    if (field === "date_of_birth") {
+      const selectedDate = new Date(value);
+      const today = new Date();
+
+      if (selectedDate > today) {
+        setErrors((prev) => ({
+          ...prev,
+          date_of_birth: "Ngày sinh không được vượt quá ngày hiện tại",
+        }));
+
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          date_of_birth: undefined,
+        }));
+      }
+    } else {
+      // Clear error khi user nhập các field khác
+      if (errors[field]) {
+        setErrors((prev) => ({
+          ...prev,
+          [field]: undefined,
+        }));
+      }
+    }
+
+    // Cập nhật formData
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
-
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: '',
-      }));
-    }
   };
 
   const validateForm = () => {
@@ -141,9 +161,8 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                     type='text'
                     value={formData.name || ''}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.name ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     placeholder='Nhập họ và tên'
                   />
                   {errors.name && (
@@ -158,20 +177,18 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   <label className='block text-sm font-medium text-gray-700 mb-1'>
                     Ngày sinh
                   </label>
-                  <input
-                    type='date'
-                    value={
-                      formData.date_of_birth
-                        ? new Date(formData.date_of_birth)
-                            .toLocaleDateString('vi-VN')
-                            .split('T')[0]
-                        : ''
-                    }
-                    onChange={(e) =>
-                      handleInputChange('date_of_birth', e.target.value)
-                    }
-                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  />
+                  <div className='relative'>
+                    <Calendar className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
+                    <input
+                      type='date'
+                      value={formData.date_of_birth?.split('T')[0]}
+                      onChange={(e) =>
+                        handleInputChange('date_of_birth', e.target.value)
+                      }
+                      className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.date_of_birth ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -206,9 +223,8 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                     type='email'
                     value={formData.email || ''}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.email ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     placeholder='Nhập email'
                   />
                   {errors.email && (
@@ -229,9 +245,8 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                     onChange={(e) =>
                       handleInputChange('phone_number', e.target.value)
                     }
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.phone_number ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.phone_number ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     placeholder='Nhập số điện thoại'
                   />
                   {errors.phone_number && (

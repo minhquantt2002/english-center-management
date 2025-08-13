@@ -1,14 +1,10 @@
-import React, { useState } from 'react';
 import {
-  Search,
   Filter,
-  Plus,
-  Phone,
-  Mail,
   MoreVertical,
-  CheckCircle,
-  Star,
+  Plus,
+  Search
 } from 'lucide-react';
+import React, { useState } from 'react';
 import { EnrollmentNested } from '../../../../../types/teacher';
 
 interface StudentListProps {
@@ -31,7 +27,7 @@ const StudentList: React.FC<StudentListProps> = ({ students }) => {
     >
       <div className='flex items-start space-x-3'>
         <img
-          src={student.student.avatar}
+          src="https://cdn-icons-png.flaticon.com/512/4196/4196591.png"
           alt={student.student.name}
           className='w-12 h-12 rounded-full'
         />
@@ -44,12 +40,6 @@ const StudentList: React.FC<StudentListProps> = ({ students }) => {
           </p>
         </div>
         <div className='flex items-center space-x-2'>
-          <button className='p-1 text-gray-400 hover:text-gray-600'>
-            <Phone className='w-4 h-4' />
-          </button>
-          <button className='p-1 text-gray-400 hover:text-gray-600'>
-            <Mail className='w-4 h-4' />
-          </button>
           <button className='p-1 text-gray-400 hover:text-gray-600'>
             <MoreVertical className='w-4 h-4' />
           </button>

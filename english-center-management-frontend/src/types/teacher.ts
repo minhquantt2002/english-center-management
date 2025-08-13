@@ -203,6 +203,7 @@ export interface EnrollmentNested {
   id: string;
   enrollment_at: string;
   status: string;
+  student:StudentInClass
 }
 
 export interface FeedbackNested {

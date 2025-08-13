@@ -58,18 +58,38 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
   };
 
   const handleInputChange = (field: string, value: string) => {
+    // Xử lý riêng cho ngày sinh
+    if (field === "date_of_birth") {
+      const selectedDate = new Date(value);
+      const today = new Date();
+
+      if (selectedDate > today) {
+        setErrors((prev) => ({
+          ...prev,
+          date_of_birth: "Ngày sinh không được vượt quá ngày hiện tại",
+        }));
+
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          date_of_birth: undefined,
+        }));
+      }
+    } else {
+      // Clear error khi user nhập các field khác
+      if (errors[field]) {
+        setErrors((prev) => ({
+          ...prev,
+          [field]: undefined,
+        }));
+      }
+    }
+
+    // Cập nhật formData
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
-
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: '',
-      }));
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,13 +115,6 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
         status: formData.status,
       };
 
-      // Trước khi gửi studentData lên API, chuyển đổi date_of_birth nếu có
-      if (newStudent.date_of_birth) {
-        // Chuyển sang định dạng ISO 8601 đầy đủ
-        const date = new Date(newStudent.date_of_birth);
-        newStudent.date_of_birth =
-          date.toLocaleDateString('vi-VN').split('T')[0] + 'T00:00:00';
-      }
 
       await onSave(newStudent);
 
@@ -188,9 +201,8 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                   type='text'
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.name ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder='Nhập họ và tên'
                 />
                 {errors.name && (
@@ -209,9 +221,8 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                     type='email'
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.email ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     placeholder='example@email.com'
                   />
                 </div>
@@ -233,9 +244,8 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                     onChange={(e) =>
                       handleInputChange('phone_number', e.target.value)
                     }
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.phone_number ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.phone_number ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     placeholder='0123456789'
                   />
                 </div>
@@ -259,11 +269,10 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                     onChange={(e) =>
                       handleInputChange('date_of_birth', e.target.value)
                     }
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.date_of_birth
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.date_of_birth
                         ? 'border-red-500'
                         : 'border-gray-300'
-                    }`}
+                      }`}
                   />
                 </div>
                 {errors.date_of_birth && (
