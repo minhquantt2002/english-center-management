@@ -24,10 +24,11 @@ interface EditStudentModalProps {
 }
 
 const levels = [
-  { value: 'beginner', label: 'Sơ cấp' },
-  { value: 'elementary', label: 'Cơ bản' },
-  { value: 'intermediate', label: 'Trung cấp' },
-  { value: 'advanced', label: 'Nâng cao' },
+  { value: 'A1', label: 'A1 - Mất gốc' },
+  { value: 'A2', label: 'A2 - Sơ cấp' },
+  { value: 'B1', label: 'B1 - Trung cấp thấp' },
+  { value: 'B2', label: 'B2 - Trung cấp cao' },
+  { value: 'C1', label: 'C1 - Nâng cao' },
 ];
 
 const relationships = [

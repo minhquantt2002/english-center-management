@@ -15,9 +15,11 @@ interface CreateCourseModalProps {
 }
 
 export const levels: { value: CourseLevel; label: string }[] = [
-  { value: 'elementary', label: 'Cơ bản' },
-  { value: 'intermediate', label: 'Trung cấp' },
-  { value: 'advanced', label: 'Nâng cao' },
+  { value: 'A1', label: 'A1 - Mất gốc' },
+  { value: 'A2', label: 'A2 - Sơ cấp' },
+  { value: 'B1', label: 'B1 - Trung cấp thấp' },
+  { value: 'B2', label: 'B2 - Trung cấp cao' },
+  { value: 'C1', label: 'C1 - Nâng cao' },
 ];
 
 export const statuses: { value: CourseStatus; label: string }[] = [
@@ -35,7 +37,7 @@ export default function CreateCourseModal({
   const [formData, setFormData] = useState<CourseCreate>({
     course_name: '',
     description: '',
-    level: 'elementary',
+    level: 'A2',
     total_weeks: 0,
     price: 0,
     status: 'active',

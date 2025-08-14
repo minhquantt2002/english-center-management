@@ -52,7 +52,35 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
           date_of_birth: undefined,
         }));
       }
-    } else {
+    }
+    else if (field === "phone_number") {
+      if (!/^[0-9]{10,11}$/.test(value.replace(/\s/g, ''))) {
+        setErrors((prev) => ({
+          ...prev,
+          phone_number: "Số điện thoại không hợp lệ",
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          phone_number: undefined,
+        }));
+      }
+    }
+    else if (field === "parent_phone") {
+      // Validation cho số điện thoại phụ huynh (không bắt buộc nhưng nếu có thì phải đúng format)
+      if (value && !/^[0-9]{10,11}$/.test(value.replace(/\s/g, ''))) {
+        setErrors((prev) => ({
+          ...prev,
+          parent_phone: "Số điện thoại phụ huynh không hợp lệ",
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          parent_phone: undefined,
+        }));
+      }
+    }
+    else {
       // Clear error khi user nhập các field khác
       if (errors[field]) {
         setErrors((prev) => ({
@@ -85,6 +113,9 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
     if (!formData.phone_number?.trim()) {
       newErrors.phone = 'Số điện thoại là bắt buộc';
     }
+    else if (!/^[0-9]{10,11}$/.test(formData.phone_number.replace(/\s/g, ''))) {
+      newErrors.phone = 'Số điện thoại không hợp lệ';
+    }
 
     if (!formData.input_level) {
       newErrors.level = 'Trình độ là bắt buộc';
@@ -92,6 +123,11 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
 
     if (!formData.status) {
       newErrors.status = 'Trạng thái là bắt buộc';
+    }
+
+    // Validation cho parent_phone (không bắt buộc nhưng nếu có thì phải đúng format)
+    if (formData.parent_phone && !/^[0-9]{10,11}$/.test(formData.parent_phone.replace(/\s/g, ''))) {
+      newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
     }
 
     setErrors(newErrors);
@@ -189,6 +225,12 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                         }`}
                     />
                   </div>
+                  {errors.date_of_birth && (
+                    <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
+                      <AlertCircle size={14} />
+                      {errors.date_of_birth}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -279,12 +321,11 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                 >
-                  <option value='beginner'>Sơ cấp</option>
-                  <option value='elementary'>Cơ bản</option>
-                  <option value='intermediate'>Trung cấp</option>
-                  <option value='upper-intermediate'>Trung cao cấp</option>
-                  <option value='advanced'>Cao cấp</option>
-                  <option value='proficiency'>Thành thạo</option>
+                  <option value='A1'>A1 - Mất gốc</option>
+                  <option value='A2'>A2 - Sơ cấp</option>
+                  <option value='B1'>B1 - Trung cấp thấp</option>
+                  <option value='B2'>B2 - Trung cấp cao</option>
+                  <option value='C1'>C1 - Nâng cao</option>
                 </select>
                 {errors.input_level && (
                   <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
@@ -354,6 +395,12 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                   placeholder='Nhập số điện thoại'
                 />
+                {errors.parent_phone && (
+                  <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
+                    <AlertCircle size={14} />
+                    {errors.parent_phone}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -369,7 +416,8 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
             </button>
             <button
               type='submit'
-              className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2'
+              className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'
+              disabled={Object.values(errors).some(Boolean)}
             >
               <Save size={16} />
               Lưu thay đổi

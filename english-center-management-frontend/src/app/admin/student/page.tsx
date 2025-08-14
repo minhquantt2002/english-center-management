@@ -207,7 +207,16 @@ const StudentManagement = () => {
                 <p className='text-gray-500 text-sm font-medium'>
                   Mới tháng này
                 </p>
-                <p className='text-2xl font-bold text-gray-900 mt-1'>12</p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'> {
+                  students.filter((s) => {
+                    const createdDate = new Date(s.created_at);
+                    const now = new Date();
+                    return (
+                      createdDate.getMonth() === now.getMonth() &&
+                      createdDate.getFullYear() === now.getFullYear()
+                    );
+                  }).length
+                }</p>
               </div>
               <div className='w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center'>
                 <Plus className='w-6 h-6 text-purple-600' />
@@ -317,8 +326,8 @@ const StudentManagement = () => {
                       {student.input_level === 'beginner'
                         ? 'Sơ cấp'
                         : student.input_level === 'intermediate'
-                        ? 'Trung cấp'
-                        : 'Cao cấp'}
+                          ? 'Trung cấp'
+                          : 'Cao cấp'}
                     </span>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>

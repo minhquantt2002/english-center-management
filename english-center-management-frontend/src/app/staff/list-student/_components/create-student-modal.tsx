@@ -11,10 +11,11 @@ interface CreateStudentModalProps {
 }
 
 const levels = [
-  { value: 'beginner', label: 'Sơ cấp' },
-  { value: 'elementary', label: 'Cơ bản' },
-  { value: 'intermediate', label: 'Trung cấp' },
-  { value: 'advanced', label: 'Nâng cao' },
+  { value: 'A1', label: 'A1 - Mất gốc' },
+  { value: 'A2', label: 'A2 - Sơ cấp' },
+  { value: 'B1', label: 'B1 - Trung cấp thấp' },
+  { value: 'B2', label: 'B2 - Trung cấp cao' },
+  { value: 'C1', label: 'C1 - Nâng cao' },
 ];
 
 export default function CreateStudentModal({
@@ -28,7 +29,7 @@ export default function CreateStudentModal({
     email: '',
     phone_number: '',
     date_of_birth: '',
-    input_level: 'beginner',
+    input_level: 'A1',
     role_name: 'student',
     parent_name: '',
     parent_phone: '',
@@ -68,15 +69,6 @@ export default function CreateStudentModal({
       newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
     }
 
-    if (!formData.parent_name.trim()) {
-      newErrors.parent_name = 'Tên người liên hệ khẩn cấp là bắt buộc';
-    }
-
-    if (!formData.parent_phone.trim()) {
-      newErrors.parent_phone =
-        'Số điện thoại người liên hệ khẩn cấp là bắt buộc';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -104,7 +96,7 @@ export default function CreateStudentModal({
       email: '',
       phone_number: '',
       date_of_birth: '',
-      input_level: 'beginner',
+      input_level: 'A1',
       parent_name: '',
       role_name: 'student',
       parent_phone: '',
@@ -298,7 +290,7 @@ export default function CreateStudentModal({
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Họ tên <span className='text-red-500'>*</span>
+                  Họ tên
                 </label>
                 <input
                   type='text'
@@ -319,7 +311,7 @@ export default function CreateStudentModal({
 
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Số điện thoại <span className='text-red-500'>*</span>
+                  Số điện thoại
                 </label>
                 <input
                   type='tel'

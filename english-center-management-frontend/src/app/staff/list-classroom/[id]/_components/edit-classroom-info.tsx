@@ -27,7 +27,7 @@ export default function EditClassroomInfoModal({
     course_id: '',
     teacher_id: '',
     room: '',
-    course_level: 'intermediate',
+    course_level: 'B1',
     status: 'active',
     start_date: '',
     end_date: '',
@@ -56,15 +56,11 @@ export default function EditClassroomInfoModal({
   }, [isOpen, getTeachers]);
 
   const courseLevels: { value: CourseLevel; label: string }[] = [
-    { value: 'beginner', label: 'Cơ bản (Beginner)' },
-    { value: 'elementary', label: 'Sơ cấp (Elementary)' },
-    { value: 'intermediate', label: 'Trung cấp (Intermediate)' },
-    {
-      value: 'upper-intermediate',
-      label: 'Trung cao cấp (Upper-Intermediate)',
-    },
-    { value: 'advanced', label: 'Cao cấp (Advanced)' },
-    { value: 'proficiency', label: 'Thành thạo (Proficiency)' },
+    { value: 'A1', label: 'A1 - Mất gốc (TOEIC 0–250)' },
+    { value: 'A2', label: 'A2 - Sơ cấp (TOEIC 250–450)' },
+    { value: 'B1', label: 'B1 - Trung cấp thấp (TOEIC 450–600)' },
+    { value: 'B2', label: 'B2 - Trung cấp cao (TOEIC 600–850)' },
+    { value: 'C1', label: 'C1 - Nâng cao (TOEIC SW 250+)' },
   ];
 
   const timeSlots = [
@@ -227,7 +223,7 @@ export default function EditClassroomInfoModal({
                 Trình độ
               </label>
               <select
-                value={formData.course_level || 'intermediate'}
+                value={formData.course_level || 'B1'}
                 onChange={(e) =>
                   handleInputChange('course_level', e.target.value)
                 }

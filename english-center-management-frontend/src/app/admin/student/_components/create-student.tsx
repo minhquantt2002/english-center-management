@@ -21,7 +21,7 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
     password: '',
     status: 'active',
     date_of_birth: '',
-    input_level: 'beginner',
+    input_level: 'A1',
     address: '',
   });
 
@@ -143,7 +143,7 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
         email: '',
         phone_number: '',
         date_of_birth: '',
-        input_level: 'beginner',
+        input_level: 'A1',
         address: '',
         password: '',
         parent_name: '',
@@ -321,12 +321,11 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                 >
-                  <option value='beginner'>Sơ cấp</option>
-                  <option value='elementary'>Cơ bản</option>
-                  <option value='intermediate'>Trung cấp</option>
-                  <option value='upper-intermediate'>Trung cao cấp</option>
-                  <option value='advanced'>Cao cấp</option>
-                  <option value='proficiency'>Thành thạo</option>
+                  <option value='A1'>A1 - Mất gốc</option>
+                  <option value='A2'>A2 - Sơ cấp</option>
+                  <option value='B1'>B1 - Trung cấp thấp</option>
+                  <option value='B2'>B2 - Trung cấp cao</option>
+                  <option value='C1'>C1 - Nâng cao</option>
                 </select>
               </div>
 

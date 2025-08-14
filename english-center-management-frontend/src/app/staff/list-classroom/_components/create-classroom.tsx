@@ -265,10 +265,11 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                 }
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
               >
-                <option value='beginner'>Sơ cấp</option>
-                <option value='elementary'>Cơ bản</option>
-                <option value='intermediate'>Trung cấp</option>
-                <option value='advanced'>Nâng cao</option>
+                <option value='A1'>A1 - Mất gốc</option>
+                <option value='A2'>A2 - Sơ cấp</option>
+                <option value='B1'>B1 - Trung cấp thấp</option>
+                <option value='B2'>B2 - Trung cấp cao</option>
+                <option value='C1'>C1 - Nâng cao</option>
               </select>
             </div>
 

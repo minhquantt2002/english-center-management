@@ -132,12 +132,11 @@ export interface CourseResponse extends CourseBase {
 export type ClassStatus = 'active' | 'completed' | 'cancelled';
 export type CourseStatus = 'active' | 'upcoming' | 'completed' | 'cancelled';
 export type CourseLevel =
-  | 'beginner'
-  | 'elementary'
-  | 'intermediate'
-  | 'upper-intermediate'
-  | 'advanced'
-  | 'proficiency';
+  | 'A1'  // TOEIC 0–250 (FOUNDATION) - Mất gốc
+  | 'A2'  // TOEIC 250–450 (BEGINNER) - Sơ cấp
+  | 'B1'  // TOEIC 450–600 (CAMP BOMB) - Trung cấp thấp
+  | 'B2'  // TOEIC 600–850 (SUBMARINE) - Trung cấp cao
+  | 'C1'; // TOEIC SW 250+ (MASTER) - Nâng cao kỹ năng Nói/Viết
 
 export interface ClassroomBase {
   class_name: string;

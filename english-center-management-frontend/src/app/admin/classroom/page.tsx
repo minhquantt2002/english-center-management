@@ -82,8 +82,10 @@ const ClassManagement: React.FC = () => {
       await createClassroom(classroomData);
       setShowCreateModal(false);
       await fetchClassrooms(); // Refresh the list
+      alert('Lớp học mới đã được tạo thành công!');
     } catch (err) {
       console.error('Failed to create classroom:', err);
+      alert('Có lỗi xảy ra khi tạo lớp học mới!');
     }
   };
 

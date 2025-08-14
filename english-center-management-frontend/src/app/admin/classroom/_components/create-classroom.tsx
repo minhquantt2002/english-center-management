@@ -23,7 +23,7 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
     class_name: '',
     course_id: '',
     teacher_id: '',
-    course_level: 'beginner',
+    course_level: 'A1',
     status: 'active',
     start_date: '',
     end_date: '',
@@ -128,15 +128,18 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
         class_name: '',
         course_id: '',
         teacher_id: '',
-        course_level: 'beginner',
+        course_level: 'A1',
         status: 'active',
         start_date: '',
         end_date: '',
       });
       setErrors({});
+      // Modal sẽ được đóng bởi component cha sau khi hiển thị thông báo thành công
     } catch (error) {
       console.error('Failed to create classroom:', error);
+      // Chỉ hiển thị lỗi, không đóng modal để user có thể thử lại
     }
+    
   };
 
   const handleClose = () => {
@@ -144,7 +147,7 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
       class_name: '',
       course_id: '',
       teacher_id: '',
-      course_level: 'beginner',
+      course_level: 'A1',
       status: 'active',
       start_date: '',
       end_date: '',
