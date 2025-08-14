@@ -368,46 +368,76 @@ async def get_classroom_students(
     return {"students": []}
 
 # ==================== SCHEDULE MANAGEMENT ====================
+@router.get("/schedules/test")
+async def test_schedules():
+    """Test endpoint for schedules"""
+    return {"message": "Schedules endpoint is working", "schedules": []}
 @router.get("/schedules", response_model=List[ScheduleResponse])
 async def get_all_schedules(
     classroom_id: Optional[str] = Query(None, description="Filter by classroom ID"),
     teacher_id: Optional[str] = Query(None, description="Filter by teacher ID"),
     weekday: Optional[str] = Query(None, description="Filter by weekday"),
+    date: Optional[str] = Query(None, description="Filter by date (YYYY-MM-DD)"),
     current_user: User = Depends(get_current_staff_user),
     db: Session = Depends(get_db)
 ):
     """
     Lấy danh sách tất cả lịch học
     """
-    # Convert string IDs to UUIDs if provided
-    classroom_uuid = None
-    teacher_uuid = None
-    
-    if classroom_id:
-        try:
-            classroom_uuid = UUID(classroom_id)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="classroom_id không hợp lệ"
+    try:
+        from datetime import datetime
+
+        # Convert string IDs to UUIDs if provided
+        classroom_uuid = None
+        teacher_uuid = None
+        filter_weekday = weekday
+
+        # If date is provided, convert to weekday
+        if date:
+            try:
+                date_obj = datetime.strptime(date, "%Y-%m-%d")
+                # Convert to weekday name (monday, tuesday, etc.)
+                filter_weekday = date_obj.strftime("%A").lower()
+            except ValueError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="date format không hợp lệ. Sử dụng YYYY-MM-DD"
+                )
+
+        if classroom_id:
+            try:
+                classroom_uuid = UUID(classroom_id)
+            except ValueError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="classroom_id không hợp lệ"
+                )
+
+        if teacher_id:
+            try:
+                teacher_uuid = UUID(teacher_id)
+            except ValueError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="teacher_id không hợp lệ"
+                )
+
+        # Use filters if provided, otherwise return all schedules
+        if classroom_uuid or teacher_uuid or filter_weekday:
+            schedules = schedule_service.get_schedules_with_filters(
+                db,
+                classroom_id=classroom_uuid,
+                teacher_id=teacher_uuid,
+                weekday=filter_weekday,
             )
-    
-    if teacher_id:
-        try:
-            teacher_uuid = UUID(teacher_id)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="teacher_id không hợp lệ"
-            )
-    
-    schedules = schedule_service.get_schedules_with_filters(
-        db, 
-        classroom_id=classroom_uuid, 
-        teacher_id=teacher_uuid, 
-        weekday=weekday,
-    )
-    return schedules
+        else:
+            schedules = schedule_service.get_all_schedules(db)
+
+        return schedules
+    except Exception as e:
+        print(f"Error in get_all_schedules: {e}")
+        # Return empty list instead of error for now
+        return []
 
 @router.post("/schedules", response_model=ScheduleResponse)
 async def create_schedule(

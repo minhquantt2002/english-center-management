@@ -141,14 +141,27 @@ def get_schedules_by_teacher_weekday(db: Session, teacher_id: UUID, weekday: str
         .all()
 
 def get_schedules_with_filters(
-    db: Session, 
+    db: Session,
+    classroom_id: Optional[UUID] = None,
     teacher_id: Optional[UUID] = None,
+    weekday: Optional[str] = None,
 ) -> List[Schedule]:
     """Get schedules with optional filters"""
     query = db.query(Schedule).options(joinedload(Schedule.classroom))
-    
+
+    if classroom_id:
+        query = query.filter(Schedule.class_id == classroom_id)
+
     if teacher_id:
         query = query.join(Class, Schedule.class_id == Class.id)\
                     .filter(Class.teacher_id == teacher_id)
-    
-    return query.all() 
+
+    if weekday:
+        try:
+            weekday_enum = Weekday(weekday.lower())
+            query = query.filter(Schedule.weekday == weekday_enum)
+        except ValueError:
+            # Invalid weekday, return empty result
+            return []
+
+    return query.all()

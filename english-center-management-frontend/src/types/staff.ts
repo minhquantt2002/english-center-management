@@ -280,6 +280,7 @@ export interface GetSchedulesQuery {
   classroom_id?: string;
   teacher_id?: string;
   weekday?: Weekday;
+  date?: string; // Format: YYYY-MM-DD
 }
 
 export interface GetInvoicesQuery {

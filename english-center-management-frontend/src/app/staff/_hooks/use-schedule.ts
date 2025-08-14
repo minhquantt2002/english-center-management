@@ -26,6 +26,7 @@ export const useStaffScheduleApi = () => {
           if (filters.teacher_id)
             params.append('teacher_id', filters.teacher_id);
           if (filters.weekday) params.append('weekday', filters.weekday);
+          if (filters.date) params.append('date', filters.date);
           if (params.toString()) {
             endpoint += `?${params.toString()}`;
           }

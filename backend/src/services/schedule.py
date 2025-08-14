@@ -127,11 +127,13 @@ def count_schedules_by_classroom(db: Session, class_id: UUID) -> int:
     return schedule_crud.count_schedules_by_classroom(db, class_id)
 
 def get_schedules_with_filters(
-    db: Session, 
+    db: Session,
+    classroom_id: Optional[UUID] = None,
     teacher_id: Optional[UUID] = None,
+    weekday: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """Get schedules with optional filters"""
-    schedules = schedule_crud.get_schedules_with_filters(db, teacher_id)
+    schedules = schedule_crud.get_schedules_with_filters(db, classroom_id, teacher_id, weekday)
     return [_schedule_to_dict(schedule) for schedule in schedules]
 
 def get_upcoming_schedules_by_teacher(db: Session, teacher_id: UUID):

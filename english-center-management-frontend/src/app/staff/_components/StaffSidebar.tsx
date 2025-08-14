@@ -11,6 +11,7 @@ import {
   School,
   Receipt,
   ChevronRight,
+  Calendar,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -53,6 +54,12 @@ const StaffSidebar: React.FC = () => {
       href: '/staff/list-classroom',
       icon: <School className='w-5 h-5' />,
       description: 'Quản lý lớp học',
+    },
+    {
+      name: 'Thời khóa biểu',
+      href: '/staff/schedule',
+      icon: <Calendar className='w-5 h-5' />,
+      description: 'Xem lịch học hàng tuần',
     },
   ];
 
