@@ -1,15 +1,15 @@
 from sqlalchemy import Column, String, Text, Date, DateTime, Integer
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from src.database import Base
+from src.utils.database import UUID
 import uuid
 
 
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(UUID(), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)
@@ -26,10 +26,8 @@ class User(Base):
     experience_years = Column(Integer)
     
     # Student specific fields
-    level = Column(String(50))  # A1, A2, B1, B2, C1, C2
     parent_name = Column(String(255))
     parent_phone = Column(String(20))
-    student_id = Column(String(50))
     status = Column(String(50), default="active")  # active, inactive, suspended, graduated
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())

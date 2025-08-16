@@ -1,17 +1,17 @@
 from sqlalchemy import Column, String, Date, ForeignKey, Text, DateTime, Integer
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from src.database import Base
+from src.utils.database import UUID
 import uuid
 
 
 class Exam(Base):
     __tablename__ = "exams"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(UUID(), primary_key=True, default=uuid.uuid4, index=True)
     exam_name = Column(String(255), nullable=False)
-    class_id = Column(UUID(as_uuid=True), ForeignKey("classes.id", ondelete='CASCADE'), nullable=False)
+    class_id = Column(UUID(), ForeignKey("classes.id", ondelete='CASCADE'), nullable=False)
     exam_date = Column(Date)
     description = Column(Text) 
     duration = Column(Integer)  

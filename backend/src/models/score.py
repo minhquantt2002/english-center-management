@@ -1,17 +1,17 @@
 from sqlalchemy import Column, Float, DateTime, ForeignKey, String, Text
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from src.database import Base
+from src.utils.database import UUID
 import uuid
 
 
 class Score(Base):
     __tablename__ = "scores"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    student_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
-    exam_id = Column(UUID(as_uuid=True), ForeignKey("exams.id", ondelete='CASCADE'), nullable=False)
+    id = Column(UUID(), primary_key=True, default=uuid.uuid4, index=True)
+    student_id = Column(UUID(), ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    exam_id = Column(UUID(), ForeignKey("exams.id", ondelete='CASCADE'), nullable=False)
     
     listening = Column(Float)
     reading = Column(Float)

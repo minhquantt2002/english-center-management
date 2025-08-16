@@ -1,18 +1,18 @@
 from sqlalchemy import Column, Text, DateTime, ForeignKey, Integer, String
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from src.database import Base
+from src.utils.database import UUID
 import uuid
 
 
 class Feedback(Base):
     __tablename__ = "feedbacks"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    teacher_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
-    student_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
-    class_id = Column(UUID(as_uuid=True), ForeignKey("classes.id", ondelete='CASCADE'), nullable=False)
+    id = Column(UUID(), primary_key=True, default=uuid.uuid4, index=True)
+    teacher_id = Column(UUID(), ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    student_id = Column(UUID(), ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    class_id = Column(UUID(), ForeignKey("classes.id", ondelete='CASCADE'), nullable=False)
     content = Column(Text)
     rating = Column(Integer)
     feedback_type = Column(String(50)) 
