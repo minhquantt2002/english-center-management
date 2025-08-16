@@ -518,7 +518,7 @@ export default function ViewStudentModal({
                 <span>Thành tích học tập</span>
               </div>
             </button>
-            <button
+            {/* <button
               onClick={() => setActiveTab('debt')}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'debt'
@@ -530,7 +530,7 @@ export default function ViewStudentModal({
                 <DollarSign className='w-4 h-4' />
                 <span>Công nợ</span>
               </div>
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -538,7 +538,7 @@ export default function ViewStudentModal({
         <div className='p-6'>
           {activeTab === 'details' && renderDetailsTab()}
           {activeTab === 'achievements' && renderAchievementsTab()}
-          {activeTab === 'debt' && renderDebtTab()}
+          {/* {activeTab === 'debt' && renderDebtTab()} */}
         </div>
 
         {/* Footer */}

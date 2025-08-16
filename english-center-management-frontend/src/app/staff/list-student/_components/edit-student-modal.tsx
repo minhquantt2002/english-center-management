@@ -52,7 +52,7 @@ export default function EditStudentModal({
     email: '',
     phone_number: '',
     date_of_birth: '',
-    input_level: 'beginner',
+    input_level: 'A1',
     bio: '',
     parent_name: '',
     parent_phone: '',
@@ -78,7 +78,7 @@ export default function EditStudentModal({
         date_of_birth: student.date_of_birth
         ? new Date(student.date_of_birth).toISOString().split('T')[0] // yyyy-mm-dd
         : '',
-        input_level: student.input_level || 'beginner',
+        input_level: student.input_level || 'A1',
         bio: student.bio || '',
         parent_name: student.parent_name || '',
         parent_phone: student.parent_phone || '',
@@ -300,9 +300,20 @@ export default function EditStudentModal({
                 />
               </div>
 
-              {/* <div>
-                <label className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-1'>
-                  <BookOpen className='w-4 h-4' />
+
+            </div>
+          </div>
+
+          {/* Academic Information */}
+          <div>
+            <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
+              <BookOpen className='w-5 h-5 text-teal-600' />
+              Thông tin học tập
+            </h3>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              {/* Level */}
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Trình độ
                 </label>
                 <select
@@ -318,7 +329,24 @@ export default function EditStudentModal({
                     </option>
                   ))}
                 </select>
-              </div> */}
+              </div>
+
+              {/* Enrollment Status */}
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
+                  Trạng thái đăng ký
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
+                >
+                  <option value='active'>Đang học</option>
+                  <option value='inactive'>Tạm nghỉ</option>
+                  <option value='suspended'>Tạm đình chỉ</option>
+                  <option value='graduated'>Đã tốt nghiệp</option>
+                </select>
+              </div>
             </div>
           </div>
 
