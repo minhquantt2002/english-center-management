@@ -46,12 +46,16 @@ const ClassDetailPage: React.FC = () => {
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case 'beginner':
-        return 'bg-green-100 text-green-800';
-      case 'intermediate':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'advanced':
+      case 'A1':
         return 'bg-red-100 text-red-800';
+      case 'A2':
+        return 'bg-orange-100 text-orange-800';
+      case 'B1':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'B2':
+        return 'bg-blue-100 text-blue-800';
+      case 'C1':
+        return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -308,15 +312,11 @@ const ClassDetailPage: React.FC = () => {
                           classData.course_level
                         )}`}
                       >
-                        {classData.course_level === 'beginner' && 'Cơ bản'}
-                        {classData.course_level === 'intermediate' &&
-                          'Trung cấp'}
-                        {classData.course_level === 'advanced' && 'Nâng cao'}
-                        {classData.course_level === 'elementary' && 'Sơ cấp'}
-                        {classData.course_level === 'upper-intermediate' &&
-                          'Trung cao'}
-                        {classData.course_level === 'proficiency' &&
-                          'Thành thạo'}
+                        {classData.course_level === 'A1' && 'A1 - Mất gốc'}
+                        {classData.course_level === 'A2' && 'A2 - Sơ cấp'}
+                        {classData.course_level === 'B1' && 'B1 - Trung cấp thấp'}
+                        {classData.course_level === 'B2' && 'B2 - Trung cấp cao'}
+                        {classData.course_level === 'C1' && 'C1 - Nâng cao'}
                       </span>
                       <span
                         className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(

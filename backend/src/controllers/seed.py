@@ -150,9 +150,8 @@ def generate_fake_users():
             "parent_name": f"Phụ huynh Nguyễn Văn {chr(64+i)}",
             "parent_phone": f"0901234{590+i:03d}",
             "status": random.choice(["active", "active", "active", "inactive", "graduated"]),
-            "input_level": random.choice(["beginner", "elementary", "intermediate", "upper-intermediate", "advanced"])
+            "input_level": random.choice(["A1", "A2", "B1", "B2", "C1"])
         })
-    
     return admin_users + staff_users + teacher_users + student_users
 
 def generate_fake_courses():

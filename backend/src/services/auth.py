@@ -44,10 +44,8 @@ def register_user(db: Session, user_data) -> Optional[User]:
         address=getattr(user_data, 'address', None),
         education=getattr(user_data, 'education', None),
         experience_years=getattr(user_data, 'experience_years', None),
-        level=getattr(user_data, 'level', None),
         parent_name=getattr(user_data, 'parent_name', None),
-        parent_phone=getattr(user_data, 'parent_phone', None),
-        student_id=getattr(user_data, 'student_id', None)
+        parent_phone=getattr(user_data, 'parent_phone', None)
     )
     
     # Create the user

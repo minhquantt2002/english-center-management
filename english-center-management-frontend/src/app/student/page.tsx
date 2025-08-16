@@ -134,9 +134,11 @@ const StudentDashboard = () => {
   // Get level display name
   const getLevelDisplayName = (level: string) => {
     const levelMap: { [key: string]: string } = {
-      beginner: 'Sơ cấp',
-      intermediate: 'Trung cấp',
-      advanced: 'Cao cấp',
+      A1: 'A1 - Mất gốc',
+      A2: 'A2 - Sơ cấp',
+      B1: 'B1 - Trung cấp thấp',
+      B2: 'B2 - Trung cấp cao',
+      C1: 'C1 - Nâng cao',
     };
     return levelMap[level] || level;
   };
@@ -408,7 +410,7 @@ const StudentDashboard = () => {
                     <span className='text-sm text-gray-600'>Cấp độ</span>
                     <span className='font-semibold text-gray-900'>
                       {getLevelDisplayName(
-                        studentProfile?.level || 'intermediate'
+                        studentProfile?.input_level || 'A2'
                       )}
                     </span>
                   </div>

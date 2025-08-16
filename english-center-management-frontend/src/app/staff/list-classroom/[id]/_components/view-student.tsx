@@ -57,14 +57,16 @@ export default function ViewStudentModal({
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case 'beginner':
-        return 'bg-green-100 text-green-800';
-      case 'intermediate':
-        return 'bg-blue-100 text-blue-800';
-      case 'advanced':
-        return 'bg-purple-100 text-purple-800';
-      case 'upper-intermediate':
+      case 'A1':
+        return 'bg-red-100 text-red-800';
+      case 'A2':
         return 'bg-orange-100 text-orange-800';
+      case 'B1':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'B2':
+        return 'bg-blue-100 text-blue-800';
+      case 'C1':
+        return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -72,14 +74,16 @@ export default function ViewStudentModal({
 
   const getLevelText = (level: string) => {
     switch (level) {
-      case 'beginner':
-        return 'Cơ bản';
-      case 'intermediate':
-        return 'Trung cấp';
-      case 'advanced':
-        return 'Nâng cao';
-      case 'upper-intermediate':
-        return 'Trung cấp cao';
+      case 'A1':
+        return 'A1 - Mất gốc';
+      case 'A2':
+        return 'A2 - Sơ cấp';
+      case 'B1':
+        return 'B1 - Trung cấp thấp';
+      case 'B2':
+        return 'B2 - Trung cấp cao';
+      case 'C1':
+        return 'C1 - Nâng cao';
       default:
         return level;
     }

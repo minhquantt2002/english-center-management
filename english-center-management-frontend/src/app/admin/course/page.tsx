@@ -53,14 +53,18 @@ const CourseManagement = () => {
 
   const getLevel = (level: string) => {
     switch (level) {
-      case 'elementary':
-        return 'Cơ bản';
-      case 'intermediate':
-        return 'Trung cấp';
-      case 'advanced':
-        return 'Nâng cao';
+      case 'A1':
+        return 'A1 - Mất gốc';
+      case 'A2':
+        return 'A2 - Sơ cấp';
+      case 'B1':
+        return 'B1 - Trung cấp thấp';
+      case 'B2':
+        return 'B2 - Trung cấp cao';
+      case 'C1':
+        return 'C1 - Nâng cao';
       default:
-        return 'Cơ bản';
+        return 'A2 - Sơ cấp';
     }
   };
 
@@ -68,7 +72,7 @@ const CourseManagement = () => {
   const coursesWithDisplay = courses.map((course: CourseResponse) => ({
     ...course,
     name: course.course_name || 'Không có tên',
-    displayLevel: getLevel(course.level || 'elementary'),
+    displayLevel: getLevel(course.level || 'A2'),
     displayDuration: course.total_weeks
       ? `${course.total_weeks} tuần`
       : 'Không có thông tin',

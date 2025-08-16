@@ -152,12 +152,16 @@ export default function StudentManagement() {
   };
 
   const getLevelBadgeColor = (level: string) => {
-    switch (level.toLowerCase()) {
-      case 'beginner':
-        return 'bg-green-100 text-green-700 border-green-200';
-      case 'intermediate':
+    switch (level) {
+      case 'A1':
+        return 'bg-red-100 text-red-700 border-red-200';
+      case 'A2':
+        return 'bg-orange-100 text-orange-700 border-orange-200';
+      case 'B1':
+        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'B2':
         return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'advanced':
+      case 'C1':
         return 'bg-purple-100 text-purple-700 border-purple-200';
       default:
         return 'bg-gray-100 text-gray-700 border-gray-200';

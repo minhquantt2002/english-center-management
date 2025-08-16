@@ -244,11 +244,11 @@ export default function EditStudentModal({
                   }`}
                 >
                   <option value=''>Chọn trình độ</option>
-                  <option value='beginner'>Cơ bản</option>
-                  <option value='elementary'>Sơ cấp</option>
-                  <option value='intermediate'>Trung cấp</option>
-                  <option value='upper-intermediate'>Trung cấp cao</option>
-                  <option value='advanced'>Nâng cao</option>
+                  <option value='A1'>A1 - Mất gốc</option>
+                  <option value='A2'>A2 - Sơ cấp</option>
+                  <option value='B1'>B1 - Trung cấp thấp</option>
+                  <option value='B2'>B2 - Trung cấp cao</option>
+                  <option value='C1'>C1 - Nâng cao</option>
                   <option value='proficiency'>Thành thạo</option>
                 </select>
                 {errors.input_level && (

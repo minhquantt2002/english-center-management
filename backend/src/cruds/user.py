@@ -44,7 +44,6 @@ def create_user(db: Session, user_data: UserCreate, hashed_password: str) -> Use
         address=user_data.address,
         education=user_data.education,
         experience_years=user_data.experience_years,
-        level=user_data.level,
         parent_name=user_data.parent_name,
         parent_phone=user_data.parent_phone,
         status=user_data.status

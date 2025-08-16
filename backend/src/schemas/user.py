@@ -36,10 +36,8 @@ class UserBase(BaseSchema):
     education: Optional[str] = None
     experience_years: Optional[int] = None
     
-    level: Optional[str] = None
     parent_name: Optional[str] = None
     parent_phone: Optional[str] = None
-    student_id: Optional[str] = None
     status: Optional[StudentStatus] = StudentStatus.ACTIVE
 
 
@@ -61,10 +59,8 @@ class UserUpdate(BaseSchema):
     education: Optional[str] = None
     experience_years: Optional[int] = None
 
-    level: Optional[str] = None
     parent_name: Optional[str] = None
     parent_phone: Optional[str] = None
-    student_id: Optional[str] = None
     status: Optional[StudentStatus] = None
 
 

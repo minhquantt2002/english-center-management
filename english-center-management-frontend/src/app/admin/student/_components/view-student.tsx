@@ -40,11 +40,15 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
 
   const getLevelBadgeColor = (level: string) => {
     switch (level) {
-      case 'beginner':
-        return 'bg-green-100 text-green-700';
-      case 'intermediate':
+      case 'A1':
+        return 'bg-red-100 text-red-700';
+      case 'A2':
+        return 'bg-orange-100 text-orange-700';
+      case 'B1':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'B2':
         return 'bg-blue-100 text-blue-700';
-      case 'advanced':
+      case 'C1':
         return 'bg-purple-100 text-purple-700';
       default:
         return 'bg-gray-100 text-gray-700';
@@ -224,10 +228,17 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
                       student.input_level
                     )}`}
                   >
-                    {(student.input_level || 'beginner')
-                      .charAt(0)
-                      .toUpperCase() +
-                      (student.input_level || 'beginner').slice(1)}
+                    {student.input_level === 'A1'
+                      ? 'A1 - Mất gốc'
+                      : student.input_level === 'A2'
+                        ? 'A2 - Sơ cấp'
+                        : student.input_level === 'B1'
+                          ? 'B1 - Trung cấp thấp'
+                          : student.input_level === 'B2'
+                            ? 'B2 - Trung cấp cao'
+                            : student.input_level === 'C1'
+                              ? 'C1 - Nâng cao'
+                              : student.input_level || 'A2'}
                   </span>
                 </div>
               </div>

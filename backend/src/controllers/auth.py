@@ -49,10 +49,8 @@ async def register(
         address=user.address,
         education=user.education,
         experience_years=user.experience_years,
-        level=user.level,
         parent_name=user.parent_name,
         parent_phone=user.parent_phone,
-        student_id=user.student_id,
         created_at=user.created_at
     )
 
@@ -121,10 +119,8 @@ async def get_current_user_info(
         address=user.address,
         education=user.education,
         experience_years=user.experience_years,
-        level=user.level,
         parent_name=user.parent_name,
         parent_phone=user.parent_phone,
-        student_id=user.student_id,
         created_at=user.created_at
     )
 
@@ -169,10 +165,8 @@ async def update_current_user_info(
         address=updated_user.address,
         education=updated_user.education,
         experience_years=updated_user.experience_years,
-        level=updated_user.level,
         parent_name=updated_user.parent_name,
         parent_phone=updated_user.parent_phone,
-        student_id=updated_user.student_id,
         created_at=updated_user.created_at
     )
 
@@ -273,8 +267,7 @@ async def register_fake_data(db: Session = Depends(get_db)):
             "bio": "Học sinh lớp 10, muốn học tiếng Anh để thi đại học",
             "date_of_birth": date(2006, 9, 12),
             "phone_number": "0901234573",
-            "input_level": "Beginner",
-            "level": "A1",
+            "input_level": "A1",
             "parent_name": "Nguyễn Văn Bố",
             "parent_phone": "0901234574",
             "student_id": "STU001"
@@ -287,8 +280,7 @@ async def register_fake_data(db: Session = Depends(get_db)):
             "bio": "Sinh viên năm 3, cần học TOEIC để ra trường",
             "date_of_birth": date(2002, 11, 8),
             "phone_number": "0901234575",
-            "input_level": "Intermediate", 
-            "level": "B1",
+            "input_level": "B1",
             "parent_name": "Trần Văn Mẹ",
             "parent_phone": "0901234576",
             "student_id": "STU002"
@@ -301,8 +293,7 @@ async def register_fake_data(db: Session = Depends(get_db)):
             "bio": "Nhân viên văn phòng, muốn cải thiện tiếng Anh giao tiếp",
             "date_of_birth": date(1995, 6, 20),
             "phone_number": "0901234577",
-            "input_level": "Elementary",
-            "level": "A2",
+            "input_level": "A2",
             "parent_name": "Lê Văn Ba",
             "parent_phone": "0901234578",
             "student_id": "STU003"

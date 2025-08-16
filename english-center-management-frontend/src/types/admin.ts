@@ -37,10 +37,8 @@ export interface UserUpdate {
   address?: string;
   education?: string;
   experience_years?: number;
-  level?: string;
   parent_name?: string;
   parent_phone?: string;
-  student_id?: string;
   status?: StudentStatus;
 }
 

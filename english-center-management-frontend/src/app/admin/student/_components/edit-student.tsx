@@ -330,7 +330,7 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                 {errors.input_level && (
                   <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
                     <AlertCircle size={14} />
-                    {errors.level}
+                    {errors.input_level}
                   </p>
                 )}
               </div>
