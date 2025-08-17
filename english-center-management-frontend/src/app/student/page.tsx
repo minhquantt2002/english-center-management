@@ -172,23 +172,6 @@ const StudentDashboard = () => {
 
   return (
     <>
-      {/* Header */}
-      <div className='mb-8'>
-        <div className='flex items-center gap-4 mb-4'>
-          <div className='w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg'>
-            <GraduationCap className='w-6 h-6 text-white' />
-          </div>
-          <div>
-            <h1 className='text-3xl font-bold text-gray-900'>
-              Chào mừng trở lại, {studentProfile?.name}!
-            </h1>
-            <p className='text-gray-600 mt-1'>
-              Đây là tổng quan về quá trình học tập của bạn hôm nay
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Stats Cards */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
         <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200'>
@@ -409,9 +392,7 @@ const StudentDashboard = () => {
                   <div className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'>
                     <span className='text-sm text-gray-600'>Cấp độ</span>
                     <span className='font-semibold text-gray-900'>
-                      {getLevelDisplayName(
-                        studentProfile?.input_level || 'A2'
-                      )}
+                      {getLevelDisplayName(studentProfile?.input_level || 'A2')}
                     </span>
                   </div>
 

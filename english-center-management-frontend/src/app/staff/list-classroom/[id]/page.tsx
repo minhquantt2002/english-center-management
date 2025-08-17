@@ -25,6 +25,25 @@ import StudyingScheduleModal from './_components/studying-schedule';
 import EditClassroomInfoModal from './_components/edit-classroom-info';
 import { ClassroomResponse, StudentResponse } from '../../../../types/staff';
 
+export function formatDays(days: string[]) {
+  const mapDays = {
+    monday: '2',
+    tuesday: '3',
+    wednesday: '4',
+    thursday: '5',
+    friday: '6',
+    saturday: '7',
+    sunday: 'CN',
+  };
+
+  const formatted = days.map((d, index) => {
+    if (d === 'monday') return 'Thứ ' + mapDays[d];
+    return mapDays[d];
+  });
+
+  return formatted.join(', ');
+}
+
 export default function ClassroomDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -34,11 +53,6 @@ export default function ClassroomDetailPage() {
     error: classroomError,
     getClassroomById,
   } = useStaffClassroomApi();
-  const {
-    loading: studentLoading,
-    error: studentError,
-    getStudents,
-  } = useStaffStudentApi();
 
   const [classroom, setClassroom] = useState<ClassroomResponse | null>(null);
   const [students, setStudents] = useState<StudentResponse[]>([]);
@@ -60,10 +74,7 @@ export default function ClassroomDetailPage() {
         // Fetch classroom details
         const classroomData = await getClassroomById(classroomId);
         setClassroom(classroomData);
-
-        // Fetch students for this classroom
-        const studentsData = await getStudents();
-        setStudents(studentsData);
+        setStudents(classroomData.enrollments.map((v) => v.student));
       } catch (err) {
         console.error('Error loading classroom data:', err);
       } finally {
@@ -72,8 +83,7 @@ export default function ClassroomDetailPage() {
     };
 
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [classroomId, getClassroomById, getStudents]);
+  }, [classroomId, getClassroomById]);
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
@@ -163,7 +173,7 @@ export default function ClassroomDetailPage() {
     }
   };
 
-  if (isLoading || classroomLoading || studentLoading) {
+  if (isLoading || classroomLoading) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
         <div className='text-center'>
@@ -174,14 +184,14 @@ export default function ClassroomDetailPage() {
     );
   }
 
-  if (classroomError || studentError) {
+  if (classroomError) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
         <div className='text-center'>
           <h2 className='text-2xl font-bold text-gray-900 mb-4'>
             Có lỗi xảy ra
           </h2>
-          <p className='text-gray-600 mb-6'>{classroomError || studentError}</p>
+          <p className='text-gray-600 mb-6'>{classroomError}</p>
           <button
             onClick={() => router.back()}
             className='bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-lg transition-colors'
@@ -229,7 +239,7 @@ export default function ClassroomDetailPage() {
 
           <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 relative'>
             <div className='flex items-center justify-between mb-4'>
-              <h1 className='text-3xl font-bold text-gray-900'>
+              <h1 className='text-2xl font-bold text-gray-900'>
                 {classroom.class_name}
               </h1>
               <div className='flex items-center space-x-3'>
@@ -244,13 +254,13 @@ export default function ClassroomDetailPage() {
                     ? 'Đang hoạt động'
                     : 'Không hoạt động'}
                 </span>
-                <button
+                {/* <button
                   onClick={() => setIsEditClassroomModalOpen(true)}
                   className='p-2 text-gray-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors'
                   title='Chỉnh sửa thông tin lớp học'
                 >
                   <Settings className='w-5 h-5' />
-                </button>
+                </button> */}
               </div>
             </div>
 
@@ -270,9 +280,7 @@ export default function ClassroomDetailPage() {
                 <div>
                   <p className='text-sm text-gray-600'>Lịch học</p>
                   <p className='font-medium text-gray-900'>
-                    {classroom.schedules
-                      ?.map((schedule) => schedule.weekday)
-                      .join(', ') || 'Chưa có lịch học'}
+                    {formatDays(classroom.schedules.map((v) => v.weekday))}
                   </p>
                 </div>
               </div>
@@ -292,8 +300,7 @@ export default function ClassroomDetailPage() {
                 <div>
                   <p className='text-sm text-gray-600'>Sĩ số</p>
                   <p className='font-medium text-gray-900'>
-                    {/* {classroom.current_students}/{classroom.max_students || 20}{' '} */}
-                    100 học viên
+                    {classroom.enrollments.length} học viên
                   </p>
                 </div>
               </div>
@@ -443,12 +450,6 @@ export default function ClassroomDetailPage() {
                             className='text-cyan-600 hover:text-cyan-800 transition-colors'
                           >
                             <Eye className='w-4 h-4' />
-                          </button>
-                          <button
-                            onClick={() => handleEditStudent(student)}
-                            className='text-blue-600 hover:text-blue-800 transition-colors'
-                          >
-                            <Edit className='w-4 h-4' />
                           </button>
                           <button className='text-red-600 hover:text-red-800 transition-colors'>
                             <Trash2 className='w-4 h-4' />

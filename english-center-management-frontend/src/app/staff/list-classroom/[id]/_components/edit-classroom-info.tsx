@@ -34,6 +34,7 @@ export default function EditClassroomInfoModal({
   });
 
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [teachers, setTeachers] = useState<TeacherResponse[]>([]);
   const { getTeachers } = useStaffTeacherApi();
@@ -83,12 +84,33 @@ export default function EditClassroomInfoModal({
     { value: 'Sun', label: 'Chủ nhật' },
   ];
 
+  const rooms = [
+    'Phòng 101',
+    'Phòng 102',
+    'Phòng 103',
+    'Phòng 201',
+    'Phòng 202',
+    'Phòng 203',
+    'Phòng 301',
+    'Phòng 302',
+  ];
+
   useEffect(() => {
     if (classroom) {
       setFormData({
         ...classroom,
         teacher: { ...classroom.teacher },
       });
+
+      // Fill schedule data if available
+      if (classroom.schedules && classroom.schedules.length > 0) {
+        const schedule = classroom.schedules[0];
+        setSelectedTimeSlot(`${schedule.start_time} - ${schedule.end_time}`);
+
+        // Extract days from schedules
+        const days = classroom.schedules.map((s) => s.weekday);
+        setSelectedDays(days);
+      }
     }
   }, [classroom]);
 
@@ -112,12 +134,6 @@ export default function EditClassroomInfoModal({
       const newDays = prev.includes(day)
         ? prev.filter((d) => d !== day)
         : [...prev, day];
-
-      // Update form data
-      setFormData((prev) => ({
-        ...prev,
-      }));
-
       return newDays;
     });
   };
@@ -132,6 +148,7 @@ export default function EditClassroomInfoModal({
           name: teacher.name,
           email: teacher.email || '',
         },
+        teacher_id: teacherId,
       }));
     }
   };
@@ -151,6 +168,14 @@ export default function EditClassroomInfoModal({
       newErrors.room = 'Vui lòng chọn phòng học';
     }
 
+    if (selectedDays.length === 0) {
+      newErrors.scheduleDays = 'Vui lòng chọn ít nhất một ngày học';
+    }
+
+    if (!selectedTimeSlot) {
+      newErrors.start_time = 'Vui lòng chọn thời gian học';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -162,10 +187,21 @@ export default function EditClassroomInfoModal({
       return;
     }
 
+    // Create updated schedules
+    const [startTime, endTime] = selectedTimeSlot.split(' - ');
+    const updatedSchedules = selectedDays.map((day) => ({
+      id:
+        classroom.schedules?.find((s) => s.weekday === day)?.id || `new-${day}`,
+      weekday: day,
+      start_time: startTime,
+      end_time: endTime,
+    }));
+
     const updatedClassroom: ClassroomResponse = {
       ...classroom,
       ...formData,
       teacher: formData.teacher!,
+      schedules: updatedSchedules,
     };
 
     onSave(updatedClassroom);
@@ -174,6 +210,8 @@ export default function EditClassroomInfoModal({
 
   const handleClose = () => {
     setErrors({});
+    setSelectedDays([]);
+    setSelectedTimeSlot('');
     onClose();
   };
 
@@ -184,7 +222,7 @@ export default function EditClassroomInfoModal({
       <div className='bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto'>
         {/* Header */}
         <div className='flex items-center justify-between p-6 border-b border-gray-200'>
-          <h2 className='text-xl font-semibold text-gray-900'>
+          <h2 className='text-2xl font-bold text-gray-900 tracking-tight'>
             Chỉnh sửa thông tin lớp học
           </h2>
           <button
@@ -199,7 +237,7 @@ export default function EditClassroomInfoModal({
         <form onSubmit={handleSubmit} className='p-6 space-y-6'>
           {/* Class Name */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-semibold text-gray-800 mb-2'>
               Tên lớp học
             </label>
             <input
@@ -219,7 +257,7 @@ export default function EditClassroomInfoModal({
           {/* Level and Teacher */}
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <label className='block text-sm font-semibold text-gray-800 mb-2'>
                 Trình độ
               </label>
               <select
@@ -238,7 +276,7 @@ export default function EditClassroomInfoModal({
             </div>
 
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <label className='block text-sm font-semibold text-gray-800 mb-2'>
                 Giáo viên
               </label>
               <select
@@ -263,20 +301,17 @@ export default function EditClassroomInfoModal({
 
           {/* Schedule */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-semibold text-gray-800 mb-3'>
               Lịch học
             </label>
             <div className='space-y-4'>
               {/* Days */}
               <div>
-                <label className='block text-sm text-gray-600 mb-2'>
-                  Ngày học
-                </label>
-                <div className='grid grid-cols-4 gap-2'>
+                <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
                   {daysOfWeek.map((day) => (
                     <label
                       key={day.value}
-                      className='flex items-center space-x-2 cursor-pointer'
+                      className='flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors'
                     >
                       <input
                         type='checkbox'
@@ -284,7 +319,9 @@ export default function EditClassroomInfoModal({
                         onChange={() => handleDayToggle(day.value)}
                         className='rounded border-gray-300 text-cyan-600 focus:ring-cyan-500'
                       />
-                      <span className='text-sm text-gray-700'>{day.label}</span>
+                      <span className='text-sm font-medium text-gray-700'>
+                        {day.label}
+                      </span>
                     </label>
                   ))}
                 </div>
@@ -297,14 +334,12 @@ export default function EditClassroomInfoModal({
 
               {/* Time */}
               <div>
-                <label className='block text-sm text-gray-600 mb-2'>
+                <label className='block text-sm font-semibold text-gray-800 mb-2'>
                   Thời gian
                 </label>
                 <select
-                  value={formData.schedules?.[0]?.start_time || ''}
-                  onChange={(e) =>
-                    handleInputChange('start_time', e.target.value)
-                  }
+                  value={selectedTimeSlot}
+                  onChange={(e) => setSelectedTimeSlot(e.target.value)}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
                     errors.start_time ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -325,31 +360,62 @@ export default function EditClassroomInfoModal({
             </div>
           </div>
 
-          {/* Room and Max Students */}
+          {/* Room */}
+          <div>
+            <label className='block text-sm font-semibold text-gray-800 mb-2'>
+              Phòng học
+            </label>
+            <select
+              value={formData.room || ''}
+              onChange={(e) => handleInputChange('room', e.target.value)}
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
+                errors.room ? 'border-red-500' : 'border-gray-300'
+              }`}
+            >
+              <option value=''>Chọn phòng học</option>
+              {rooms.map((room) => (
+                <option key={room} value={room}>
+                  {room}
+                </option>
+              ))}
+            </select>
+            {errors.room && (
+              <p className='mt-1 text-sm text-red-600'>{errors.room}</p>
+            )}
+          </div>
+
+          {/* Course Dates */}
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Phòng học
+              <label className='block text-sm font-semibold text-gray-800 mb-2'>
+                Ngày bắt đầu
               </label>
-              <select
-                value={formData.room || ''}
-                onChange={(e) => handleInputChange('room', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
-                  errors.room ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                <option value=''>Chọn phòng học</option>
-                {classroom?.room}
-              </select>
-              {errors.room && (
-                <p className='mt-1 text-sm text-red-600'>{errors.room}</p>
-              )}
+              <input
+                type='date'
+                value={formData.start_date || ''}
+                onChange={(e) =>
+                  handleInputChange('start_date', e.target.value)
+                }
+                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
+              />
+            </div>
+
+            <div>
+              <label className='block text-sm font-semibold text-gray-800 mb-2'>
+                Ngày kết thúc
+              </label>
+              <input
+                type='date'
+                value={formData.end_date || ''}
+                onChange={(e) => handleInputChange('end_date', e.target.value)}
+                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
+              />
             </div>
           </div>
 
           {/* Status */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-semibold text-gray-800 mb-2'>
               Trạng thái
             </label>
             <select
@@ -359,6 +425,8 @@ export default function EditClassroomInfoModal({
             >
               <option value='active'>Đang hoạt động</option>
               <option value='inactive'>Không hoạt động</option>
+              <option value='completed'>Đã hoàn thành</option>
+              <option value='pending'>Chờ bắt đầu</option>
             </select>
           </div>
 
@@ -367,13 +435,13 @@ export default function EditClassroomInfoModal({
             <button
               type='button'
               onClick={handleClose}
-              className='px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors'
+              className='px-6 py-2.5 text-gray-700 font-medium bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors'
             >
               Hủy
             </button>
             <button
               type='submit'
-              className='px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg flex items-center space-x-2 transition-colors'
+              className='px-6 py-2.5 bg-cyan-500 hover:bg-cyan-600 text-white font-medium rounded-lg flex items-center space-x-2 transition-colors'
             >
               <Save className='w-4 h-4' />
               <span>Lưu thay đổi</span>

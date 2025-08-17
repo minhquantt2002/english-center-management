@@ -523,8 +523,7 @@ async def get_classroom_schedules(
             detail="classroom_id không hợp lệ"
         )
     
-    # TODO: Implement logic to get classroom schedules
-    return {"schedules": []}
+    return schedule_service.get_schedules_by_classroom(db=db, class_id=classroom_id)
 
 # ==================== INVOICE MANAGEMENT ====================
 @router.post("/invoices")

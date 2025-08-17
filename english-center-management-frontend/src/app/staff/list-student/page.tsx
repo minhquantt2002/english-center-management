@@ -192,23 +192,15 @@ export default function StudentManagement() {
   return (
     <>
       {/* Header */}
-      <div className='mb-8'>
+      <div className='mb-4'>
         <div className='flex items-center gap-4 mb-4'>
-          <div className='w-12 h-12 bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg'>
-            <Users className='w-6 h-6 text-white' />
-          </div>
-          <div>
-            <h1 className='text-3xl font-bold text-gray-900'>
-              Danh sách học viên
-            </h1>
-            <p className='text-gray-600 mt-1'>
-              Quản lý và tổ chức hồ sơ học viên của trung tâm
-            </p>
-          </div>
+          <h1 className='text-3xl font-bold text-gray-900'>
+            Danh sách học viên
+          </h1>
         </div>
 
         {/* Stats Cards */}
-        <div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-8'>
+        <div className='grid grid-cols-1 md:grid-cols-4 gap-6'>
           <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
             <div className='flex items-center justify-between'>
               <div>
@@ -281,7 +273,7 @@ export default function StudentManagement() {
       </div>
 
       {/* Filters and Search */}
-      <div className='bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-8'>
+      <div className='mb-4'>
         <div className='flex flex-col lg:flex-row gap-4'>
           {/* Search */}
           <div className='flex-1 relative'>

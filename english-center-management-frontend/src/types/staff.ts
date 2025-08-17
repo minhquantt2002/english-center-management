@@ -18,10 +18,10 @@ export type UserRole = 'admin' | 'staff' | 'teacher' | 'student';
 export type StudentStatus = 'active' | 'inactive' | 'suspended' | 'graduated';
 export type ClassStatus = 'active' | 'completed' | 'cancelled';
 export type CourseLevel =
-  | 'A1'  // TOEIC 0–250 (FOUNDATION) - Mất gốc
-  | 'A2'  // TOEIC 250–450 (BEGINNER) - Sơ cấp
-  | 'B1'  // TOEIC 450–600 (CAMP BOMB) - Trung cấp thấp
-  | 'B2'  // TOEIC 600–850 (SUBMARINE) - Trung cấp cao
+  | 'A1' // TOEIC 0–250 (FOUNDATION) - Mất gốc
+  | 'A2' // TOEIC 250–450 (BEGINNER) - Sơ cấp
+  | 'B1' // TOEIC 450–600 (CAMP BOMB) - Trung cấp thấp
+  | 'B2' // TOEIC 600–850 (SUBMARINE) - Trung cấp cao
   | 'C1'; // TOEIC SW 250+ (MASTER) - Nâng cao kỹ năng Nói/Viết
 
 // ==================== STUDENT MANAGEMENT ====================
@@ -338,6 +338,7 @@ export interface EnrollmentNested {
   status: string;
   class_id?: string;
   classroom: ClassroomNested;
+  student: StudentResponse;
 }
 
 export interface ExamBase {

@@ -1,16 +1,21 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { X, Calendar, MapPin, User, Edit, Plus, Trash2 } from 'lucide-react';
-import CreateScheduleModal from './create-schedule';
-import { useStaffScheduleApi } from '../../../_hooks';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
-  ClassroomResponse,
-  ScheduleResponse,
-  ScheduleCreate,
-  ScheduleUpdate,
-  Weekday,
-} from '../../../../../types/staff';
+  X,
+  Calendar,
+  MapPin,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Eye,
+  XCircle,
+  BookOpen,
+} from 'lucide-react';
+import CreateScheduleModal from './create-schedule-modal';
+import { useStaffScheduleApi } from '../../../_hooks';
+import { ClassroomResponse } from '../../../../../types/staff';
 
 interface StudyingScheduleModalProps {
   isOpen: boolean;
@@ -18,185 +23,190 @@ interface StudyingScheduleModalProps {
   classroom: ClassroomResponse | null;
 }
 
-const dayNames = {
-  monday: 'Thứ 2',
-  tuesday: 'Thứ 3',
-  wednesday: 'Thứ 4',
-  thursday: 'Thứ 5',
-  friday: 'Thứ 6',
-  saturday: 'Thứ 7',
-  sunday: 'Chủ nhật',
-};
-
-const timeSlots = [
-  { id: '1', startTime: '07:00', endTime: '08:30', label: '07:00 - 08:30' },
-  { id: '2', startTime: '08:30', endTime: '10:00', label: '08:30 - 10:00' },
-  { id: '3', startTime: '10:00', endTime: '11:30', label: '10:00 - 11:30' },
-  { id: '4', startTime: '14:00', endTime: '15:30', label: '14:00 - 15:30' },
-  { id: '5', startTime: '15:30', endTime: '17:00', label: '15:30 - 17:00' },
-  { id: '6', startTime: '17:00', endTime: '18:30', label: '17:00 - 18:30' },
-  { id: '7', startTime: '18:30', endTime: '20:00', label: '18:30 - 20:00' },
-  { id: '8', startTime: '20:00', endTime: '21:30', label: '20:00 - 21:30' },
-];
-
-const rooms = [
-  'Phòng 101',
-  'Phòng 102',
-  'Phòng 103',
-  'Phòng 201',
-  'Phòng 202',
-  'Phòng 203',
-  'Phòng Lab 1',
-  'Phòng Lab 2',
-  'Online',
-];
-
 export default function StudyingScheduleModal({
   isOpen,
   onClose,
   classroom,
 }: StudyingScheduleModalProps) {
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingSession, setEditingSession] = useState<any | null>(null);
+  const { loading, getClassroomSchedules, createSchedule } =
+    useStaffScheduleApi();
+  const [currentWeek, setCurrentWeek] = useState(new Date()); // January 22, 2024
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
+  const [schedules, setSchedules] = useState([]);
   const [isCreateScheduleOpen, setIsCreateScheduleOpen] = useState(false);
 
-  const {
-    loading,
-    error,
-    getClassroomSchedules,
-    createSchedule,
-    updateSchedule,
-    deleteSchedule,
-  } = useStaffScheduleApi();
+  const fetchSchedules = async () => {
+    try {
+      const schedulesData = await getClassroomSchedules(classroom.id);
+      setSchedules(schedulesData);
+    } catch (err) {
+      console.error('Error fetching schedules:', err);
+    }
+  };
 
   useEffect(() => {
-    if (classroom && isOpen) {
-      loadSchedules();
-    }
+    fetchSchedules();
+  }, [getClassroomSchedules]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [classroom, isOpen]);
+  // Time slots for the timetable - Updated to match your actual schedule times
+  const timeSlots = [
+    { id: '1', startTime: '07:00', endTime: '08:30', label: '07:00 - 08:30' },
+    { id: '2', startTime: '08:30', endTime: '10:00', label: '08:30 - 10:00' },
+    { id: '3', startTime: '10:00', endTime: '12:00', label: '10:00 - 12:00' }, // Updated for 10-12 class
+    { id: '4', startTime: '14:00', endTime: '16:00', label: '14:00 - 16:00' }, // Updated for 14-16 class
+    { id: '5', startTime: '16:00', endTime: '18:00', label: '16:00 - 18:00' }, // Updated for 16-18 classes
+    { id: '6', startTime: '18:00', endTime: '20:00', label: '18:00 - 20:00' }, // Updated for 18-20 class
+    { id: '7', startTime: '20:00', endTime: '21:30', label: '20:00 - 21:30' },
+  ];
 
-  const loadSchedules = async () => {
-    if (!classroom?.id) return;
+  const dayNames = {
+    Monday: 'Thứ 2',
+    Tuesday: 'Thứ 3',
+    Wednesday: 'Thứ 4',
+    Thursday: 'Thứ 5',
+    Friday: 'Thứ 6',
+    Saturday: 'Thứ 7',
+    Sunday: 'Chủ nhật',
+  };
 
-    try {
-      const response = await getClassroomSchedules(classroom.id);
-      const scheduleSessions = response.schedules.map(
-        (schedule: ScheduleResponse) => ({
-          id: schedule.id,
-          day: schedule.weekday,
-          timeSlot: {
-            startTime: schedule.start_time,
-            endTime: schedule.end_time,
-          },
-          room: schedule.classroom?.class_name || 'Chưa phân công',
-          teacher: classroom.teacher?.name || 'Chưa phân công',
-          status: 'scheduled',
-          notes: '',
-        })
+  // Get week range for current week
+  const getWeekRange = (date) => {
+    const start = new Date(date);
+    const dayOfWeek = start.getDay();
+    const diff = start.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust for Sunday
+    start.setDate(diff);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+
+    const formatDate = (d) => {
+      return d.toLocaleDateString('vi-VN', { month: 'long', day: 'numeric' });
+    };
+
+    return `${formatDate(start)} - ${formatDate(end)}, ${start.getFullYear()}`;
+  };
+
+  // Get week number
+  const getWeekNumber = (date) => {
+    const start = new Date(date.getFullYear(), 0, 1);
+    const days = Math.floor(
+      (date.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)
+    );
+    return Math.ceil((days + start.getDay() + 1) / 7);
+  };
+
+  // Navigate between weeks
+  const navigateWeek = (direction) => {
+    const newDate = new Date(currentWeek);
+    newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+    setCurrentWeek(newDate);
+  };
+
+  // Get schedules for current week
+  const weekSchedules = useMemo(() => {
+    const startOfWeek = new Date(currentWeek);
+    const dayOfWeek = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    startOfWeek.setDate(diff);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    function getDateOfWeekday(weekday) {
+      const weekdayMap = {
+        monday: 1,
+        tuesday: 2,
+        wednesday: 3,
+        thursday: 4,
+        friday: 5,
+        saturday: 6,
+        sunday: 0,
+      };
+      const dayIdx = weekdayMap[weekday.toLowerCase()];
+      const date = new Date(startOfWeek);
+      date.setDate(
+        startOfWeek.getDate() + ((dayIdx + 7 - startOfWeek.getDay()) % 7)
       );
-      setSessions(scheduleSessions);
-    } catch (err) {
-      console.error('Error loading schedules:', err);
+      return date;
     }
-  };
 
-  const handleCreateSchedule = () => {
-    setIsCreateScheduleOpen(true);
-  };
+    return schedules
+      .map((sch) => ({
+        ...sch,
+        _date: getDateOfWeekday(sch.weekday),
+      }))
+      .filter((schedule) => {
+        // Kiểm tra tuần hiện tại có nằm trong khoảng thời gian của lớp học không
+        const classStartDate = new Date(schedule.classroom.start_date);
+        const classEndDate = new Date(schedule.classroom.end_date);
 
-  const handleScheduleCreated = async (newSchedule: any) => {
-    if (!classroom?.id) return;
+        // Kiểm tra xem tuần hiện tại có giao nhau với thời gian của lớp học không
+        const weekInRange =
+          startOfWeek <= classEndDate && endOfWeek >= classStartDate;
 
-    try {
-      const scheduleData: ScheduleCreate = {
-        class_id: classroom.id,
-        weekday: newSchedule.day as Weekday,
-        start_time: newSchedule.timeSlot.startTime,
-        end_time: newSchedule.timeSlot.endTime,
-      };
+        return (
+          schedule._date >= startOfWeek &&
+          schedule._date <= endOfWeek &&
+          weekInRange
+        );
+      });
+  }, [currentWeek, schedules]);
 
-      await createSchedule(scheduleData);
-      await loadSchedules(); // Reload schedules
-      setIsCreateScheduleOpen(false);
-    } catch (err) {
-      console.error('Error creating schedule:', err);
-    }
-  };
+  // Helper function to check if two time ranges overlap or match
+  const timeRangesMatch = (scheduleStart, scheduleEnd, slotStart, slotEnd) => {
+    // Convert time strings to minutes for easier comparison
+    const timeToMinutes = (timeStr) => {
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      return hours * 60 + minutes;
+    };
 
-  const handleCreateScheduleClose = () => {
-    setIsCreateScheduleOpen(false);
-  };
+    const schedStartMin = timeToMinutes(scheduleStart);
+    const schedEndMin = timeToMinutes(scheduleEnd);
+    const slotStartMin = timeToMinutes(slotStart);
+    const slotEndMin = timeToMinutes(slotEnd);
 
-  const handleEditSession = (session: any) => {
-    setEditingSession(session);
-    setIsEditing(true);
-  };
-
-  const handleSaveEdit = async () => {
-    if (!editingSession) return;
-
-    try {
-      const scheduleData: ScheduleUpdate = {
-        weekday: editingSession.day as Weekday,
-        start_time: editingSession.timeSlot.startTime,
-        end_time: editingSession.timeSlot.endTime,
-      };
-
-      await updateSchedule(editingSession.id, scheduleData);
-      await loadSchedules(); // Reload schedules
-      setEditingSession(null);
-      setIsEditing(false);
-    } catch (err) {
-      console.error('Error updating schedule:', err);
-    }
-  };
-
-  const handleDeleteSession = async (sessionId: string) => {
-    try {
-      await deleteSchedule(sessionId);
-      await loadSchedules(); // Reload schedules
-    } catch (err) {
-      console.error('Error deleting schedule:', err);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'scheduled':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'completed':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 border-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'scheduled':
-        return 'Đã lên lịch';
-      case 'completed':
-        return 'Đã hoàn thành';
-      case 'cancelled':
-        return 'Đã hủy';
-      default:
-        return status;
-    }
+    // Check if the schedule overlaps with the slot
+    return schedStartMin < slotEndMin && schedEndMin > slotStartMin;
   };
 
   // Helper function to get session for a specific day and time slot
-  const getSessionForSlot = (day: string, timeSlot: any) => {
-    return sessions.find(
-      (session) =>
-        session.day === day &&
-        session.timeSlot.startTime === timeSlot.startTime &&
-        session.timeSlot.endTime === timeSlot.endTime
-    );
+  const getSessionForSlot = (day, timeSlot) => {
+    const dayMap = {
+      Monday: 'monday',
+      Tuesday: 'tuesday',
+      Wednesday: 'wednesday',
+      Thursday: 'thursday',
+      Friday: 'friday',
+      Saturday: 'saturday',
+      Sunday: 'sunday',
+    };
+
+    return weekSchedules.find((schedule) => {
+      return (
+        schedule.weekday === dayMap[day] &&
+        timeRangesMatch(
+          schedule.start_time,
+          schedule.end_time,
+          timeSlot.startTime + ':00',
+          timeSlot.endTime + ':00'
+        )
+      );
+    });
+  };
+
+  const formatTime = (timeString) => {
+    return timeString.substring(0, 5); // Remove seconds from HH:MM:SS
+  };
+
+  const handleCreateSchedule = async (scheduleData: any) => {
+    try {
+      await createSchedule(scheduleData);
+      setIsCreateScheduleOpen(false);
+      alert('Lịch học mới đã được tạo thành công!');
+      fetchSchedules();
+    } catch (error) {
+      console.error('Error creating schedule:', error);
+      alert('Có lỗi xảy ra khi tạo lịch học mới!');
+    }
   };
 
   if (!isOpen) return null;
@@ -210,9 +220,6 @@ export default function StudyingScheduleModal({
             <h2 className='text-2xl font-bold text-gray-900'>
               Lịch học - {classroom?.class_name}
             </h2>
-            <p className='text-gray-600 mt-1'>
-              Quản lý lịch học và lịch trình của lớp
-            </p>
           </div>
           <button
             onClick={onClose}
@@ -231,75 +238,65 @@ export default function StudyingScheduleModal({
               <p className='text-gray-600 mt-2'>Đang tải...</p>
             </div>
           )}
-
-          {error && (
-            <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4'>
-              <p>Lỗi: {error}</p>
-            </div>
-          )}
-
-          {/* Class Info */}
-          <div className='bg-gray-50 rounded-lg p-4 mb-6'>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              <div className='flex items-center space-x-3'>
-                <User className='w-5 h-5 text-gray-500' />
-                <div>
-                  <p className='text-sm text-gray-600'>Giáo viên</p>
-                  <p className='font-medium text-gray-900'>
-                    {classroom?.teacher.name}
-                  </p>
-                </div>
-              </div>
-              <div className='flex items-center space-x-3'>
-                <Calendar className='w-5 h-5 text-gray-500' />
-                <div>
-                  <p className='text-sm text-gray-600'>Lịch học</p>
-                  <p className='font-medium text-gray-900'>
-                    {classroom?.schedules?.length
-                      ? `${classroom.schedules.length} buổi học`
-                      : 'Chưa có lịch học'}
-                  </p>
-                </div>
-              </div>
-              <div className='flex items-center space-x-3'>
-                <MapPin className='w-5 h-5 text-gray-500' />
-                <div>
-                  <p className='text-sm text-gray-600'>Phòng học</p>
-                  <p className='font-medium text-gray-900'>
-                    {classroom?.room || 'Chưa phân công'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Add Session Button */}
-          <div className='mb-6'>
-            <button
-              onClick={handleCreateSchedule}
-              disabled={loading}
-              className='bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors font-medium'
-            >
-              <Plus className='w-5 h-5' />
-              <span>Tạo lịch học</span>
-            </button>
-          </div>
-
           {/* Create Schedule Modal */}
           <CreateScheduleModal
+            classId={classroom.id}
             isOpen={isCreateScheduleOpen}
-            onClose={handleCreateScheduleClose}
-            classroom={classroom}
-            onScheduleCreated={handleScheduleCreated}
+            onClose={() => setIsCreateScheduleOpen(false)}
+            onSubmit={handleCreateSchedule}
           />
 
-          {/* Timetable */}
-          <div className='mb-6'>
-            <h3 className='text-lg font-semibold text-gray-900 mb-4'>
-              Thời khóa biểu
-            </h3>
+          {/* Controls */}
+          <div className='flex flex-col sm:flex-row justify-between items-center mb-8 gap-4'>
+            {/* Week Navigation */}
+            <div className='flex items-center gap-4'>
+              <button
+                onClick={() => navigateWeek('prev')}
+                className='p-2 hover:bg-gray-100 rounded-lg transition-colors'
+              >
+                <ChevronLeft className='w-5 h-5' />
+              </button>
 
-            {/* Timetable Grid */}
+              <div className='text-center'>
+                <div className='font-semibold text-gray-900'>
+                  {getWeekRange(currentWeek)}
+                </div>
+                <div className='text-sm text-gray-500'>
+                  Tuần {getWeekNumber(currentWeek)}
+                </div>
+              </div>
+
+              <button
+                onClick={() => navigateWeek('next')}
+                className='p-2 hover:bg-gray-100 rounded-lg transition-colors'
+              >
+                <ChevronRight className='w-5 h-5' />
+              </button>
+            </div>
+
+            <div className='flex space-x-3'>
+              <button
+                onClick={() => setIsCreateScheduleOpen(true)}
+                disabled={loading}
+                className='bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-400 text-white  px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors font-medium'
+              >
+                <Plus className='w-4 h-4' />
+                <span>Tạo lịch học</span>
+              </button>
+
+              {/* Today Button */}
+              <button
+                onClick={() => setCurrentWeek(new Date())}
+                className='bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2'
+              >
+                <Calendar className='w-4 h-4' />
+                Hôm nay
+              </button>
+            </div>
+          </div>
+
+          {/* Timetable */}
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden'>
             <div className='overflow-x-auto'>
               <div className='min-w-[800px]'>
                 {/* Header Row */}
@@ -331,106 +328,32 @@ export default function StudyingScheduleModal({
                       return (
                         <div
                           key={day}
-                          className='p-2 border border-gray-200 min-h-[80px] relative'
+                          className='p-2 border border-gray-200 min-h-[100px] relative'
                         >
                           {session ? (
-                            <div className='h-full'>
-                              {isEditing &&
-                              editingSession?.id === session.id ? (
-                                <div className='space-y-2'>
-                                  <select
-                                    value={editingSession.room}
-                                    onChange={(e) =>
-                                      setEditingSession((prev) =>
-                                        prev
-                                          ? { ...prev, room: e.target.value }
-                                          : null
-                                      )
-                                    }
-                                    className='w-full text-xs px-1 py-1 border border-gray-300 rounded'
-                                  >
-                                    {rooms.map((room) => (
-                                      <option key={room} value={room}>
-                                        {room}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  <select
-                                    value={editingSession.status}
-                                    onChange={(e) =>
-                                      setEditingSession((prev) =>
-                                        prev
-                                          ? {
-                                              ...prev,
-                                              status: e.target.value as any,
-                                            }
-                                          : null
-                                      )
-                                    }
-                                    className='w-full text-xs px-1 py-1 border border-gray-300 rounded'
-                                  >
-                                    <option value='scheduled'>
-                                      Đã lên lịch
-                                    </option>
-                                    <option value='completed'>
-                                      Đã hoàn thành
-                                    </option>
-                                    <option value='cancelled'>Đã hủy</option>
-                                  </select>
-                                  <div className='flex space-x-1'>
-                                    <button
-                                      onClick={handleSaveEdit}
-                                      disabled={loading}
-                                      className='text-xs bg-green-500 text-white px-1 py-1 rounded disabled:bg-gray-400'
-                                    >
-                                      ✓
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        setIsEditing(false);
-                                        setEditingSession(null);
-                                      }}
-                                      className='text-xs bg-gray-500 text-white px-1 py-1 rounded'
-                                    >
-                                      ✕
-                                    </button>
+                            <div className='h-full bg-blue-50 border-l-4 border-blue-500 rounded p-2'>
+                              <div className='h-full flex flex-col'>
+                                <div className='flex items-start justify-between mb-2'>
+                                  <div className='text-xs font-semibold text-blue-900 line-clamp-2'>
+                                    {session.classroom?.class_name || 'Lớp học'}
                                   </div>
+                                  <button
+                                    onClick={() => setSelectedSchedule(session)}
+                                    className='text-blue-600 hover:text-blue-800 text-xs ml-1 flex-shrink-0'
+                                  >
+                                    <Eye className='w-3 h-3' />
+                                  </button>
                                 </div>
-                              ) : (
-                                <div className='h-full flex flex-col'>
-                                  <div className='text-xs font-medium text-gray-900 mb-1'>
-                                    {session.teacher}
-                                  </div>
-                                  <div className='text-xs text-gray-600 mb-1'>
-                                    {session.room}
-                                  </div>
-                                  <span
-                                    className={`text-xs px-1 py-0.5 rounded-full ${getStatusColor(
-                                      session.status
-                                    )}`}
-                                  >
-                                    {getStatusText(session.status)}
-                                  </span>
-                                  <div className='absolute top-1 right-1 flex space-x-1'>
-                                    <button
-                                      onClick={() => handleEditSession(session)}
-                                      disabled={loading}
-                                      className='text-blue-600 hover:text-blue-800 text-xs disabled:text-gray-400'
-                                    >
-                                      <Edit className='w-3 h-3' />
-                                    </button>
-                                    <button
-                                      onClick={() =>
-                                        handleDeleteSession(session.id)
-                                      }
-                                      disabled={loading}
-                                      className='text-red-600 hover:text-red-800 text-xs disabled:text-gray-400'
-                                    >
-                                      <Trash2 className='w-3 h-3' />
-                                    </button>
-                                  </div>
+                                <div className='text-xs text-blue-700 mb-1 flex items-center gap-1'>
+                                  <MapPin className='w-3 h-3' />
+                                  {session.classroom?.room || 'N/A'}
                                 </div>
-                              )}
+                                <div className='text-xs text-blue-600 flex items-center gap-1'>
+                                  <Clock className='w-3 h-3' />
+                                  {formatTime(session.start_time)} -{' '}
+                                  {formatTime(session.end_time)}
+                                </div>
+                              </div>
                             </div>
                           ) : (
                             <div className='h-full flex items-center justify-center text-gray-400 text-xs'>
@@ -446,43 +369,89 @@ export default function StudyingScheduleModal({
             </div>
           </div>
 
-          {/* Legend */}
-          <div className='bg-gray-50 rounded-lg p-4'>
-            <h4 className='font-medium text-gray-900 mb-3'>Chú thích</h4>
-            <div className='flex flex-wrap gap-4'>
-              <div className='flex items-center space-x-2'>
-                <div className='w-4 h-4 bg-blue-100 border border-blue-200 rounded'></div>
-                <span className='text-sm text-gray-700'>Đã lên lịch</span>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <div className='w-4 h-4 bg-green-100 border border-green-200 rounded'></div>
-                <span className='text-sm text-gray-700'>Đã hoàn thành</span>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <div className='w-4 h-4 bg-red-100 border border-red-200 rounded'></div>
-                <span className='text-sm text-gray-700'>Đã hủy</span>
+          {/* Schedule Detail Modal */}
+          {selectedSchedule && (
+            <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+              <div className='bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4'>
+                {/* Header */}
+                <div className='flex items-center justify-between p-6 border-b border-gray-200'>
+                  <div>
+                    <h2 className='text-2xl font-bold text-gray-900'>
+                      Chi tiết lịch học
+                    </h2>
+                    <p className='text-gray-600 mt-1'>
+                      Thông tin chi tiết về buổi học
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setSelectedSchedule(null)}
+                    className='text-gray-400 hover:text-gray-600 transition-colors'
+                  >
+                    <XCircle className='w-6 h-6' />
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className='p-6'>
+                  <div className='space-y-4'>
+                    <div className='flex items-center space-x-3'>
+                      <BookOpen className='w-5 h-5 text-gray-500' />
+                      <div>
+                        <p className='text-sm text-gray-600'>Tên lớp</p>
+                        <p className='font-medium text-gray-900'>
+                          {selectedSchedule.classroom?.class_name || 'Lớp học'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className='flex items-center space-x-3'>
+                      <Clock className='w-5 h-5 text-gray-500' />
+                      <div>
+                        <p className='text-sm text-gray-600'>Thời gian</p>
+                        <p className='font-medium text-gray-900'>
+                          {formatTime(selectedSchedule.start_time)} -{' '}
+                          {formatTime(selectedSchedule.end_time)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className='flex items-center space-x-3'>
+                      <Calendar className='w-5 h-5 text-gray-500' />
+                      <div>
+                        <p className='text-sm text-gray-600'>Ngày</p>
+                        <p className='font-medium text-gray-900'>
+                          {Object.entries(dayNames).find(
+                            ([k, v]) =>
+                              k.toLowerCase() === selectedSchedule.weekday
+                          )?.[1] || selectedSchedule.weekday}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className='flex items-center space-x-3'>
+                      <MapPin className='w-5 h-5 text-gray-500' />
+                      <div>
+                        <p className='text-sm text-gray-600'>Phòng học</p>
+                        <p className='font-medium text-gray-900'>
+                          {selectedSchedule.classroom?.room || 'Chưa xác định'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className='flex items-center justify-end p-6 border-t border-gray-200 bg-gray-50'>
+                  <button
+                    onClick={() => setSelectedSchedule(null)}
+                    className='px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'
+                  >
+                    Đóng
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className='flex items-center justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50'>
-          <button
-            onClick={onClose}
-            className='px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'
-          >
-            Đóng
-          </button>
-          <button
-            onClick={() => {
-              console.log('Saving schedule changes:', sessions);
-              onClose();
-            }}
-            className='px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors'
-          >
-            Lưu thay đổi
-          </button>
+          )}
         </div>
       </div>
     </div>

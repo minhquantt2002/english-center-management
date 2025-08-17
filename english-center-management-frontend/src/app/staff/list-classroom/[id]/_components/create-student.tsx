@@ -110,7 +110,7 @@ export default function AssignStudentModal({
 
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-      <div className='bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto'>
+      <div className='bg-white rounded-lg shadow-xl max-w-5xl w-full mx-4  max-h-[90vh] overflow-y-auto'>
         {/* Header */}
         <div className='flex items-center justify-between p-6 border-b border-gray-200'>
           <div className='flex items-center space-x-3'>
@@ -133,7 +133,7 @@ export default function AssignStudentModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className='p-6 space-y-6'>
+        <form onSubmit={handleSubmit} className='h-full p-6 space-y-6'>
           {/* Search */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>
@@ -185,7 +185,7 @@ export default function AssignStudentModal({
                   : 'Không có học viên nào có thể thêm'}
               </div>
             ) : (
-              <div className='space-y-2 max-h-64 overflow-y-auto'>
+              <div className='grid grid-cols-3 gap-2 overflow-y-auto'>
                 {filteredStudents.map((student) => (
                   <div
                     key={student.id}
@@ -223,11 +223,6 @@ export default function AssignStudentModal({
                             )}
                           </div>
                         </div>
-                      </div>
-                      <div className='text-right'>
-                        <span className='text-sm text-gray-600'>
-                          {student.id}
-                        </span>
                       </div>
                     </div>
                   </div>

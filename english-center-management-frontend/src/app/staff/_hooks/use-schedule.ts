@@ -8,6 +8,7 @@ import {
   DeleteScheduleResponse,
   ClassroomSchedulesResponse,
 } from '../../../types/staff';
+import { ScheduleNested } from '../../../types/student';
 
 export const useStaffScheduleApi = () => {
   const [loading, setLoading] = useState(false);
@@ -106,7 +107,7 @@ export const useStaffScheduleApi = () => {
   );
 
   const getClassroomSchedules = useCallback(
-    async (classroomId: string): Promise<ClassroomSchedulesResponse> => {
+    async (classroomId: string): Promise<ScheduleResponse[]> => {
       setLoading(true);
       setError(null);
       try {

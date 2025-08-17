@@ -95,6 +95,7 @@ class TeacherUpdate(BaseSchema):
 
 # Student specific schemas
 class StudentBase(BaseSchema):
+    id: UUID
     name: str
     email: EmailStr
     input_level: Optional[str] = None
@@ -105,6 +106,7 @@ class StudentBase(BaseSchema):
     phone_number: Optional[str] = None
     date_of_birth: Optional[date] = None 
     address: Optional[str] = None 
+    created_at: datetime
 
 
 class StudentCreate(StudentBase):

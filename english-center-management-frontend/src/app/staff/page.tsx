@@ -154,23 +154,6 @@ const Dashboard = () => {
 
   return (
     <>
-      {/* Header */}
-      <div className='mb-8'>
-        <div className='flex items-center gap-4 mb-4'>
-          <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg'>
-            <Users className='w-6 h-6 text-white' />
-          </div>
-          <div>
-            <h1 className='text-3xl font-bold text-gray-900'>
-              Chào mừng trở lại, Staff!
-            </h1>
-            <p className='text-gray-600 mt-1'>
-              Đây là tổng quan về hoạt động của trung tâm hôm nay
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Stats Cards */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
         {statsData.map((stat, index) => (

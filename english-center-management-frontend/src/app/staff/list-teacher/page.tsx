@@ -110,11 +110,8 @@ export default function TeacherManagement() {
   return (
     <>
       {/* Header */}
-      <div className='mb-8'>
+      <div className='mb-4'>
         <div className='flex items-center gap-4 mb-4'>
-          <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg'>
-            <GraduationCap className='w-6 h-6 text-white' />
-          </div>
           <div>
             <h1 className='text-3xl font-bold text-gray-900'>
               Danh sách giáo viên
@@ -123,7 +120,7 @@ export default function TeacherManagement() {
         </div>
 
         {/* Stats Cards */}
-        <div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-8'>
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 '>
           <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
             <div className='flex items-center justify-between'>
               <div>
@@ -136,19 +133,6 @@ export default function TeacherManagement() {
               </div>
               <div className='w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center'>
                 <GraduationCap className='w-6 h-6 text-green-600' />
-              </div>
-            </div>
-          </div>
-
-          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
-            <div className='flex items-center justify-between'>
-              <div>
-                <p className='text-gray-500 text-sm font-medium'>
-                  Đang giảng dạy
-                </p>
-              </div>
-              <div className='w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center'>
-                <BookOpen className='w-6 h-6 text-blue-600' />
               </div>
             </div>
           </div>
@@ -188,7 +172,7 @@ export default function TeacherManagement() {
       </div>
 
       {/* Filters and Search */}
-      <div className='bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-8'>
+      <div className='rounded-xl border border-gray-100 mb-4'>
         <div className='flex flex-col lg:flex-row gap-4'>
           {/* Search */}
           <div className='flex-1 relative'>
