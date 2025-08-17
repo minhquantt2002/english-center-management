@@ -22,6 +22,7 @@ import {
   StudentCreate,
   StudentUpdate,
 } from '../../../types/staff';
+import { Trash2 } from 'lucide-react';
 
 export default function StudentManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,7 +34,7 @@ export default function StudentManagement() {
   const [students, setStudents] = useState<StudentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { getStudents, createStudent, updateStudent } = useStaffStudentApi();
+  const { getStudents, createStudent, updateStudent, deleteStudent } = useStaffStudentApi();
 
   // Fetch students on component mount
   useEffect(() => {
@@ -122,6 +123,18 @@ export default function StudentManagement() {
     setSelectedStudent(studentProfile);
     setIsViewModalOpen(true);
   };
+  const handleDeleteStudent = async (studentId: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa học viên này?')) {
+      try {
+        await deleteStudent(studentId);
+        await fetchStudents(); // Refresh the list
+        alert('Học viên đã được xóa thành công!');
+      } catch (error) {
+        console.error('Error deleting student:', error);
+        alert('Có lỗi xảy ra khi xóa học viên!');
+      }
+    }
+  };
 
   const handleEditStudent = (student: StudentResponse) => {
     setSelectedStudent(student);
@@ -144,7 +157,7 @@ export default function StudentManagement() {
         return 'bg-green-100 text-green-800 border-green-200';
       case 'inactive':
         return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'suspended':
+      case 'graduated':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -179,6 +192,7 @@ export default function StudentManagement() {
   const statusLabels = {
     active: 'Đang học',
     inactive: 'Tạm nghỉ',
+    graduated: 'Đã tốt nghiệp',
   };
 
   const getInitials = (name: string) => {
@@ -391,6 +405,13 @@ export default function StudentManagement() {
                         title='Chỉnh sửa'
                       >
                         <Edit className='w-4 h-4' />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteStudent(student.id)}
+                        className='text-red-600 hover:text-red-900 p-1 rounded-lg hover:bg-red-50 transition-colors'
+                        title='Xóa'
+                      >
+                        <Trash2 className='w-4 h-4' />
                       </button>
                     </div>
                   </td>

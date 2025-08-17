@@ -155,6 +155,7 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
       course_id: formData.course_id,
       teacher_id: formData.teacher_id,
       status: formData.status,
+      room: formData.room,
       start_date: formData.start_date,
       end_date: formData.end_date,
       schedules: schedules.map((sch) => ({

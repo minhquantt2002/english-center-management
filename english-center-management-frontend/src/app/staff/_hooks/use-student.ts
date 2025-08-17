@@ -86,6 +86,20 @@ export const useStaffStudentApi = () => {
     },
     []
   );
+  const deleteStudent = useCallback(async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await api.delete(`/staff/students/${id}`);
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const getAvailableStudents = useCallback(async (): Promise<
     StudentResponse[]
@@ -150,6 +164,7 @@ export const useStaffStudentApi = () => {
     getStudents,
     createStudent,
     updateStudent,
+    deleteStudent,
     getAvailableStudents,
     getStudentAchievements,
     getStudentInvoices,

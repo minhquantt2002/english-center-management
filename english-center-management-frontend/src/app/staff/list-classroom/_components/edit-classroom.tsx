@@ -172,13 +172,20 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
     if (!validateForm()) {
       return;
     }
-    const updatedClassroom: Partial<ClassroomUpdate> & { schedules: any[] } = {
+    const updatedClassroom: Partial<ClassroomUpdate> & { schedules: any[],id: string } = {
       ...formData,
       schedules: schedules.map((sch) => ({
         weekday: sch.weekday,
         start_time: sch.start_time,
         end_time: sch.end_time,
       })),
+      room: formData.room,
+      status: formData.status,
+      teacher_id: formData.teacher_id,
+      course_id: formData.course_id,
+      class_name: formData.class_name,
+      course_level: formData.course_level,
+      id: classroom.id,
     };
     onSave(updatedClassroom);
     handleClose();

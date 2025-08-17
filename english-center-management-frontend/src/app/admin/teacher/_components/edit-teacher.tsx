@@ -114,6 +114,31 @@ export default function EditTeacherModal({
   };
 
   const handleInputChange = (field: keyof TeacherUpdate, value: any) => {
+    if (field === 'date_of_birth') {
+      const selectedDate = new Date(value);
+      const today = new Date();
+      const minBirthDate = new Date(
+        today.getFullYear() - 18,
+        today.getMonth(),
+        today.getDate()
+      );
+      if (selectedDate > today) {
+        setErrors((prev) => ({
+          ...prev,
+          date_of_birth: 'Ngày sinh không được vượt quá ngày hiện tại',
+        }));
+      } else if (selectedDate > minBirthDate) {
+        setErrors((prev) => ({
+          ...prev,
+          date_of_birth: 'Giáo viên phải đủ 18 tuổi',
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          date_of_birth: undefined,
+        }));
+      }
+    }
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -160,9 +185,8 @@ export default function EditTeacherModal({
                 type='text'
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.name ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder='Nhập họ và tên'
               />
               {errors.name && (
@@ -179,9 +203,8 @@ export default function EditTeacherModal({
                 type='email'
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder='Nhập email'
               />
               {errors.email && (
@@ -200,9 +223,8 @@ export default function EditTeacherModal({
                 onChange={(e) =>
                   handleInputChange('phone_number', e.target.value)
                 }
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.phone_number ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.phone_number ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder='Nhập số điện thoại'
               />
               {errors.phone_number && (
@@ -220,13 +242,12 @@ export default function EditTeacherModal({
                 <Calendar className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
                 <input
                   type='date'
-                  value={formData.date_of_birth?.split('T')[0]}
+                  value={formData.date_of_birth}
                   onChange={(e) =>
                     handleInputChange('date_of_birth', e.target.value)
                   }
-                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.date_of_birth ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.date_of_birth ? 'border-red-500' : 'border-gray-300'
+                    }`}
                 />
               </div>
               {errors.date_of_birth && (
@@ -265,9 +286,8 @@ export default function EditTeacherModal({
                 onChange={(e) =>
                   handleInputChange('specialization', e.target.value)
                 }
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.specialization ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.specialization ? 'border-red-500' : 'border-gray-300'
+                  }`}
               >
                 {specializations.map((spec) => (
                   <option key={spec.value} value={spec.value}>
@@ -290,9 +310,8 @@ export default function EditTeacherModal({
               <select
                 value={formData.education}
                 onChange={(e) => handleInputChange('education', e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.education ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.education ? 'border-red-500' : 'border-gray-300'
+                  }`}
               >
                 {qualifications.map((qual) => (
                   <option key={qual.value} value={qual.value}>
