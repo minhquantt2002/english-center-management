@@ -5,14 +5,15 @@ import { Plus, Clock, Users, MapPin, School, Calendar, RefreshCw } from 'lucide-
 import { useStaffScheduleApi, useStaffClassroomApi } from '../_hooks';
 import { ScheduleResponse, ClassroomResponse } from '../../../types/staff';
 import CreateClassroomModal from '../list-classroom/_components/create-classroom';
-import { WeeklyScheduleGrid, CreateScheduleModal } from './_components';
+import { CreateScheduleModal } from './_components';
 
 const SchedulePage: React.FC = () => {
   const [schedules, setSchedules] = useState<ScheduleResponse[]>([]);
   const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCreateScheduleModal, setShowCreateScheduleModal] = useState(false);
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+
+  const [isLoading, setIsLoading] = useState(true);
 
   const { getSchedules, createSchedule } = useStaffScheduleApi();
   const { getClassrooms, createClassroom } = useStaffClassroomApi();
@@ -31,30 +32,23 @@ const SchedulePage: React.FC = () => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    // Refetch data when view mode changes
-    fetchData();
-  }, [viewMode]);
+
 
   const fetchData = async () => {
+    setIsLoading(true);
     try {
       const classroomsData = await getClassrooms();
       setClassrooms(classroomsData || []);
 
-      // Fetch schedules based on view mode
-      if (viewMode === 'list') {
-        // For list view, get today's schedules
-        const schedulesData = await getSchedules({ date: getTodayString() });
-        setSchedules(schedulesData || []);
-      } else {
-        // For grid view, get all schedules
-        const schedulesData = await getSchedules();
-        setSchedules(schedulesData || []);
-      }
+      // Get today's schedules
+      const schedulesData = await getSchedules({ date: getTodayString() });
+      setSchedules(schedulesData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       setSchedules([]);
       setClassrooms([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -106,28 +100,6 @@ const SchedulePage: React.FC = () => {
               </p>
             </div>
             <div className='flex items-center gap-4'>
-              {/* View Mode Toggle */}
-              <div className='flex bg-gray-100 rounded-lg p-1'>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${viewMode === 'list'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                >
-                  Danh sách
-                </button>
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${viewMode === 'grid'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                >
-                  Lưới tuần
-                </button>
-              </div>
-
               <div className='flex gap-2'>
                 <button
                   onClick={() => setShowCreateScheduleModal(true)}
@@ -151,17 +123,9 @@ const SchedulePage: React.FC = () => {
 
       {/* Content */}
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-        {viewMode === 'grid' ? (
-          <div className='mb-8'>
-            <div className='mb-6'>
-              <h2 className='text-lg font-semibold text-gray-900 mb-2'>
-                Thời khóa biểu tuần
-              </h2>
-              <p className='text-gray-600'>
-                Xem lịch học theo dạng lưới tuần
-              </p>
-            </div>
-            <WeeklyScheduleGrid schedules={schedules} classrooms={classrooms} />
+        {isLoading ? (
+          <div className='flex justify-center items-center py-12'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600'></div>
           </div>
         ) : (
           <div>
@@ -337,6 +301,7 @@ const SchedulePage: React.FC = () => {
             </div>
           </div>
         </div>
+
       </div>
 
       {/* Modals */}

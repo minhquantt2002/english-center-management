@@ -100,6 +100,33 @@ async def update_student(
     updated_student = user_service.update_student(db, student_uuid, student_data)
     return updated_student
 
+@router.delete("/students/{student_id}")
+async def delete_student(    
+    student_id: str,
+    current_user: User = Depends(get_current_staff_user),
+    db: Session = Depends(get_db)
+):  
+    """
+    Nhân viên có thể xóa học sinh
+    """
+    try:
+        student_uuid = UUID(student_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="student_id không hợp lệ"
+        )
+    
+    student = user_service.get_student(db, student_uuid)
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Học sinh không tồn tại"
+        )
+    
+    user_service.delete_student(db, student_uuid)
+    return {"message": "Xóa học sinh thành công"}
+
 @router.get("/students/available", response_model=List[StudentResponse])
 async def get_available_students(
     current_user: User = Depends(get_current_staff_user),
