@@ -1,6 +1,7 @@
+import { ToastContainer } from 'react-toastify';
+import SessionWrapper from '../components/SessionWrapper';
 import './globals.css';
 import type { Metadata } from 'next';
-import SessionWrapper from '@/components/SessionWrapper';
 
 export const metadata: Metadata = {
   title: 'Quản lý Trung tâm Tiếng Anh',
@@ -17,6 +18,7 @@ export default function RootLayout({
       <body className='flex'>
         <SessionWrapper>
           <div className='flex-1'>{children}</div>
+          <ToastContainer />
         </SessionWrapper>
       </body>
     </html>

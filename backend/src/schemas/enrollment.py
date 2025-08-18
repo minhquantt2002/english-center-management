@@ -1,8 +1,15 @@
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, List
 from src.schemas.base import BaseSchema
 from uuid import UUID
 
+
+class ScoreBase(BaseSchema):
+    listening: Optional[float] = None
+    reading: Optional[float] = None
+    speaking: Optional[float] = None
+    writing: Optional[float] = None
+    feedback: Optional[str] = None
 
 class EnrollmentBase(BaseSchema):
     class_id: UUID
@@ -31,6 +38,10 @@ class StudentNested(BaseSchema):
     id: UUID
     name: str
     email: str
+    
+
+class ScoreNested(ScoreBase):
+    id: UUID
 
 
 # Enrollment with relationships
@@ -40,4 +51,5 @@ class EnrollmentResponse(EnrollmentBase):
     created_at: datetime
 
     classroom: Optional[ClassroomNested] = None
-    student: Optional[StudentNested] = None 
+    student: Optional[StudentNested] = None
+    score: List[ScoreNested] = []

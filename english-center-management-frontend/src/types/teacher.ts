@@ -25,7 +25,6 @@ export interface TeacherResponse extends TeacherBase {
   id: string;
   created_at: string;
   taught_classes?: ClassroomNested[];
-  given_feedbacks?: FeedbackNested[];
 }
 
 // Student in class
@@ -38,47 +37,6 @@ export interface StudentInClass {
   parent_phone?: string;
   status: 'active' | 'inactive' | 'suspended' | 'graduated';
   enrollment_date: string;
-  scores?: ScoreData[];
-}
-
-// Grade types
-export interface GradeBook {
-  class_id: string;
-  class_name: string;
-  students: StudentScore[];
-  exams: ExamNested[];
-}
-
-export interface ScoreData {
-  student_id: string;
-  exam_id: string;
-  listening?: number;
-  reading?: number;
-  speaking?: number;
-  writing?: number;
-  total_score?: number;
-  grade?: string;
-  comments?: string;
-}
-
-export interface StudentScore {
-  id: string;
-  student_id: string;
-  student_name: string;
-  exam_id: string;
-  exam_name: string;
-  listening?: number;
-  reading?: number;
-  speaking?: number;
-  writing?: number;
-  total_score?: number;
-  grade?: string;
-  comments?: string;
-  created_at: string;
-}
-
-export interface GradesData {
-  scores: ScoreData[];
 }
 
 // Schedule types
@@ -91,21 +49,19 @@ export interface ScheduleData {
   classroom?: ClassroomNested;
 }
 
+export interface ScoreUpdate {
+  listening: number | null;
+  reading: number | null;
+  speaking: number | null;
+  writing: number | null;
+
+  feedback: string | null;
+}
+
 export interface TeachingSchedule {
   teacher_id: string;
   teacher_name: string;
   schedules: ScheduleData[];
-}
-
-export interface ClassSession {
-  id: string;
-  class_name: string;
-  course_name: string;
-  room?: string;
-  weekday: Weekday;
-  start_time: string;
-  end_time: string;
-  date: string;
 }
 
 export interface ClassDetails {
@@ -126,8 +82,6 @@ export interface ClassDetails {
   end_date?: string;
   created_at: string;
   enrollments: EnrollmentNested[];
-  exams: ExamNested[];
-  feedbacks: FeedbackNested[];
   schedules: ScheduleNested[];
 }
 
@@ -140,28 +94,6 @@ export interface TeacherDashboard {
   today_schedules: ScheduleData[];
   upcoming_classes: ClassDetails[];
   recent_activities: any[];
-}
-
-// Query parameters
-export interface TeacherClassesParams {
-  status?: 'active' | 'completed' | 'cancelled';
-  course_id?: string;
-}
-
-export interface TeacherScheduleParams {
-  weekday?: Weekday;
-  start_date?: string;
-  end_date?: string;
-}
-
-export interface TeacherClassesResponse {
-  classes: ClassDetails[];
-  total: number;
-}
-
-export interface TeacherScheduleResponse {
-  schedules: ScheduleData[];
-  total: number;
 }
 
 export interface TeacherClassroomResponse extends ClassDetails {}
@@ -190,18 +122,11 @@ export interface EnrollmentNested {
   enrollment_at: string;
   status: string;
   student: StudentInClass;
+  score: ScoreNested[];
 }
 
-export interface FeedbackNested {
+export interface ScoreNested extends ScoreUpdate {
   id: string;
-  content?: string;
-  rating?: number;
-}
-
-export interface ExamNested {
-  id: string;
-  exam_name: string;
-  exam_date?: string;
 }
 
 export interface ScheduleNested {

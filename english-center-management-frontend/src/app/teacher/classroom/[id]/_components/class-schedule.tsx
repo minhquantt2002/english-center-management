@@ -7,6 +7,7 @@ import {
 import ViewScheduleModal from './view-schedule-modal';
 import CreateScheduleModal from './create-schedule-modal';
 import { useStaffScheduleApi } from '../../../../staff/_hooks';
+import { toast } from 'react-toastify';
 
 interface ClassScheduleProps {
   classroom: TeacherClassroomResponse;
@@ -68,10 +69,10 @@ const ClassSchedule: React.FC<ClassScheduleProps> = ({
 
       refetchData();
 
-      alert('Lịch học mới đã được tạo thành công!');
+      toast('Lịch học mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating schedule:', error);
-      alert('Có lỗi xảy ra khi tạo lịch học mới!');
+      toast('Có lỗi xảy ra khi tạo lịch học mới!');
     }
   };
 

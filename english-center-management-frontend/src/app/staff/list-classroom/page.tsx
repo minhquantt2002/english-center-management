@@ -16,6 +16,7 @@ import CreateClassroomModal from './_components/create-classroom';
 import AssignStudentModal from './_components/assign-student';
 import { useStaffClassroomApi } from '../_hooks';
 import { ClassroomCreate, ClassroomResponse } from '../../../types/staff';
+import { toast } from 'react-toastify';
 
 export default function EnglishCourseInterface() {
   const router = useRouter();
@@ -106,10 +107,10 @@ export default function EnglishCourseInterface() {
       setIsEditModalOpen(false);
       setSelectedClassroom(null);
       await fetchClassrooms(); // Refresh the list
-      alert('Thông tin lớp học đã được cập nhật thành công!');
+      toast('Thông tin lớp học đã được cập nhật thành công!');
     } catch (error) {
       console.error('Error updating classroom:', error);
-      alert('Có lỗi xảy ra khi cập nhật thông tin lớp học!');
+      toast('Có lỗi xảy ra khi cập nhật thông tin lớp học!');
     }
   };
 
@@ -118,10 +119,10 @@ export default function EnglishCourseInterface() {
       await createClassroom(classData);
       setIsCreateModalOpen(false);
       await fetchClassrooms(); // Refresh the list
-      alert('Lớp học mới đã được tạo thành công!');
+      toast('Lớp học mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating classroom:', error);
-      alert('Có lỗi xảy ra khi tạo lớp học mới!');
+      toast('Có lỗi xảy ra khi tạo lớp học mới!');
     }
   };
 

@@ -13,14 +13,6 @@ def get_courses(db: Session) -> List[Course]:
     """Get list of courses"""
     return course_crud.get_courses(db)
 
-def get_all_courses(db: Session) -> List[Course]:
-    """Get all courses without pagination"""
-    return course_crud.get_all_courses(db)
-
-def get_courses_by_level(db: Session, level: str) -> List[Course]:
-    """Get courses by level"""
-    return course_crud.get_courses_by_level(db, level)
-
 def create_course(db: Session, course_data: CourseCreate) -> Course:
     """Create new course"""
     return course_crud.create_course(db, course_data)
@@ -32,10 +24,6 @@ def update_course(db: Session, course_id: UUID, course_data: CourseUpdate) -> Op
 def delete_course(db: Session, course_id: UUID) -> bool:
     """Delete course"""
     return course_crud.delete_course(db, course_id)
-
-def count_total_courses(db: Session) -> int:
-    """Count total courses"""
-    return course_crud.count_total_courses(db)
 
 def count_courses(db: Session) -> int:
     """Count total courses (alias for count_total_courses)"""

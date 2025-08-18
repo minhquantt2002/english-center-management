@@ -13,13 +13,9 @@ from .schedule import (
     ScheduleBase, ScheduleCreate, ScheduleUpdate, ScheduleResponse,
     Weekday
 )
-from .score import ScoreBase, ScoreCreate, ScoreUpdate, ScoreResponse
-from .exam import ExamBase, ExamCreate, ExamUpdate, ExamResponse
+
 from .enrollment import (
     EnrollmentBase, EnrollmentCreate, EnrollmentUpdate, EnrollmentResponse,
-)
-from .feedback import (
-    FeedbackBase, FeedbackCreate, FeedbackUpdate, FeedbackResponse,
 )
 from .auth import LoginRequest, RegisterRequest, TokenResponse, TokenData
 

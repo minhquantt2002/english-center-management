@@ -24,6 +24,7 @@ import CreateTeacherModal, {
 import ViewTeacherModal from './_components/view-teacher';
 import EditTeacherModal from './_components/edit-teacher';
 import { useTeacherApi } from '../_hooks';
+import { toast } from 'react-toastify';
 
 const TeacherManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,10 +77,10 @@ const TeacherManagement = () => {
       await createTeacher(teacherData);
       setIsCreateModalOpen(false);
       await fetchTeachers(); // Refresh the list
-      alert('Giáo viên mới đã được tạo thành công!');
+      toast('Giáo viên mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating teacher:', error);
-      alert('Có lỗi xảy ra khi tạo giáo viên mới!');
+      toast('Có lỗi xảy ra khi tạo giáo viên mới!');
     }
   };
 
@@ -101,10 +102,10 @@ const TeacherManagement = () => {
       setIsEditModalOpen(false);
       setSelectedTeacher(null);
       await fetchTeachers(); // Refresh the list
-      alert('Thông tin giáo viên đã được cập nhật thành công!');
+      toast('Thông tin giáo viên đã được cập nhật thành công!');
     } catch (error) {
       console.error('Error updating teacher:', error);
-      alert('Có lỗi xảy ra khi cập nhật thông tin giáo viên!');
+      toast('Có lỗi xảy ra khi cập nhật thông tin giáo viên!');
     }
   };
 
@@ -113,10 +114,10 @@ const TeacherManagement = () => {
       try {
         await deleteTeacher(teacherId);
         await fetchTeachers(); // Refresh the list
-        alert('Giáo viên đã được xóa thành công!');
+        toast('Giáo viên đã được xóa thành công!');
       } catch (error) {
         console.error('Error deleting teacher:', error);
-        alert('Có lỗi xảy ra khi xóa giáo viên!');
+        toast('Có lỗi xảy ra khi xóa giáo viên!');
       }
     }
   };

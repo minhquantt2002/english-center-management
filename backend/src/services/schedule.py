@@ -44,11 +44,6 @@ def get_schedule(db: Session, schedule_id: UUID) -> Optional[Dict[str, Any]]:
     schedule = schedule_crud.get_schedule(db, schedule_id)
     return _schedule_to_dict(schedule) if schedule else None
 
-def get_schedules(db: Session) -> List[Dict[str, Any]]:
-    """Get list of schedules with pagination"""
-    schedules = schedule_crud.get_schedules(db)
-    return [_schedule_to_dict(schedule) for schedule in schedules]
-
 def get_all_schedules(db: Session) -> List[Dict[str, Any]]:
     """Get all schedules without pagination"""
     schedules = schedule_crud.get_all_schedules(db)
@@ -69,44 +64,12 @@ def get_schedules_by_teacher(db: Session, teacher_id: UUID) -> List[Dict[str, An
     schedules = schedule_crud.get_schedules_by_teacher(db)
     return [_schedule_to_dict(schedule) for schedule in schedules if str(schedule.classroom.teacher_id) == str(teacher_id)]
 
-def get_schedules_by_student_weekday(db: Session, student_id: UUID, weekday: str) -> List[Dict[str, Any]]:
-    """Get schedules for specific student on specific weekday"""
-    schedules = schedule_crud.get_schedules_by_student_weekday(db, student_id, weekday)
-    return [_schedule_to_dict(schedule) for schedule in schedules]
-
-def get_schedules_by_teacher_weekday(db: Session, teacher_id: UUID, weekday: str) -> List[Dict[str, Any]]:
-    """Get schedules for specific teacher on specific weekday"""
-    schedules = schedule_crud.get_schedules_by_teacher_weekday(db, teacher_id, weekday)
-    return [_schedule_to_dict(schedule) for schedule in schedules]
-
 def get_today_schedules_by_student(db: Session, student_id: UUID) -> List[Dict[str, Any]]:
     """Get today's schedules for specific student"""
     today = date.today()
     weekday = today.strftime("%A").lower()
     schedules = schedule_crud.get_schedules_by_student_weekday(db, student_id, weekday)
     return [_schedule_to_dict(schedule) for schedule in schedules]
-
-def get_today_schedules_by_teacher(db: Session, teacher_id: UUID) -> List[Dict[str, Any]]:
-    """Get today's schedules for specific teacher"""
-    today = date.today()
-    weekday = today.strftime("%A").lower()
-    schedules = schedule_crud.get_schedules_by_teacher_weekday(db, teacher_id, weekday)
-    return [_schedule_to_dict(schedule) for schedule in schedules]
-
-def get_schedules_by_room(db: Session, room: str) -> List[Dict[str, Any]]:
-    """Get schedules for specific room"""
-    schedules = schedule_crud.get_schedules_by_room(db, room)
-    return [_schedule_to_dict(schedule) for schedule in schedules]
-
-def get_schedule_by_classroom_time(
-    db: Session, 
-    class_id: UUID, 
-    weekday: Weekday, 
-    start_time: time, 
-    end_time: time
-) -> Optional[Schedule]:
-    """Check if schedule exists for classroom at specific time"""
-    return schedule_crud.get_schedule_by_classroom_time(db, class_id, weekday, start_time, end_time)
 
 def create_schedule(db: Session, schedule_data: ScheduleCreate) -> Dict[str, Any]:
     """Create new schedule"""
@@ -117,10 +80,6 @@ def update_schedule(db: Session, schedule_id: UUID, schedule_data: ScheduleUpdat
     """Update schedule"""
     schedule = schedule_crud.update_schedule(db, schedule_id, schedule_data)
     return _schedule_to_dict(schedule) if schedule else None
-
-def delete_schedule(db: Session, schedule_id: UUID) -> bool:
-    """Delete schedule"""
-    return schedule_crud.delete_schedule(db, schedule_id)
 
 def count_schedules_by_classroom(db: Session, class_id: UUID) -> int:
     """Count schedules for a classroom"""

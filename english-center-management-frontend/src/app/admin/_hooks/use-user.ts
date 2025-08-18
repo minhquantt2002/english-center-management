@@ -4,7 +4,6 @@ import {
   UserResponse,
   UserCreate,
   UserUpdate,
-  UserRole,
   GetUsersQuery,
   UpdateUserRoleRequest,
 } from '../../../types/admin';

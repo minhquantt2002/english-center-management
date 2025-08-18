@@ -2,6 +2,7 @@ from datetime import date, datetime, time
 from typing import Optional, List
 from src.schemas.base import BaseSchema
 from src.schemas.user import StudentBase
+
 import enum
 from uuid import UUID
 
@@ -59,24 +60,22 @@ class TeacherNested(BaseSchema):
     email: str
 
 
+class ScoreNested(BaseSchema):
+    id: UUID
+    listening: Optional[float] = None
+    reading: Optional[float] = None
+    speaking: Optional[float] = None
+    writing: Optional[float] = None
+    feedback: Optional[str] = None
+
+
 class EnrollmentNested(BaseSchema):
     id: UUID
     enrollment_at: date
     status: str
     student: Optional[StudentBase]
-
-
-class ExamNested(BaseSchema):
-    id: UUID
-    exam_name: str
-    exam_date: Optional[date] = None
-
-
-class FeedbackNested(BaseSchema):
-    id: UUID
-    content: Optional[str] = None
-    rating: Optional[int] = None
-
+    score: List[ScoreNested] = []
+    
 
 class ScheduleNested(BaseSchema):
     id: UUID
@@ -92,6 +91,4 @@ class ClassroomResponse(ClassroomBase):
     course: Optional[CourseNested] = None
     teacher: Optional[TeacherNested] = None
     enrollments: Optional[List[EnrollmentNested]] = None
-    exams: Optional[List[ExamNested]] = None
-    feedbacks: Optional[List[FeedbackNested]] = None
     schedules: Optional[List[ScheduleNested]] = None

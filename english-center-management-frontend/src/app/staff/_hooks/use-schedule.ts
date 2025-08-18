@@ -6,7 +6,6 @@ import {
   ScheduleUpdate,
   GetSchedulesQuery,
   DeleteScheduleResponse,
-  ClassroomSchedulesResponse,
 } from '../../../types/staff';
 import { ScheduleNested } from '../../../types/student';
 

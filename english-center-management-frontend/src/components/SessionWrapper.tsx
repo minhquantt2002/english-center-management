@@ -15,22 +15,22 @@ interface SessionWrapperProps {
 // Component để xử lý token expiration
 const TokenExpirationHandler = () => {
   const { useTokenExpiration } = require('../hooks/useTokenExpiration');
-  const { 
-    showExpirationModal, 
+  const {
+    showExpirationModal,
     showWarningModal,
     handleExpirationModalClose,
-    handleWarningModalClose
+    handleWarningModalClose,
   } = useTokenExpiration();
-  
+
   return (
     <>
-      <TokenExpirationModal 
-        isOpen={showExpirationModal} 
-        onClose={handleExpirationModalClose} 
+      <TokenExpirationModal
+        isOpen={showExpirationModal}
+        onClose={handleExpirationModalClose}
       />
-      <TokenWarningModal 
-        isOpen={showWarningModal} 
-        onClose={handleWarningModalClose} 
+      <TokenWarningModal
+        isOpen={showWarningModal}
+        onClose={handleWarningModalClose}
       />
     </>
   );

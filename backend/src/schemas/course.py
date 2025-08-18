@@ -22,13 +22,11 @@ class CourseUpdate(BaseSchema):
     price: Optional[float] = None
     status: Optional[str] = None
 
-# Nested schemas for relationships  
 class ClassroomNested(BaseSchema):
     id: UUID
     class_name: str
     room: Optional[str] = None
 
-# Course with relationships
 class CourseResponse(CourseBase):
     id: UUID
     created_at: datetime

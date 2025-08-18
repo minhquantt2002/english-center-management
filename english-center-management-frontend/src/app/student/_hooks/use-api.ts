@@ -2,12 +2,8 @@ import { useState, useCallback } from 'react';
 import { api } from '../../../lib/api';
 import {
   StudentDashboard,
-  GetStudentClassesParams,
   ClassroomResponse,
-  GetStudentScheduleParams,
   ScheduleResponse,
-  GetStudentScoresParams,
-  ScoreResponse,
   StudentResponse,
   StudentUpdate,
 } from '../../../types/student';
@@ -67,23 +63,6 @@ export const useStudentApi = () => {
       const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
       setError(errorMessage);
       console.error('Error fetching student schedule:', err);
-      return []; // Trả về array rỗng thay vì throw error
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Get student's scores
-  const getStudentScores = useCallback(async (): Promise<ScoreResponse[]> => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.get(`/student/scores`);
-      return response || [];
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
-      setError(errorMessage);
-      console.error('Error fetching student scores:', err);
       return []; // Trả về array rỗng thay vì throw error
     } finally {
       setLoading(false);
@@ -172,38 +151,15 @@ export const useStudentApi = () => {
     []
   );
 
-  // Get class scores
-  const getClassScores = useCallback(
-    async (classId: string): Promise<ScoreResponse[]> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await api.get(`/student/classes/${classId}/scores`);
-        return response || [];
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Có lỗi xảy ra';
-        setError(errorMessage);
-        console.error('Error fetching class scores:', err);
-        return []; // Trả về array rỗng thay vì throw error
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
   return {
     loading,
     error,
     getStudentDashboard,
     getStudentClasses,
     getStudentSchedule,
-    getStudentScores,
     getClassDetails,
     getStudentProfile,
     updateStudentProfile,
     getClassSchedules,
-    getClassScores,
   };
 };

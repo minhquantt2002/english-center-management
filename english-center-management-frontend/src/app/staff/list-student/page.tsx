@@ -23,6 +23,7 @@ import {
   StudentUpdate,
 } from '../../../types/staff';
 import { Trash2 } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 export default function StudentManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,7 +35,8 @@ export default function StudentManagement() {
   const [students, setStudents] = useState<StudentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { getStudents, createStudent, updateStudent, deleteStudent } = useStaffStudentApi();
+  const { getStudents, createStudent, updateStudent, deleteStudent } =
+    useStaffStudentApi();
 
   // Fetch students on component mount
   useEffect(() => {
@@ -84,10 +86,10 @@ export default function StudentManagement() {
       await createStudent(studentData);
       setIsCreateModalOpen(false);
       await fetchStudents(); // Refresh the list
-      alert('Học viên mới đã được tạo thành công!');
+      toast('Học viên mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating student:', error);
-      alert('Có lỗi xảy ra khi tạo học viên mới!');
+      toast('Có lỗi xảy ra khi tạo học viên mới!');
     }
   };
 
@@ -100,10 +102,10 @@ export default function StudentManagement() {
       setIsEditModalOpen(false);
       setSelectedStudent(null);
       await fetchStudents(); // Refresh the list
-      alert('Thông tin học viên đã được cập nhật thành công!');
+      toast('Thông tin học viên đã được cập nhật thành công!');
     } catch (error) {
       console.error('Error updating student:', error);
-      alert('Có lỗi xảy ra khi cập nhật thông tin học viên!');
+      toast('Có lỗi xảy ra khi cập nhật thông tin học viên!');
     }
   };
 
@@ -128,10 +130,10 @@ export default function StudentManagement() {
       try {
         await deleteStudent(studentId);
         await fetchStudents(); // Refresh the list
-        alert('Học viên đã được xóa thành công!');
+        toast('Học viên đã được xóa thành công!');
       } catch (error) {
         console.error('Error deleting student:', error);
-        alert('Có lỗi xảy ra khi xóa học viên!');
+        toast('Có lỗi xảy ra khi xóa học viên!');
       }
     }
   };

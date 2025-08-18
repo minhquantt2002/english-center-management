@@ -21,6 +21,7 @@ import CreateCourseModal from './_components/create-course';
 import EditCourseModal from './_components/edit-course';
 import ViewCourseModal from './_components/view-course';
 import { useCourseApi } from '../_hooks';
+import { toast } from 'react-toastify';
 
 const CourseManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -91,24 +92,23 @@ const CourseManagement = () => {
   //   }
   // };
   const getLevelBadgeColor = (level: string) => {
-  switch (level) {
-    case 'Sơ cấp':
-      return 'bg-blue-50 text-blue-700 border-blue-200';
-    case 'Cơ bản':
-      return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    case 'Trung cấp':
-      return 'bg-amber-50 text-amber-700 border-amber-200';
-    case 'Cao trung cấp':
-      return 'bg-purple-50 text-purple-700 border-purple-200';
-    case 'Nâng cao':
-      return 'bg-rose-50 text-rose-700 border-rose-200';
-    case 'Thành thạo':
-      return 'bg-indigo-50 text-indigo-700 border-indigo-200';
-    default:
-      return 'bg-gray-50 text-gray-700 border-gray-200';
-  }
-};
-
+    switch (level) {
+      case 'Sơ cấp':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'Cơ bản':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'Trung cấp':
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'Cao trung cấp':
+        return 'bg-purple-50 text-purple-700 border-purple-200';
+      case 'Nâng cao':
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+      case 'Thành thạo':
+        return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      default:
+        return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
 
   const filteredCourses = coursesWithDisplay.filter((course) => {
     const courseName = course.course_name || course.name || '';
@@ -124,10 +124,10 @@ const CourseManagement = () => {
       await createCourse(courseData as CourseCreate);
       setIsCreateModalOpen(false);
       await fetchCourses(); // Refresh the list
-      alert('Khóa học đã được tạo thành công!');
+      toast('Khóa học đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating course:', error);
-      alert('Có lỗi xảy ra khi tạo khóa học!');
+      toast('Có lỗi xảy ra khi tạo khóa học!');
     }
   };
 
@@ -160,10 +160,10 @@ const CourseManagement = () => {
       setIsEditModalOpen(false);
       setSelectedCourse(null);
       await fetchCourses(); // Refresh the list
-      alert('Khóa học đã được cập nhật thành công!');
+      toast('Khóa học đã được cập nhật thành công!');
     } catch (error) {
       console.error('Error updating course:', error);
-      alert('Có lỗi xảy ra khi cập nhật khóa học!');
+      toast('Có lỗi xảy ra khi cập nhật khóa học!');
     }
   };
 
@@ -172,10 +172,10 @@ const CourseManagement = () => {
       try {
         await deleteCourse(courseId);
         await fetchCourses(); // Refresh the list
-        alert('Khóa học đã được xóa thành công!');
+        toast('Khóa học đã được xóa thành công!');
       } catch (error) {
         console.error('Error deleting course:', error);
-        alert('Có lỗi xảy ra khi xóa khóa học!');
+        toast('Có lỗi xảy ra khi xóa khóa học!');
       }
     }
   };

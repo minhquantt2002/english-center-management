@@ -53,19 +53,16 @@ export interface EnrollmentNested {
   id: string;
   enrollment_at: string;
   status: string;
+  score: ScoreNested[];
 }
 
 export interface ScoreNested {
   id: string;
-  total_score?: number;
-  grade?: string;
-}
-
-export interface FeedbackNested {
-  id: string;
-  content?: string;
-  rating?: number;
-  feedback_type?: string;
+  listening: number | null;
+  reading: number | null;
+  speaking: number | null;
+  writing: number | null;
+  feedback: string | null;
 }
 
 // User with relationships
@@ -73,10 +70,7 @@ export interface UserResponse extends UserBase {
   id: string;
   created_at: string;
   taught_classes?: ClassroomNested[];
-  given_feedbacks?: FeedbackNested[];
   enrollments?: EnrollmentNested[];
-  scores?: ScoreNested[];
-  received_feedbacks?: FeedbackNested[];
 }
 
 // Query parameters
@@ -130,10 +124,10 @@ export interface CourseResponse extends CourseBase {
 export type ClassStatus = 'active' | 'completed' | 'cancelled';
 export type CourseStatus = 'active' | 'upcoming' | 'completed' | 'cancelled';
 export type CourseLevel =
-  | 'A1'  // TOEIC 0–250 (FOUNDATION) - Mất gốc
-  | 'A2'  // TOEIC 250–450 (BEGINNER) - Sơ cấp
-  | 'B1'  // TOEIC 450–600 (CAMP BOMB) - Trung cấp thấp
-  | 'B2'  // TOEIC 600–850 (SUBMARINE) - Trung cấp cao
+  | 'A1' // TOEIC 0–250 (FOUNDATION) - Mất gốc
+  | 'A2' // TOEIC 250–450 (BEGINNER) - Sơ cấp
+  | 'B1' // TOEIC 450–600 (CAMP BOMB) - Trung cấp thấp
+  | 'B2' // TOEIC 600–850 (SUBMARINE) - Trung cấp cao
   | 'C1'; // TOEIC SW 250+ (MASTER) - Nâng cao kỹ năng Nói/Viết
 
 export interface ClassroomBase {
@@ -172,12 +166,6 @@ export interface TeacherNested {
   email: string;
 }
 
-export interface ExamNested {
-  id: string;
-  exam_name: string;
-  exam_date?: string;
-}
-
 export interface ScheduleNested {
   id: string;
   weekday: string;
@@ -191,8 +179,6 @@ export interface ClassroomResponse extends ClassroomBase {
   course?: CourseNested;
   teacher?: TeacherNested;
   enrollments?: EnrollmentNested[];
-  exams?: ExamNested[];
-  feedbacks?: FeedbackNested[];
   schedules?: ScheduleNested[];
 }
 
@@ -229,7 +215,6 @@ export interface TeacherResponse extends TeacherBase {
   id: string;
   created_at: string;
   taught_classes?: ClassroomNested[];
-  given_feedbacks?: FeedbackNested[];
 }
 
 // Student specific types
@@ -267,8 +252,6 @@ export interface StudentResponse extends StudentBase {
   id: string;
   created_at: string;
   enrollments?: EnrollmentNested[];
-  scores?: ScoreNested[];
-  received_feedbacks?: FeedbackNested[];
 }
 
 // Missing interfaces for hooks

@@ -13,6 +13,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useUserInfo } from './UserInfoContext';
+import { toast } from 'react-toastify';
 
 interface PersonalInfoModalProps {
   isOpen: boolean;
@@ -119,10 +120,11 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
       }
 
       await updateUserInfo(updateData);
+      toast('Cập nhật thông tin thành công!');
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating user info:', error);
-      alert('Có lỗi xảy ra khi cập nhật thông tin. Vui lòng thử lại.');
+      toast('Có lỗi xảy ra khi cập nhật thông tin. Vui lòng thử lại.');
     } finally {
       setIsSaving(false);
     }

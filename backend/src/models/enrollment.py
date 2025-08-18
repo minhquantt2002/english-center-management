@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Date, ForeignKey, String, DateTime, Text
+from sqlalchemy import Column, Date, ForeignKey, String, DateTime, Float
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from src.database import Base
@@ -19,3 +19,4 @@ class Enrollment(Base):
     # Relationships
     classroom = relationship("Class", back_populates="enrollments")
     student = relationship("User", back_populates="enrollments") 
+    score = relationship("Score", back_populates="enrollment") 

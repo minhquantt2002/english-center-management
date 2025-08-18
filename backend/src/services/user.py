@@ -19,10 +19,6 @@ def get_users(db: Session) -> List[User]:
     """Get list of users"""
     return user_crud.get_users(db)
 
-def get_all_users(db: Session) -> List[User]:
-    """Get all users without pagination"""
-    return user_crud.get_all_users(db)
-
 def get_users_by_role(db: Session, role_name: str) -> List[User]:
     """Get users by role name"""
     return user_crud.get_users_by_role(db, role_name)
@@ -40,10 +36,6 @@ def update_user(db: Session, user_id: UUID, user_data: UserUpdate) -> Optional[U
 def delete_user(db: Session, user_id: UUID) -> bool:
     """Delete user"""
     return user_crud.delete_user(db, user_id)
-
-def count_total_users(db: Session) -> int:
-    """Count total users"""
-    return user_crud.count_total_users(db)
 
 def count_users_by_role(db: Session, role_name: str) -> int:
     """Count users by role name"""
@@ -127,33 +119,12 @@ def get_student_academic_summary(db: Session, student_id: UUID) -> dict:
     return user_crud.get_student_academic_summary(db, student_id)
 
 def check_student_enrollment_permission(db: Session, student_id: UUID, classroom_id: UUID) -> bool:
-    """
-    Kiểm tra xem student có đăng ký lớp học đó không
-    
-    Args:
-        db (Session): Database session
-        student_id (UUID): ID của student
-        classroom_id (UUID): ID của classroom
-        
-    Returns:
-        bool: True nếu student đã đăng ký lớp học và status là active/completed, 
-              False nếu chưa đăng ký hoặc status là dropped/inactive
-              
-    Example:
-        # Kiểm tra quyền truy cập
-        has_permission = check_student_enrollment_permission(db, student_id, classroom_id)
-        if not has_permission:
-            raise HTTPException(status_code=403, detail="Bạn chưa đăng ký lớp học này")
-    """
-    # Kiểm tra xem student có tồn tại không
     student = get_user(db, student_id)
     if not student or student.role_name != "student":
         return False
     
-    # Kiểm tra enrollment
     enrollment = enrollment_crud.get_enrollment_by_student_classroom(db, student_id, classroom_id)
     
-    # Chỉ trả về True nếu có enrollment và status là active hoặc completed
     if enrollment and enrollment.status in ["active", "completed"]:
         return True
     

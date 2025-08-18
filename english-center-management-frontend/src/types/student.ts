@@ -34,8 +34,6 @@ export interface StudentResponse {
   phone_number?: string;
   created_at: string;
   enrollments?: EnrollmentNested[];
-  scores?: ScoreNested[];
-  received_feedbacks?: FeedbackNested[];
 }
 
 // Schedule types
@@ -46,50 +44,6 @@ export interface ScheduleResponse {
   start_time: string;
   end_time: string;
   classroom?: ClassroomNested;
-}
-
-// Score types
-export interface ScoreResponse {
-  id: string;
-  student_id: string;
-  exam_id: string;
-  listening?: number;
-  reading?: number;
-  speaking?: number;
-  writing?: number;
-  total_score?: number;
-  grade?: string;
-  comments?: string;
-  created_at: string;
-  student?: StudentNested;
-  exam?: ExamNested;
-}
-
-// Dashboard types
-export interface StudentDashboard {
-  student_id: string;
-  student_name: string;
-  total_enrollments: number;
-  total_scores: number;
-  average_score: number;
-  today_schedules: ScheduleResponse[];
-  upcoming_classes: ClassroomResponse[];
-  recent_scores: ScoreResponse[];
-}
-
-// Query parameters
-export interface GetStudentClassesParams {
-  status?: 'active' | 'completed' | 'cancelled';
-}
-
-export interface GetStudentScheduleParams {
-  classroom_id?: string;
-  weekday?: Weekday;
-}
-
-export interface GetStudentScoresParams {
-  exam_id?: string;
-  classroom_id?: string;
 }
 
 // Nested schemas for student
@@ -109,24 +63,18 @@ export interface EnrollmentNested {
   id: string;
   enrollment_at: string;
   status: string;
+  score: ScoreNested[];
 }
 
 export interface ScoreNested {
   id: string;
-  total_score?: number;
-  grade?: string;
-}
 
-export interface FeedbackNested {
-  id: string;
-  content?: string;
-  rating?: number;
-}
+  listening: number | null;
+  reading: number | null;
+  speaking: number | null;
+  writing: number | null;
 
-export interface ExamNested {
-  id: string;
-  exam_name: string;
-  exam_date?: string;
+  feedback: string | null;
 }
 
 export interface CourseNested {
@@ -148,10 +96,10 @@ export interface ClassroomResponse {
   teacher_id: string;
   room?: string;
   course_level:
-    | 'A1'  // TOEIC 0–250 (FOUNDATION) - Mất gốc
-    | 'A2'  // TOEIC 250–450 (BEGINNER) - Sơ cấp
-    | 'B1'  // TOEIC 450–600 (CAMP BOMB) - Trung cấp thấp
-    | 'B2'  // TOEIC 600–850 (SUBMARINE) - Trung cấp cao
+    | 'A1' // TOEIC 0–250 (FOUNDATION) - Mất gốc
+    | 'A2' // TOEIC 250–450 (BEGINNER) - Sơ cấp
+    | 'B1' // TOEIC 450–600 (CAMP BOMB) - Trung cấp thấp
+    | 'B2' // TOEIC 600–850 (SUBMARINE) - Trung cấp cao
     | 'C1'; // TOEIC SW 250+ (MASTER) - Nâng cao kỹ năng Nói/Viết
   status: 'active' | 'completed' | 'cancelled';
   start_date?: string;
@@ -160,8 +108,6 @@ export interface ClassroomResponse {
   course?: CourseNested;
   teacher?: TeacherNested;
   enrollments?: EnrollmentNested[];
-  exams?: ExamNested[];
-  feedbacks?: FeedbackNested[];
   schedules?: ScheduleNested[];
 }
 

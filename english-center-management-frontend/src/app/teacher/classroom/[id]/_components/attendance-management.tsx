@@ -13,6 +13,7 @@ import {
   SessionAttendanceResponse,
   useAttendanceApi,
 } from '../../../_hooks/use-attendance';
+import { toast } from 'react-toastify';
 
 interface Student {
   id: string;
@@ -193,7 +194,7 @@ const AttendanceManagement: React.FC<{
       setAlertMessage('');
       setTopic('');
       setSelectedSchedule(null);
-      alert('Điểm danh thành công!');
+      toast('Điểm danh thành công!');
     } catch (error) {
       setAlertMessage('Điểm danh không thành công! Vui lòng thử lại.');
     }

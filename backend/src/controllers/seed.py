@@ -1,35 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
 import random
 from datetime import datetime, date, timedelta, time
 import uuid
 
 from src.database import get_db
-from src.models import User, Course, Class, Schedule, Enrollment, Exam, Score, Feedback, ClassStatus, CourseLevel, Weekday
-from src.schemas.user import UserCreate
+from src.models import User, Course, Class, Schedule, Enrollment, ClassStatus, CourseLevel, Weekday, Score
 from src.services.auth import get_password_hash
 
 router = APIRouter()
-
-# {
-#   "name": "Nguyễn Văn A",
-#   "email": "nguyenvana@example.com",
-#   "password": "nguyenvana", 
-#   "role_name": "student",
-#   "bio": "Sinh viên đam mê công nghệ, thích học hỏi và khám phá.",
-#   "date_of_birth": "2001-05-20",
-#   "phone_number": "0987654321",
-#   "input_level": "beginner",
-#   "specialization": "Công nghệ thông tin",
-#   "address": "123 Đường Lê Lợi, Quận 1, TP. Hồ Chí Minh",
-#   "education": "Đại học Bách Khoa TP.HCM",
-#   "experience_years": 1,
-#   "level": "Beginner",
-#   "parent_name": "Nguyễn Văn B",
-#   "parent_phone": "0912345678",
-#   "status": "active"
-# }
 def generate_fake_users():
     """Tạo danh sách users fake"""
     users = []
@@ -199,14 +178,12 @@ async def seed_all_data(db: Session = Depends(get_db)):
     """Tạo tất cả dữ liệu fake cho hệ thống"""
     try:
         # Xóa dữ liệu cũ (nếu có)
-        db.query(Feedback).delete()
-        db.query(Score).delete()
-        db.query(Exam).delete()
         db.query(Enrollment).delete()
         db.query(Schedule).delete()
         db.query(Class).delete()
         db.query(Course).delete()
         db.query(User).delete()
+        db.query(Score).delete()
         db.commit()
         
         # Tạo users
@@ -306,6 +283,7 @@ async def seed_all_data(db: Session = Depends(get_db)):
         db.commit()
         
         # Tạo enrollments
+        print("?")
         for class_obj in created_classes:
             # Mỗi lớp có 8-15 học viên
             num_students = random.randint(8, 15)
@@ -319,67 +297,20 @@ async def seed_all_data(db: Session = Depends(get_db)):
                     enrollment_at=date.today() - timedelta(days=random.randint(0, 30)),
                     status=random.choice(["active", "active", "active", "completed", "dropped"])
                 )
+                
                 db.add(enrollment)
-        
-        db.commit()
-        
-        # Tạo exams
-        exam_types = ["Mid-term", "Final", "Quiz", "Assignment"]
-        for class_obj in created_classes:
-            # Mỗi lớp có 2-4 bài thi
-            num_exams = random.randint(2, 4)
-            for i in range(num_exams):
-                exam = Exam(
-                    id=uuid.uuid4(),
-                    class_id=class_obj.id,
-                    exam_name=f"{random.choice(exam_types)} {i+1}",
-                    exam_date=date.today() + timedelta(days=random.randint(10, 60)),
-                    duration=random.choice([60, 90, 120]),
-                    total_points=random.choice([100, 50, 30])
+                db.commit()
+                db.refresh(enrollment)
+
+                score = Score(
+                    enrollment_id=enrollment.id,
+                    listening=None,
+                    reading=None,
+                    speaking=None,
+                    writing=None,
+                    feedback=None,
                 )
-                db.add(exam)
-        
-        db.commit()
-        
-        # Tạo scores
-        enrollments = db.query(Enrollment).filter(Enrollment.status == "active").all()
-        exams = db.query(Exam).all()
-        
-        for enrollment in enrollments:
-            for exam in exams:
-                if exam.class_id == enrollment.class_id:
-                    total_score = random.randint(60, 100)
-                    score = Score(
-                        id=uuid.uuid4(),
-                        student_id=enrollment.student_id,
-                        exam_id=exam.id,
-                        listening=random.randint(15, 25),
-                        reading=random.randint(15, 25),
-                        speaking=random.randint(15, 25),
-                        writing=random.randint(15, 25),
-                        total_score=total_score,
-                        grade="A" if total_score >= 90 else "B" if total_score >= 80 else "C" if total_score >= 70 else "D",
-                        comments="Học viên làm bài tốt, cần cải thiện thêm phần ngữ pháp."
-                    )
-                    db.add(score)
-        
-        db.commit()
-        
-        # Tạo feedbacks
-        for class_obj in created_classes:
-            class_enrollments = [e for e in enrollments if e.class_id == class_obj.id]
-            for enrollment in class_enrollments:
-                if random.random() < 0.7:  # 70% học viên có feedback
-                    feedback = Feedback(
-                        id=uuid.uuid4(),
-                        class_id=class_obj.id,
-                        teacher_id=class_obj.teacher_id,
-                        student_id=enrollment.student_id,
-                        content=f"Feedback cho học viên {enrollment.student.name}",
-                        rating=random.randint(3, 5),
-                        created_at=datetime.now() - timedelta(days=random.randint(1, 30))
-                    )
-                    db.add(feedback)
+                db.add(score)
         
         db.commit()
         
@@ -391,9 +322,6 @@ async def seed_all_data(db: Session = Depends(get_db)):
                 "classes_created": len(created_classes),
                 "schedules_created": db.query(Schedule).count(),
                 "enrollments_created": db.query(Enrollment).count(),
-                "exams_created": db.query(Exam).count(),
-                "scores_created": db.query(Score).count(),
-                "feedbacks_created": db.query(Feedback).count()
             }
         }
         
@@ -401,79 +329,6 @@ async def seed_all_data(db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Lỗi khi tạo dữ liệu fake: {str(e)}")
 
-@router.post("/seed-users")
-async def seed_users(db: Session = Depends(get_db)):
-    """Chỉ tạo users fake"""
-    try:
-        fake_users = generate_fake_users()
-        created_users = []
-        
-        for user_data in fake_users:
-            hashed_password = get_password_hash(user_data["password"])
-            user = User(
-                id=uuid.uuid4(),
-                name=user_data["name"],
-                email=user_data["email"],
-                password=hashed_password,
-                role_name=user_data["role_name"],
-                bio=user_data.get("bio"),
-                date_of_birth=user_data.get("date_of_birth"),
-                phone_number=user_data["phone_number"],
-                input_level=user_data.get("input_level"),
-                specialization=user_data.get("specialization"),
-                address=user_data.get("address"),
-                education=user_data.get("education"),
-                experience_years=user_data.get("experience_years"),
-                parent_name=user_data.get("parent_name"),
-                parent_phone=user_data.get("parent_phone"),
-                status=user_data.get("status", "active")
-            )
-            db.add(user)
-            created_users.append(user)
-        
-        db.commit()
-        
-        return {
-            "message": f"Đã tạo thành công {len(created_users)} users",
-            "users_created": len(created_users)
-        }
-        
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Lỗi khi tạo users: {str(e)}")
-
-@router.post("/seed-courses")
-async def seed_courses(db: Session = Depends(get_db)):
-    """Chỉ tạo courses fake"""
-    try:
-        fake_courses = generate_fake_courses()
-        created_courses = []
-        
-        for course_data in fake_courses:
-            course = Course(
-                id=uuid.uuid4(),
-                course_name=course_data["course_name"],
-                description=course_data["description"],
-                level=course_data["level"],
-                total_weeks=course_data["total_weeks"],
-                price=course_data["price"]
-            )
-            db.add(course)
-            created_courses.append(course)
-        
-        db.commit()
-        
-        return {
-            "message": f"Đã tạo thành công {len(created_courses)} courses",
-            "courses_created": len(created_courses)
-        }
-        
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Lỗi khi tạo courses: {str(e)}")
-
-@router.delete("/clear-all")
-async def clear_all_data(db: Session = Depends(get_db)):
     """Xóa tất cả dữ liệu trong database"""
     try:
         db.query(Feedback).delete()

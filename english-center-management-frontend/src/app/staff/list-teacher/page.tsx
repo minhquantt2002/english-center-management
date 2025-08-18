@@ -7,10 +7,8 @@ import {
   GraduationCap,
   Mail,
   Phone,
-  BookOpen,
   Clock,
   Users,
-  AlertCircle,
 } from 'lucide-react';
 import { TeacherResponse } from '../../../types/staff';
 import TeachingScheduleModal from './_components/teaching-schedule-modal';
@@ -75,7 +73,6 @@ export default function TeacherManagement() {
       }
     } catch (error) {
       console.error('Error fetching teacher schedule:', error);
-      alert('Có lỗi xảy ra khi tải lịch giảng dạy!');
     }
   };
 

@@ -9,9 +9,6 @@ def get_classroom(db: Session, classroom_id: UUID) -> Optional[Class]:
     """Get classroom by ID"""
     return classroom_crud.get_classroom(db, classroom_id)
 
-def get_classrooms(db: Session) -> List[Class]:
-    """Get list of classrooms"""
-    return classroom_crud.get_classrooms(db)
 
 def get_classrooms_with_filters(
     db: Session, 
@@ -22,10 +19,6 @@ def get_classrooms_with_filters(
     """Get classrooms with optional filters"""
     return classroom_crud.get_classrooms_with_filters(db, course_id, teacher_id, status)
 
-def get_all_classrooms(db: Session) -> List[Class]:
-    """Get all classrooms without pagination"""
-    return classroom_crud.get_all_classrooms(db)
-
 def get_classrooms_by_teacher(db: Session, teacher_id: UUID) -> List[Class]:
     """Get classrooms taught by specific teacher"""
     return classroom_crud.get_classrooms_by_teacher(db, teacher_id)
@@ -34,10 +27,6 @@ def get_classroom_by_id(db: Session, classroom_id: UUID) -> Class:
     """Get classrooms taught by specific teacher"""
     return classroom_crud.get_classrooms_by_id(db, classroom_id)
 
-def get_classrooms_by_course(db: Session, course_id: UUID) -> List[Class]:
-    """Get classrooms for specific course"""
-    return classroom_crud.get_classrooms_by_course(db, course_id)
-
 def get_classrooms_by_student(db: Session, student_id: UUID, status: Optional[str] = None) -> List[Class]:
     """Get classrooms where student is enrolled"""
     return classroom_crud.get_classrooms_by_student(db, student_id, status)
@@ -45,10 +34,6 @@ def get_classrooms_by_student(db: Session, student_id: UUID, status: Optional[st
 def get_upcoming_classes_by_student(db: Session, student_id: UUID) -> List[Class]:
     """Get upcoming classes for student"""
     return classroom_crud.get_upcoming_classes_by_student(db, student_id)
-
-def get_upcoming_classes_by_teacher(db: Session, teacher_id: UUID) -> List[Class]:
-    """Get upcoming classes for teacher"""
-    return classroom_crud.get_upcoming_classes_by_teacher(db, teacher_id)
 
 def create_classroom(db: Session, classroom_data: ClassroomCreate) -> Class:
     """Create new classroom"""
@@ -61,10 +46,6 @@ def update_classroom(db: Session, classroom_id: UUID, classroom_data: ClassroomU
 def delete_classroom(db: Session, classroom_id: UUID) -> bool:
     """Delete classroom"""
     return classroom_crud.delete_classroom(db, classroom_id)
-
-def count_total_classrooms(db: Session) -> int:
-    """Count total classrooms"""
-    return classroom_crud.count_total_classrooms(db)
 
 def count_classrooms(db: Session) -> int:
     """Count total classrooms (alias for count_total_classrooms)"""

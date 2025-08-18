@@ -16,6 +16,7 @@ import {
 import CreateScheduleModal from './create-schedule-modal';
 import { useStaffScheduleApi } from '../../../_hooks';
 import { ClassroomResponse } from '../../../../../types/staff';
+import { toast } from 'react-toastify';
 
 interface StudyingScheduleModalProps {
   isOpen: boolean;
@@ -201,11 +202,11 @@ export default function StudyingScheduleModal({
     try {
       await createSchedule(scheduleData);
       setIsCreateScheduleOpen(false);
-      alert('Lịch học mới đã được tạo thành công!');
+      toast('Lịch học mới đã được tạo thành công!');
       fetchSchedules();
     } catch (error) {
       console.error('Error creating schedule:', error);
-      alert('Có lỗi xảy ra khi tạo lịch học mới!');
+      toast('Có lỗi xảy ra khi tạo lịch học mới!');
     }
   };
 

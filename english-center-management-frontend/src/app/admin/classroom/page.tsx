@@ -6,6 +6,7 @@ import { useClassroomApi } from '../_hooks';
 import { CreateClassroomModal, EditClassroomModal } from './_components';
 import { ClassroomResponse } from '../../../types/admin';
 import { levels } from '../course/_components/create-course';
+import { toast } from 'react-toastify';
 
 const ClassManagement: React.FC = () => {
   const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
@@ -82,10 +83,10 @@ const ClassManagement: React.FC = () => {
       await createClassroom(classroomData);
       setShowCreateModal(false);
       await fetchClassrooms(); // Refresh the list
-      alert('Lớp học mới đã được tạo thành công!');
+      toast('Lớp học mới đã được tạo thành công!');
     } catch (err) {
       console.error('Failed to create classroom:', err);
-      alert('Có lỗi xảy ra khi tạo lớp học mới!');
+      toast('Có lỗi xảy ra khi tạo lớp học mới!');
     }
   };
 

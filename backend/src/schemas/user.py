@@ -1,8 +1,7 @@
 from datetime import date, datetime
 from typing import Optional, List
-from pydantic import BaseModel, EmailStr
+from pydantic import EmailStr
 from src.schemas.base import BaseSchema
-from src.schemas.exam import ExamBase
 import enum
 from uuid import UUID
 
@@ -133,31 +132,21 @@ class ClassroomNested(BaseSchema):
     room: Optional[str] = None
 
 
-class EnrollmentNested(BaseSchema):
-    id: UUID
-    enrollment_at: date
-    status: str
-    classroom: Optional[ClassroomNested] = None
-
-
 class ScoreNested(BaseSchema):
     id: UUID
-    total_score: Optional[float] = None
-    grade: Optional[str] = None
-
     listening: Optional[float] = None
     reading: Optional[float] = None
     speaking: Optional[float] = None
     writing: Optional[float] = None
+    feedback: Optional[str] = None
 
-    exam: Optional[ExamBase] = None
 
-
-class FeedbackNested(BaseSchema):
+class EnrollmentNested(BaseSchema):
     id: UUID
-    content: Optional[str] = None
-    rating: Optional[int] = None
-    feedback_type: Optional[str] = None
+    enrollment_at: date
+    status: str    
+    classroom: Optional[ClassroomNested] = None
+    score: List[ScoreNested] = []
 
 
 # User with relationships
@@ -167,12 +156,9 @@ class UserResponse(UserBase):
     
     # Teacher relationships
     taught_classes: Optional[List[ClassroomNested]] = None
-    given_feedbacks: Optional[List[FeedbackNested]] = None
     
     # Student relationships
     enrollments: Optional[List[EnrollmentNested]] = None
-    scores: Optional[List[ScoreNested]] = None
-    received_feedbacks: Optional[List[FeedbackNested]] = None
 
 
 class TeacherResponse(TeacherBase):
@@ -180,7 +166,6 @@ class TeacherResponse(TeacherBase):
     created_at: datetime
     
     taught_classes: Optional[List[ClassroomNested]] = None
-    given_feedbacks: Optional[List[FeedbackNested]] = None
 
 
 class StudentResponse(StudentBase):
@@ -188,5 +173,3 @@ class StudentResponse(StudentBase):
     created_at: datetime
     
     enrollments: Optional[List[EnrollmentNested]] = None
-    scores: Optional[List[ScoreNested]] = None
-    received_feedbacks: Optional[List[FeedbackNested]] = None

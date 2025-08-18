@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Search, Users, User, Check, AlertCircle } from 'lucide-react';
 import { useStaffStudentApi, useStaffClassroomApi } from '../../_hooks';
 import { ClassroomResponse, StudentResponse } from '../../../../types/staff';
+import { toast } from 'react-toastify';
 
 interface AssignStudentModalProps {
   isOpen: boolean;
@@ -111,33 +112,21 @@ export default function AssignStudentModal({
       .map((student) => student.id.toString());
 
     if (selectedStudentIds.length === 0) {
-      alert('Vui lòng chọn ít nhất một học viên để phân công.');
+      toast('Vui lòng chọn ít nhất một học viên để phân công.');
       return;
     }
 
     setIsLoading(true);
     try {
       // Assign multiple students at once
-      const result = await assignMultipleStudentsToClassroom(
-        classroom.id,
-        selectedStudentIds
-      );
+      await assignMultipleStudentsToClassroom(classroom.id, selectedStudentIds);
 
-      // // Show success/failure messages
-      // if (result.failed_enrollments && result.failed_enrollments.length > 0) {
-      //   const failedCount = result.failed_enrollments.length;
-      //   const successCount = result.successful_enrollments.length;
-      //   alert(
-      //     `Đã phân công ${successCount} học viên thành công. ${failedCount} học viên không thể phân công.`
-      //   );
-      // } else {
-      //   alert(`Đã phân công ${selectedStudentIds.length} học viên thành công!`);
-      // }
+      toast(`Đã phân công ${selectedStudentIds.length} học viên thành công!`);
 
       onClose();
     } catch (error) {
       console.error('Error assigning students:', error);
-      alert('Có lỗi xảy ra khi phân công học viên. Vui lòng thử lại.');
+      toast('Có lỗi xảy ra khi phân công học viên. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }

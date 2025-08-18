@@ -9,6 +9,7 @@ import {
   Edit,
   UserCheck,
   BarChart3,
+  BookOpen,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -19,6 +20,7 @@ import StudentList from './_components/student-list';
 import ClassSchedule from './_components/class-schedule';
 import AttendanceManagement from './_components/attendance-management';
 import GradeManagement from './_components/grade-management';
+import HomeworkManagement from './_components/homework-management';
 
 const ClassDetailPage = () => {
   const params = useParams();
@@ -46,6 +48,7 @@ const ClassDetailPage = () => {
     { id: 'students', label: 'Học viên', icon: Users },
     { id: 'schedule', label: 'Lịch học', icon: Calendar },
     { id: 'attendance', label: 'Điểm danh', icon: UserCheck },
+    { id: 'homework', label: 'Bài tập về nhà', icon: BookOpen },
     { id: 'grades', label: 'Điểm số', icon: BarChart3 },
   ];
 
@@ -142,7 +145,16 @@ const ClassDetailPage = () => {
               />
             )}
 
-            {activeTab === 'grades' && <GradeManagement />}
+            {activeTab === 'homework' && (
+              <HomeworkManagement
+                classId={classDetails.id}
+                students={classDetails.enrollments}
+              />
+            )}
+
+            {activeTab === 'grades' && (
+              <GradeManagement enrollments={classDetails.enrollments} />
+            )}
           </div>
         </div>
       </div>

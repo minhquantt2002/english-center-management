@@ -8,12 +8,10 @@ from ..models.user import User
 from ..services import user as user_service
 from ..services import classroom as classroom_service
 from ..services import schedule as schedule_service
-from ..services import score as score_service
 from ..services import user as user_service
 from ..schemas.user import StudentResponse, StudentUpdate
 from ..schemas.classroom import ClassroomResponse
 from ..schemas.schedule import ScheduleResponse
-from ..schemas.score import ScoreResponse
 
 router = APIRouter()
 
@@ -32,7 +30,7 @@ async def get_student_dashboard(
     
     upcoming_classes = classroom_service.get_upcoming_classes_by_student(db, current_user.id)
     
-    recent_scores = score_service.get_recent_scores_by_student(db, current_user.id)
+    recent_scores = []
     
     dashboard_data = {
         "student_id": str(current_user.id),
@@ -117,7 +115,6 @@ async def get_student_classroom(
         )
     return classroom
 
-# ==================== SCHEDULE MANAGEMENT ====================
 @router.get("/schedule")
 async def get_student_schedule(
     current_user: User = Depends(get_current_student_user),
@@ -157,48 +154,3 @@ async def get_classroom_schedules(
     
     schedules = schedule_service.get_schedules_by_classroom(db, classroom_uuid)
     return schedules
-
-# ==================== SCORE MANAGEMENT ====================
-@router.get("/scores", response_model=List[ScoreResponse])
-async def get_student_scores(
-    exam_id: Optional[str] = Query(None, description="Filter by exam ID"),
-    classroom_id: Optional[str] = Query(None, description="Filter by classroom ID"),
-    current_user: User = Depends(get_current_student_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy danh sách điểm số của học sinh
-    """
-    scores = score_service.get_scores_by_student(
-        db, 
-        current_user.id, 
-        exam_id=exam_id,
-        classroom_id=classroom_id,
-    )
-    return scores
-
-@router.get("/classes/{classroom_id}/scores", response_model=List[ScoreResponse])
-async def get_classroom_scores(
-    classroom_id: str,
-    current_user: User = Depends(get_current_student_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy điểm số của học sinh trong một lớp học cụ thể
-    """
-    try:
-        classroom_uuid = UUID(classroom_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="classroom_id không hợp lệ"
-        )
-    
-    if not user_service.check_student_enrollment_permission(db, current_user.id, classroom_uuid):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Bạn chưa đăng ký lớp học này"
-        )
-    
-    scores = score_service.get_scores_by_student_classroom(db, current_user.id, classroom_uuid)
-    return scores 

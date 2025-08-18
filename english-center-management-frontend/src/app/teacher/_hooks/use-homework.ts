@@ -1,33 +1,41 @@
 import { useState, useCallback } from 'react';
 import { api } from '../../../lib/api';
 
-export interface CreateAttendance {
-  student_id: string;
-  is_present: boolean;
+export enum HomeworkStatus {
+  PENDING = 'pending',
+  PASSED = 'passed',
+  FAILED = 'failed',
 }
 
-export interface CreateSessionAttendance {
+export interface UpdateHomework {
+  student_id: string;
+  status: HomeworkStatus;
+  feedback: string;
+}
+
+export interface Homework extends UpdateHomework {
+  id: string;
+}
+
+export interface SessionHomeworkResponse {
+  id: string;
   topic: string;
   class_id: string;
   schedule_id: string;
-  attendances: CreateAttendance[];
-}
-
-export interface SessionAttendanceResponse extends CreateSessionAttendance {
-  id: string;
+  homeworks: Homework[];
   created_at: string;
 }
 
-export const useAttendanceApi = () => {
+export const useHomeworkApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getSessionAttendances = useCallback(
-    async (classId: string): Promise<SessionAttendanceResponse[]> => {
+  const getSessionHomeworks = useCallback(
+    async (classId: string): Promise<SessionHomeworkResponse[]> => {
       setLoading(true);
       setError(null);
       try {
-        const response = await api.get(`/attendance/${classId}/`);
+        const response = await api.get(`/homework/${classId}/`);
         return response;
       } catch (err) {
         const errorMessage =
@@ -41,12 +49,18 @@ export const useAttendanceApi = () => {
     []
   );
 
-  const createAttendance = useCallback(
-    async (createdAttendance: CreateSessionAttendance): Promise<void> => {
+  const updateHomework = useCallback(
+    async (
+      homeworkId: string,
+      updateHomework: UpdateHomework
+    ): Promise<void> => {
       setLoading(true);
       setError(null);
       try {
-        const response = await api.post(`/attendance`, createdAttendance);
+        const response = await api.put(
+          `/homework/${homeworkId}/`,
+          updateHomework
+        );
         return response;
       } catch (err) {
         const errorMessage =
@@ -63,7 +77,7 @@ export const useAttendanceApi = () => {
   return {
     loading,
     error,
-    getSessionAttendances,
-    createAttendance,
+    getSessionHomeworks,
+    updateHomework,
   };
 };

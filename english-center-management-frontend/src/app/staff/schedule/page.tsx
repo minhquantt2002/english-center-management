@@ -14,6 +14,7 @@ import { useStaffScheduleApi, useStaffClassroomApi } from '../_hooks';
 import { ScheduleResponse, ClassroomResponse } from '../../../types/staff';
 import CreateClassroomModal from '../list-classroom/_components/create-classroom';
 import { CreateScheduleModal } from './_components';
+import { toast } from 'react-toastify';
 
 const SchedulePage: React.FC = () => {
   const [schedules, setSchedules] = useState<ScheduleResponse[]>([]);
@@ -63,10 +64,10 @@ const SchedulePage: React.FC = () => {
       await createClassroom(classroomData);
       setShowCreateModal(false);
       await fetchData();
-      alert('Lớp học mới đã được tạo thành công!');
+      toast('Lớp học mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating classroom:', error);
-      alert('Có lỗi xảy ra khi tạo lớp học mới!');
+      toast('Có lỗi xảy ra khi tạo lớp học mới!');
     }
   };
 
@@ -75,10 +76,10 @@ const SchedulePage: React.FC = () => {
       await createSchedule(scheduleData);
       setShowCreateScheduleModal(false);
       await fetchData();
-      alert('Lịch học mới đã được tạo thành công!');
+      toast('Lịch học mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating schedule:', error);
-      alert('Có lỗi xảy ra khi tạo lịch học mới!');
+      toast('Có lỗi xảy ra khi tạo lịch học mới!');
     }
   };
 

@@ -18,6 +18,7 @@ import ViewStudentModal from './_components/view-student';
 import EditStudentModal from './_components/edit-student';
 import CreateStudentModal from './_components/create-student';
 import { useStudentApi } from '../_hooks';
+import { toast } from 'react-toastify';
 
 const StudentManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -107,10 +108,10 @@ const StudentManagement = () => {
       setIsEditModalOpen(false);
       setSelectedStudent(null);
       await fetchStudents(); // Refresh the list
-      alert('Thông tin học viên đã được cập nhật thành công!');
+      toast('Thông tin học viên đã được cập nhật thành công!');
     } catch (error) {
       console.error('Error updating student:', error);
-      alert('Có lỗi xảy ra khi cập nhật thông tin học viên!');
+      toast('Có lỗi xảy ra khi cập nhật thông tin học viên!');
     }
   };
 
@@ -121,10 +122,10 @@ const StudentManagement = () => {
       await createStudent(newStudent);
       setIsCreateModalOpen(false);
       await fetchStudents(); // Refresh the list
-      alert('Học viên mới đã được tạo thành công!');
+      toast('Học viên mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating student:', error);
-      alert('Có lỗi xảy ra khi tạo học viên mới!');
+      toast('Có lỗi xảy ra khi tạo học viên mới!');
     }
   };
 
@@ -133,10 +134,10 @@ const StudentManagement = () => {
       try {
         await deleteStudent(studentId);
         await fetchStudents(); // Refresh the list
-        alert('Học viên đã được xóa thành công!');
+        toast('Học viên đã được xóa thành công!');
       } catch (error) {
         console.error('Error deleting student:', error);
-        alert('Có lỗi xảy ra khi xóa học viên!');
+        toast('Có lỗi xảy ra khi xóa học viên!');
       }
     }
   };
@@ -211,16 +212,19 @@ const StudentManagement = () => {
                 <p className='text-gray-500 text-sm font-medium'>
                   Mới tháng này
                 </p>
-                <p className='text-2xl font-bold text-gray-900 mt-1'> {
-                  students.filter((s) => {
-                    const createdDate = new Date(s.created_at);
-                    const now = new Date();
-                    return (
-                      createdDate.getMonth() === now.getMonth() &&
-                      createdDate.getFullYear() === now.getFullYear()
-                    );
-                  }).length
-                }</p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {' '}
+                  {
+                    students.filter((s) => {
+                      const createdDate = new Date(s.created_at);
+                      const now = new Date();
+                      return (
+                        createdDate.getMonth() === now.getMonth() &&
+                        createdDate.getFullYear() === now.getFullYear()
+                      );
+                    }).length
+                  }
+                </p>
               </div>
               <div className='w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center'>
                 <Plus className='w-6 h-6 text-purple-600' />
@@ -330,14 +334,14 @@ const StudentManagement = () => {
                       {student.input_level === 'A1'
                         ? 'A1 - Mất gốc'
                         : student.input_level === 'A2'
-                          ? 'A2 - Sơ cấp'
-                          : student.input_level === 'B1'
-                            ? 'B1 - Trung cấp thấp'
-                            : student.input_level === 'B2'
-                              ? 'B2 - Trung cấp cao'
-                              : student.input_level === 'C1'
-                                ? 'C1 - Nâng cao'
-                                : student.input_level}
+                        ? 'A2 - Sơ cấp'
+                        : student.input_level === 'B1'
+                        ? 'B1 - Trung cấp thấp'
+                        : student.input_level === 'B2'
+                        ? 'B2 - Trung cấp cao'
+                        : student.input_level === 'C1'
+                        ? 'C1 - Nâng cao'
+                        : student.input_level}
                     </span>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
@@ -351,10 +355,11 @@ const StudentManagement = () => {
                         student.status || 'active'
                       )}`}
                     >
-                      {student.status === 'active' ? 'Đang học' : student.status === 'inactive'
+                      {student.status === 'active'
+                        ? 'Đang học'
+                        : student.status === 'inactive'
                         ? 'Tạm nghỉ'
-                        : 'Đã tốt nghiệp'
-                      }
+                        : 'Đã tốt nghiệp'}
                     </span>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>

@@ -7,6 +7,7 @@ import {
   useStaffClassroomApi,
   useStaffStudentApi,
 } from '../../../../staff/_hooks';
+import { toast } from 'react-toastify';
 
 interface AssignStudentModalProps {
   isOpen: boolean;
@@ -111,7 +112,7 @@ export default function AssignStudentModal({
       .map((student) => student.id.toString());
 
     if (selectedStudentIds.length === 0) {
-      alert('Vui lòng chọn ít nhất một học viên để phân công.');
+      toast('Vui lòng chọn ít nhất một học viên để phân công.');
       return;
     }
 
@@ -120,12 +121,12 @@ export default function AssignStudentModal({
       // Assign multiple students at once
       await assignMultipleStudentsToClassroom(classroomId, selectedStudentIds);
 
-      alert(`Đã phân công ${selectedStudentIds.length} học viên thành công!`);
+      toast(`Đã phân công ${selectedStudentIds.length} học viên thành công!`);
 
       onClose();
     } catch (error) {
       console.error('Error assigning students:', error);
-      alert('Có lỗi xảy ra khi phân công học viên. Vui lòng thử lại.');
+      toast('Có lỗi xảy ra khi phân công học viên. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }

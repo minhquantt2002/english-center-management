@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, Clock, Save } from 'lucide-react';
 import { ScheduleCreate, Weekday } from '../../../../../types/staff';
+import { toast } from 'react-toastify';
 
 interface CreateScheduleModalProps {
   isOpen: boolean;
@@ -103,6 +104,7 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
     try {
       await onSubmit(formData);
       handleClose();
+      toast('Tạo lịch học thành công!');
     } catch (error) {
       console.error('Error creating schedule:', error);
     } finally {

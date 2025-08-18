@@ -2,51 +2,42 @@ from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import update
 from ..database import get_db
 from ..dependencies import get_current_teacher_user
 from ..models.user import User
 from ..services import classroom as classroom_service
 from ..services import schedule as schedule_service
-from ..services import score as score_service
-from ..services import exam as exam_service
 from ..services import enrollment as enrollment_service
+from ..schemas.enrollment import ScoreBase
 from ..schemas.classroom import ClassroomResponse
-from ..schemas.schedule import ScheduleResponse
+from ..models.score import Score as ScoreModel
 
 router = APIRouter()
 
-# Dashboard endpoints
 @router.get("/dashboard")
 async def get_teacher_dashboard(
     current_user: User = Depends(get_current_teacher_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy dữ liệu dashboard cho giáo viên
-    """
-    # Lấy thống kê giảng dạy
     teaching_stats = {
         "totalClasses": len(classroom_service.get_classrooms_by_teacher(db, current_user.id)),
         "totalStudents": len(enrollment_service.get_students_by_teacher(db, current_user.id)),
-        "totalExams": len(exam_service.get_exams_by_teacher(db, current_user.id)),
-        "totalScores": len(score_service.get_scores_by_teacher(db, current_user.id)),
+        "totalExams": 0,
+        "totalScores": 0,
         "upcomingClasses": schedule_service.get_upcoming_schedules_by_teacher(db, current_user.id),
-        "recentScores": score_service.get_recent_scores_by_teacher(db, current_user.id)
+        "recentScores": []
     }
     return teaching_stats
 
 
 
-# ==================== CLASSROOM MANAGEMENT ====================
 @router.get("/classes", response_model=List[ClassroomResponse])
 async def get_teacher_classes(
     status: Optional[str] = Query(None, description="Filter by classroom status"),
     current_user: User = Depends(get_current_teacher_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy danh sách lớp học của giáo viên
-    """
     classrooms = classroom_service.get_classrooms_with_filters(
         db,
         teacher_id=current_user.id,
@@ -59,9 +50,6 @@ async def get_teacher_classroom(
     classroom_id: str,
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy thông tin lớp học cụ thể của giáo viên
-    """
     try:
         classroom_uuid = UUID(classroom_id)
     except ValueError:
@@ -78,17 +66,38 @@ async def get_teacher_classroom(
         )
     return classroom
 
-# ==================== SCHEDULE MANAGEMENT ====================
 @router.get("/schedule")
 async def get_teaching_schedule(
     current_user: User = Depends(get_current_teacher_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy lịch dạy của giáo viên
-    """
     schedules = schedule_service.get_schedules_with_filters(
         db,
         teacher_id=current_user.id,
     )
     return schedules
+
+
+@router.put("/score/{score_id}/")
+async def update_score(
+    score_id: UUID,
+    score_data: ScoreBase,
+    current_user: User = Depends(get_current_teacher_user),
+    db: Session = Depends(get_db)
+):
+    try:
+        statement = update(ScoreModel).where(ScoreModel.id == score_id).values(
+            **score_data.model_dump(exclude_none=True))
+        db.execute(statement)
+        db.commit()
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Bad request"
+        )
+    
+    return True
+
+
+
+

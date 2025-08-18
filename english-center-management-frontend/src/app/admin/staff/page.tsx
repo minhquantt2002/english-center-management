@@ -16,6 +16,7 @@ import { useStaffApi } from '../_hooks';
 import ViewStaffModal from './_components/view-staff';
 import EditStaffModal from './_components/edit-staff';
 import CreateStaffModal from './_components/create-staff';
+import { toast } from 'react-toastify';
 
 const StaffManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -63,10 +64,10 @@ const StaffManagement = () => {
       await createStaff(staffData);
       setIsCreateModalOpen(false);
       await fetchStaffs(); // Refresh the list
-      alert('Nhân sự mới đã được tạo thành công!');
+      toast('Nhân sự mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating staff:', error);
-      alert('Có lỗi xảy ra khi tạo nhân sự mới!');
+      toast('Có lỗi xảy ra khi tạo nhân sự mới!');
     }
   };
 
@@ -88,10 +89,10 @@ const StaffManagement = () => {
       setIsEditModalOpen(false);
       setSelectedStaff(null);
       await fetchStaffs(); // Refresh the list
-      alert('Thông tin nhân sự đã được cập nhật thành công!');
+      toast('Thông tin nhân sự đã được cập nhật thành công!');
     } catch (error) {
       console.error('Error updating staff:', error);
-      alert('Có lỗi xảy ra khi cập nhật thông tin nhân sự!');
+      toast('Có lỗi xảy ra khi cập nhật thông tin nhân sự!');
     }
   };
 
@@ -100,10 +101,10 @@ const StaffManagement = () => {
       try {
         await deleteStaff(staffId);
         await fetchStaffs(); // Refresh the list
-        alert('Nhân sự đã được xóa thành công!');
+        toast('Nhân sự đã được xóa thành công!');
       } catch (error) {
         console.error('Error deleting staff:', error);
-        alert('Có lỗi xảy ra khi xóa nhân sự!');
+        toast('Có lỗi xảy ra khi xóa nhân sự!');
       }
     }
   };

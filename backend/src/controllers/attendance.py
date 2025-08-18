@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from src.database import get_db
-from src.models import Session as SessionModel, Attendance
 from typing import List
 import uuid
 from src.models import Session as SessionModel
+from src.models import Homework as HomeworkModel
+from src.models import Attendance as AttendanceModel
+from src.models.attendance import HomeworkStatus
+
 from src.schemas.attendance import SessionCreate, SessionOut
 
 
@@ -20,18 +23,30 @@ def create_session(data: SessionCreate, db: Session = Depends(get_db)):
     )
     db.add(session)
     db.flush()
+    db.refresh(session)
+
 
     attendances = [
-        Attendance(
+        AttendanceModel(
             student_id=a.student_id,
             is_present=a.is_present,
-            session_id=session.id
+            session_id=session.id,
         )
         for a in data.attendances
     ]
+
+    homeworks = [
+        HomeworkModel(
+            student_id=a.student_id,
+            status=HomeworkStatus.PENDING,
+            session_id=session.id,
+        )
+        for a in data.attendances
+    ]
+
     db.add_all(attendances)
+    db.add_all(homeworks)
     db.commit()
-    db.refresh(session)
 
     return {
         "id": session.id,

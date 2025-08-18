@@ -25,5 +25,5 @@ class SessionOut(BaseSchema):
     topic: str
     class_id: UUID
     schedule_id: UUID
-    attendances: List[AttendanceOut]
+    attendances: List[AttendanceOut] = []
     created_at: datetime 

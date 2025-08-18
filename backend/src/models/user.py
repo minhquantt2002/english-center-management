@@ -40,12 +40,4 @@ class User(Base):
     enrollments = relationship("Enrollment", back_populates="student")
 
     attendances = relationship("Attendance", back_populates="student")
-    
-    # Student scores (if student)
-    scores = relationship("Score", back_populates="student")
-    
-    # Feedbacks given by teacher
-    given_feedbacks = relationship("Feedback", foreign_keys="Feedback.teacher_id", back_populates="teacher")
-    
-    # Feedbacks received by student
-    received_feedbacks = relationship("Feedback", foreign_keys="Feedback.student_id", back_populates="student")
+    homeworks = relationship("Homework", back_populates="student")

@@ -64,8 +64,6 @@ export interface StudentResponse {
   phone_number?: string;
   created_at: string;
   enrollments?: EnrollmentNested[];
-  scores?: ScoreNested[];
-  received_feedbacks?: FeedbackNested[];
 }
 
 // ==================== TEACHER MANAGEMENT ====================
@@ -82,7 +80,6 @@ export interface TeacherResponse {
   phone_number?: string;
   created_at: string;
   taught_classes?: ClassroomNested[];
-  given_feedbacks?: FeedbackNested[];
 }
 
 // ==================== COURSE MANAGEMENT ====================
@@ -134,8 +131,6 @@ export interface ClassroomResponse {
   course?: CourseNested;
   teacher?: TeacherNested;
   enrollments?: EnrollmentNested[];
-  exams?: ExamNested[];
-  feedbacks?: FeedbackNested[];
   schedules?: ScheduleNested[];
 }
 
@@ -283,30 +278,6 @@ export interface GetSchedulesQuery {
   date?: string; // Format: YYYY-MM-DD
 }
 
-export interface GetInvoicesQuery {
-  student_id?: string;
-  status?: InvoiceStatus;
-  page?: number;
-  limit?: number;
-}
-
-// ==================== REQUEST BODY TYPES ====================
-export interface AssignStudentToClassroomRequest {
-  studentId: string;
-}
-
-export interface AssignMultipleStudentsToClassroomRequest {
-  studentIds: string[];
-}
-
-export interface CreateInvoiceRequest {
-  student_id: string;
-  amount: number;
-  description: string;
-  due_date: string;
-  status: InvoiceStatus;
-}
-
 // ==================== NESTED SCHEMAS ====================
 export interface StudentNested {
   id: string;
@@ -339,42 +310,18 @@ export interface EnrollmentNested {
   class_id?: string;
   classroom: ClassroomNested;
   student: StudentResponse;
-}
-
-export interface ExamBase {
-  exam_name: string;
-  class_id: string;
-  exam_date?: string;
-  description?: string;
-  duration?: number;
-  total_points?: number;
-  exam_type?: string;
+  score: ScoreNested[];
 }
 
 export interface ScoreNested {
   id: string;
-  total_score?: number;
-  grade?: string;
 
-  listening?: number;
-  reading?: number;
-  speaking?: number;
-  writing?: number;
+  listening: number | null;
+  reading: number | null;
+  speaking: number | null;
+  writing: number | null;
 
-  exam?: ExamBase;
-}
-
-export interface FeedbackNested {
-  id: string;
-  content?: string;
-  rating?: number;
-  feedback_type?: string;
-}
-
-export interface ExamNested {
-  id: string;
-  exam_name: string;
-  exam_date?: string;
+  feedback: string | null;
 }
 
 export interface ScheduleNested {

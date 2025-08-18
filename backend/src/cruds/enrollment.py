@@ -3,6 +3,7 @@ from sqlalchemy import delete
 from typing import Optional, List
 from uuid import UUID
 from ..models.enrollment import Enrollment
+from ..models.score import Score
 from ..schemas.enrollment import EnrollmentCreate, EnrollmentUpdate
 
 def get_enrollment(db: Session, enrollment_id: UUID) -> Optional[Enrollment]:
@@ -44,6 +45,18 @@ def create_enrollment(db: Session, enrollment_data: EnrollmentCreate) -> Enrollm
     db.add(db_enrollment)
     db.commit()
     db.refresh(db_enrollment)
+
+    db_score = Score(
+        enrollment_id=db_enrollment.id,
+        listening=None,
+        reading=None,
+        speaking=None,
+        writing=None,
+        feedback=None
+    )
+    db.add(db_score)
+    db.commit()
+
     return db_enrollment
 
 def update_enrollment(db: Session, enrollment_id: UUID, enrollment_update: EnrollmentUpdate) -> Optional[Enrollment]:
