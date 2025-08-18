@@ -1,8 +1,7 @@
 import { getSession, signOut } from 'next-auth/react';
 
-const API_BASE_URL = 'http://192.168.1.9:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-// Helper function to get auth token
 const getAuthToken = async () => {
   try {
     // Get from NextAuth session first
@@ -11,7 +10,6 @@ const getAuthToken = async () => {
       return session.accessToken;
     }
 
-    // Fallback to localStorage for backward compatibility
     if (typeof window !== 'undefined') {
       const localToken = localStorage.getItem('token');
       if (localToken) {

@@ -34,7 +34,6 @@ const ZenlishLogin: React.FC = () => {
       }
 
       if (result?.ok) {
-        // Lấy session để lấy role_name
         let tries = 0;
         let session = null;
         while (tries < 10) {
@@ -49,14 +48,16 @@ const ZenlishLogin: React.FC = () => {
           setIsLoading(false);
           return;
         }
-        // Gọi lại /auth/me để lấy user info (nếu cần), hoặc lấy từ session nếu đã có
         const accessToken = session.accessToken;
-        const userRes = await fetch('http://192.168.1.9:8000/auth/me', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        const userRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/me`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
         if (!userRes.ok) {
           setError('Không lấy được thông tin người dùng');
           setIsLoading(false);

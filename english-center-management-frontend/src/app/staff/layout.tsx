@@ -31,7 +31,7 @@ const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className='flex h-screen bg-gradient-to-br from-gray-50 via-white to-green-50 overflow-hidden'>
+    <div className='flex h-screen'>
       {/* Sidebar */}
       <div
         className={`

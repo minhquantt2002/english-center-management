@@ -11,7 +11,6 @@ import {
   BookOpen,
   GraduationCap,
   Receipt,
-  Clock,
 } from 'lucide-react';
 import { useStaffStatsApi } from './_hooks';
 

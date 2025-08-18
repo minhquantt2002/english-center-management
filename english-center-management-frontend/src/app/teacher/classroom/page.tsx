@@ -2,16 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import {
-  Search,
-  Users,
-  Clock,
-  Star,
-  Calendar,
-  MapPin,
-  Book,
-  ChevronDown,
-} from 'lucide-react';
+import { Users, Clock, Star, Calendar, MapPin, Book } from 'lucide-react';
 import { useTeacherApi } from '../_hooks/use-api';
 import { TeacherClassroomResponse } from '../../../types/teacher';
 import { formatDays } from '../../staff/list-classroom/[id]/page';
@@ -92,20 +83,6 @@ const MyClassesDashboard = () => {
               Quản lý và theo dõi các lớp học của bạn
             </p>
           </div>
-          {/* <div className='flex items-center space-x-3'>
-            <div className='relative'>
-              <Search className='w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400' />
-              <input
-                type='text'
-                placeholder='Tìm kiếm lớp học...'
-                className='pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white'
-              />
-            </div>
-            <button className='inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'>
-              Lọc
-              <ChevronDown className='w-4 h-4 ml-1' />
-            </button>
-          </div> */}
         </div>
 
         {/* Stats Cards */}
