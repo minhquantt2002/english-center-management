@@ -23,32 +23,14 @@ const weekdayColors: { [key: string]: string } = {
   'Chủ nhật': 'bg-purple-500',
 };
 
-const formatDay = (day: string) => {
-  let formatted = 'Thứ 2';
-  switch (day) {
-    case 'monday':
-      formatted = 'Thứ 2';
-      return;
-    case 'tuesday':
-      formatted = 'Thứ 3';
-      return;
-    case 'wednesday':
-      formatted = 'Thứ 4';
-      return;
-    case 'thursday':
-      formatted = 'Thứ 5';
-      return;
-    case 'friday':
-      formatted = 'Thứ 6';
-      return;
-    case 'saturday':
-      formatted = 'Thứ 7';
-      return;
-    case 'sunday':
-      formatted = 'Chủ nhật';
-      return;
-  }
-  return formatted;
+const weekdayMap: Record<string, string> = {
+  monday: 'Thứ 2',
+  tuesday: 'Thứ 3',
+  wednesday: 'Thứ 4',
+  thursday: 'Thứ 5',
+  friday: 'Thứ 6',
+  saturday: 'Thứ 7',
+  sunday: 'Chủ nhật',
 };
 
 const weekdayEmojis: { [key: string]: string } = {
@@ -105,11 +87,11 @@ const ClassSchedule: React.FC<ClassScheduleProps> = ({
           <div className='relative'>
             <div
               className={`w-12 h-12 rounded-xl ${getWeekdayColor(
-                formatDay(session.weekday)
+                weekdayMap[session.weekday]
               )} flex items-center justify-center shadow-lg`}
             >
               <span className='text-white text-lg font-bold'>
-                {getWeekdayEmoji(formatDay(session.weekday))}
+                {getWeekdayEmoji(weekdayMap[session.weekday])}
               </span>
             </div>
             <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white flex items-center justify-center'>
@@ -117,23 +99,25 @@ const ClassSchedule: React.FC<ClassScheduleProps> = ({
             </div>
           </div>
 
-          <div className='flex items-center'>
+          <div className='flex-col items-center'>
             <h4 className='text-lg font-bold text-gray-900 mb-1'>
-              {formatDay(session.weekday)}
+              {weekdayMap[session.weekday]}
             </h4>
 
-            <div className='flex items-center space-x-2 text-gray-700'>
-              <Clock className='w-4 h-4' />
-              <span className='font-medium'>
-                {session.start_time.substring(0, 5)}
-              </span>
-            </div>
+            <div className='flex items-center'>
+              <div className='flex items-center space-x-2 text-gray-700'>
+                <Clock className='w-4 h-4' />
+                <span className='font-medium'>
+                  {session.start_time.substring(0, 5)}
+                </span>
+              </div>
 
-            <div className='flex items-center space-x-2 ml-2 text-gray-700'>
-              <ArrowRight className='w-4 h-4' />
-              <span className='font-medium'>
-                {session.end_time.substring(0, 5)}
-              </span>
+              <div className='flex items-center space-x-2 ml-2 text-gray-700'>
+                <ArrowRight className='w-4 h-4' />
+                <span className='font-medium'>
+                  {session.end_time.substring(0, 5)}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -191,7 +175,9 @@ const ClassSchedule: React.FC<ClassScheduleProps> = ({
         </div>
       ) : (
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-          {classroom.schedules.map(renderScheduleItem)}
+          {classroom.schedules.map((v) => {
+            return renderScheduleItem(v);
+          })}
         </div>
       )}
 

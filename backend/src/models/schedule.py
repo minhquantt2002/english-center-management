@@ -27,3 +27,5 @@ class Schedule(Base):
 
     # Relationships
     classroom = relationship("Class", back_populates="schedules") 
+    
+    sessions = relationship("Session", back_populates="schedule")

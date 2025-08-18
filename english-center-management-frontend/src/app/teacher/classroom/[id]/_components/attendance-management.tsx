@@ -7,6 +7,7 @@ import {
   Users,
   Check,
   UserX,
+  Eye,
 } from 'lucide-react';
 import {
   SessionAttendanceResponse,
@@ -84,6 +85,9 @@ const AttendanceManagement: React.FC<{
   const [topic, setTopic] = useState('');
   const [selectedSchedule, setSelectedSchedule] = useState<string | null>(null);
   const [alertMessage, setAlertMessage] = useState('');
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedSession, setSelectedSession] =
+    useState<SessionAttendanceResponse | null>(null);
 
   const [sessionAttendances, setSessionAttendances] = useState<
     SessionAttendanceResponse[]
@@ -300,7 +304,7 @@ const AttendanceManagement: React.FC<{
                     {new Date(session.created_at).toLocaleString('vi-VN')}
                   </span>
                 </div>
-                <div className='mt-2 flex space-x-4 items-center'>
+                <div className='mt-2 flex space-x-4 items-center justify-between'>
                   <div className='flex space-x-4 text-sm'>
                     <span className='inline-flex items-center text-green-600'>
                       <div className='w-2 h-2 rounded-full bg-green-500 mr-1'></div>
@@ -315,7 +319,16 @@ const AttendanceManagement: React.FC<{
                     </span>
                   </div>
 
-                  <div></div>
+                  <button
+                    onClick={() => {
+                      setSelectedSession(session);
+                      setShowDetailModal(true);
+                    }}
+                    className='inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                  >
+                    <Eye className='w-4 h-4 mr-2' />
+                    Xem chi tiết
+                  </button>
                 </div>
               </div>
             );
@@ -517,6 +530,199 @@ const AttendanceManagement: React.FC<{
                     Lưu điểm danh
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDetailModal && selectedSession && (
+        <div className='fixed inset-0 bg-black !mt-0 bg-opacity-50 flex items-center justify-center z-50'>
+          <div className='bg-white rounded-lg shadow-xl max-w-4xl w-[90vw] mx-4 max-h-[85vh] flex flex-col'>
+            <div className='flex items-center justify-between p-6 border-b border-gray-200'>
+              <div className='flex items-center'>
+                <Eye className='w-6 h-6 text-blue-600 mr-3' />
+                <div>
+                  <h2 className='text-xl font-semibold text-gray-900'>
+                    Chi tiết điểm danh
+                  </h2>
+                  <p className='text-sm text-gray-500 mt-1'>
+                    {selectedSession.topic || 'Buổi học'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className='text-gray-400 hover:text-gray-600'
+              >
+                <X className='w-6 h-6' />
+              </button>
+            </div>
+
+            <div className='px-6 py-4 border-b border-gray-200 bg-gray-50'>
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+                <div className='text-center'>
+                  <div className='text-2xl font-bold text-blue-600'>
+                    {selectedSession.attendances.length}
+                  </div>
+                  <div className='text-sm text-gray-600'>Tổng học viên</div>
+                </div>
+                <div className='text-center'>
+                  <div className='text-2xl font-bold text-green-600'>
+                    {
+                      selectedSession.attendances.filter((a) => a.is_present)
+                        .length
+                    }
+                  </div>
+                  <div className='text-sm text-gray-600'>Có mặt</div>
+                </div>
+                <div className='text-center'>
+                  <div className='text-2xl font-bold text-red-600'>
+                    {
+                      selectedSession.attendances.filter((a) => !a.is_present)
+                        .length
+                    }
+                  </div>
+                  <div className='text-sm text-gray-600'>Vắng mặt</div>
+                </div>
+                <div className='text-center'>
+                  <div className='text-2xl font-bold text-blue-600'>
+                    {Math.round(
+                      (selectedSession.attendances.filter((a) => a.is_present)
+                        .length /
+                        selectedSession.attendances.length) *
+                        100
+                    )}
+                    %
+                  </div>
+                  <div className='text-sm text-gray-600'>Tỷ lệ có mặt</div>
+                </div>
+              </div>
+            </div>
+
+            <div className='p-6 overflow-y-auto flex-1'>
+              <div className='mb-4'>
+                <h3 className='text-lg font-medium text-gray-900 mb-2'>
+                  Thông tin buổi học
+                </h3>
+                <div className='bg-gray-50 rounded-lg p-4 space-y-2'>
+                  <div className='flex justify-between'>
+                    <span className='text-gray-600'>Chủ đề:</span>
+                    <span className='font-medium'>
+                      {selectedSession.topic || 'Chưa có chủ đề'}
+                    </span>
+                  </div>
+                  <div className='flex justify-between'>
+                    <span className='text-gray-600'>Thời gian điểm danh:</span>
+                    <span className='font-medium'>
+                      {new Date(selectedSession.created_at).toLocaleString(
+                        'vi-VN'
+                      )}
+                    </span>
+                  </div>
+                  <div className='flex justify-between'>
+                    <span className='text-gray-600'>Ca học:</span>
+                    <span className='font-medium'>
+                      {schedules
+                        ?.find((s) => s.id === selectedSession.schedule_id)
+                        ?.start_time?.substring(0, 5)}{' '}
+                      -{' '}
+                      {schedules
+                        ?.find((s) => s.id === selectedSession.schedule_id)
+                        ?.end_time?.substring(0, 5)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className='mb-4'>
+                <h3 className='text-lg font-medium text-gray-900 mb-4'>
+                  Danh sách học viên
+                </h3>
+
+                <div className='space-y-3'>
+                  {selectedSession.attendances.map((attendance, index) => {
+                    const student = students?.find(
+                      (s) => s.id === attendance.student_id
+                    );
+
+                    return (
+                      <div
+                        key={index}
+                        className='flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-white'
+                      >
+                        <div className='flex items-center'>
+                          <div className='w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4'>
+                            <span className='text-blue-600 font-medium text-sm'>
+                              {student?.student?.name?.charAt(0) || '-'}
+                            </span>
+                          </div>
+                          <div>
+                            <h4 className='font-medium text-gray-900'>
+                              {student?.student?.name || 'Không có tên'}
+                            </h4>
+                            <p className='text-sm text-gray-500'>
+                              ID: {attendance.student_id}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className='flex items-center'>
+                          {attendance.is_present ? (
+                            <div className='flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium'>
+                              <Check className='w-4 h-4 mr-1' />
+                              Có mặt
+                            </div>
+                          ) : (
+                            <div className='flex items-center px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium'>
+                              <UserX className='w-4 h-4 mr-1' />
+                              Vắng mặt
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {selectedSession.attendances.length === 0 && (
+                  <div className='text-center py-8'>
+                    <Users className='w-12 h-12 text-gray-400 mx-auto mb-4' />
+                    <p className='text-gray-500'>Không có dữ liệu điểm danh</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className='px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg'>
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center space-x-4 text-sm text-gray-600'>
+                  <span className='inline-flex items-center'>
+                    <div className='w-2 h-2 bg-green-500 rounded-full mr-2'></div>
+                    Có mặt:{' '}
+                    {
+                      selectedSession.attendances.filter((a) => a.is_present)
+                        .length
+                    }
+                  </span>
+                  <span className='inline-flex items-center'>
+                    <div className='w-2 h-2 bg-red-500 rounded-full mr-2'></div>
+                    Vắng mặt:{' '}
+                    {
+                      selectedSession.attendances.filter((a) => !a.is_present)
+                        .length
+                    }
+                  </span>
+                  <span className='font-medium text-gray-700'>
+                    Tổng: {selectedSession.attendances.length}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowDetailModal(false)}
+                  className='px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700'
+                >
+                  Đóng
+                </button>
               </div>
             </div>
           </div>

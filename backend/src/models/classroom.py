@@ -39,6 +39,7 @@ class Class(Base):
     course = relationship("Course", back_populates="classes")
     teacher = relationship("User", back_populates="taught_classes")
     enrollments = relationship("Enrollment", back_populates="classroom")
+    sessions = relationship("Session", back_populates="classroom")
     exams = relationship("Exam", back_populates="classroom")
     feedbacks = relationship("Feedback", back_populates="classroom")
     schedules = relationship("Schedule", back_populates="classroom")

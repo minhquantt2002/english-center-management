@@ -38,6 +38,8 @@ class User(Base):
     
     # Student enrollments (if student)
     enrollments = relationship("Enrollment", back_populates="student")
+
+    attendances = relationship("Attendance", back_populates="student")
     
     # Student scores (if student)
     scores = relationship("Score", back_populates="student")

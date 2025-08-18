@@ -6,6 +6,7 @@ from .score import Score
 from .exam import Exam
 from .enrollment import Enrollment
 from .feedback import Feedback
+from .attendance import Session, Attendance
 
 __all__ = [
     "User",
@@ -19,4 +20,6 @@ __all__ = [
     "Exam",
     "Enrollment",
     "Feedback",
+    "Session",
+    "Attendance"
 ] 
