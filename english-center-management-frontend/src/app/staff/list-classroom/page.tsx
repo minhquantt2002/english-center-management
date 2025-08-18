@@ -2,20 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Clock,
-  Users,
-  MapPin,
-  Calendar,
-  User,
-  Edit,
-  UserPlus,
-} from 'lucide-react';
+import { MapPin, Calendar, User, Edit, UserPlus, Plus } from 'lucide-react';
 import EditClassroomModal from './_components/edit-classroom';
 import CreateClassroomModal from './_components/create-classroom';
 import AssignStudentModal from './_components/assign-student';
 import { useStaffClassroomApi } from '../_hooks';
 import { ClassroomCreate, ClassroomResponse } from '../../../types/staff';
+import { formatDays } from './[id]/page';
 
 export default function EnglishCourseInterface() {
   const router = useRouter();
@@ -61,7 +54,7 @@ export default function EnglishCourseInterface() {
         classItem.status === 'active' ? 'Đang hoạt động' : 'Sắp khai giảng',
       day:
         classItem.schedules.length > 0
-          ? classItem.schedules.map((schedule) => schedule.weekday).join(', ')
+          ? formatDays(classItem.schedules.map((schedule) => schedule.weekday))
           : 'Chưa có lịch học',
       instructor: classItem.teacher.name,
       room: classItem.room || 'Phòng A101',
@@ -79,20 +72,6 @@ export default function EnglishCourseInterface() {
       default:
         return 'bg-gray-100 text-gray-800';
     }
-  };
-
-  const getProgressColor = (students: string) => {
-    const [current, total] = students.split('/').map((n) => parseInt(n));
-    const percentage = (current / total) * 100;
-
-    if (percentage >= 90) return 'bg-red-500';
-    if (percentage >= 70) return 'bg-orange-500';
-    return 'bg-blue-500';
-  };
-
-  const getProgressPercentage = (students: string) => {
-    const [current, total] = students.split('/').map((n) => parseInt(n));
-    return (current / total) * 100;
   };
 
   const handleEditClassroom = (classroom: ClassroomResponse) => {
@@ -163,7 +142,8 @@ export default function EnglishCourseInterface() {
             onClick={() => setIsCreateModalOpen(true)}
             className='bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-colors'
           >
-            <span>+ Tạo lớp mới</span>
+            <Plus className='w-4 h-4' />
+            Tạo lớp mới
           </button>
         </div>
 
@@ -176,8 +156,8 @@ export default function EnglishCourseInterface() {
             >
               {/* Card Header */}
               <div className='p-6 pb-4'>
-                <div className='flex items-center justify-between mb-3'>
-                  <div>
+                <div className='flex items-center space-x-1.5 mb-3'>
+                  <div className='flex-1'>
                     <h3 className='text-lg font-semibold text-gray-900'>
                       {course.name}
                     </h3>
@@ -185,13 +165,13 @@ export default function EnglishCourseInterface() {
                       Cấp độ: {course.level}
                     </p>
                   </div>
-                  <span
+                  <div
                     className={`p-2 font-medium text-center rounded-full text-xs ${getStatusColor(
                       course.status
                     )}`}
                   >
                     {course.statusText}
-                  </span>
+                  </div>
                 </div>
 
                 {/* Course Details */}

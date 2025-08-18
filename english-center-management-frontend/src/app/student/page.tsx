@@ -9,7 +9,6 @@ import {
   Trophy,
   CheckCircle,
   AlertCircle,
-  GraduationCap,
   BarChart3,
   Calendar,
   Award,

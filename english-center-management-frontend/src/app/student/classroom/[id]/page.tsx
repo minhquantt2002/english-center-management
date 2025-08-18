@@ -8,13 +8,10 @@ import {
   MapPin,
   User,
   Calendar,
-  CheckCircle,
   Award,
-  Video,
   MessageCircle,
   ArrowLeft,
   Target,
-  BarChart3,
 } from 'lucide-react';
 import { useStudentApi } from '../../_hooks/use-api';
 import { ClassroomResponse } from '../../../../types/student';
@@ -72,10 +69,6 @@ const ClassDetailPage: React.FC = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
-  };
-
-  const getProgressPercentage = (completed: number, total: number) => {
-    return Math.round((completed / total) * 100);
   };
 
   if (loading) {
@@ -314,8 +307,10 @@ const ClassDetailPage: React.FC = () => {
                       >
                         {classData.course_level === 'A1' && 'A1 - Mất gốc'}
                         {classData.course_level === 'A2' && 'A2 - Sơ cấp'}
-                        {classData.course_level === 'B1' && 'B1 - Trung cấp thấp'}
-                        {classData.course_level === 'B2' && 'B2 - Trung cấp cao'}
+                        {classData.course_level === 'B1' &&
+                          'B1 - Trung cấp thấp'}
+                        {classData.course_level === 'B2' &&
+                          'B2 - Trung cấp cao'}
                         {classData.course_level === 'C1' && 'C1 - Nâng cao'}
                       </span>
                       <span

@@ -34,7 +34,8 @@ export default function StudentManagement() {
   const [students, setStudents] = useState<StudentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { getStudents, createStudent, updateStudent, deleteStudent } = useStaffStudentApi();
+  const { getStudents, createStudent, updateStudent, deleteStudent } =
+    useStaffStudentApi();
 
   // Fetch students on component mount
   useEffect(() => {

@@ -7,10 +7,8 @@ import {
   GraduationCap,
   Mail,
   Phone,
-  BookOpen,
   Clock,
   Users,
-  AlertCircle,
 } from 'lucide-react';
 import { TeacherResponse } from '../../../types/staff';
 import TeachingScheduleModal from './_components/teaching-schedule-modal';
