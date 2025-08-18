@@ -51,7 +51,7 @@ const ZenlishLogin: React.FC = () => {
         }
         // Gọi lại /auth/me để lấy user info (nếu cần), hoặc lấy từ session nếu đã có
         const accessToken = session.accessToken;
-        const userRes = await fetch('http://localhost:8000/auth/me', {
+        const userRes = await fetch('http://192.168.1.9:8000/auth/me', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ const ZenlishLogin: React.FC = () => {
         const userData = await userRes.json();
         // Lưu userData vào localStorage
         localStorage.setItem('userData', JSON.stringify(userData));
-        
+
         const role = userData?.role_name;
         // Redirect theo role
         switch (role) {

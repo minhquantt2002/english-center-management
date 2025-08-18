@@ -3,8 +3,6 @@ import { api } from '../../../lib/api';
 import {
   TeacherDashboard,
   TeacherClassroomResponse,
-  AttendanceData,
-  AttendanceEntry,
   GradeBook,
   ScoreData,
   StudentScore,
@@ -78,32 +76,6 @@ export const useTeacherApi = () => {
       setError(null);
       try {
         const response = await api.get(`/teacher/classes/${classroomId}`);
-        return response;
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Có lỗi xảy ra';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  // Update attendance
-  const updateAttendance = useCallback(
-    async (
-      classId: string,
-      attendanceData: AttendanceData
-    ): Promise<AttendanceEntry[]> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await api.put(
-          `/teacher/classes/${classId}/attendance`,
-          attendanceData
-        );
         return response;
       } catch (err) {
         const errorMessage =
@@ -216,7 +188,6 @@ export const useTeacherApi = () => {
     getTeacherDashboard,
     getTeachingSchedule,
     getClassrooms,
-    updateAttendance,
     createStudentScore,
     updateStudentScore,
     updateGrades,

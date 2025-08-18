@@ -134,7 +134,13 @@ const ClassDetailPage = () => {
               />
             )}
 
-            {activeTab === 'attendance' && <AttendanceManagement />}
+            {activeTab === 'attendance' && (
+              <AttendanceManagement
+                classId={classDetails.id}
+                schedules={classDetails.schedules}
+                students={classDetails.enrollments}
+              />
+            )}
 
             {activeTab === 'grades' && <GradeManagement />}
           </div>

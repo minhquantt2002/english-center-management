@@ -1,6 +1,6 @@
 import { getSession, signOut } from 'next-auth/react';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://192.168.1.9:8000';
 
 // Helper function to get auth token
 const getAuthToken = async () => {
@@ -29,17 +29,17 @@ const getAuthToken = async () => {
 // Helper function to handle token expiration
 const handleTokenExpiration = async () => {
   console.log('Token expired, logging out...');
-  
+
   // Clear localStorage
   if (typeof window !== 'undefined') {
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
   }
-  
+
   // Sign out from NextAuth
-  await signOut({ 
+  await signOut({
     callbackUrl: '/auth/login',
-    redirect: true 
+    redirect: true,
   });
 };
 
@@ -74,13 +74,13 @@ export const api = {
       console.error('API Error:', response.status, response.statusText);
       const errorText = await response.text();
       console.error('Error response:', errorText);
-      
+
       // Check if it's a token expiration error
       if (response.status === 401 || isTokenExpiredError(errorText)) {
         await handleTokenExpiration();
         return;
       }
-      
+
       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 
@@ -100,13 +100,13 @@ export const api = {
 
     if (!response.ok) {
       const errorText = await response.text();
-      
+
       // Check if it's a token expiration error
       if (response.status === 401 || isTokenExpiredError(errorText)) {
         await handleTokenExpiration();
         return;
       }
-      
+
       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 
@@ -126,13 +126,13 @@ export const api = {
 
     if (!response.ok) {
       const errorText = await response.text();
-      
+
       // Check if it's a token expiration error
       if (response.status === 401 || isTokenExpiredError(errorText)) {
         await handleTokenExpiration();
         return;
       }
-      
+
       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 
@@ -151,13 +151,13 @@ export const api = {
 
     if (!response.ok) {
       const errorText = await response.text();
-      
+
       // Check if it's a token expiration error
       if (response.status === 401 || isTokenExpiredError(errorText)) {
         await handleTokenExpiration();
         return;
       }
-      
+
       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 

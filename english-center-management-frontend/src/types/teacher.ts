@@ -38,21 +38,7 @@ export interface StudentInClass {
   parent_phone?: string;
   status: 'active' | 'inactive' | 'suspended' | 'graduated';
   enrollment_date: string;
-  attendance_records?: AttendanceEntry[];
   scores?: ScoreData[];
-}
-
-// Attendance types
-export interface AttendanceData {
-  date: string;
-  attendance_records: AttendanceEntry[];
-}
-
-export interface AttendanceEntry {
-  student_id: string;
-  student_name: string;
-  status: 'present' | 'absent' | 'late' | 'excused';
-  notes?: string;
 }
 
 // Grade types
