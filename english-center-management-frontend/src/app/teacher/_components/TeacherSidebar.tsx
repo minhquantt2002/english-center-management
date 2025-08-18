@@ -50,7 +50,7 @@ const TeacherSidebar: React.FC = () => {
   };
 
   return (
-    <div className='h-screen w-64 bg-gradient-to-b from-orange-50 to-white border-r border-gray-200 fixed left-0 top-0 z-30'>
+    <div className='h-screen w-64 bg-white border-r border-gray-200 fixed left-0 top-0 z-30'>
       {/* Logo */}
       <div className='h-16 flex items-center px-6 border-b border-gray-200 bg-white'>
         <div className='flex items-center gap-3'>

@@ -66,7 +66,7 @@ async def get_current_staff_user(
     """
     Dependency để lấy current staff user (admin hoặc staff)
     """
-    if current_user.role_name not in ["admin", "staff"]:
+    if current_user.role_name not in ["admin", "staff", "teacher"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Không có quyền truy cập"

@@ -7,11 +7,9 @@ import {
   Calendar,
   Clock,
   MapPin,
-  User,
   BookOpen,
   XCircle,
   Eye,
-  Info,
 } from 'lucide-react';
 import { useTeacherApi } from '../_hooks/use-api';
 

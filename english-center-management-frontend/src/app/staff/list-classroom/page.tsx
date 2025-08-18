@@ -125,24 +125,6 @@ export default function EnglishCourseInterface() {
     }
   };
 
-  const handleAssignStudents = async (
-    classroomId: string,
-    studentIds: string[]
-  ) => {
-    try {
-      // In a real app, you would make an API call here to assign students
-      console.log(
-        `Assigning ${studentIds.length} students to classroom ${classroomId}:`,
-        studentIds
-      );
-
-      alert(`Đã phân công ${studentIds.length} học viên vào lớp thành công!`);
-    } catch (error) {
-      console.error('Error assigning students:', error);
-      alert('Có lỗi xảy ra khi phân công học viên!');
-    }
-  };
-
   if (isLoading) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
@@ -304,7 +286,6 @@ export default function EnglishCourseInterface() {
           setSelectedClassroom(null);
         }}
         classroom={selectedClassroom}
-        onAssignStudents={handleAssignStudents}
       />
     </div>
   );

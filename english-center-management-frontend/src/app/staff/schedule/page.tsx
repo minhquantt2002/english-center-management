@@ -1,7 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Clock, Users, MapPin, School, Calendar, RefreshCw } from 'lucide-react';
+import {
+  Plus,
+  Clock,
+  Users,
+  MapPin,
+  School,
+  Calendar,
+  RefreshCw,
+} from 'lucide-react';
 import { useStaffScheduleApi, useStaffClassroomApi } from '../_hooks';
 import { ScheduleResponse, ClassroomResponse } from '../../../types/staff';
 import CreateClassroomModal from '../list-classroom/_components/create-classroom';
@@ -31,8 +39,6 @@ const SchedulePage: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
-
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -81,8 +87,9 @@ const SchedulePage: React.FC = () => {
   };
 
   const getTodayString = () => {
-    return new Date()
-      .toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
+    return new Date().toLocaleDateString('en-CA', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+    });
   };
 
   return (
@@ -137,7 +144,8 @@ const SchedulePage: React.FC = () => {
                     Lịch học hôm nay
                   </h2>
                   <p className='text-gray-600 mt-1'>
-                    Danh sách các lớp học diễn ra hôm nay ({new Date().toLocaleDateString('vi-VN')})
+                    Danh sách các lớp học diễn ra hôm nay (
+                    {new Date().toLocaleDateString('vi-VN')})
                   </p>
                 </div>
                 <button
@@ -165,22 +173,36 @@ const SchedulePage: React.FC = () => {
                               </h3>
                               <div className='space-y-2 text-sm text-gray-600'>
                                 <div className='flex items-center'>
-                                  <Clock size={14} className='mr-2 text-gray-400' />
+                                  <Clock
+                                    size={14}
+                                    className='mr-2 text-gray-400'
+                                  />
                                   {schedule.start_time} - {schedule.end_time}
                                 </div>
                                 <div className='flex items-center'>
-                                  <Users size={14} className='mr-2 text-gray-400' />
+                                  <Users
+                                    size={14}
+                                    className='mr-2 text-gray-400'
+                                  />
                                   {classroom?.teacher?.name || 'N/A'}
                                 </div>
                                 {classroom?.room && (
                                   <div className='flex items-center'>
-                                    <MapPin size={14} className='mr-2 text-gray-400' />
+                                    <MapPin
+                                      size={14}
+                                      className='mr-2 text-gray-400'
+                                    />
                                     {classroom.room}
                                   </div>
                                 )}
                                 <div className='flex items-center'>
-                                  <Calendar size={14} className='mr-2 text-gray-400' />
-                                  {weekdays.find(d => d.key === schedule.weekday)?.label || schedule.weekday}
+                                  <Calendar
+                                    size={14}
+                                    className='mr-2 text-gray-400'
+                                  />
+                                  {weekdays.find(
+                                    (d) => d.key === schedule.weekday
+                                  )?.label || schedule.weekday}
                                 </div>
                               </div>
                             </div>
@@ -192,7 +214,9 @@ const SchedulePage: React.FC = () => {
                 ) : (
                   <div className='text-center py-8'>
                     <Calendar className='mx-auto h-12 w-12 text-gray-400 mb-4' />
-                    <p className='text-gray-500'>Không có lịch học nào hôm nay</p>
+                    <p className='text-gray-500'>
+                      Không có lịch học nào hôm nay
+                    </p>
                   </div>
                 )}
               </div>
@@ -223,17 +247,26 @@ const SchedulePage: React.FC = () => {
                             </h3>
                             <div className='space-y-2 text-sm text-gray-600'>
                               <div className='flex items-center'>
-                                <Users size={14} className='mr-2 text-gray-400' />
+                                <Users
+                                  size={14}
+                                  className='mr-2 text-gray-400'
+                                />
                                 {classroom.teacher?.name || 'Chưa có giáo viên'}
                               </div>
                               {classroom.room && (
                                 <div className='flex items-center'>
-                                  <MapPin size={14} className='mr-2 text-gray-400' />
+                                  <MapPin
+                                    size={14}
+                                    className='mr-2 text-gray-400'
+                                  />
                                   {classroom.room}
                                 </div>
                               )}
                               <div className='flex items-center'>
-                                <School size={14} className='mr-2 text-gray-400' />
+                                <School
+                                  size={14}
+                                  className='mr-2 text-gray-400'
+                                />
                                 {classroom.course_level}
                               </div>
                             </div>
@@ -267,7 +300,9 @@ const SchedulePage: React.FC = () => {
                 <School className='w-6 h-6 text-cyan-600' />
               </div>
               <div className='ml-4'>
-                <p className='text-sm font-medium text-gray-600'>Tổng lớp học</p>
+                <p className='text-sm font-medium text-gray-600'>
+                  Tổng lớp học
+                </p>
                 <p className='text-2xl font-bold text-gray-900'>
                   {classrooms.length}
                 </p>
@@ -281,7 +316,9 @@ const SchedulePage: React.FC = () => {
                 <Calendar className='w-6 h-6 text-green-600' />
               </div>
               <div className='ml-4'>
-                <p className='text-sm font-medium text-gray-600'>Lịch học tuần này</p>
+                <p className='text-sm font-medium text-gray-600'>
+                  Lịch học tuần này
+                </p>
                 <p className='text-2xl font-bold text-gray-900'>
                   {schedules.length}
                 </p>
@@ -301,7 +338,6 @@ const SchedulePage: React.FC = () => {
             </div>
           </div>
         </div>
-
       </div>
 
       {/* Modals */}

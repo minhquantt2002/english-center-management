@@ -2,13 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Search, Users, User, Check, AlertCircle } from 'lucide-react';
-import { useStaffStudentApi, useStaffClassroomApi } from '../../_hooks';
-import { ClassroomResponse, StudentResponse } from '../../../../types/staff';
+import { StudentResponse } from '../../../../../types/staff';
+import {
+  useStaffClassroomApi,
+  useStaffStudentApi,
+} from '../../../../staff/_hooks';
 
 interface AssignStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  classroom: ClassroomResponse | null;
+  classroomId: string;
 }
 
 interface StudentWithSelection extends StudentResponse {
@@ -19,7 +22,7 @@ interface StudentWithSelection extends StudentResponse {
 export default function AssignStudentModal({
   isOpen,
   onClose,
-  classroom,
+  classroomId,
 }: AssignStudentModalProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('all');
@@ -39,7 +42,7 @@ export default function AssignStudentModal({
   // Initialize students with selection state
   useEffect(() => {
     const fetchStudents = async () => {
-      if (isOpen && classroom) {
+      if (isOpen && classroomId) {
         setIsFetchingStudents(true);
         try {
           const availableStudents = await getAvailableStudents();
@@ -49,7 +52,7 @@ export default function AssignStudentModal({
               isSelected: false,
               isAssigned:
                 student.enrollments.findIndex(
-                  (c) => c.classroom.id === classroom.id
+                  (c) => c.classroom.id === classroomId
                 ) !== -1,
             })
           );
@@ -63,7 +66,7 @@ export default function AssignStudentModal({
     };
 
     fetchStudents();
-  }, [isOpen, classroom, getAvailableStudents]);
+  }, [isOpen, classroomId, getAvailableStudents]);
 
   // Filter students based on search and level
   const filteredStudents = students.filter((student) => {
@@ -73,12 +76,9 @@ export default function AssignStudentModal({
       student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.id?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesLevel =
-      selectedLevel === 'all' || student.input_level === selectedLevel;
-
     const isAssigned = !student.isAssigned;
 
-    return matchesSearch && matchesLevel && isAssigned;
+    return matchesSearch && isAssigned;
   });
 
   const handleStudentToggle = (studentId: string) => {
@@ -104,7 +104,7 @@ export default function AssignStudentModal({
   };
 
   const handleAssignStudents = async () => {
-    if (!classroom) return;
+    if (!classroomId) return;
 
     const selectedStudentIds = students
       .filter((student) => student.isSelected)
@@ -118,21 +118,9 @@ export default function AssignStudentModal({
     setIsLoading(true);
     try {
       // Assign multiple students at once
-      const result = await assignMultipleStudentsToClassroom(
-        classroom.id,
-        selectedStudentIds
-      );
+      await assignMultipleStudentsToClassroom(classroomId, selectedStudentIds);
 
-      // // Show success/failure messages
-      // if (result.failed_enrollments && result.failed_enrollments.length > 0) {
-      //   const failedCount = result.failed_enrollments.length;
-      //   const successCount = result.successful_enrollments.length;
-      //   alert(
-      //     `Đã phân công ${successCount} học viên thành công. ${failedCount} học viên không thể phân công.`
-      //   );
-      // } else {
-      //   alert(`Đã phân công ${selectedStudentIds.length} học viên thành công!`);
-      // }
+      alert(`Đã phân công ${selectedStudentIds.length} học viên thành công!`);
 
       onClose();
     } catch (error) {
@@ -143,57 +131,16 @@ export default function AssignStudentModal({
     }
   };
 
-  const getLevelColor = (level: string) => {
-    switch (level) {
-      case 'A1':
-        return 'bg-red-100 text-red-800';
-      case 'A2':
-        return 'bg-orange-100 text-orange-800';
-      case 'B1':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'B2':
-        return 'bg-blue-100 text-blue-800';
-      case 'C1':
-        return 'bg-purple-100 text-purple-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getLevelLabel = (level: string) => {
-    switch (level) {
-      case 'A1':
-        return 'A1 - Mất gốc';
-      case 'A2':
-        return 'A2 - Sơ cấp';
-      case 'B1':
-        return 'B1 - Trung cấp thấp';
-      case 'B2':
-        return 'B2 - Trung cấp cao';
-      case 'C1':
-        return 'C1 - Nâng cao';
-      default:
-        return level;
-    }
-  };
-
-  if (!isOpen || !classroom) return null;
+  if (!isOpen || !classroomId) return null;
 
   const selectedCount = students.filter((student) => student.isSelected).length;
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
-      <div className='bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden'>
+    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center !mt-0 z-50 p-4'>
+      <div className='bg-white rounded-lg shadow-xl max-w-6xl w-full overflow-hidden'>
         {/* Header */}
         <div className='flex items-center justify-between p-6 border-b'>
-          <div>
-            <h2 className='text-xl font-semibold text-gray-900'>
-              Phân công học viên
-            </h2>
-            <p className='text-sm text-gray-600 mt-1'>
-              Lớp: {classroom.class_name} - {classroom.room}
-            </p>
-          </div>
+          <h2 className='text-xl font-semibold text-gray-900'>Thêm học viên</h2>
           <button
             onClick={onClose}
             className='text-gray-400 hover:text-gray-600 transition-colors'
@@ -228,96 +175,111 @@ export default function AssignStudentModal({
           </div>
         </div>
 
-        {/* Student List */}
-        <div className='flex-1 overflow-y-auto max-h-96'>
+        <div className='flex-1 overflow-y-auto max-h-[500px]'>
           {isFetchingStudents ? (
-            <div className='p-8 text-center text-gray-500'>
-              <div className='w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-              <p>Đang tải danh sách học viên...</p>
+            <div className='p-12 text-center text-gray-500'>
+              <div className='w-10 h-10 border-3 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
+              <p className='text-lg font-medium'>
+                Đang tải danh sách học viên...
+              </p>
+              <p className='text-sm text-gray-400 mt-1'>
+                Vui lòng đợi trong giây lát
+              </p>
             </div>
           ) : studentError ? (
-            <div className='p-8 text-center text-red-500'>
-              <AlertCircle className='w-12 h-12 mx-auto mb-4' />
-              <p>Có lỗi xảy ra khi tải danh sách học viên</p>
-              <p className='text-sm mt-2'>{studentError}</p>
+            <div className='p-12 text-center text-red-500'>
+              <div className='w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4'>
+                <AlertCircle className='w-8 h-8' />
+              </div>
+              <p className='text-lg font-medium'>
+                Có lỗi xảy ra khi tải danh sách học viên
+              </p>
+              <p className='text-sm mt-2 text-gray-500'>{studentError}</p>
             </div>
           ) : filteredStudents.length === 0 ? (
-            <div className='p-8 text-center text-gray-500'>
-              <Users className='w-12 h-12 mx-auto mb-4 text-gray-300' />
-              <p>Không tìm thấy học viên nào phù hợp</p>
+            <div className='p-12 text-center text-gray-500'>
+              <div className='w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4'>
+                <Users className='w-8 h-8 text-gray-400' />
+              </div>
+              <p className='text-lg font-medium'>
+                Không tìm thấy học viên nào phù hợp
+              </p>
+              <p className='text-sm text-gray-400 mt-1'>
+                Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc
+              </p>
             </div>
           ) : (
             <div className='p-6'>
               {/* Select All */}
-              <div className='flex items-center justify-between mb-4 p-3 bg-gray-50 rounded-lg'>
-                <div className='flex items-center space-x-3'>
+              <div className='flex items-center justify-between mb-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200'>
+                <div className='flex items-center space-x-4'>
                   <button
                     onClick={handleSelectAll}
-                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                    className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
                       filteredStudents.every((student) => student.isSelected)
-                        ? 'bg-cyan-500 border-cyan-500 text-white'
-                        : 'border-gray-300 hover:border-cyan-400'
+                        ? 'bg-cyan-500 border-cyan-500 text-white shadow-lg shadow-cyan-500/25'
+                        : 'border-gray-300 hover:border-cyan-400 hover:bg-cyan-50'
                     }`}
                   >
                     {filteredStudents.every(
                       (student) => student.isSelected
-                    ) && <Check className='w-3 h-3' />}
+                    ) && <Check className='w-4 h-4' />}
                   </button>
-                  <span className='font-medium text-gray-700'>
-                    Chọn tất cả ({filteredStudents.length})
+                  <div>
+                    <span className='font-semibold text-gray-800'>
+                      Chọn tất cả
+                    </span>
+                    <span className='text-gray-500 ml-2'>
+                      ({filteredStudents.length} học viên)
+                    </span>
+                  </div>
+                </div>
+                <div className='text-right'>
+                  <span className='text-sm font-medium text-cyan-600 bg-cyan-100 px-3 py-1 rounded-full'>
+                    Đã chọn: {selectedCount}
                   </span>
                 </div>
-                <span className='text-sm text-gray-500'>
-                  Đã chọn: {selectedCount}
-                </span>
               </div>
 
               {/* Students Grid */}
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+              <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
                 {filteredStudents.map((student) => (
                   <div
                     key={student.id}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                    className={`p-5 border-2 rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.02] ${
                       student.isSelected
-                        ? 'border-cyan-500 bg-cyan-50'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        ? 'border-cyan-400 bg-gradient-to-br from-cyan-50 to-blue-50 shadow-lg shadow-cyan-500/10'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md'
                     }`}
                     onClick={() => handleStudentToggle(student.id)}
                   >
-                    <div className='flex items-center space-x-3'>
+                    <div className='flex items-center space-x-4'>
                       <div
-                        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                        className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
                           student.isSelected
-                            ? 'bg-cyan-500 border-cyan-500 text-white'
-                            : 'border-gray-300'
+                            ? 'bg-cyan-500 border-cyan-500 text-white shadow-lg shadow-cyan-500/25'
+                            : 'border-gray-300 hover:border-cyan-400'
                         }`}
                       >
-                        {student.isSelected && <Check className='w-3 h-3' />}
+                        {student.isSelected && <Check className='w-4 h-4' />}
                       </div>
                       <div className='flex-1 min-w-0'>
-                        <div className='flex items-center space-x-2'>
-                          <div className='w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center'>
-                            <User className='w-4 h-4 text-gray-500' />
+                        <div className='flex items-center space-x-3 mb-3'>
+                          <div className='w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center shadow-inner'>
+                            <User className='w-5 h-5 text-gray-600' />
                           </div>
                           <div className='flex-1 min-w-0'>
-                            <p className='font-medium text-gray-900 truncate'>
+                            <p className='font-semibold text-gray-900 truncate text-lg'>
                               {student.name}
                             </p>
                             <p className='text-sm text-gray-500 truncate'>
-                              {student.id}
+                              {student.email}
                             </p>
                           </div>
                         </div>
-                        <div className='mt-2 flex items-center justify-between'>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${getLevelColor(
-                              student.input_level
-                            )}`}
-                          >
-                            {getLevelLabel(student.input_level)}
-                          </span>
-                          <span className='text-xs text-gray-500'>
-                            {student.email}
+                        <div className='flex items-center justify-between'>
+                          <span className='text-xs text-gray-400 font-medium'>
+                            ID: {student.id}
                           </span>
                         </div>
                       </div>

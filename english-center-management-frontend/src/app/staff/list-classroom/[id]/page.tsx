@@ -12,12 +12,10 @@ import {
   Mail,
   Search,
   Plus,
-  Edit,
   Trash2,
   Eye,
-  Settings,
 } from 'lucide-react';
-import { useStaffClassroomApi, useStaffStudentApi } from '../../_hooks';
+import { useStaffClassroomApi } from '../../_hooks';
 import AssignStudentModal from './_components/create-student';
 import ViewStudentModal from './_components/view-student';
 import EditStudentModal from './_components/edit-student';
@@ -26,7 +24,7 @@ import EditClassroomInfoModal from './_components/edit-classroom-info';
 import { ClassroomResponse, StudentResponse } from '../../../../types/staff';
 
 export function formatDays(days: string[]) {
-  const mapDays = {
+  const mapDays: Record<string, string> = {
     monday: '2',
     tuesday: '3',
     wednesday: '4',
@@ -36,7 +34,20 @@ export function formatDays(days: string[]) {
     sunday: 'CN',
   };
 
-  const formatted = days.map((d, index) => {
+  const orderDays: Record<string, number> = {
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+    sunday: 7,
+  };
+
+  // sort lại days theo thứ tự
+  const sorted = [...days].sort((a, b) => orderDays[a] - orderDays[b]);
+
+  const formatted = sorted.map((d) => {
     if (d === 'monday') return 'Thứ ' + mapDays[d];
     return mapDays[d];
   });
@@ -96,13 +107,11 @@ export default function ClassroomDetailPage() {
 
   const handleAssignStudent = async (studentId: string[]) => {
     try {
-      // Find the student to assign
       const studentToAssign = students.filter((student: StudentResponse) =>
         studentId.includes(student.id)
       );
 
       if (studentToAssign) {
-        // Update the student's current class
         const updatedStudent = {
           ...studentToAssign,
           currentClass: classroom?.class_name || '',
@@ -110,9 +119,6 @@ export default function ClassroomDetailPage() {
 
         // Add to students list
         setStudents((prev) => [...prev, ...updatedStudent]);
-
-        // In a real app, you would make an API call here
-        console.log('Student assigned:', updatedStudent);
       }
     } catch (error) {
       console.error('Error assigning student:', error);

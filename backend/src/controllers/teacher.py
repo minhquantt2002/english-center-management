@@ -57,7 +57,6 @@ async def get_teacher_classes(
 @router.get("/classes/{classroom_id}", response_model=ClassroomResponse)
 async def get_teacher_classroom(
     classroom_id: str,
-    current_user: User = Depends(get_current_teacher_user),
     db: Session = Depends(get_db)
 ):
     """

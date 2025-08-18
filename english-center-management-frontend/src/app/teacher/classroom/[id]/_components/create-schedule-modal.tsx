@@ -1,37 +1,31 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { X, Clock, Calendar, Save } from 'lucide-react';
-import { useStaffClassroomApi } from '../../_hooks';
-import {
-  ScheduleCreate,
-  ClassroomResponse,
-  Weekday,
-} from '../../../../types/staff';
+import React, { useState } from 'react';
+import { X, Clock, Save } from 'lucide-react';
+import { ScheduleCreate, Weekday } from '../../../../../types/staff';
 
 interface CreateScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
+  classroomId: string;
   onSubmit: (scheduleData: ScheduleCreate) => Promise<void>;
 }
 
 const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
   isOpen,
   onClose,
+  classroomId,
   onSubmit,
 }) => {
   const [formData, setFormData] = useState<ScheduleCreate>({
-    class_id: '',
+    class_id: classroomId,
     weekday: 'monday' as Weekday,
     start_time: '08:00',
     end_time: '09:30',
   });
 
-  const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { getClassrooms } = useStaffClassroomApi();
 
   const weekdays = [
     { value: 'monday', label: 'Thứ Hai' },
@@ -51,21 +45,6 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
     { start: '17:00', end: '18:30' },
     { start: '18:45', end: '20:15' },
   ];
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchClassrooms();
-    }
-  }, [isOpen]);
-
-  const fetchClassrooms = async () => {
-    try {
-      const data = await getClassrooms();
-      setClassrooms(data || []);
-    } catch (error) {
-      console.error('Error fetching classrooms:', error);
-    }
-  };
 
   const handleInputChange = (field: keyof ScheduleCreate, value: string) => {
     setFormData((prev) => ({
@@ -133,7 +112,7 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
 
   const handleClose = () => {
     setFormData({
-      class_id: '',
+      class_id: classroomId,
       weekday: 'monday' as Weekday,
       start_time: '08:00',
       end_time: '09:30',
@@ -145,7 +124,7 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
+    <div className='fixed inset-0 bg-black bg-opacity-50 !mt-0 flex items-center justify-center z-50 p-4'>
       <div className='bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto'>
         {/* Header */}
         <div className='flex items-center justify-between p-6 border-b border-gray-200'>
@@ -165,30 +144,6 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className='p-6 space-y-4'>
-          {/* Classroom Selection */}
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Lớp học <span className='text-red-500'>*</span>
-            </label>
-            <select
-              value={formData.class_id}
-              onChange={(e) => handleInputChange('class_id', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
-                errors.class_id ? 'border-red-300' : 'border-gray-300'
-              }`}
-            >
-              <option value=''>Chọn lớp học</option>
-              {classrooms.map((classroom) => (
-                <option key={classroom.id} value={classroom.id}>
-                  {classroom.class_name} - {classroom.teacher?.name || 'N/A'}
-                </option>
-              ))}
-            </select>
-            {errors.class_id && (
-              <p className='text-red-500 text-sm mt-1'>{errors.class_id}</p>
-            )}
-          </div>
-
           {/* Weekday Selection */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>

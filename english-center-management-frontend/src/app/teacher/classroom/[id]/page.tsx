@@ -9,20 +9,16 @@ import {
   Edit,
   UserCheck,
   BarChart3,
-  Settings,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useTeacherApi } from '../../_hooks/use-api';
-import {
-  ClassOverview,
-  StudentList,
-  ClassSchedule,
-  ClassStats,
-  AttendanceManagement,
-  GradeManagement,
-} from './_components';
 import { TeacherClassroomResponse } from '../../../../types/teacher';
+import ClassOverview from './_components/class-overview';
+import StudentList from './_components/student-list';
+import ClassSchedule from './_components/class-schedule';
+import AttendanceManagement from './_components/attendance-management';
+import GradeManagement from './_components/grade-management';
 
 const ClassDetailPage = () => {
   const params = useParams();
@@ -32,16 +28,16 @@ const ClassDetailPage = () => {
   const [classDetails, setClassDetails] =
     useState<TeacherClassroomResponse>(null);
 
-  useEffect(() => {
-    const fetchClassData = async () => {
-      try {
-        const [classData] = await Promise.all([getClassroomDetail(classId)]);
-        setClassDetails(classData);
-      } catch (err) {
-        console.error('Error fetching class data:', err);
-      }
-    };
+  const fetchClassData = async () => {
+    try {
+      const [classData] = await Promise.all([getClassroomDetail(classId)]);
+      setClassDetails(classData);
+    } catch (err) {
+      console.error('Error fetching class data:', err);
+    }
+  };
 
+  useEffect(() => {
     fetchClassData();
   }, [classId, getClassroomDetail]);
 
@@ -85,28 +81,15 @@ const ClassDetailPage = () => {
               </p>
             </div>
           </div>
-          <div className='flex items-center space-x-3'>
-            <button className='inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'>
-              <Settings className='w-4 h-4 mr-2' />
-              Cài đặt
-            </button>
-            <button className='inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'>
-              <Edit className='w-4 h-4 mr-2' />
-              Chỉnh sửa
-            </button>
-          </div>
+
+          <button className='inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'>
+            <Edit className='w-4 h-4 mr-2' />
+            Chỉnh sửa
+          </button>
         </div>
       </div>
 
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
-        {/* Class Stats */}
-        <ClassStats
-          totalStudents={classDetails?.enrollments.length || 0}
-          room={classDetails?.room || ''}
-          currentUnit={classDetails?.course.level || ''}
-        />
-
-        {/* Tabs */}
+      <div className=' mx-auto px-4 py-6'>
         <div className='bg-white rounded-lg shadow-sm border border-gray-200 mb-6'>
           <div className='border-b border-gray-200'>
             <nav className='flex space-x-8 px-6'>
@@ -137,11 +120,18 @@ const ClassDetailPage = () => {
             )}
 
             {activeTab === 'students' && (
-              <StudentList students={classDetails.enrollments} />
+              <StudentList
+                classroomId={classDetails.id}
+                students={classDetails.enrollments}
+                refetchData={fetchClassData}
+              />
             )}
 
             {activeTab === 'schedule' && (
-              <ClassSchedule sessions={classDetails.schedules} />
+              <ClassSchedule
+                classroom={classDetails}
+                refetchData={fetchClassData}
+              />
             )}
 
             {activeTab === 'attendance' && <AttendanceManagement />}

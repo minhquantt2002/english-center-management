@@ -14,37 +14,7 @@ import {
 } from 'lucide-react';
 import { useTeacherApi } from '../_hooks/use-api';
 import { TeacherClassroomResponse } from '../../../types/teacher';
-
-const getDays = (day: string) => {
-  let res = '';
-  switch (day.toLowerCase()) {
-    case 'monday':
-      res = 'Thứ 2';
-      break;
-    case 'tuesday':
-      res = 'Thứ 3';
-      break;
-    case 'wednesday':
-      res = 'Thứ 4';
-      break;
-    case 'thursday':
-      res = 'Thứ 5';
-      break;
-    case 'friday':
-      res = 'Thứ 6';
-      break;
-    case 'saturday':
-      res = 'Thứ 7';
-      break;
-    case 'sunday':
-      res = 'Chủ nhật';
-      break;
-    default:
-      res = 'Không xác định';
-      break;
-  }
-  return res;
-};
+import { formatDays } from '../../staff/list-classroom/[id]/page';
 
 const MyClassesDashboard = () => {
   const { loading, getClassrooms } = useTeacherApi();
@@ -166,12 +136,12 @@ const MyClassesDashboard = () => {
           {classes.map((classItem) => (
             <div
               key={classItem.id}
-              className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer'
+              className='bg-white rounded-lg  shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer'
             >
               {/* Class Header */}
               <div className='flex justify-between items-start mb-4'>
-                <div className='flex-1'>
-                  <h3 className='text-lg font-semibold text-gray-900 mb-1'>
+                <div className='flex space-x-2 items-center'>
+                  <h3 className='text-lg font-semibold text-gray-900'>
                     {classItem.class_name}
                   </h3>
                   <span
@@ -180,8 +150,9 @@ const MyClassesDashboard = () => {
                     {classItem.course_level}
                   </span>
                 </div>
-                <div className='text-right'>
-                  <div className='flex items-center text-sm text-gray-600 mb-1'>
+
+                <div>
+                  <div className='flex items-center text-sm text-gray-600'>
                     <Users className='w-4 h-4 mr-1' />
                     {classItem.enrollments.length}
                   </div>
@@ -189,12 +160,10 @@ const MyClassesDashboard = () => {
               </div>
 
               {/* Schedule & Location */}
-              <div className='space-y-2 mb-4'>
+              <div className='mb-4 flex justify-between items-center'>
                 <div className='flex items-center text-sm text-gray-600'>
                   <Calendar className='w-4 h-4 mr-2' />
-                  {classItem.schedules
-                    .map((schedule) => getDays(schedule.weekday))
-                    .join(', ')}
+                  {formatDays(classItem.schedules.map((v) => v.weekday))}
                 </div>
                 <div className='flex items-center text-sm text-gray-600'>
                   <MapPin className='w-4 h-4 mr-2' />
@@ -203,10 +172,10 @@ const MyClassesDashboard = () => {
               </div>
 
               {/* Student Avatars */}
-              <div className='flex items-center justify-between'>
+              <div className='flex items-center justify-end '>
                 <Link
                   href={`/teacher/classroom/${classItem.id}`}
-                  className='text-blue-600 hover:text-blue-700 hover:bg-blue-200/60 px-4 py-2 rounded-lg text-sm font-medium'
+                  className='text-white bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium'
                 >
                   Xem chi tiết
                 </Link>

@@ -1,18 +1,23 @@
-import {
-  Filter,
-  MoreVertical,
-  Plus,
-  Search
-} from 'lucide-react';
+import { Eye, Plus, Search, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
-import { EnrollmentNested } from '../../../../../types/teacher';
+import { EnrollmentNested, StudentInClass } from '../../../../../types/teacher';
+import ViewStudentModal from './view-student-modal';
+import AssignStudentModal from './assign-student';
 
 interface StudentListProps {
+  classroomId: string;
   students: EnrollmentNested[];
+  refetchData: any;
 }
 
-const StudentList: React.FC<StudentListProps> = ({ students }) => {
+const StudentList: React.FC<StudentListProps> = ({
+  students,
+  classroomId,
+  refetchData,
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isOpenView, setIsOpenView] = useState<StudentInClass | null>(null);
+  const [isOpenAdd, setIsOpenAdd] = useState(false);
 
   const filteredStudents = students.filter(
     (student) =>
@@ -27,7 +32,7 @@ const StudentList: React.FC<StudentListProps> = ({ students }) => {
     >
       <div className='flex items-start space-x-3'>
         <img
-          src="https://cdn-icons-png.flaticon.com/512/4196/4196591.png"
+          src='https://cdn-icons-png.flaticon.com/512/4196/4196591.png'
           alt={student.student.name}
           className='w-12 h-12 rounded-full'
         />
@@ -40,8 +45,18 @@ const StudentList: React.FC<StudentListProps> = ({ students }) => {
           </p>
         </div>
         <div className='flex items-center space-x-2'>
-          <button className='p-1 text-gray-400 hover:text-gray-600'>
-            <MoreVertical className='w-4 h-4' />
+          <button
+            className='p-1 text-blue-600 hover:text-blue-400'
+            onClick={() => setIsOpenView(student.student)}
+          >
+            <Eye className='w-4 h-4' />
+          </button>
+
+          <button
+            className='p-1 text-red-600 hover:text-red-400'
+            onClick={() => console.log('Delete', student.id)}
+          >
+            <Trash2 className='w-4 h-4' />
           </button>
         </div>
       </div>
@@ -62,12 +77,11 @@ const StudentList: React.FC<StudentListProps> = ({ students }) => {
               className='pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none'
             />
           </div>
-          <button className='inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'>
-            <Filter className='w-4 h-4 mr-2' />
-            Lọc
-          </button>
         </div>
-        <button className='inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'>
+        <button
+          onClick={() => setIsOpenAdd(true)}
+          className='inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'
+        >
           <Plus className='w-4 h-4 mr-2' />
           Thêm học viên
         </button>
@@ -75,6 +89,25 @@ const StudentList: React.FC<StudentListProps> = ({ students }) => {
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
         {filteredStudents.map(renderStudentCard)}
       </div>
+
+      {isOpenView !== null && (
+        <ViewStudentModal
+          isOpen={isOpenView !== null}
+          onClose={() => setIsOpenView(null)}
+          student={isOpenView.id}
+        />
+      )}
+
+      {isOpenAdd && (
+        <AssignStudentModal
+          isOpen={isOpenAdd}
+          onClose={() => {
+            setIsOpenAdd(false);
+            refetchData();
+          }}
+          classroomId={classroomId}
+        />
+      )}
     </div>
   );
 };

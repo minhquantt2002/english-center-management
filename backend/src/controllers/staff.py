@@ -9,6 +9,7 @@ from ..services import user as user_service
 from ..services import course as course_service
 from ..services import classroom as classroom_service
 from ..services import schedule as schedule_service
+from ..services import enrollment as enrollment_service
 from ..schemas.user import UserResponse, UserCreate, UserUpdate, StudentResponse
 from ..schemas.course import CourseResponse
 from ..schemas.classroom import ClassroomResponse, ClassroomCreate, ClassroomUpdate
@@ -371,8 +372,7 @@ async def assign_multiple_students_to_classroom(
             detail="ID không hợp lệ"
         )
     
-    # TODO: Implement logic to assign multiple students to classroom
-    return {"message": "Học sinh đã được gán vào lớp"}
+    return enrollment_service.bulk_create_enrollments(db=db, student_ids=student_ids, class_id=classroom_uuid)
 
 @router.get("/classrooms/{classroom_id}/students")
 async def get_classroom_students(
@@ -395,10 +395,7 @@ async def get_classroom_students(
     return {"students": []}
 
 # ==================== SCHEDULE MANAGEMENT ====================
-@router.get("/schedules/test")
-async def test_schedules():
-    """Test endpoint for schedules"""
-    return {"message": "Schedules endpoint is working", "schedules": []}
+
 @router.get("/schedules", response_model=List[ScheduleResponse])
 async def get_all_schedules(
     classroom_id: Optional[str] = Query(None, description="Filter by classroom ID"),
@@ -555,7 +552,6 @@ async def get_classroom_schedules(
 # ==================== INVOICE MANAGEMENT ====================
 @router.post("/invoices")
 async def create_invoice(
-    invoice_data: dict,
     current_user: User = Depends(get_current_staff_user),
     db: Session = Depends(get_db)
 ):

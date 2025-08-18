@@ -29,6 +29,18 @@ def get_enrollment_by_student_classroom(db: Session, student_id: UUID, class_id:
     """Get specific enrollment by student and classroom"""
     return enrollment_crud.get_enrollment_by_student_classroom(db, student_id, class_id)
 
+def bulk_create_enrollments(db: Session, student_ids: List[UUID], class_id: UUID) -> Optional[Enrollment]:
+    """Get specific enrollment by student and classroom"""
+    for student_id in student_ids:
+        enrollment_crud.create_enrollment(
+            db=db,
+            enrollment_data=EnrollmentCreate(
+                student_id=student_id,
+                class_id=class_id,
+            )
+        )
+    return True
+
 def create_enrollment(db: Session, enrollment_data: EnrollmentCreate | dict) -> Enrollment:
     """Create new enrollment"""
     if isinstance(enrollment_data, dict):
