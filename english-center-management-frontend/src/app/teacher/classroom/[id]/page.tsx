@@ -141,14 +141,14 @@ const ClassDetailPage = () => {
               <AttendanceManagement
                 classId={classDetails.id}
                 schedules={classDetails.schedules}
-                students={classDetails.enrollments}
+                enrollments={classDetails.enrollments}
               />
             )}
 
             {activeTab === 'homework' && (
               <HomeworkManagement
                 classId={classDetails.id}
-                students={classDetails.enrollments}
+                enrollments={classDetails.enrollments}
               />
             )}
 

@@ -5,9 +5,9 @@ from uuid import UUID
 from ..models.user import User
 from ..schemas.user import UserCreate, UserUpdate
 
-def get_user(db: Session, user_id: UUID) -> Optional[User]:
+def get_user(db: Session, user_id: UUID):
     """Get user by UUID"""
-    return db.query(User).filter(User.id == user_id).first()
+    return db.query(User).where(User.id == user_id).first()
 
 def get_user_by_id(db: Session, user_id: UUID) -> Optional[User]:
     """Get user by ID (alias for get_user)"""
@@ -106,6 +106,6 @@ def get_student_academic_summary(db: Session, student_id: UUID) -> dict:
         "input_level": user.input_level,
         "status": user.status,
         "total_enrollments": len(user.enrollments),
-        "total_scores": len(user.scores),
-        "average_score": sum(score.total_score for score in user.scores) / len(user.scores) if user.scores else 0,
+        "total_scores": 0,
+        "average_score": 0,
     }

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useStudentApi } from '../_hooks/use-api';
 import { ClassroomResponse } from '../../../types/student';
+import { formatDays } from '../../staff/list-classroom/[id]/page';
 
 const StudentClassroomPage: React.FC = () => {
   const router = useRouter();
@@ -265,7 +266,7 @@ const StudentClassroomPage: React.FC = () => {
                 <Clock className='w-4 h-4' />
                 <span>
                   {classItem.schedules && classItem.schedules.length > 0
-                    ? `${classItem.schedules[0].weekday} ${classItem.schedules[0].start_time} - ${classItem.schedules[0].end_time}`
+                    ? formatDays(classItem.schedules.map((v) => v.weekday))
                     : 'Chưa có lịch'}
                 </span>
               </div>

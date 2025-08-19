@@ -15,7 +15,7 @@ import { useStudentApi } from '../_hooks/use-api';
 
 const StudyingSchedule = () => {
   const { loading, getStudentSchedule } = useStudentApi();
-  const [currentWeek, setCurrentWeek] = useState(new Date(2024, 0, 22)); // January 22, 2024
+  const [currentWeek, setCurrentWeek] = useState(new Date()); // January 22, 2024
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [schedules, setSchedules] = useState([]);
 
@@ -183,8 +183,8 @@ const StudyingSchedule = () => {
   };
 
   return (
-    <div className='min-h-screen bg-gray-50 p-6'>
-      <div className='max-w-7xl mx-auto'>
+    <div className='min-h-screen'>
+      <div className='mx-auto'>
         {/* Loading state */}
         {loading && (
           <div className='flex justify-center items-center py-8'>
@@ -194,7 +194,7 @@ const StudyingSchedule = () => {
 
         {/* Header */}
         <div className='mb-8'>
-          <h1 className='text-3xl font-bold text-gray-900 mb-2'>
+          <h1 className='text-2xl font-bold text-gray-900 mb-2'>
             Lịch học của tôi
           </h1>
           <p className='text-gray-600'>

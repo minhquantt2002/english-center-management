@@ -17,15 +17,11 @@ from ..schemas.schedule import ScheduleResponse, ScheduleCreate, ScheduleUpdate
 
 router = APIRouter()
 
-# ==================== STUDENT MANAGEMENT ====================
 @router.get("/students", response_model=List[StudentResponse])
 async def get_all_students(
     current_user: User = Depends(get_current_staff_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy danh sách tất cả học sinh
-    """
     students = user_service.get_students(db)
     return students
 
@@ -35,9 +31,6 @@ async def get_student_by_id(
     current_user: User = Depends(get_current_staff_user),
     db: Session = Depends(get_db)
 ):  
-    """
-    Lấy thông tin học sinh theo ID
-    """
     try:
         student_uuid = UUID(student_id)
     except ValueError:
@@ -272,9 +265,6 @@ async def get_classroom_by_id(
     current_user: User = Depends(get_current_staff_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy thông tin lớp học theo ID
-    """
     try:
         classroom_uuid = UUID(classroom_id)
     except ValueError:
@@ -297,9 +287,6 @@ async def create_classroom(
     current_user: User = Depends(get_current_staff_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Tạo lớp học mới
-    """
     classroom = classroom_service.create_classroom(db, classroom_data)
     return classroom
 
@@ -310,9 +297,6 @@ async def update_classroom(
     current_user: User = Depends(get_current_staff_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Cập nhật thông tin lớp học
-    """
     try:
         classroom_uuid = UUID(classroom_id)
     except ValueError:
@@ -331,27 +315,6 @@ async def update_classroom(
     updated_classroom = classroom_service.update_classroom(db, classroom_uuid, classroom_data)
     return updated_classroom
 
-@router.post("/classrooms/{classroom_id}/students")
-async def assign_student_to_classroom(
-    classroom_id: str,
-    student_data: dict,
-    current_user: User = Depends(get_current_staff_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Gán học sinh vào lớp học
-    """
-    try:
-        classroom_uuid = UUID(classroom_id)
-        student_uuid = UUID(student_data.get("studentId"))
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="ID không hợp lệ"
-        )
-    
-    # TODO: Implement logic to assign student to classroom
-    return {"message": "Học sinh đã được gán vào lớp"}
 
 @router.post("/classrooms/{classroom_id}/students/bulk")
 async def assign_multiple_students_to_classroom(
@@ -373,26 +336,6 @@ async def assign_multiple_students_to_classroom(
         )
     
     return enrollment_service.bulk_create_enrollments(db=db, student_ids=student_ids, class_id=classroom_uuid)
-
-@router.get("/classrooms/{classroom_id}/students")
-async def get_classroom_students(
-    classroom_id: str,
-    current_user: User = Depends(get_current_staff_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy danh sách học sinh trong lớp
-    """
-    try:
-        classroom_uuid = UUID(classroom_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="classroom_id không hợp lệ"
-        )
-    
-    # TODO: Implement logic to get classroom students
-    return {"students": []}
 
 # ==================== SCHEDULE MANAGEMENT ====================
 
@@ -469,9 +412,6 @@ async def create_schedule(
     current_user: User = Depends(get_current_staff_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Tạo lịch học mới
-    """
     schedule = schedule_service.create_schedule(db, schedule_data)
     return schedule
 
@@ -482,9 +422,6 @@ async def update_schedule(
     current_user: User = Depends(get_current_staff_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Cập nhật thông tin lịch học
-    """
     try:
         schedule_uuid = UUID(schedule_id)
     except ValueError:
@@ -509,9 +446,6 @@ async def delete_schedule(
     current_user: User = Depends(get_current_staff_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Xóa lịch học
-    """
     try:
         schedule_uuid = UUID(schedule_id)
     except ValueError:
@@ -549,29 +483,6 @@ async def get_classroom_schedules(
     
     return schedule_service.get_schedules_by_classroom(db=db, class_id=classroom_id)
 
-# ==================== INVOICE MANAGEMENT ====================
-@router.post("/invoices")
-async def create_invoice(
-    current_user: User = Depends(get_current_staff_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Tạo hóa đơn mới
-    """
-    # TODO: Implement logic to create invoice
-    return {"message": "Hóa đơn đã được tạo"}
-
-@router.get("/invoices")
-async def get_all_invoices(
-    current_user: User = Depends(get_current_staff_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy danh sách tất cả hóa đơn
-    """
-    # TODO: Implement logic to get invoices
-    return {"invoices": []}
-
 # ==================== STATS MANAGEMENT ====================
 @router.get("/stats")
 async def get_staff_stats(
@@ -590,14 +501,3 @@ async def get_staff_stats(
         "totalEnrollments": 0,
         "recentEnrollments": []
     }
-
-@router.get("/rooms")
-async def get_rooms(
-    current_user: User = Depends(get_current_staff_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy danh sách phòng
-    """
-    # TODO: Implement logic to get rooms
-    return {"rooms": []}

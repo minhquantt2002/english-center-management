@@ -228,7 +228,7 @@ export default function ViewStudentModal({
         <div className=''>
           <div className='space-y-2 flex flex-col'>
             {studentData?.enrollments.map((enrollment, index) => (
-              <p className='text-gray-900 font-medium text-sm'>
+              <p key={index} className='text-gray-900 font-medium text-sm'>
                 {index + 1}: {enrollment.classroom.class_name}
               </p>
             ))}

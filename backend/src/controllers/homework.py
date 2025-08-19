@@ -6,7 +6,9 @@ from typing import List
 import uuid
 from src.models import Homework as HomeworkModel
 from src.models import Session as SessionModel
-from src.schemas.homework import SessionOut, HomeworkUpdate
+from src.schemas.homework import SessionOut, HomeworkUpdate, HomeworkResponse
+from ..dependencies import get_current_student_user
+from ..models.user import User
 
 router = APIRouter()
 
@@ -27,8 +29,14 @@ def update_homework(homework_id: uuid.UUID, data: HomeworkUpdate, db: Session = 
 
     return homework
 
+@router.get('/student/', response_model=List[HomeworkResponse])
+def get_homeworks_by_student(current_user: User = Depends(get_current_student_user), db: Session = Depends(get_db)):
+    homeworks = db.query(HomeworkModel).where(HomeworkModel.student_id == current_user.id).all()
+    return homeworks
 
 @router.get("/{class_id}/", response_model=List[SessionOut])
 def get_sessions(class_id: uuid.UUID, db: Session = Depends(get_db)):
     sessions = db.query(SessionModel).where(SessionModel.class_id == class_id).all()
     return sessions
+
+

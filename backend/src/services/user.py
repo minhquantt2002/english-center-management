@@ -87,7 +87,7 @@ def delete_student(db: Session, student_id: UUID) -> bool:
     """Delete student"""
     return user_crud.delete_user(db, student_id)
 
-def get_student(db: Session, student_id: UUID) -> Optional[User]:
+def get_student(db: Session, student_id: UUID):
     """Get student by ID"""
     return user_crud.get_user(db, student_id)
 

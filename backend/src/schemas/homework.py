@@ -21,3 +21,20 @@ class SessionOut(BaseSchema):
     schedule_id: UUID
     homeworks: List[HomeworkOut] = []
     created_at: datetime 
+
+
+class SessionHomework(BaseSchema):
+    id: UUID
+    topic: str
+    class_id: UUID
+    schedule_id: UUID
+    created_at: datetime 
+
+class HomeworkResponse(BaseSchema):
+    id: UUID
+    session: SessionHomework
+    student_id: UUID
+    status: HomeworkStatus = HomeworkStatus.PENDING
+    feedback: Optional[str] = None
+
+    

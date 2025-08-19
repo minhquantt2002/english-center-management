@@ -32,11 +32,8 @@ class User(Base):
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # Relationships
-    # Classes taught by this user (if teacher)
     taught_classes = relationship("Class", back_populates="teacher")
     
-    # Student enrollments (if student)
     enrollments = relationship("Enrollment", back_populates="student")
 
     attendances = relationship("Attendance", back_populates="student")

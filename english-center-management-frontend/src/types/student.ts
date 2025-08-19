@@ -1,3 +1,5 @@
+import { HomeworkStatus } from '../app/teacher/_hooks/use-homework';
+
 // Student specific types based on backend schemas
 export type Weekday =
   | 'monday'
@@ -64,6 +66,7 @@ export interface EnrollmentNested {
   enrollment_at: string;
   status: string;
   score: ScoreNested[];
+  student_id: string;
 }
 
 export interface ScoreNested {
@@ -116,4 +119,35 @@ export interface ScheduleNested {
   weekday: string;
   start_time: string;
   end_time: string;
+}
+
+export interface HomeworkStudentResponse {
+  id: string;
+  session: {
+    id: string;
+    topic: string;
+    class_id: string;
+    schedule_id: string;
+    created_at: string;
+  };
+  student_id: string;
+  status: HomeworkStatus;
+  feedback: string | null;
+}
+
+export interface AttendanceStudentResponse {
+  id: string;
+  session: {
+    id: string;
+    topic: string;
+    class_id: string;
+    schedule_id: string;
+    created_at: string;
+  };
+  student_id: string;
+  is_present: boolean;
+}
+
+export interface EnrollmentScoreResponse {
+  score: ScoreNested;
 }

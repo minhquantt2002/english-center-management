@@ -76,8 +76,8 @@ function formatSchedules(list: ScheduleNested[]) {
 const AttendanceManagement: React.FC<{
   classId: string;
   schedules?: ScheduleNested[];
-  students?: EnrollmentNested[];
-}> = ({ schedules, students, classId }) => {
+  enrollments?: EnrollmentNested[];
+}> = ({ schedules, enrollments, classId }) => {
   const [showAlert, setShowAlert] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [attendance, setAttendance] = useState<{
@@ -148,8 +148,8 @@ const AttendanceManagement: React.FC<{
     setShowModal(true);
     setAlertMessage('');
     const initialAttendance: { [key: string]: boolean } = {};
-    students.forEach((student) => {
-      initialAttendance[student.id] = null;
+    enrollments.forEach((student) => {
+      initialAttendance[student.student.id] = null;
     });
     setAttendance(initialAttendance);
   };
@@ -182,10 +182,12 @@ const AttendanceManagement: React.FC<{
         topic,
         class_id: classId,
         schedule_id: selectedSchedule,
-        attendances: Object.entries(attendance).map((v) => ({
-          is_present: v[1],
-          student_id: v[0],
-        })),
+        attendances: Object.entries(attendance).map(
+          ([student_id, is_present]) => ({
+            student_id,
+            is_present,
+          })
+        ),
       });
 
       setShowModal(false);
@@ -284,56 +286,62 @@ const AttendanceManagement: React.FC<{
         </div>
       ) : (
         <div className='space-y-3'>
-          {sessionAttendances.map((session) => {
-            const presentCount = session.attendances.filter(
-              (a) => a.is_present
-            ).length;
-            const absentCount = session.attendances.filter(
-              (a) => !a.is_present
-            ).length;
+          {sessionAttendances
+            .sort(
+              (a, b) =>
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime()
+            )
+            .map((session) => {
+              const presentCount = session.attendances.filter(
+                (a) => a.is_present
+              ).length;
+              const absentCount = session.attendances.filter(
+                (a) => !a.is_present
+              ).length;
 
-            return (
-              <div
-                key={session.id}
-                className='p-4 border border-gray-200 rounded-lg bg-white shadow-sm'
-              >
-                <div className='flex items-center justify-between'>
-                  <h4 className='text-base font-semibold text-gray-900'>
-                    {session.topic || 'Buổi học'}
-                  </h4>
-                  <span className='text-sm text-gray-500'>
-                    {new Date(session.created_at).toLocaleString('vi-VN')}
-                  </span>
-                </div>
-                <div className='mt-2 flex space-x-4 items-center justify-between'>
-                  <div className='flex space-x-4 text-sm'>
-                    <span className='inline-flex items-center text-green-600'>
-                      <div className='w-2 h-2 rounded-full bg-green-500 mr-1'></div>
-                      Có mặt: {presentCount}
-                    </span>
-                    <span className='inline-flex items-center text-red-600'>
-                      <div className='w-2 h-2 rounded-full bg-red-500 mr-1'></div>
-                      Vắng mặt: {absentCount}
-                    </span>
-                    <span className='text-gray-700'>
-                      Tổng: {session.attendances.length}
+              return (
+                <div
+                  key={session.id}
+                  className='p-4 border border-gray-200 rounded-lg bg-white shadow-sm'
+                >
+                  <div className='flex items-center justify-between'>
+                    <h4 className='text-base font-semibold text-gray-900'>
+                      {session.topic || 'Buổi học'}
+                    </h4>
+                    <span className='text-sm text-gray-500'>
+                      {new Date(session.created_at).toLocaleString('vi-VN')}
                     </span>
                   </div>
+                  <div className='mt-2 flex space-x-4 items-center justify-between'>
+                    <div className='flex space-x-4 text-sm'>
+                      <span className='inline-flex items-center text-green-600'>
+                        <div className='w-2 h-2 rounded-full bg-green-500 mr-1'></div>
+                        Có mặt: {presentCount}
+                      </span>
+                      <span className='inline-flex items-center text-red-600'>
+                        <div className='w-2 h-2 rounded-full bg-red-500 mr-1'></div>
+                        Vắng mặt: {absentCount}
+                      </span>
+                      <span className='text-gray-700'>
+                        Tổng: {session.attendances.length}
+                      </span>
+                    </div>
 
-                  <button
-                    onClick={() => {
-                      setSelectedSession(session);
-                      setShowDetailModal(true);
-                    }}
-                    className='inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  >
-                    <Eye className='w-4 h-4 mr-2' />
-                    Xem chi tiết
-                  </button>
+                    <button
+                      onClick={() => {
+                        setSelectedSession(session);
+                        setShowDetailModal(true);
+                      }}
+                      className='inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    >
+                      <Eye className='w-4 h-4 mr-2' />
+                      Xem chi tiết
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
       )}
 
@@ -408,28 +416,28 @@ const AttendanceManagement: React.FC<{
             <div className='p-6 overflow-y-auto flex-1'>
               <div className='mb-4'>
                 <p className='text-sm text-gray-600'>
-                  Tổng số học viên: {students.length}
+                  Tổng số học viên: {enrollments.length}
                 </p>
               </div>
 
               <div className='space-y-3'>
-                {students.map((student) => (
+                {enrollments.map((enrollment) => (
                   <div
-                    key={student.id}
+                    key={enrollment.student.id}
                     className='flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50'
                   >
                     <div className='flex items-center'>
                       <div className='w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4'>
                         <span className='text-blue-600 font-medium text-sm'>
-                          {student.student?.name?.charAt(0) || '-'}
+                          {enrollment.student?.name?.charAt(0) || '-'}
                         </span>
                       </div>
                       <div>
                         <h4 className='font-medium text-gray-900'>
-                          {student.student?.name || 'Không có tên'}
+                          {enrollment.student?.name || 'Không có tên'}
                         </h4>
                         <p className='text-sm text-gray-500'>
-                          ID: {student.id}
+                          #{enrollment.student.id.substring(0, 5)}
                         </p>
                       </div>
                     </div>
@@ -437,9 +445,11 @@ const AttendanceManagement: React.FC<{
                     <div className='relative'>
                       <div className='flex bg-gray-100 rounded-full p-1 space-x-1'>
                         <button
-                          onClick={() => toggleAttendance(student.id, true)}
+                          onClick={() =>
+                            toggleAttendance(enrollment.student.id, true)
+                          }
                           className={`relative flex items-center px-4 py-2 rounded-full text-sm font-medium ${
-                            attendance[student.id] === true
+                            attendance[enrollment.student.id] === true
                               ? 'bg-green-500 text-white'
                               : 'text-gray-600 hover:text-green-600 hover:bg-green-50'
                           }`}
@@ -449,9 +459,11 @@ const AttendanceManagement: React.FC<{
                         </button>
 
                         <button
-                          onClick={() => toggleAttendance(student.id, false)}
+                          onClick={() =>
+                            toggleAttendance(enrollment.student.id, false)
+                          }
                           className={`relative flex items-center px-4 py-2 rounded-full text-sm font-medium ${
-                            attendance[student.id] === false
+                            attendance[enrollment.student.id] === false
                               ? 'bg-red-500 text-white'
                               : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
                           }`}
@@ -465,7 +477,7 @@ const AttendanceManagement: React.FC<{
                 ))}
               </div>
 
-              {students.length === 0 && (
+              {enrollments.length === 0 && (
                 <div className='text-center py-8'>
                   <Users className='w-12 h-12 text-gray-400 mx-auto mb-4' />
                   <p className='text-gray-500'>
@@ -514,7 +526,7 @@ const AttendanceManagement: React.FC<{
                   </div>
 
                   <div className='text-sm font-medium text-gray-700'>
-                    Tổng: {students.length}
+                    Tổng: {enrollments.length}
                   </div>
                 </div>
                 <div className='flex space-x-3'>
@@ -643,8 +655,8 @@ const AttendanceManagement: React.FC<{
 
                 <div className='space-y-3'>
                   {selectedSession.attendances.map((attendance, index) => {
-                    const student = students?.find(
-                      (s) => s.id === attendance.student_id
+                    const student = enrollments?.find(
+                      (s) => s.student.id === attendance.student_id
                     );
 
                     return (

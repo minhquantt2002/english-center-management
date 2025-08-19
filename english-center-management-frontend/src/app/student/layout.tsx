@@ -32,7 +32,7 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className='flex h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 overflow-hidden'>
+    <div className='flex h-screen overflow-hidden'>
       {/* Sidebar */}
       <div
         className={`
@@ -73,9 +73,7 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
       </div>
 
       {/* Mobile bottom padding for safe area */}
-      {isMobile && (
-        <div className='h-safe-area-inset-bottom bg-gradient-to-br from-purple-50 via-white to-pink-50' />
-      )}
+      {isMobile && <div className='h-safe-area-inset-bottom' />}
     </div>
   );
 };

@@ -12,8 +12,8 @@ import {
   Clock,
   User,
   Award,
-  DollarSign,
   TrendingUp,
+  GraduationCap,
 } from 'lucide-react';
 import { StudentResponse } from '../../../../types/staff';
 import { useStaffStudentApi } from '../../_hooks';
@@ -35,30 +35,6 @@ export default function ViewStudentModal({
   const [studentData, setStudentData] = useState<StudentResponse | null>(null);
   const { getStudentById } = useStaffStudentApi();
 
-  const mockInvoices = [
-    {
-      id: 1,
-      invoiceNumber: 'INV-2024-001',
-      description: 'Học phí tháng 1/2024',
-      amount: 2000000,
-      paidAmount: 1500000,
-      remainingAmount: 500000,
-      paymentStatus: 'partial',
-      dueDate: '2024-01-31',
-    },
-    {
-      id: 2,
-      invoiceNumber: 'INV-2024-002',
-      description: 'Học phí tháng 2/2024',
-      amount: 2000000,
-      paidAmount: 0,
-      remainingAmount: 2000000,
-      paymentStatus: 'overdue',
-      dueDate: '2024-02-28',
-    },
-  ];
-
-  // Fetch student data when modal opens
   useEffect(() => {
     if (isOpen && student) {
       const fetchStudentData = async () => {
@@ -93,169 +69,212 @@ export default function ViewStudentModal({
     });
   };
 
-  const getStatusLabel = (status: string) => {
-    const statusMap: { [key: string]: string } = {
-      active: 'Đang học',
-      inactive: 'Tạm nghỉ',
-      pending: 'Chờ phân lớp',
-    };
-    return statusMap[status] || status;
-  };
-
   const getStatusColor = (status: string) => {
     const colorMap: { [key: string]: string } = {
-      active: 'bg-green-100 text-green-800',
-      inactive: 'bg-red-100 text-red-800',
-      pending: 'bg-yellow-100 text-yellow-800',
+      active: 'bg-green-100 text-green-800 border-green-200',
+      inactive: 'bg-red-100 text-red-800 border-red-200',
+      pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     };
-    return colorMap[status] || 'bg-gray-100 text-gray-800';
-  };
-
-  const getPaymentStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'partial':
-        return 'bg-blue-100 text-blue-800';
-      case 'overdue':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPaymentStatusText = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'Đã thanh toán';
-      case 'pending':
-        return 'Chờ thanh toán';
-      case 'partial':
-        return 'Thanh toán một phần';
-      case 'overdue':
-        return 'Quá hạn';
-      default:
-        return status;
-    }
+    return colorMap[status] || 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
   const renderDetailsTab = () => (
     <div className='space-y-6'>
       {/* Student Header */}
-      <div className='flex items-start space-x-6 mb-8'>
-        <div className='flex-shrink-0'>
-          <div className='w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold text-xl'>
-            {getInitials(studentData?.name ?? '')}
+      <div className='bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200'>
+        <div className='flex items-center gap-4'>
+          <div className='w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg'>
+            {getInitials(studentData?.name.charAt(0) || '')}
           </div>
-        </div>
-        <div className='flex-1'>
-          <h3 className='text-2xl font-bold text-gray-900 mb-2'>
-            {studentData?.name}
-          </h3>
-
-          <div className='flex flex-wrap gap-3'>
-            <span
-              className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(
-                studentData?.status
-              )}`}
-            >
-              {getStatusLabel(studentData?.status)}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Contact Information */}
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
-        <div className='bg-gray-50 rounded-lg p-6'>
-          <h4 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
-            <Mail className='w-5 h-5 mr-2 text-gray-600' />
-            Thông tin liên hệ
-          </h4>
-          <div className='space-y-3'>
-            <div className='flex items-center'>
-              <Mail className='w-4 h-4 text-gray-500 mr-3' />
-              <span className='text-gray-700'>{studentData?.email}</span>
-            </div>
-            {studentData?.phone_number && (
-              <div className='flex items-center'>
-                <Phone className='w-4 h-4 text-gray-500 mr-3' />
-                <span className='text-gray-700'>
-                  {studentData?.phone_number}
-                </span>
-              </div>
-            )}
-            {studentData?.bio && (
-              <div className='flex items-start'>
-                <MapPin className='w-4 h-4 text-gray-500 mr-3 mt-0.5' />
-                <span className='text-gray-700'>{studentData?.bio}</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className='bg-gray-50 rounded-lg p-6'>
-          <h4 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
-            <Calendar className='w-5 h-5 mr-2 text-gray-600' />
-            Thông tin cá nhân
-          </h4>
-          <div className='space-y-3'>
-            {studentData?.date_of_birth && (
-              <div className='flex items-center'>
-                <Calendar className='w-4 h-4 text-gray-500 mr-3' />
-                <span className='text-gray-700'>
-                  Ngày sinh: {formatDate(studentData?.date_of_birth)}
-                </span>
-              </div>
-            )}
-            <div className='flex items-center'>
-              <Clock className='w-4 h-4 text-gray-500 mr-3' />
-              <span className='text-gray-700'>
-                Ngày tạo: {formatDate(studentData?.created_at)}
+          <div className='flex-1'>
+            <h3 className='text-2xl font-bold text-gray-900 mb-1'>
+              {studentData?.name}
+            </h3>
+            <div className='flex items-center gap-3'>
+              <span
+                className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(
+                  'active'
+                )}`}
+              >
+                Đang học
+              </span>
+              <span className='text-sm text-gray-600'>
+                #{studentData?.id.substring(0, 5)}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Academic Information */}
-      <div className='bg-gray-50 rounded-lg p-6 mb-8'>
-        <h4 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
-          <BookOpen className='w-5 h-5 mr-2 text-gray-600' />
-          Lớp học
-        </h4>
-        <div className=''>
-          <div className='space-y-2 flex flex-col'>
-            {studentData?.enrollments.map((enrollment, index) => (
-              <p className='text-gray-900 font-medium text-sm'>
-                {index + 1}: {enrollment.classroom.class_name}
-              </p>
-            ))}
+      {/* Contact Information */}
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+        <div className='bg-white rounded-xl p-6 border border-gray-200 shadow-sm'>
+          <div className='flex items-center gap-3 mb-4'>
+            <div className='w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center'>
+              <Mail className='w-5 h-5 text-blue-600' />
+            </div>
+            <h4 className='text-lg font-semibold text-gray-900'>
+              Thông tin liên hệ
+            </h4>
           </div>
+          <div className='space-y-4'>
+            <div className='flex items-center gap-3 p-3 bg-gray-50 rounded-lg'>
+              <Mail className='w-4 h-4 text-gray-500' />
+              <div>
+                <p className='text-xs text-gray-500 uppercase tracking-wide'>
+                  Email
+                </p>
+                <p className='text-gray-900 font-medium'>
+                  {studentData?.email}
+                </p>
+              </div>
+            </div>
+            {studentData?.phone_number && (
+              <div className='flex items-center gap-3 p-3 bg-gray-50 rounded-lg'>
+                <Phone className='w-4 h-4 text-gray-500' />
+                <div>
+                  <p className='text-xs text-gray-500 uppercase tracking-wide'>
+                    Số điện thoại
+                  </p>
+                  <p className='text-gray-900 font-medium'>
+                    {studentData?.phone_number}
+                  </p>
+                </div>
+              </div>
+            )}
+            {studentData?.bio && (
+              <div className='flex items-start gap-3 p-3 bg-gray-50 rounded-lg'>
+                <MapPin className='w-4 h-4 text-gray-500 mt-1' />
+                <div>
+                  <p className='text-xs text-gray-500 uppercase tracking-wide'>
+                    Thông tin thêm
+                  </p>
+                  <p className='text-gray-900'>{studentData?.bio}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className='bg-white rounded-xl p-6 border border-gray-200 shadow-sm'>
+          <div className='flex items-center gap-3 mb-4'>
+            <div className='w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center'>
+              <Calendar className='w-5 h-5 text-green-600' />
+            </div>
+            <h4 className='text-lg font-semibold text-gray-900'>
+              Thông tin cá nhân
+            </h4>
+          </div>
+          <div className='space-y-4'>
+            {studentData?.date_of_birth && (
+              <div className='flex items-center gap-3 p-3 bg-gray-50 rounded-lg'>
+                <Calendar className='w-4 h-4 text-gray-500' />
+                <div>
+                  <p className='text-xs text-gray-500 uppercase tracking-wide'>
+                    Ngày sinh
+                  </p>
+                  <p className='text-gray-900 font-medium'>
+                    {formatDate(studentData?.date_of_birth)}
+                  </p>
+                </div>
+              </div>
+            )}
+            <div className='flex items-center gap-3 p-3 bg-gray-50 rounded-lg'>
+              <Clock className='w-4 h-4 text-gray-500' />
+              <div>
+                <p className='text-xs text-gray-500 uppercase tracking-wide'>
+                  Ngày đăng ký
+                </p>
+                <p className='text-gray-900 font-medium'>
+                  {formatDate(studentData?.created_at)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Academic Information */}
+      <div className='bg-white rounded-xl p-6 border border-gray-200 shadow-sm'>
+        <div className='flex items-center gap-3 mb-6'>
+          <div className='w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center'>
+            <GraduationCap className='w-5 h-5 text-purple-600' />
+          </div>
+          <h4 className='text-lg font-semibold text-gray-900'>
+            Thông tin học tập
+          </h4>
+          <span className='px-3 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full'>
+            {studentData?.enrollments?.length || 0} lớp học
+          </span>
+        </div>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          {studentData?.enrollments?.map((enrollment, index) => (
+            <div
+              key={enrollment.id}
+              className='group p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-purple-200 transition-all duration-200'
+            >
+              <div className='flex items-center gap-3 mb-2'>
+                <div className='w-8 h-8 bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg flex items-center justify-center'>
+                  <BookOpen className='w-4 h-4 text-purple-600' />
+                </div>
+                <div className='flex-1'>
+                  <h5 className='font-semibold text-gray-900 group-hover:text-purple-700 transition-colors'>
+                    {enrollment.classroom.class_name}
+                  </h5>
+                  <p className='text-xs text-gray-500'>
+                    #{enrollment.classroom.id.substring(0, 5)}
+                  </p>
+                </div>
+              </div>
+              <div className='ml-11'>
+                <span
+                  className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                    enrollment.status || 'active'
+                  )}`}
+                >
+                  {enrollment.status === 'active'
+                    ? 'Đang học'
+                    : enrollment.status === 'completed'
+                    ? 'Hoàn thành'
+                    : enrollment.status || 'Đang học'}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Emergency Contact */}
       {studentData?.parent_name && (
-        <div className='bg-gray-50 rounded-lg p-6'>
-          <h4 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
-            <Users className='w-5 h-5 mr-2 text-gray-600' />
-            Liên hệ khẩn cấp
-          </h4>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
-                Tên
-              </label>
-              <p className='text-gray-900'>{studentData?.parent_name}</p>
+        <div className='bg-white rounded-xl p-6 border border-gray-200 shadow-sm'>
+          <div className='flex items-center gap-3 mb-6'>
+            <div className='w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center'>
+              <Users className='w-5 h-5 text-orange-600' />
             </div>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
-                Số điện thoại
-              </label>
-              <p className='text-gray-900'>{studentData?.parent_phone}</p>
+            <h4 className='text-lg font-semibold text-gray-900'>
+              Thông tin liên hệ khẩn cấp
+            </h4>
+          </div>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div className='p-4 bg-orange-50 rounded-lg border border-orange-200'>
+              <div className='flex items-center gap-2 mb-2'>
+                <User className='w-4 h-4 text-orange-600' />
+                <p className='text-sm font-medium text-orange-800'>Họ và tên</p>
+              </div>
+              <p className='text-gray-900 font-semibold'>
+                {studentData?.parent_name}
+              </p>
+            </div>
+            <div className='p-4 bg-orange-50 rounded-lg border border-orange-200'>
+              <div className='flex items-center gap-2 mb-2'>
+                <Phone className='w-4 h-4 text-orange-600' />
+                <p className='text-sm font-medium text-orange-800'>
+                  Số điện thoại
+                </p>
+              </div>
+              <p className='text-gray-900 font-semibold'>
+                {studentData?.parent_phone}
+              </p>
             </div>
           </div>
         </div>
@@ -265,287 +284,157 @@ export default function ViewStudentModal({
 
   const renderAchievementsTab = () => (
     <div className='space-y-6'>
-      <div className='bg-gray-50 rounded-lg p-6'>
-        <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2'>
-          <Award className='w-5 h-5 text-yellow-600' />
-          <span>Thành tích học tập</span>
+      <div className='flex items-center gap-3 mb-6'>
+        <div className='w-10 h-10 bg-gradient-to-br from-yellow-100 to-orange-200 rounded-lg flex items-center justify-center'>
+          <Award className='w-5 h-5 text-orange-600' />
+        </div>
+        <h3 className='text-lg font-semibold text-gray-900'>
+          Thành tích học tập
         </h3>
-
-        {studentData.scores.length > 0 ? (
-          <div className='space-y-4'>
-            {studentData.scores.map((achievement) => (
-              <div
-                key={achievement.id}
-                className='bg-white rounded-lg p-4 border border-gray-200'
-              >
-                <div className='flex items-center justify-between mb-3'>
-                  <h4 className='font-semibold text-gray-900'>
-                    {achievement?.exam?.exam_name}
-                  </h4>
-                  <span className='px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800'>
-                    {achievement?.exam?.exam_type === 'final'
-                      ? 'Cuối kỳ'
-                      : achievement?.exam?.exam_type === 'midterm'
-                      ? 'Giữa kỳ'
-                      : achievement?.exam?.exam_type === 'quiz'
-                      ? 'Kiểm tra'
-                      : 'Thực hành'}
-                  </span>
-                </div>
-                <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-3'>
-                  <div>
-                    <span className='text-gray-600'>Điểm tổng:</span>
-                    <span className='ml-2 font-medium text-lg text-blue-600'>
-                      {achievement?.total_score}/
-                      {achievement?.exam?.total_points}
-                    </span>
-                  </div>
-                  <div>
-                    <span className='text-gray-600'>Xếp loại:</span>
-                    <span className='ml-2 font-medium text-lg text-green-600'>
-                      {achievement.grade}
-                    </span>
-                  </div>
-                  <div>
-                    <span className='text-gray-600'>Ngày thi:</span>
-                    <span className='ml-2 font-medium'>
-                      {new Date(
-                        achievement?.exam?.exam_date
-                      ).toLocaleDateString('vi-VN')}
-                    </span>
-                  </div>
-                </div>
-                <div className='flex items-center space-x-2'>
-                  <TrendingUp className='w-4 h-4 text-green-600' />
-                  <span className='text-sm text-green-600 font-medium'>
-                    Xuất sắc! Học viên đã hoàn thành bài thi với kết quả tốt
-                  </span>
-                </div>
-              </div>
-            ))}
-
-            {/* Summary */}
-            <div className='bg-blue-50 rounded-lg p-4 border border-blue-200'>
-              <h4 className='font-semibold text-blue-900 mb-2'>Tổng kết</h4>
-              <div className='grid grid-cols-3 gap-4 text-sm'>
-                <div>
-                  <span className='text-blue-600'>Điểm trung bình:</span>
-                  <span className='ml-2 font-medium text-blue-900'>
-                    {(
-                      studentData.scores.reduce(
-                        (sum, ach) => sum + ach.total_score,
-                        0
-                      ) / studentData.scores.length
-                    ).toFixed(1)}
-                    /100
-                  </span>
-                </div>
-                <div>
-                  <span className='text-blue-600'>Số bài thi:</span>
-                  <span className='ml-2 font-medium text-blue-900'>
-                    {studentData.scores.length}
-                  </span>
-                </div>
-                <div>
-                  <span className='text-blue-600'>Xếp loại cao nhất:</span>
-                  <span className='ml-2 font-medium text-blue-900'>
-                    {studentData.scores.reduce(
-                      (best, ach) => (ach?.grade < best ? ach?.grade : best),
-                      'Z'
-                    )}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className='text-center py-8'>
-            <Award className='w-12 h-12 text-gray-400 mx-auto mb-4' />
-            <p className='text-gray-500'>Chưa có thành tích học tập</p>
-          </div>
-        )}
+        <span className='px-3 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full'>
+          {studentData?.enrollments?.length || 0} kết quả
+        </span>
       </div>
-    </div>
-  );
 
-  const renderDebtTab = () => (
-    <div className='space-y-6'>
-      <div className='bg-gray-50 rounded-lg p-6'>
-        <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2'>
-          <DollarSign className='w-5 h-5 text-red-600' />
-          <span>Thông tin công nợ</span>
-        </h3>
-
-        {mockInvoices.length > 0 ? (
-          <div className='space-y-4'>
-            {mockInvoices.map((invoice) => (
-              <div
-                key={invoice.id}
-                className='bg-white rounded-lg p-4 border border-gray-200'
-              >
-                <div className='flex items-center justify-between mb-3'>
-                  <h4 className='font-semibold text-gray-900'>
-                    {invoice.invoiceNumber}
-                  </h4>
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${getPaymentStatusColor(
-                      invoice.paymentStatus
-                    )}`}
-                  >
-                    {getPaymentStatusText(invoice.paymentStatus)}
-                  </span>
-                </div>
-                <p className='text-gray-600 mb-3'>{invoice.description}</p>
-                <div className='grid grid-cols-2 gap-4 text-sm mb-3'>
-                  <div>
-                    <span className='text-gray-600'>Tổng tiền:</span>
-                    <span className='ml-2 font-medium'>
-                      {invoice.amount.toLocaleString('vi-VN')} VNĐ
-                    </span>
+      {studentData?.enrollments && studentData.enrollments.length > 0 ? (
+        <div className='space-y-4'>
+          {studentData.enrollments.map((enrollment, index) => (
+            <div
+              key={enrollment.id}
+              className='group bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-200'
+            >
+              <div className='flex items-center justify-between mb-4'>
+                <div className='flex items-center gap-3'>
+                  <div className='w-12 h-12 bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg flex items-center justify-center'>
+                    <GraduationCap className='w-6 h-6 text-purple-600' />
                   </div>
                   <div>
-                    <span className='text-gray-600'>Đã thanh toán:</span>
-                    <span className='ml-2 font-medium text-green-600'>
-                      {invoice.paidAmount.toLocaleString('vi-VN')} VNĐ
-                    </span>
-                  </div>
-                  <div>
-                    <span className='text-gray-600'>Còn nợ:</span>
-                    <span className='ml-2 font-medium text-red-600'>
-                      {invoice.remainingAmount.toLocaleString('vi-VN')} VNĐ
-                    </span>
-                  </div>
-                  <div>
-                    <span className='text-gray-600'>Hạn thanh toán:</span>
-                    <span className='ml-2 font-medium'>
-                      {new Date(invoice.dueDate).toLocaleDateString('vi-VN')}
-                    </span>
-                  </div>
-                </div>
-                {invoice.paymentStatus === 'overdue' && (
-                  <div className='bg-red-50 border border-red-200 rounded p-3'>
-                    <p className='text-red-700 text-sm font-medium'>
-                      ⚠️ Quá hạn thanh toán
+                    <h4 className='font-semibold text-gray-900 group-hover:text-purple-700 transition-colors'>
+                      {enrollment?.classroom.class_name}
+                    </h4>
+                    <p className='text-sm text-gray-500'>
+                      #{enrollment.classroom.id.substring(0, 5)}
                     </p>
                   </div>
-                )}
+                </div>
+                <span
+                  className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(
+                    enrollment.status || 'active'
+                  )}`}
+                >
+                  {enrollment.status === 'active'
+                    ? 'Đang học'
+                    : enrollment.status === 'completed'
+                    ? 'Hoàn thành'
+                    : enrollment.status || 'Đang học'}
+                </span>
               </div>
-            ))}
 
-            {/* Summary */}
-            <div className='bg-blue-50 rounded-lg p-4 border border-blue-200'>
-              <h4 className='font-semibold text-blue-900 mb-2'>Tổng kết</h4>
-              <div className='grid grid-cols-3 gap-4 text-sm'>
-                <div>
-                  <span className='text-blue-600'>Tổng nợ:</span>
-                  <span className='ml-2 font-medium text-blue-900'>
-                    {mockInvoices
-                      .reduce((sum, inv) => sum + inv.remainingAmount, 0)
-                      .toLocaleString('vi-VN')}{' '}
-                    VNĐ
-                  </span>
+              {/* Score Overview - You can add actual score data here */}
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-4'>
+                <div className='text-center p-3 bg-blue-50 rounded-lg'>
+                  <div className='text-lg font-bold text-blue-600 mb-1'>--</div>
+                  <div className='text-xs text-gray-600'>Nghe</div>
                 </div>
-                <div>
-                  <span className='text-blue-600'>Đã thanh toán:</span>
-                  <span className='ml-2 font-medium text-blue-900'>
-                    {mockInvoices
-                      .reduce((sum, inv) => sum + inv.paidAmount, 0)
-                      .toLocaleString('vi-VN')}{' '}
-                    VNĐ
-                  </span>
+                <div className='text-center p-3 bg-green-50 rounded-lg'>
+                  <div className='text-lg font-bold text-green-600 mb-1'>
+                    --
+                  </div>
+                  <div className='text-xs text-gray-600'>Đọc</div>
                 </div>
-                <div>
-                  <span className='text-blue-600'>Số hóa đơn:</span>
-                  <span className='ml-2 font-medium text-blue-900'>
-                    {mockInvoices.length}
-                  </span>
+                <div className='text-center p-3 bg-orange-50 rounded-lg'>
+                  <div className='text-lg font-bold text-orange-600 mb-1'>
+                    --
+                  </div>
+                  <div className='text-xs text-gray-600'>Nói</div>
                 </div>
+                <div className='text-center p-3 bg-purple-50 rounded-lg'>
+                  <div className='text-lg font-bold text-purple-600 mb-1'>
+                    --
+                  </div>
+                  <div className='text-xs text-gray-600'>Viết</div>
+                </div>
+              </div>
+
+              <div className='flex items-center gap-2 pt-3 border-t border-gray-100'>
+                <TrendingUp className='w-4 h-4 text-green-600' />
+                <span className='text-sm text-green-600 font-medium'>
+                  Học viên đang có tiến bộ tốt trong lớp học này
+                </span>
               </div>
             </div>
+          ))}
+        </div>
+      ) : (
+        <div className='text-center py-12'>
+          <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
+            <Award className='w-8 h-8 text-gray-400' />
           </div>
-        ) : (
-          <div className='text-center py-8'>
-            <DollarSign className='w-12 h-12 text-gray-400 mx-auto mb-4' />
-            <p className='text-gray-500'>Không có thông tin công nợ</p>
-          </div>
-        )}
-      </div>
+          <h4 className='text-lg font-medium text-gray-900 mb-2'>
+            Chưa có thành tích học tập
+          </h4>
+          <p className='text-gray-500'>
+            Thành tích và điểm số sẽ được hiển thị ở đây khi học viên hoàn thành
+            các bài kiểm tra.
+          </p>
+        </div>
+      )}
     </div>
   );
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-      <div className='bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto'>
+    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
+      <div className='bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden'>
         {/* Header */}
-        <div className='flex items-center justify-between p-6 border-b border-gray-200'>
-          <h2 className='text-xl font-semibold text-gray-900'>
-            Thông tin học viên
-          </h2>
+        <div className='flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50'>
+          <div className='flex items-center gap-3'>
+            <div className='w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center'>
+              <User className='w-5 h-5 text-blue-600' />
+            </div>
+            <h2 className='text-xl font-semibold text-gray-900'>
+              Thông tin học viên
+            </h2>
+          </div>
           <button
             onClick={onClose}
-            className='text-gray-400 hover:text-gray-600 transition-colors'
+            className='w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors'
           >
-            <X className='w-6 h-6' />
+            <X className='w-5 h-5' />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className='border-b border-gray-200'>
-          <div className='flex space-x-8 px-6'>
-            <button
-              onClick={() => setActiveTab('details')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'details'
-                  ? 'border-cyan-500 text-cyan-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className='flex items-center space-x-2'>
-                <User className='w-4 h-4' />
-                <span>Thông tin chi tiết</span>
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('achievements')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'achievements'
-                  ? 'border-cyan-500 text-cyan-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className='flex items-center space-x-2'>
-                <Award className='w-4 h-4' />
-                <span>Thành tích học tập</span>
-              </div>
-            </button>
-            {/* <button
-              onClick={() => setActiveTab('debt')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'debt'
-                  ? 'border-cyan-500 text-cyan-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className='flex items-center space-x-2'>
-                <DollarSign className='w-4 h-4' />
-                <span>Công nợ</span>
-              </div>
-            </button> */}
+        <div className='border-b border-gray-200 bg-gray-50'>
+          <div className='flex px-6'>
+            {[
+              { id: 'details', label: 'Thông tin chi tiết', icon: User },
+              { id: 'achievements', label: 'Thành tích học tập', icon: Award },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center gap-2 py-4 px-6 text-sm font-medium border-b-2 transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? 'border-purple-500 text-purple-600 bg-white'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <tab.icon className='w-4 h-4' />
+                <span>{tab.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Content */}
-        <div className='p-6'>
+        <div className='p-6 overflow-y-auto max-h-[calc(90vh-200px)] bg-gray-50'>
           {activeTab === 'details' && renderDetailsTab()}
           {activeTab === 'achievements' && renderAchievementsTab()}
-          {/* {activeTab === 'debt' && renderDebtTab()} */}
         </div>
 
-        {/* Footer */}
-        <div className='flex items-center justify-end space-x-3 p-6 border-t border-gray-200'>
+        <div className='flex items-center justify-end gap-3 px-6 py-2 border-t border-gray-200 bg-gray-50'>
           <button
             onClick={onClose}
-            className='px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors'
+            className='px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium'
           >
             Đóng
           </button>

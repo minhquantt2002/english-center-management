@@ -44,12 +44,14 @@ export function formatDays(days: string[]) {
     sunday: 7,
   };
 
-  // sort lại days theo thứ tự
-  const sorted = [...days].sort((a, b) => orderDays[a] - orderDays[b]);
-  const formatted = sorted.map((d) => {
-    return mapDays[d];
-  });
-  formatted[0] = 'Thứ ' + formatted[0];
+  const unique = Array.from(new Set(days));
+
+  const sorted = [...unique].sort((a, b) => orderDays[a] - orderDays[b]);
+
+  const formatted = sorted.map((d) => mapDays[d]);
+  if (formatted.length > 0) {
+    formatted[0] = 'Thứ ' + formatted[0];
+  }
 
   return formatted.join(', ');
 }

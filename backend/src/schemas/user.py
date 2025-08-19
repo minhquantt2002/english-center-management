@@ -2,6 +2,7 @@ from datetime import date, datetime
 from typing import Optional, List
 from pydantic import EmailStr
 from src.schemas.base import BaseSchema
+from src.models.attendance import HomeworkStatus
 import enum
 from uuid import UUID
 
@@ -168,8 +169,37 @@ class TeacherResponse(TeacherBase):
     taught_classes: Optional[List[ClassroomNested]] = None
 
 
+class SessionNested(BaseSchema):
+    id: UUID
+    topic: str
+    class_id: UUID
+    schedule_id: UUID
+    created_at: datetime 
+
+
+class AttendanceNested(BaseSchema):
+    id: UUID
+    session: SessionNested
+    student_id: UUID
+    is_present: bool
+
+class HomeworkNested(BaseSchema):
+    id: UUID
+    session: SessionNested
+    student_id: UUID
+    status: HomeworkStatus = HomeworkStatus.PENDING
+    feedback: Optional[str] = None
+
+
 class StudentResponse(StudentBase):
     id: UUID
     created_at: datetime
-    
+    attendances: List[AttendanceNested] = []
+    homeworks: List[HomeworkNested] = []
     enrollments: Optional[List[EnrollmentNested]] = None
+
+
+class EnrollmentScoreResponse(BaseSchema):
+    id: UUID
+    score: List[ScoreNested]
+    

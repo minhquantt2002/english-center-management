@@ -27,3 +27,18 @@ class SessionOut(BaseSchema):
     schedule_id: UUID
     attendances: List[AttendanceOut] = []
     created_at: datetime 
+
+
+class SessionAttendance(BaseSchema):
+    id: UUID
+    topic: str
+    class_id: UUID
+    schedule_id: UUID
+    created_at: datetime 
+
+
+class AttendanceResponse(BaseSchema):
+    id: UUID
+    session: SessionAttendance
+    student_id: UUID
+    is_present: bool

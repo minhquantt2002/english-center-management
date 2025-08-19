@@ -2,34 +2,38 @@ from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 from ..database import get_db
 from ..dependencies import get_current_student_user
 from ..models.user import User
+from ..models.enrollment import Enrollment as EnrollmentModel
 from ..services import user as user_service
 from ..services import classroom as classroom_service
 from ..services import schedule as schedule_service
 from ..services import user as user_service
-from ..schemas.user import StudentResponse, StudentUpdate
+from ..schemas.user import StudentResponse, StudentUpdate, EnrollmentScoreResponse
 from ..schemas.classroom import ClassroomResponse
 from ..schemas.schedule import ScheduleResponse
 
 router = APIRouter()
 
-# Dashboard endpoints
+@router.get('/score/student/{class_id}/', response_model=EnrollmentScoreResponse)
+def get_student_score(
+    class_id: UUID,
+    current_user: User = Depends(get_current_student_user),
+    db: Session = Depends(get_db)
+):
+    enrollments = db.query(EnrollmentModel).where(and_(EnrollmentModel.student_id == current_user.id, EnrollmentModel.class_id == class_id)).first()
+    return enrollments
+
 @router.get("/dashboard")
 async def get_student_dashboard(
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy dữ liệu dashboard cho học sinh
-    """
     academic_summary = user_service.get_student_academic_summary(db, current_user.id)
-    
     today_schedules = schedule_service.get_today_schedules_by_student(db, current_user.id)
-    
     upcoming_classes = classroom_service.get_upcoming_classes_by_student(db, current_user.id)
-    
     recent_scores = []
     
     dashboard_data = {
@@ -44,15 +48,11 @@ async def get_student_dashboard(
     }
     return dashboard_data
 
-# ==================== PROFILE MANAGEMENT ====================
 @router.get("/profile", response_model=StudentResponse)
 async def get_student_profile(
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy thông tin profile của học sinh
-    """
     return current_user
 
 @router.put("/profile", response_model=StudentResponse)
@@ -61,22 +61,15 @@ async def update_student_profile(
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Cập nhật thông tin profile của học sinh
-    """
     updated_user = user_service.update_user(db, current_user.id, profile_data)
     return updated_user
 
-# ==================== CLASSROOM MANAGEMENT ====================
 @router.get("/classes", response_model=List[ClassroomResponse])
 async def get_student_classes(
     status: Optional[str] = Query(None, description="Filter by classroom status"),
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy danh sách lớp học của học sinh
-    """
     classrooms = classroom_service.get_classrooms_by_student(
         db, 
         current_user.id, 
@@ -90,9 +83,6 @@ async def get_student_classroom(
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy thông tin lớp học cụ thể của học sinh
-    """
     try:
         classroom_uuid = UUID(classroom_id)
     except ValueError:
@@ -120,9 +110,6 @@ async def get_student_schedule(
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy lịch học của học sinh (từ tất cả lớp đã đăng ký)
-    """
     schedules = schedule_service.get_schedules_by_student(
         db, 
         current_user.id, 
@@ -135,9 +122,6 @@ async def get_classroom_schedules(
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy lịch học của một lớp học cụ thể
-    """
     try:
         classroom_uuid = UUID(classroom_id)
     except ValueError:

@@ -19,8 +19,8 @@ interface EnrollmentNested {
 
 const HomeworkManagement: React.FC<{
   classId: string;
-  students: EnrollmentNested[];
-}> = ({ classId, students }) => {
+  enrollments: EnrollmentNested[];
+}> = ({ classId, enrollments }) => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedSession, setSelectedSession] =
     useState<SessionHomeworkResponse | null>(null);
@@ -46,9 +46,6 @@ const HomeworkManagement: React.FC<{
         });
       });
       setFeedbacks(initialFeedbacks);
-
-      console.log('1: ', students.map((v) => v.id).sort());
-      console.log('2: ', response[0].homeworks.map((v) => v.student_id).sort());
     } catch (err) {
       console.error('Error fetching class data:', err);
     }
@@ -176,63 +173,69 @@ const HomeworkManagement: React.FC<{
         </div>
       ) : (
         <div className='space-y-3'>
-          {sessionHomeworks.map((session) => {
-            const pendingCount = session.homeworks.filter(
-              (a) => a.status === HomeworkStatus.PENDING
-            ).length;
-            const passedCount = session.homeworks.filter(
-              (a) => a.status === HomeworkStatus.PASSED
-            ).length;
-            const failedCount = session.homeworks.filter(
-              (a) => a.status === HomeworkStatus.FAILED
-            ).length;
+          {sessionHomeworks
+            .sort(
+              (a, b) =>
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime()
+            )
+            .map((session) => {
+              const pendingCount = session.homeworks.filter(
+                (a) => a.status === HomeworkStatus.PENDING
+              ).length;
+              const passedCount = session.homeworks.filter(
+                (a) => a.status === HomeworkStatus.PASSED
+              ).length;
+              const failedCount = session.homeworks.filter(
+                (a) => a.status === HomeworkStatus.FAILED
+              ).length;
 
-            return (
-              <div
-                key={session.id}
-                className='p-4 border border-gray-200 rounded-lg bg-white shadow-sm'
-              >
-                <div className='flex items-center justify-between'>
-                  <h4 className='text-base font-semibold text-gray-900'>
-                    {session.topic || 'Buổi học'}
-                  </h4>
-                  <span className='text-sm text-gray-500'>
-                    {new Date(session.created_at).toLocaleString('vi-VN')}
-                  </span>
-                </div>
-                <div className='mt-2 flex space-x-4 items-center justify-between'>
-                  <div className='flex space-x-4 text-sm'>
-                    <span className='inline-flex items-center text-green-600'>
-                      <div className='w-2 h-2 rounded-full bg-green-500 mr-1'></div>
-                      Đạt: {passedCount}
-                    </span>
-                    <span className='inline-flex items-center text-red-600'>
-                      <div className='w-2 h-2 rounded-full bg-red-500 mr-1'></div>
-                      Không đạt: {failedCount}
-                    </span>
-                    <span className='inline-flex items-center text-orange-600'>
-                      <div className='w-2 h-2 rounded-full bg-orange-500 mr-1'></div>
-                      Chưa chấm: {pendingCount}
-                    </span>
-                    <span className='text-gray-700'>
-                      Tổng: {session.homeworks.length}
+              return (
+                <div
+                  key={session.id}
+                  className='p-4 border border-gray-200 rounded-lg bg-white shadow-sm'
+                >
+                  <div className='flex items-center justify-between'>
+                    <h4 className='text-base font-semibold text-gray-900'>
+                      {session.topic || 'Buổi học'}
+                    </h4>
+                    <span className='text-sm text-gray-500'>
+                      {new Date(session.created_at).toLocaleString('vi-VN')}
                     </span>
                   </div>
+                  <div className='mt-2 flex space-x-4 items-center justify-between'>
+                    <div className='flex space-x-4 text-sm'>
+                      <span className='inline-flex items-center text-green-600'>
+                        <div className='w-2 h-2 rounded-full bg-green-500 mr-1'></div>
+                        Đạt: {passedCount}
+                      </span>
+                      <span className='inline-flex items-center text-red-600'>
+                        <div className='w-2 h-2 rounded-full bg-red-500 mr-1'></div>
+                        Không đạt: {failedCount}
+                      </span>
+                      <span className='inline-flex items-center text-orange-600'>
+                        <div className='w-2 h-2 rounded-full bg-orange-500 mr-1'></div>
+                        Chưa chấm: {pendingCount}
+                      </span>
+                      <span className='text-gray-700'>
+                        Tổng: {session.homeworks.length}
+                      </span>
+                    </div>
 
-                  <button
-                    onClick={() => {
-                      setSelectedSession(session);
-                      setShowDetailModal(true);
-                    }}
-                    className='inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  >
-                    <Eye className='w-4 h-4 mr-2' />
-                    Xem chi tiết
-                  </button>
+                    <button
+                      onClick={() => {
+                        setSelectedSession(session);
+                        setShowDetailModal(true);
+                      }}
+                      className='inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    >
+                      <Eye className='w-4 h-4 mr-2' />
+                      Xem chi tiết
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
       )}
 
@@ -311,8 +314,8 @@ const HomeworkManagement: React.FC<{
 
                 <div className='space-y-4'>
                   {selectedSession.homeworks.map((homework, index) => {
-                    const student = students?.find(
-                      (s) => s.id === homework.student_id
+                    const student = enrollments?.find(
+                      (s) => s.student.id === homework.student_id
                     );
                     console.log(student);
                     return (

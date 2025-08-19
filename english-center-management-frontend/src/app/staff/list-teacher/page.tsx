@@ -221,7 +221,7 @@ export default function TeacherManagement() {
                     <div className='flex items-center'>
                       <div className='h-12 w-12 flex-shrink-0'>
                         <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
-                          {getInitials(teacher.name)}
+                          {getInitials(teacher.name.charAt(0))}
                         </div>
                       </div>
                       <div className='ml-4'>

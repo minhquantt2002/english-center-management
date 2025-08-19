@@ -7,8 +7,10 @@ from src.models import Session as SessionModel
 from src.models import Homework as HomeworkModel
 from src.models import Attendance as AttendanceModel
 from src.models.attendance import HomeworkStatus
+from ..dependencies import get_current_student_user
+from ..models.user import User
 
-from src.schemas.attendance import SessionCreate, SessionOut
+from src.schemas.attendance import SessionCreate, SessionOut, AttendanceResponse
 
 
 router = APIRouter()
@@ -55,6 +57,12 @@ def create_session(data: SessionCreate, db: Session = Depends(get_db)):
         "schedule_id": session.schedule_id,
         "attendances": [{"id": a.id, "student_id": a.student_id, "is_present": a.is_present} for a in attendances]
     }
+
+
+@router.get('/student/', response_model=List[AttendanceResponse])
+def get_homeworks_by_student(current_user: User = Depends(get_current_student_user), db: Session = Depends(get_db)):
+    homeworks = db.query(AttendanceModel).where(AttendanceModel.student_id == current_user.id).all()
+    return homeworks
 
 
 @router.get("/{class_id}/", response_model=List[SessionOut])
