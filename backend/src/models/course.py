@@ -13,7 +13,6 @@ class Course(Base):
     course_name = Column(String(255), nullable=False)
     description = Column(Text)
     level = Column(String(50))
-    status = Column(String(50))
     total_weeks = Column(Integer)
     price = Column(Float)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

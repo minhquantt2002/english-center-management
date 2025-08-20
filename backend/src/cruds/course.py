@@ -29,7 +29,6 @@ def create_course(db: Session, course_data: CourseCreate) -> Course:
         level=course_data.level,
         total_weeks=course_data.total_weeks,
         price=course_data.price,
-        status=course_data.status
     )
     db.add(db_course)
     db.commit()

@@ -94,13 +94,7 @@ export default function CreateStudentModal({
         newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
       }
 
-      if (!data.parent_name?.trim()) {
-        newErrors.parent_name = 'Tên phụ huynh là bắt buộc';
-      }
-
-      if (!data.parent_phone?.trim()) {
-        newErrors.parent_phone = 'Số điện thoại phụ huynh là bắt buộc';
-      } else if (
+      if (
         !/^[0-9]{10,11}$/.test(data.parent_phone?.replace(/\s/g, ''))
       ) {
         newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
@@ -455,11 +449,10 @@ export default function CreateStudentModal({
             <button
               type='submit'
               disabled={isLoading || !isFormValid()}
-              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${
-                isLoading || !isFormValid()
+              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${isLoading || !isFormValid()
                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
                   : 'bg-teal-600 hover:bg-teal-700 text-white'
-              }`}
+                }`}
             >
               <User className='w-4 h-4' />
               {isLoading ? 'Đang tạo...' : 'Thêm học viên'}

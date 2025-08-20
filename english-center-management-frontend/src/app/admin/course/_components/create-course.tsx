@@ -22,12 +22,6 @@ export const levels: { value: CourseLevel; label: string }[] = [
   { value: 'C1', label: 'C1 - Nâng cao' },
 ];
 
-export const statuses: { value: CourseStatus; label: string }[] = [
-  { value: 'active', label: 'Đang hoạt động' },
-  { value: 'upcoming', label: 'Sắp diễn ra' },
-  { value: 'completed', label: 'Đã hoàn thành' },
-  { value: 'cancelled', label: 'Đã hủy' },
-];
 
 export default function CreateCourseModal({
   isOpen,
@@ -40,7 +34,6 @@ export default function CreateCourseModal({
     level: 'A2',
     total_weeks: 0,
     price: 0,
-    status: 'active',
   });
 
   const [errors, setErrors] = useState<
@@ -78,9 +71,6 @@ export default function CreateCourseModal({
         newErrors.level = 'Cấp độ khóa học là bắt buộc';
       }
 
-      if (!data.status) {
-        newErrors.status = 'Trạng thái khóa học là bắt buộc';
-      }
 
       return newErrors;
     });
@@ -107,10 +97,6 @@ export default function CreateCourseModal({
 
     if (!formData.level) {
       newErrors.level = 'Cấp độ khóa học là bắt buộc';
-    }
-
-    if (!formData.status) {
-      newErrors.status = 'Trạng thái khóa học là bắt buộc';
     }
 
     setErrors(newErrors);
@@ -256,23 +242,6 @@ export default function CreateCourseModal({
                     {errors.total_weeks}
                   </p>
                 )}
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Trạng thái <span className='text-red-500'>*</span>
-                </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => handleInputChange('status', e.target.value)}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
-                >
-                  {statuses.map((status) => (
-                    <option key={status.value} value={status.value}>
-                      {status.label}
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
 

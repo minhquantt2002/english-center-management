@@ -12,6 +12,8 @@ import {
   BookOpen,
   Calendar,
   GraduationCap,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import CreateStudentModal from './_components/create-student-modal';
 import EditStudentModal from './_components/edit-student-modal';
@@ -34,6 +36,10 @@ export default function StudentManagement() {
     useState<StudentResponse | null>(null);
   const [students, setStudents] = useState<StudentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { getStudents, createStudent, updateStudent, deleteStudent } =
     useStaffStudentApi();
@@ -80,6 +86,17 @@ export default function StudentManagement() {
       student.id?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedStudents = filteredStudents.slice(startIndex, endIndex);
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const handleCreateStudent = async (studentData: StudentCreate) => {
     try {
@@ -341,7 +358,7 @@ export default function StudentManagement() {
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-100'>
-              {filteredStudents.map((student) => (
+              {paginatedStudents.map((student) => (
                 <tr
                   key={student.id}
                   className='hover:bg-gray-50 transition-colors'
@@ -425,6 +442,58 @@ export default function StudentManagement() {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {filteredStudents.length > 0 && totalPages > 1 && (
+        <div className='bg-white rounded-xl border border-gray-100 shadow-sm mt-4 px-6 py-4'>
+          <div className='flex items-center justify-between'>
+            <div className='text-sm text-gray-700'>
+              Hiển thị {startIndex + 1} đến {Math.min(endIndex, filteredStudents.length)} trong tổng số {filteredStudents.length} học viên
+            </div>
+            <div className='flex items-center space-x-2'>
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  currentPage === 1
+                    ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <ChevronLeft className='w-4 h-4' />
+              </button>
+
+              <div className='flex items-center space-x-1'>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      currentPage === page
+                        ? 'bg-teal-600 text-white'
+                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  currentPage === totalPages
+                    ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <ChevronRight className='w-4 h-4' />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modals */}
       {isCreateModalOpen && (

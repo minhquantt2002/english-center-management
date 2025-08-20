@@ -93,17 +93,17 @@ const CourseManagement = () => {
   // };
   const getLevelBadgeColor = (level: string) => {
     switch (level) {
-      case 'Sơ cấp':
+      case 'A1 - Mất gốc':
         return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'Cơ bản':
+      case 'A2 - Sơ cấp':
         return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'Trung cấp':
+      case 'B1 - Trung cấp thấp':
         return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'Cao trung cấp':
+      case 'B2 - Trung cấp cao':
         return 'bg-purple-50 text-purple-700 border-purple-200';
-      case 'Nâng cao':
+      case 'C1 - Nâng cao':
         return 'bg-rose-50 text-rose-700 border-rose-200';
-      case 'Thành thạo':
+      case 'C2 - Thành thạo':
         return 'bg-indigo-50 text-indigo-700 border-indigo-200';
       default:
         return 'bg-gray-50 text-gray-700 border-gray-200';
@@ -311,11 +311,10 @@ const CourseManagement = () => {
             <div className='flex items-center gap-2'>
               <button
                 onClick={() => setViewMode('table')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'table'
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'table'
                     ? 'bg-blue-100 text-blue-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                  }`}
                 title='Chế độ bảng'
               >
                 <div className='w-5 h-5 grid grid-cols-2 gap-0.5'>
@@ -327,11 +326,10 @@ const CourseManagement = () => {
               </button>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'grid'
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'grid'
                     ? 'bg-blue-100 text-blue-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                  }`}
                 title='Chế độ lưới'
               >
                 <div className='w-5 h-5 grid grid-cols-3 gap-0.5'>
@@ -370,6 +368,9 @@ const CourseManagement = () => {
                       Cấp độ
                     </th>
                     <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                      Số lớp
+                    </th>
+                    <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                       Thời lượng
                     </th>
                     <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
@@ -403,6 +404,9 @@ const CourseManagement = () => {
                         >
                           {course.displayLevel}
                         </span>
+                      </td>
+                      <td className='px-6 py-4'>
+                        {course.classes.length}
                       </td>
                       <td className='px-6 py-4 text-sm text-gray-900'>
                         {course.displayDuration}
