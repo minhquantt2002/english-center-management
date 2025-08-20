@@ -55,33 +55,35 @@ export default function CreateCourseModal({
 
   // Validate form in real-time
   const validateFormRealtime = (data: CourseCreate) => {
-    const newErrors: typeof errors = {};
+    setErrors(() => {
+      const newErrors: typeof errors = {};
 
-    if (!data.course_name.trim()) {
-      newErrors.course_name = 'Tên khóa học là bắt buộc';
-    }
+      if (!data.course_name.trim()) {
+        newErrors.course_name = 'Tên khóa học là bắt buộc';
+      }
 
-    if (!data.description.trim()) {
-      newErrors.description = 'Mô tả khóa học là bắt buộc';
-    }
+      if (!data.description.trim()) {
+        newErrors.description = 'Mô tả khóa học là bắt buộc';
+      }
 
-    if (!data.total_weeks) {
-      newErrors.total_weeks = 'Thời lượng khóa học là bắt buộc';
-    }
+      if (!data.total_weeks) {
+        newErrors.total_weeks = 'Thời lượng khóa học là bắt buộc';
+      }
 
-    if (!data.price) {
-      newErrors.price = 'Học phí là bắt buộc';
-    }
+      if (!data.price) {
+        newErrors.price = 'Học phí là bắt buộc';
+      }
 
-    if (!data.level) {
-      newErrors.level = 'Cấp độ khóa học là bắt buộc';
-    }
+      if (!data.level) {
+        newErrors.level = 'Cấp độ khóa học là bắt buộc';
+      }
 
-    if (!data.status) {
-      newErrors.status = 'Trạng thái khóa học là bắt buộc';
-    }
+      if (!data.status) {
+        newErrors.status = 'Trạng thái khóa học là bắt buộc';
+      }
 
-    setErrors(newErrors);
+      return newErrors;
+    });
   };
 
   const validateForm = () => {

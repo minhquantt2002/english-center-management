@@ -46,54 +46,68 @@ export default function CreateStudentModal({
 
   // Check if form has any errors
   const hasErrors = () => {
-    return Object.values(errors).some(error => error !== undefined && error !== '');
+    return Object.values(errors).some(error => error && error.trim() !== '');
+  };
+
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    return (
+      formData.name.trim() !== '' &&
+      formData.email.trim() !== '' &&
+      formData.phone_number?.trim() !== '' &&
+      formData.date_of_birth !== '' &&
+      formData.password?.trim() !== '' &&
+      !hasErrors()
+    );
   };
 
   // Validate form in real-time
   const validateFormRealtime = (data: StudentCreate) => {
-    const newErrors: typeof errors = {};
+    setErrors(() => {
+      const newErrors: typeof errors = {};
 
-    if (!data.name.trim()) {
-      newErrors.name = 'Tên học viên là bắt buộc';
-    }
+      if (!data.name.trim()) {
+        newErrors.name = 'Tên học viên là bắt buộc';
+      }
 
-    if (!data.email.trim()) {
-      newErrors.email = 'Email là bắt buộc';
-    } else if (!/\S+@\S+\.\S+/.test(data.email)) {
-      newErrors.email = 'Email không hợp lệ';
-    }
+      if (!data.email.trim()) {
+        newErrors.email = 'Email là bắt buộc';
+      } else if (!/\S+@\S+\.\S+/.test(data.email)) {
+        newErrors.email = 'Email không hợp lệ';
+      }
 
-    if (!data.phone_number?.trim()) {
-      newErrors.phone_number = 'Số điện thoại là bắt buộc';
-    } else if (
-      !/^[0-9]{10,11}$/.test(data.phone_number?.replace(/\s/g, ''))
-    ) {
-      newErrors.phone_number = 'Số điện thoại không hợp lệ';
-    }
+      if (!data.phone_number?.trim()) {
+        newErrors.phone_number = 'Số điện thoại là bắt buộc';
+      } else if (
+        !/^[0-9]{10,11}$/.test(data.phone_number?.replace(/\s/g, ''))
+      ) {
+        newErrors.phone_number = 'Số điện thoại không hợp lệ';
+      }
 
-    if (!data.date_of_birth) {
-      newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
-    }
+      if (!data.date_of_birth) {
+        newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
+      }
 
-    if (!data.password?.trim()) {
-      newErrors.password = 'Mật khẩu là bắt buộc';
-    } else if (data.password.length < 6) {
-      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
-    }
+      if (!data.password?.trim()) {
+        newErrors.password = 'Mật khẩu là bắt buộc';
+      } else if (data.password.length < 6) {
+        newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+      }
 
-    if (!data.parent_name?.trim()) {
-      newErrors.parent_name = 'Tên phụ huynh là bắt buộc';
-    }
+      if (!data.parent_name?.trim()) {
+        newErrors.parent_name = 'Tên phụ huynh là bắt buộc';
+      }
 
-    if (!data.parent_phone?.trim()) {
-      newErrors.parent_phone = 'Số điện thoại phụ huynh là bắt buộc';
-    } else if (
-      !/^[0-9]{10,11}$/.test(data.parent_phone?.replace(/\s/g, ''))
-    ) {
-      newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
-    }
+      if (!data.parent_phone?.trim()) {
+        newErrors.parent_phone = 'Số điện thoại phụ huynh là bắt buộc';
+      } else if (
+        !/^[0-9]{10,11}$/.test(data.parent_phone?.replace(/\s/g, ''))
+      ) {
+        newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
+      }
 
-    setErrors(newErrors);
+      return newErrors;
+    });
   };
 
   const validateForm = () => {
@@ -179,10 +193,11 @@ export default function CreateStudentModal({
           date_of_birth: "Ngày sinh không được vượt quá ngày hiện tại",
         }));
       } else {
-        setErrors((prev) => ({
-          ...prev,
-          date_of_birth: undefined,
-        }));
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.date_of_birth;
+          return newErrors;
+        });
       }
     } else {
       // Validate form in real-time for other fields
@@ -309,6 +324,23 @@ export default function CreateStudentModal({
                 />
               </div>
 
+              {/* Password */}
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
+                  Mật khẩu <span className='text-red-500'>*</span>
+                </label>
+                <input
+                  type='password'
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.password ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  placeholder='Nhập mật khẩu (tối thiểu 6 ký tự)'
+                />
+                {errors.password && (
+                  <p className='text-red-500 text-sm mt-1'>{errors.password}</p>
+                )}
+              </div>
 
             </div>
           </div>
@@ -422,9 +454,9 @@ export default function CreateStudentModal({
             </button>
             <button
               type='submit'
-              disabled={isLoading || hasErrors()}
+              disabled={isLoading || !isFormValid()}
               className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${
-                isLoading || hasErrors()
+                isLoading || !isFormValid()
                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
                   : 'bg-teal-600 hover:bg-teal-700 text-white'
               }`}

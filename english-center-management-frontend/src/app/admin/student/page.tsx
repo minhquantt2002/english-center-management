@@ -125,7 +125,7 @@ const StudentManagement = () => {
       toast('Học viên mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating student:', error);
-      toast('Có lỗi xảy ra khi tạo học viên mới!');
+      toast(error.detail);
     }
   };
 

@@ -67,7 +67,7 @@ const StaffManagement = () => {
       toast('Nhân sự mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating staff:', error);
-      toast('Có lỗi xảy ra khi tạo nhân sự mới!');
+      toast(error.detail);
     }
   };
 

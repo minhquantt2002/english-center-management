@@ -81,46 +81,48 @@ export default function CreateTeacherModal({
 
   // Check if form has any errors
   const hasErrors = () => {
-    return Object.values(errors).some(error => error !== undefined && error !== '');
+    return Object.values(errors).some(error => error && error.trim() !== '');
+  };
+
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    return (
+      formData.name.trim() !== '' &&
+      formData.email.trim() !== '' &&
+      formData.phone_number.trim() !== '' &&
+      formData.date_of_birth !== '' &&
+      !hasErrors()
+    );
   };
 
   // Validate form in real-time
   const validateFormRealtime = (data: TeacherCreate) => {
-    const newErrors: typeof errors = {};
+    setErrors(() => {
+      const newErrors: typeof errors = {};
 
-    if (!data.name.trim()) {
-      newErrors.name = 'Họ tên là bắt buộc';
-    }
+      if (!data.name.trim()) {
+        newErrors.name = 'Họ tên là bắt buộc';
+      }
 
-    if (!data.email.trim()) {
-      newErrors.email = 'Email là bắt buộc';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      newErrors.email = 'Email không hợp lệ';
-    }
+      if (!data.email.trim()) {
+        newErrors.email = 'Email là bắt buộc';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        newErrors.email = 'Email không hợp lệ';
+      }
 
-    if (!data.phone_number.trim()) {
-      newErrors.phone_number = 'Số điện thoại là bắt buộc';
-    } else if (
-      !/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))
-    ) {
-      newErrors.phone_number = 'Số điện thoại không hợp lệ';
-    }
+      if (!data.phone_number.trim()) {
+        newErrors.phone_number = 'Số điện thoại là bắt buộc';
+      } else if (
+        !/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))
+      ) {
+        newErrors.phone_number = 'Số điện thoại không hợp lệ';
+      }
 
-    if (!data.specialization) {
-      newErrors.specialization = 'Chuyên môn là bắt buộc';
-    }
-
-    if (!data.date_of_birth) {
-      newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
-    }
-
-    if (!data.password.trim()) {
-      newErrors.password = 'Mật khẩu là bắt buộc';
-    } else if (data.password.length < 6) {
-      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
-    }
-
-    setErrors(newErrors);
+      if (!data.date_of_birth) {
+        newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
+      }
+      return newErrors;
+    });
   };
 
   const validateForm = () => {
@@ -208,10 +210,11 @@ export default function CreateTeacherModal({
           date_of_birth: "Giáo viên phải đủ 18 tuổi",
         }));
       } else {
-        setErrors((prev) => ({
-          ...prev,
-          date_of_birth: undefined,
-        }));
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.date_of_birth;
+          return newErrors;
+        });
       }
     } else {
       // Validate form in real-time for other fields
@@ -318,8 +321,8 @@ export default function CreateTeacherModal({
                       handleInputChange('date_of_birth', e.target.value)
                     }
                     className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.date_of_birth
-                        ? 'border-red-500'
-                        : 'border-gray-300'
+                      ? 'border-red-500'
+                      : 'border-gray-300'
                       }`}
                   />
                 </div>
@@ -420,8 +423,8 @@ export default function CreateTeacherModal({
                     )
                   }
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.experience_years
-                      ? 'border-red-500'
-                      : 'border-gray-300'
+                    ? 'border-red-500'
+                    : 'border-gray-300'
                     }`}
                 >
                   {experienceYears.map((exp) => (
@@ -461,12 +464,11 @@ export default function CreateTeacherModal({
             </button>
             <button
               type='submit'
-              disabled={hasErrors()}
-              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${
-                hasErrors()
+              disabled={!isFormValid()}
+              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${!isFormValid()
                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                   : 'bg-teal-600 hover:bg-teal-700 text-white'
-              }`}
+                }`}
             >
               <GraduationCap className='w-4 h-4' />
               Thêm giáo viên

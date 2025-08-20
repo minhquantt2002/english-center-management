@@ -55,35 +55,37 @@ export default function EditTeacherModal({
 
   // Validate form in real-time
   const validateFormRealtime = (data: TeacherUpdate) => {
-    const newErrors: typeof errors = {};
+    setErrors(() => {
+      const newErrors: typeof errors = {};
 
-    if (!data.name.trim()) {
-      newErrors.name = 'Họ tên là bắt buộc';
-    }
+      if (!data.name.trim()) {
+        newErrors.name = 'Họ tên là bắt buộc';
+      }
 
-    if (!data.email.trim()) {
-      newErrors.email = 'Email là bắt buộc';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      newErrors.email = 'Email không hợp lệ';
-    }
+      if (!data.email.trim()) {
+        newErrors.email = 'Email là bắt buộc';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        newErrors.email = 'Email không hợp lệ';
+      }
 
-    if (!data.phone_number.trim()) {
-      newErrors.phone_number = 'Số điện thoại là bắt buộc';
-    } else if (
-      !/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))
-    ) {
-      newErrors.phone_number = 'Số điện thoại không hợp lệ';
-    }
+      if (!data.phone_number.trim()) {
+        newErrors.phone_number = 'Số điện thoại là bắt buộc';
+      } else if (
+        !/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))
+      ) {
+        newErrors.phone_number = 'Số điện thoại không hợp lệ';
+      }
 
-    if (!data.specialization) {
-      newErrors.specialization = 'Chuyên môn là bắt buộc';
-    }
+      if (!data.specialization) {
+        newErrors.specialization = 'Chuyên môn là bắt buộc';
+      }
 
-    if (!data.education) {
-      newErrors.education = 'Bằng cấp là bắt buộc';
-    }
+      if (!data.education) {
+        newErrors.education = 'Bằng cấp là bắt buộc';
+      }
 
-    setErrors(newErrors);
+      return newErrors;
+    });
   };
 
   // Load teacher data when modal opens
@@ -183,10 +185,11 @@ export default function EditTeacherModal({
           date_of_birth: 'Giáo viên phải đủ 18 tuổi',
         }));
       } else {
-        setErrors((prev) => ({
-          ...prev,
-          date_of_birth: undefined,
-        }));
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.date_of_birth;
+          return newErrors;
+        });
       }
     } else {
       // Validate form in real-time for other fields

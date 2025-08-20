@@ -43,37 +43,39 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
 
   // Validate form in real-time
   const validateFormRealtime = (data: ClassroomCreate) => {
-    const newErrors: Record<string, string> = {};
+    setErrors(() => {
+      const newErrors: Record<string, string> = {};
 
-    if (!data.class_name.trim()) {
-      newErrors.class_name = 'Tên lớp học là bắt buộc';
-    }
-
-    if (!data.course_id) {
-      newErrors.course_id = 'Vui lòng chọn khóa học';
-    }
-
-    if (!data.teacher_id) {
-      newErrors.teacher_id = 'Vui lòng chọn giáo viên';
-    }
-
-    if (!data.start_date) {
-      newErrors.start_date = 'Ngày bắt đầu là bắt buộc';
-    }
-
-    if (!data.end_date) {
-      newErrors.end_date = 'Ngày kết thúc là bắt buộc';
-    }
-
-    if (data.start_date && data.end_date) {
-      const startDate = new Date(data.start_date);
-      const endDate = new Date(data.end_date);
-      if (startDate >= endDate) {
-        newErrors.end_date = 'Ngày kết thúc phải sau ngày bắt đầu';
+      if (!data.class_name.trim()) {
+        newErrors.class_name = 'Tên lớp học là bắt buộc';
       }
-    }
 
-    setErrors(newErrors);
+      if (!data.course_id) {
+        newErrors.course_id = 'Vui lòng chọn khóa học';
+      }
+
+      if (!data.teacher_id) {
+        newErrors.teacher_id = 'Vui lòng chọn giáo viên';
+      }
+
+      if (!data.start_date) {
+        newErrors.start_date = 'Ngày bắt đầu là bắt buộc';
+      }
+
+      if (!data.end_date) {
+        newErrors.end_date = 'Ngày kết thúc là bắt buộc';
+      }
+
+      if (data.start_date && data.end_date) {
+        const startDate = new Date(data.start_date);
+        const endDate = new Date(data.end_date);
+        if (startDate >= endDate) {
+          newErrors.end_date = 'Ngày kết thúc phải sau ngày bắt đầu';
+        }
+      }
+
+      return newErrors;
+    });
   };
 
   useEffect(() => {

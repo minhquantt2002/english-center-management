@@ -44,33 +44,35 @@ export default function EditCourseModal({
 
   // Validate form in real-time
   const validateFormRealtime = (data: CourseUpdate) => {
-    const newErrors: typeof errors = {};
+    setErrors(() => {
+      const newErrors: typeof errors = {};
 
-    if (!data.course_name.trim()) {
-      newErrors.course_name = 'Tên khóa học là bắt buộc';
-    }
+      if (!data.course_name.trim()) {
+        newErrors.course_name = 'Tên khóa học là bắt buộc';
+      }
 
-    if (!data.description.trim()) {
-      newErrors.description = 'Mô tả khóa học là bắt buộc';
-    }
+      if (!data.description.trim()) {
+        newErrors.description = 'Mô tả khóa học là bắt buộc';
+      }
 
-    if (!data.total_weeks) {
-      newErrors.total_weeks = 'Thời lượng khóa học là bắt buộc';
-    }
+      if (!data.total_weeks) {
+        newErrors.total_weeks = 'Thời lượng khóa học là bắt buộc';
+      }
 
-    if (!data.price) {
-      newErrors.price = 'Học phí khóa học là bắt buộc';
-    }
+      if (!data.price) {
+        newErrors.price = 'Học phí khóa học là bắt buộc';
+      }
 
-    if (data.price !== undefined && data.price < 0) {
-      newErrors.price = 'Học phí không được âm';
-    }
+      if (data.price !== undefined && data.price < 0) {
+        newErrors.price = 'Học phí không được âm';
+      }
 
-    if (!data.status) {
-      newErrors.status = 'Trạng thái khóa học là bắt buộc';
-    }
+      if (!data.status) {
+        newErrors.status = 'Trạng thái khóa học là bắt buộc';
+      }
 
-    setErrors(newErrors);
+      return newErrors;
+    });
   };
 
   // Load course data when modal opens

@@ -21,6 +21,7 @@ export const useTeacherApi = () => {
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Có lỗi xảy ra';
+          console.log('err:', err);
         setError(errorMessage);
         throw err;
       } finally {

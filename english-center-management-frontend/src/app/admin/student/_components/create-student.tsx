@@ -30,42 +30,56 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
 
   // Check if form has any errors
   const hasErrors = () => {
-    return Object.values(errors).some(error => error !== undefined && error !== '');
+    return Object.values(errors).some(error => error && error.trim() !== '');
+  };
+
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    return (
+      formData.name.trim() !== '' &&
+      formData.email.trim() !== '' &&
+      formData.phone_number?.trim() !== '' &&
+      formData.date_of_birth !== '' &&
+      formData.password.trim() !== '' &&
+      !hasErrors()
+    );
   };
 
   // Validate form in real-time
   const validateFormRealtime = (data: StudentCreate) => {
-    const newErrors: Record<string, string> = {};
+    setErrors(() => {
+      const newErrors: Record<string, string> = {};
 
-    if (!data.name.trim()) {
-      newErrors.name = 'Tên học viên là bắt buộc';
-    }
+      if (!data.name.trim()) {
+        newErrors.name = 'Tên học viên là bắt buộc';
+      }
 
-    if (!data.email.trim()) {
-      newErrors.email = 'Email là bắt buộc';
-    } else if (!/\S+@\S+\.\S+/.test(data.email)) {
-      newErrors.email = 'Email không hợp lệ';
-    }
+      if (!data.email.trim()) {
+        newErrors.email = 'Email là bắt buộc';
+      } else if (!/\S+@\S+\.\S+/.test(data.email)) {
+        newErrors.email = 'Email không hợp lệ';
+      }
 
-    if (!data.phone_number?.trim()) {
-      newErrors.phone_number = 'Số điện thoại là bắt buộc';
-    } else if (
-      !/^[0-9]{10,11}$/.test(data.phone_number?.replace(/\s/g, ''))
-    ) {
-      newErrors.phone_number = 'Số điện thoại không hợp lệ';
-    }
+      if (!data.phone_number?.trim()) {
+        newErrors.phone_number = 'Số điện thoại là bắt buộc';
+      } else if (
+        !/^[0-9]{10,11}$/.test(data.phone_number?.replace(/\s/g, ''))
+      ) {
+        newErrors.phone_number = 'Số điện thoại không hợp lệ';
+      }
 
-    if (!data.date_of_birth) {
-      newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
-    }
+      if (!data.date_of_birth) {
+        newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
+      }
 
-    if (!data.password.trim()) {
-      newErrors.password = 'Mật khẩu là bắt buộc';
-    } else if (data.password.length < 6) {
-      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
-    }
+      if (!data.password.trim()) {
+        newErrors.password = 'Mật khẩu là bắt buộc';
+      } else if (data.password.length < 6) {
+        newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+      }
 
-    setErrors(newErrors);
+      return newErrors;
+    });
   };
 
   const validateForm = () => {
@@ -116,10 +130,11 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
           date_of_birth: "Ngày sinh không được vượt quá ngày hiện tại",
         }));
       } else {
-        setErrors((prev) => ({
-          ...prev,
-          date_of_birth: undefined,
-        }));
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.date_of_birth;
+          return newErrors;
+        });
       }
     } else {
       // Validate form in real-time for other fields
@@ -335,6 +350,24 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                   />
                 </div>
               </div>
+
+              {/* Password */}
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
+                  Mật khẩu *
+                </label>
+                <input
+                  type='password'
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  placeholder='Nhập mật khẩu (tối thiểu 6 ký tự)'
+                />
+                {errors.password && (
+                  <p className='mt-1 text-sm text-red-600'>{errors.password}</p>
+                )}
+              </div>
             </div>
           </div>
 
@@ -433,9 +466,9 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
             </button>
             <button
               type='submit'
-              disabled={isSubmitting || hasErrors()}
+              disabled={isSubmitting || !isFormValid()}
               className={`px-4 py-2 text-sm font-medium border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2 ${
-                isSubmitting || hasErrors()
+                isSubmitting || !isFormValid()
                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
                   : 'text-white bg-blue-600 hover:bg-blue-700'
               }`}

@@ -44,27 +44,29 @@ export default function EditStaffModal({
 
   // Validate form in real-time
   const validateFormRealtime = (data: UserUpdate) => {
-    const newErrors: typeof errors = {};
+    setErrors(() => {
+      const newErrors: typeof errors = {};
 
-    if (!data.name.trim()) {
-      newErrors.name = 'Họ tên là bắt buộc';
-    }
+      if (!data.name.trim()) {
+        newErrors.name = 'Họ tên là bắt buộc';
+      }
 
-    if (!data.email.trim()) {
-      newErrors.email = 'Email là bắt buộc';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      newErrors.email = 'Email không hợp lệ';
-    }
+      if (!data.email.trim()) {
+        newErrors.email = 'Email là bắt buộc';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        newErrors.email = 'Email không hợp lệ';
+      }
 
-    if (!data.phone_number.trim()) {
-      newErrors.phone_number = 'Số điện thoại là bắt buộc';
-    } else if (
-      !/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))
-    ) {
-      newErrors.phone_number = 'Số điện thoại không hợp lệ';
-    }
+      if (!data.phone_number.trim()) {
+        newErrors.phone_number = 'Số điện thoại là bắt buộc';
+      } else if (
+        !/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))
+      ) {
+        newErrors.phone_number = 'Số điện thoại không hợp lệ';
+      }
 
-    setErrors(newErrors);
+      return newErrors;
+    });
   };
 
   // Load staff data when modal opens

@@ -59,7 +59,7 @@ const TeacherManagement = () => {
     name: teacher.name,
     specialization: specializations.find(
       (s) => s.value === teacher.specialization
-    )?.label,
+    )?.label || '',
     email: teacher.email,
     phone: teacher.phone_number,
     assignedClasses: teacher.taught_classes || [],
@@ -68,7 +68,7 @@ const TeacherManagement = () => {
   const filteredTeachers = teachersList.filter((teacher) => {
     const matchesSearch =
       teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.specialization.toLowerCase().includes(searchTerm.toLowerCase());
+      (teacher.specialization && teacher.specialization.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesSearch;
   });
 
@@ -79,8 +79,7 @@ const TeacherManagement = () => {
       await fetchTeachers(); // Refresh the list
       toast('Giáo viên mới đã được tạo thành công!');
     } catch (error) {
-      console.error('Error creating teacher:', error);
-      toast('Có lỗi xảy ra khi tạo giáo viên mới!');
+      toast(error.detail);
     }
   };
 

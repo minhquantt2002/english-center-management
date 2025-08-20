@@ -23,38 +23,40 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
 
   // Validate form in real-time
   const validateFormRealtime = (data: Partial<UserUpdate>) => {
-    const newErrors: Record<string, string> = {};
+    setErrors(() => {
+      const newErrors: Record<string, string> = {};
 
-    if (!data.name?.trim()) {
-      newErrors.name = 'Họ và tên là bắt buộc';
-    }
+      if (!data.name?.trim()) {
+        newErrors.name = 'Họ và tên là bắt buộc';
+      }
 
-    if (!data.email?.trim()) {
-      newErrors.email = 'Email là bắt buộc';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      newErrors.email = 'Email không hợp lệ';
-    }
+      if (!data.email?.trim()) {
+        newErrors.email = 'Email là bắt buộc';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        newErrors.email = 'Email không hợp lệ';
+      }
 
-    if (!data.phone_number?.trim()) {
-      newErrors.phone_number = 'Số điện thoại là bắt buộc';
-    } else if (!/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))) {
-      newErrors.phone_number = 'Số điện thoại không hợp lệ';
-    }
+      if (!data.phone_number?.trim()) {
+        newErrors.phone_number = 'Số điện thoại là bắt buộc';
+      } else if (!/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))) {
+        newErrors.phone_number = 'Số điện thoại không hợp lệ';
+      }
 
-    if (!data.input_level) {
-      newErrors.input_level = 'Trình độ là bắt buộc';
-    }
+      if (!data.input_level) {
+        newErrors.input_level = 'Trình độ là bắt buộc';
+      }
 
-    if (!data.status) {
-      newErrors.status = 'Trạng thái là bắt buộc';
-    }
+      if (!data.status) {
+        newErrors.status = 'Trạng thái là bắt buộc';
+      }
 
-    // Validation cho parent_phone (không bắt buộc nhưng nếu có thì phải đúng format)
-    if (data.parent_phone && !/^[0-9]{10,11}$/.test(data.parent_phone.replace(/\s/g, ''))) {
-      newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
-    }
+      // Validation cho parent_phone (không bắt buộc nhưng nếu có thì phải đúng format)
+      if (data.parent_phone && !/^[0-9]{10,11}$/.test(data.parent_phone.replace(/\s/g, ''))) {
+        newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
+      }
 
-    setErrors(newErrors);
+      return newErrors;
+    });
   };
 
   useEffect(() => {

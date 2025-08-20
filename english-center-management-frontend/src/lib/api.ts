@@ -97,7 +97,7 @@ export const api = {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
+      const errorText = await response.json();
 
       // Check if it's a token expiration error
       if (response.status === 401 || isTokenExpiredError(errorText)) {
@@ -105,7 +105,7 @@ export const api = {
         return;
       }
 
-      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+      throw errorText;
     }
 
     return response.json();
