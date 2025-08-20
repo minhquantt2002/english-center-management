@@ -79,6 +79,50 @@ export default function CreateTeacherModal({
     Partial<Record<keyof TeacherCreate, string>>
   >({});
 
+  // Check if form has any errors
+  const hasErrors = () => {
+    return Object.values(errors).some(error => error !== undefined && error !== '');
+  };
+
+  // Validate form in real-time
+  const validateFormRealtime = (data: TeacherCreate) => {
+    const newErrors: typeof errors = {};
+
+    if (!data.name.trim()) {
+      newErrors.name = 'Họ tên là bắt buộc';
+    }
+
+    if (!data.email.trim()) {
+      newErrors.email = 'Email là bắt buộc';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      newErrors.email = 'Email không hợp lệ';
+    }
+
+    if (!data.phone_number.trim()) {
+      newErrors.phone_number = 'Số điện thoại là bắt buộc';
+    } else if (
+      !/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))
+    ) {
+      newErrors.phone_number = 'Số điện thoại không hợp lệ';
+    }
+
+    if (!data.specialization) {
+      newErrors.specialization = 'Chuyên môn là bắt buộc';
+    }
+
+    if (!data.date_of_birth) {
+      newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
+    }
+
+    if (!data.password.trim()) {
+      newErrors.password = 'Mật khẩu là bắt buộc';
+    } else if (data.password.length < 6) {
+      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+    }
+
+    setErrors(newErrors);
+  };
+
   const validateForm = () => {
     const newErrors: typeof errors = {};
 
@@ -136,12 +180,19 @@ export default function CreateTeacherModal({
   };
 
   const handleInputChange = (field: keyof TeacherCreate, value: any) => {
-    // Xử lý riêng cho ngày sinh
+    const newFormData = {
+      ...formData,
+      [field]: value,
+    };
+
+    setFormData(newFormData);
+
+    // Handle date of birth validation separately
     if (field === "date_of_birth") {
       const selectedDate = new Date(value);
       const today = new Date();
       const minBirthDate = new Date(
-        today.getFullYear() - 16,
+        today.getFullYear() - 18,
         today.getMonth(),
         today.getDate()
       );
@@ -163,20 +214,9 @@ export default function CreateTeacherModal({
         }));
       }
     } else {
-      // Clear error khi user nhập các field khác
-      if (errors[field]) {
-        setErrors((prev) => ({
-          ...prev,
-          [field]: undefined,
-        }));
-      }
+      // Validate form in real-time for other fields
+      validateFormRealtime(newFormData);
     }
-
-    // Cập nhật formData
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
   };
 
   if (!isOpen) return null;
@@ -421,7 +461,12 @@ export default function CreateTeacherModal({
             </button>
             <button
               type='submit'
-              className='px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors flex items-center gap-2'
+              disabled={hasErrors()}
+              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                hasErrors()
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  : 'bg-teal-600 hover:bg-teal-700 text-white'
+              }`}
             >
               <GraduationCap className='w-4 h-4' />
               Thêm giáo viên

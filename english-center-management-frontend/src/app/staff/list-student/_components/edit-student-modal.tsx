@@ -68,10 +68,48 @@ export default function EditStudentModal({
     >
   >({});
 
+  // Check if form has any errors
+  const hasErrors = () => {
+    return Object.values(errors).some(error => error !== undefined && error !== '');
+  };
+
+  // Validate form in real-time
+  const validateFormRealtime = (data: StudentUpdate) => {
+    const newErrors: typeof errors = {};
+
+    if (!data.name.trim()) {
+      newErrors.name = 'Họ tên là bắt buộc';
+    }
+
+    if (!data.email.trim()) {
+      newErrors.email = 'Email là bắt buộc';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      newErrors.email = 'Email không hợp lệ';
+    }
+
+    if (!data.phone_number.trim()) {
+      newErrors.phone_number = 'Số điện thoại là bắt buộc';
+    } else if (!/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))) {
+      newErrors.phone_number = 'Số điện thoại không hợp lệ';
+    }
+
+    if (!data.parent_name?.trim()) {
+      newErrors.parent_name = 'Tên phụ huynh là bắt buộc';
+    }
+
+    if (!data.parent_phone?.trim()) {
+      newErrors.parent_phone = 'Số điện thoại phụ huynh là bắt buộc';
+    } else if (!/^[0-9]{10,11}$/.test(data.parent_phone.replace(/\s/g, ''))) {
+      newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
+    }
+
+    setErrors(newErrors);
+  };
+
   // Populate form data when student prop changes
   useEffect(() => {
     if (student) {
-      setFormData({
+      const initialData = {
         name: student.name || '',
         email: student.email || '',
         phone_number: student.phone_number || '',
@@ -83,8 +121,10 @@ export default function EditStudentModal({
         parent_name: student.parent_name || '',
         parent_phone: student.parent_phone || '',
         status: student.status || 'active',
-      });
-      setErrors({});
+      };
+      setFormData(initialData);
+      // Validate initial data
+      validateFormRealtime(initialData);
     }
   }, [student]);
 
@@ -151,6 +191,14 @@ export default function EditStudentModal({
   };
 
   const handleInputChange = (field: keyof StudentUpdate, value: any) => {
+    const newFormData = {
+      ...formData,
+      [field]: value,
+    };
+
+    setFormData(newFormData);
+
+    // Handle date of birth validation separately
     if (field === "date_of_birth") {
       const selectedDate = new Date(value);
       const today = new Date();
@@ -167,18 +215,9 @@ export default function EditStudentModal({
         }));
       }
     } else {
-      if (errors[field]) {
-        setErrors((prev) => ({
-          ...prev,
-          [field]: undefined,
-        }));
-      }
+      // Validate form in real-time for other fields
+      validateFormRealtime(newFormData);
     }
-
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
   };
 
   if (!isOpen || !student) return null;
@@ -413,8 +452,12 @@ export default function EditStudentModal({
             </button>
             <button
               type='submit'
-              disabled={isLoading}
-              className='px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'
+              disabled={isLoading || hasErrors()}
+              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                isLoading || hasErrors()
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
+                  : 'bg-teal-600 hover:bg-teal-700 text-white'
+              }`}
             >
               <Save className='w-4 h-4' />
               {isLoading ? 'Đang cập nhật...' : 'Cập nhật học viên'}

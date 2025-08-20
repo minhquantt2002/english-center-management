@@ -29,6 +29,44 @@ export default function CreateStaffModal({
     Partial<Record<keyof UserCreate, string>>
   >({});
 
+  // Check if form has any errors
+  const hasErrors = () => {
+    return Object.values(errors).some(error => error !== undefined && error !== '');
+  };
+
+  // Validate form in real-time
+  const validateFormRealtime = (data: UserCreate) => {
+    const newErrors: typeof errors = {};
+
+    if (!data.name.trim()) {
+      newErrors.name = 'Họ tên là bắt buộc';
+    }
+
+    if (!data.email.trim()) {
+      newErrors.email = 'Email là bắt buộc';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      newErrors.email = 'Email không hợp lệ';
+    }
+
+    if (!data.phone_number.trim()) {
+      newErrors.phone_number = 'Số điện thoại là bắt buộc';
+    } else if (
+      !/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))
+    ) {
+      newErrors.phone_number = 'Số điện thoại không hợp lệ';
+    }
+
+    if (!data.date_of_birth.trim()) {
+      newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
+    }
+
+    if (!data.address.trim()) {
+      newErrors.address = 'Địa chỉ là bắt buộc';
+    }
+
+    setErrors(newErrors);
+  };
+
   const validateForm = () => {
     const newErrors: typeof errors = {};
 
@@ -86,7 +124,14 @@ export default function CreateStaffModal({
   };
 
   const handleInputChange = (field: keyof UserCreate, value: any) => {
-    // Xử lý riêng cho ngày sinh
+    const newFormData = {
+      ...formData,
+      [field]: value,
+    };
+
+    setFormData(newFormData);
+
+    // Handle date of birth validation separately
     if (field === "date_of_birth") {
       const selectedDate = new Date(value);
       const today = new Date();
@@ -113,20 +158,9 @@ export default function CreateStaffModal({
         }));
       }
     } else {
-      // Clear error khi user nhập các field khác
-      if (errors[field]) {
-        setErrors((prev) => ({
-          ...prev,
-          [field]: undefined,
-        }));
-      }
+      // Validate form in real-time for other fields
+      validateFormRealtime(newFormData);
     }
-
-    // Cập nhật formData
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
   };
 
   if (!isOpen) return null;
@@ -272,7 +306,12 @@ export default function CreateStaffModal({
             </button>
             <button
               type='submit'
-              className='px-7 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl transition-colors flex items-center gap-2 font-semibold shadow focus:outline-none focus:ring-2 focus:ring-teal-400'
+              disabled={hasErrors()}
+              className={`px-7 py-2.5 rounded-xl transition-colors flex items-center gap-2 font-semibold shadow focus:outline-none focus:ring-2 focus:ring-teal-400 ${
+                hasErrors()
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  : 'bg-teal-600 hover:bg-teal-700 text-white'
+              }`}
             >
               <User className='w-4 h-4' />
               Thêm nhân viên

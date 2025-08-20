@@ -37,10 +37,44 @@ export default function EditStaffModal({
     Partial<Record<keyof UserUpdate, string>>
   >({});
 
+  // Check if form has any errors
+  const hasErrors = () => {
+    return Object.values(errors).some(error => error !== undefined && error !== '');
+  };
+
+  // Validate form in real-time
+  const validateFormRealtime = (data: UserUpdate) => {
+    const newErrors: typeof errors = {};
+
+    if (!data.name.trim()) {
+      newErrors.name = 'Họ tên là bắt buộc';
+    }
+
+    if (!data.email.trim()) {
+      newErrors.email = 'Email là bắt buộc';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      newErrors.email = 'Email không hợp lệ';
+    }
+
+    if (!data.phone_number.trim()) {
+      newErrors.phone_number = 'Số điện thoại là bắt buộc';
+    } else if (
+      !/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))
+    ) {
+      newErrors.phone_number = 'Số điện thoại không hợp lệ';
+    }
+
+    setErrors(newErrors);
+  };
+
   // Load staff data when modal opens
   useEffect(() => {
     if (staff && isOpen) {
       setFormData({
+        ...staff,
+      });
+      // Validate initial data
+      validateFormRealtime({
         ...staff,
       });
     }
@@ -92,18 +126,15 @@ export default function EditStaffModal({
   };
 
   const handleInputChange = (field: keyof UserUpdate, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
+    const newFormData = {
+      ...formData,
       [field]: value,
-    }));
+    };
 
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: undefined,
-      }));
-    }
+    setFormData(newFormData);
+
+    // Validate form in real-time
+    validateFormRealtime(newFormData);
   };
 
   if (!isOpen || !staff) return null;
@@ -257,7 +288,12 @@ export default function EditStaffModal({
             </button>
             <button
               type='submit'
-              className='px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+              disabled={hasErrors()}
+              className={`px-6 py-3 rounded-lg transition-colors ${
+                hasErrors()
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
             >
               Cập nhật
             </button>

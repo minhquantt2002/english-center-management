@@ -37,18 +37,56 @@ export default function EditCourseModal({
   >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Check if form has any errors
+  const hasErrors = () => {
+    return Object.values(errors).some(error => error !== undefined && error !== '');
+  };
+
+  // Validate form in real-time
+  const validateFormRealtime = (data: CourseUpdate) => {
+    const newErrors: typeof errors = {};
+
+    if (!data.course_name.trim()) {
+      newErrors.course_name = 'Tên khóa học là bắt buộc';
+    }
+
+    if (!data.description.trim()) {
+      newErrors.description = 'Mô tả khóa học là bắt buộc';
+    }
+
+    if (!data.total_weeks) {
+      newErrors.total_weeks = 'Thời lượng khóa học là bắt buộc';
+    }
+
+    if (!data.price) {
+      newErrors.price = 'Học phí khóa học là bắt buộc';
+    }
+
+    if (data.price !== undefined && data.price < 0) {
+      newErrors.price = 'Học phí không được âm';
+    }
+
+    if (!data.status) {
+      newErrors.status = 'Trạng thái khóa học là bắt buộc';
+    }
+
+    setErrors(newErrors);
+  };
+
   // Load course data when modal opens
   useEffect(() => {
     if (course && isOpen) {
-      setFormData({
+      const initialData = {
         course_name: course.course_name || '',
         description: course.description || '',
         level: course.level as CourseLevel,
         total_weeks: course.total_weeks || 0,
         price: course.price || 0,
         status: course.status || 'active',
-      });
-      setErrors({});
+      };
+      setFormData(initialData);
+      // Validate initial data
+      validateFormRealtime(initialData);
     }
   }, [course, isOpen]);
 
@@ -118,18 +156,15 @@ export default function EditCourseModal({
   };
 
   const handleInputChange = (field: keyof CourseUpdate, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
+    const newFormData = {
+      ...formData,
       [field]: value,
-    }));
+    };
 
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: undefined,
-      }));
-    }
+    setFormData(newFormData);
+
+    // Validate form in real-time
+    validateFormRealtime(newFormData);
   };
 
   if (!isOpen || !course) return null;
@@ -320,8 +355,12 @@ export default function EditCourseModal({
             </button>
             <button
               type='submit'
-              disabled={isSubmitting}
-              className='px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'
+              disabled={isSubmitting || hasErrors()}
+              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                isSubmitting || hasErrors()
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
             >
               {isSubmitting ? (
                 <>

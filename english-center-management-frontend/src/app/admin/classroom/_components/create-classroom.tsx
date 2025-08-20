@@ -36,6 +36,46 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
   const { getCourses } = useCourseApi();
   const { getTeachers } = useTeacherApi();
 
+  // Check if form has any errors
+  const hasErrors = () => {
+    return Object.values(errors).some(error => error !== undefined && error !== '');
+  };
+
+  // Validate form in real-time
+  const validateFormRealtime = (data: ClassroomCreate) => {
+    const newErrors: Record<string, string> = {};
+
+    if (!data.class_name.trim()) {
+      newErrors.class_name = 'Tên lớp học là bắt buộc';
+    }
+
+    if (!data.course_id) {
+      newErrors.course_id = 'Vui lòng chọn khóa học';
+    }
+
+    if (!data.teacher_id) {
+      newErrors.teacher_id = 'Vui lòng chọn giáo viên';
+    }
+
+    if (!data.start_date) {
+      newErrors.start_date = 'Ngày bắt đầu là bắt buộc';
+    }
+
+    if (!data.end_date) {
+      newErrors.end_date = 'Ngày kết thúc là bắt buộc';
+    }
+
+    if (data.start_date && data.end_date) {
+      const startDate = new Date(data.start_date);
+      const endDate = new Date(data.end_date);
+      if (startDate >= endDate) {
+        newErrors.end_date = 'Ngày kết thúc phải sau ngày bắt đầu';
+      }
+    }
+
+    setErrors(newErrors);
+  };
+
   useEffect(() => {
     if (isOpen) {
       fetchData();
@@ -62,17 +102,15 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    const newFormData = {
+      ...formData,
       [name]: value,
-    }));
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: '',
-      }));
-    }
+    };
+
+    setFormData(newFormData);
+
+    // Validate form in real-time
+    validateFormRealtime(newFormData);
   };
 
   const validateForm = () => {
@@ -323,8 +361,12 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
             </button>
             <button
               type='submit'
-              disabled={loading}
-              className='px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors duration-200 font-medium flex items-center gap-2'
+              disabled={loading || hasErrors()}
+              className={`px-6 py-2 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 ${
+                loading || hasErrors()
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
             >
               {loading ? (
                 <>

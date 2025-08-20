@@ -28,6 +28,46 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Check if form has any errors
+  const hasErrors = () => {
+    return Object.values(errors).some(error => error !== undefined && error !== '');
+  };
+
+  // Validate form in real-time
+  const validateFormRealtime = (data: StudentCreate) => {
+    const newErrors: Record<string, string> = {};
+
+    if (!data.name.trim()) {
+      newErrors.name = 'Tên học viên là bắt buộc';
+    }
+
+    if (!data.email.trim()) {
+      newErrors.email = 'Email là bắt buộc';
+    } else if (!/\S+@\S+\.\S+/.test(data.email)) {
+      newErrors.email = 'Email không hợp lệ';
+    }
+
+    if (!data.phone_number?.trim()) {
+      newErrors.phone_number = 'Số điện thoại là bắt buộc';
+    } else if (
+      !/^[0-9]{10,11}$/.test(data.phone_number?.replace(/\s/g, ''))
+    ) {
+      newErrors.phone_number = 'Số điện thoại không hợp lệ';
+    }
+
+    if (!data.date_of_birth) {
+      newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
+    }
+
+    if (!data.password.trim()) {
+      newErrors.password = 'Mật khẩu là bắt buộc';
+    } else if (data.password.length < 6) {
+      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+    }
+
+    setErrors(newErrors);
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -58,7 +98,14 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
   };
 
   const handleInputChange = (field: string, value: string) => {
-    // Xử lý riêng cho ngày sinh
+    const newFormData = {
+      ...formData,
+      [field]: value,
+    };
+
+    setFormData(newFormData);
+
+    // Handle date of birth validation separately
     if (field === "date_of_birth") {
       const selectedDate = new Date(value);
       const today = new Date();
@@ -68,7 +115,6 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
           ...prev,
           date_of_birth: "Ngày sinh không được vượt quá ngày hiện tại",
         }));
-
       } else {
         setErrors((prev) => ({
           ...prev,
@@ -76,20 +122,9 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
         }));
       }
     } else {
-      // Clear error khi user nhập các field khác
-      if (errors[field]) {
-        setErrors((prev) => ({
-          ...prev,
-          [field]: undefined,
-        }));
-      }
+      // Validate form in real-time for other fields
+      validateFormRealtime(newFormData);
     }
-
-    // Cập nhật formData
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -398,8 +433,12 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
             </button>
             <button
               type='submit'
-              disabled={isSubmitting}
-              className='px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 flex items-center space-x-2'
+              disabled={isSubmitting || hasErrors()}
+              className={`px-4 py-2 text-sm font-medium border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2 ${
+                isSubmitting || hasErrors()
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
+                  : 'text-white bg-blue-600 hover:bg-blue-700'
+              }`}
             >
               {isSubmitting ? (
                 <>

@@ -48,10 +48,52 @@ export default function EditTeacherModal({
     Partial<Record<keyof TeacherUpdate, string>>
   >({});
 
+  // Check if form has any errors
+  const hasErrors = () => {
+    return Object.values(errors).some(error => error !== undefined && error !== '');
+  };
+
+  // Validate form in real-time
+  const validateFormRealtime = (data: TeacherUpdate) => {
+    const newErrors: typeof errors = {};
+
+    if (!data.name.trim()) {
+      newErrors.name = 'Họ tên là bắt buộc';
+    }
+
+    if (!data.email.trim()) {
+      newErrors.email = 'Email là bắt buộc';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      newErrors.email = 'Email không hợp lệ';
+    }
+
+    if (!data.phone_number.trim()) {
+      newErrors.phone_number = 'Số điện thoại là bắt buộc';
+    } else if (
+      !/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))
+    ) {
+      newErrors.phone_number = 'Số điện thoại không hợp lệ';
+    }
+
+    if (!data.specialization) {
+      newErrors.specialization = 'Chuyên môn là bắt buộc';
+    }
+
+    if (!data.education) {
+      newErrors.education = 'Bằng cấp là bắt buộc';
+    }
+
+    setErrors(newErrors);
+  };
+
   // Load teacher data when modal opens
   useEffect(() => {
     if (teacher && isOpen) {
       setFormData({
+        ...teacher,
+      });
+      // Validate initial data
+      validateFormRealtime({
         ...teacher,
       });
     }
@@ -114,6 +156,14 @@ export default function EditTeacherModal({
   };
 
   const handleInputChange = (field: keyof TeacherUpdate, value: any) => {
+    const newFormData = {
+      ...formData,
+      [field]: value,
+    };
+
+    setFormData(newFormData);
+
+    // Handle date of birth validation separately
     if (field === 'date_of_birth') {
       const selectedDate = new Date(value);
       const today = new Date();
@@ -138,18 +188,9 @@ export default function EditTeacherModal({
           date_of_birth: undefined,
         }));
       }
-    }
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: undefined,
-      }));
+    } else {
+      // Validate form in real-time for other fields
+      validateFormRealtime(newFormData);
     }
   };
 
@@ -374,7 +415,12 @@ export default function EditTeacherModal({
             </button>
             <button
               type='submit'
-              className='px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+              disabled={hasErrors()}
+              className={`px-6 py-3 rounded-lg transition-colors ${
+                hasErrors()
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
             >
               Cập nhật
             </button>

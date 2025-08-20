@@ -48,6 +48,42 @@ export default function CreateCourseModal({
   >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Check if form has any errors
+  const hasErrors = () => {
+    return Object.values(errors).some(error => error !== undefined && error !== '');
+  };
+
+  // Validate form in real-time
+  const validateFormRealtime = (data: CourseCreate) => {
+    const newErrors: typeof errors = {};
+
+    if (!data.course_name.trim()) {
+      newErrors.course_name = 'Tên khóa học là bắt buộc';
+    }
+
+    if (!data.description.trim()) {
+      newErrors.description = 'Mô tả khóa học là bắt buộc';
+    }
+
+    if (!data.total_weeks) {
+      newErrors.total_weeks = 'Thời lượng khóa học là bắt buộc';
+    }
+
+    if (!data.price) {
+      newErrors.price = 'Học phí là bắt buộc';
+    }
+
+    if (!data.level) {
+      newErrors.level = 'Cấp độ khóa học là bắt buộc';
+    }
+
+    if (!data.status) {
+      newErrors.status = 'Trạng thái khóa học là bắt buộc';
+    }
+
+    setErrors(newErrors);
+  };
+
   const validateForm = () => {
     const newErrors: typeof errors = {};
 
@@ -110,18 +146,15 @@ export default function CreateCourseModal({
   };
 
   const handleInputChange = (field: keyof CourseCreate, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
+    const newFormData = {
+      ...formData,
       [field]: value,
-    }));
+    };
 
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: undefined,
-      }));
-    }
+    setFormData(newFormData);
+
+    // Validate form in real-time
+    validateFormRealtime(newFormData);
   };
 
   if (!isOpen) return null;
@@ -310,8 +343,12 @@ export default function CreateCourseModal({
             </button>
             <button
               type='submit'
-              disabled={isSubmitting}
-              className='px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'
+              disabled={isSubmitting || hasErrors()}
+              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                isSubmitting || hasErrors()
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
+                  : 'bg-teal-600 hover:bg-teal-700 text-white'
+              }`}
             >
               {isSubmitting ? (
                 <>
