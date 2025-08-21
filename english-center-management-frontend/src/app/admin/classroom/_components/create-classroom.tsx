@@ -179,7 +179,7 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
       console.error('Failed to create classroom:', error);
       // Chỉ hiển thị lỗi, không đóng modal để user có thể thử lại
     }
-    
+
   };
 
   const handleClose = () => {
@@ -234,9 +234,8 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                 name='class_name'
                 value={formData.class_name}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.class_name ? 'border-red-300' : 'border-gray-300'
-                }`}
+                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.class_name ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 placeholder='Nhập tên lớp học'
               />
             </div>
@@ -256,9 +255,8 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                 name='course_id'
                 value={formData.course_id}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.course_id ? 'border-red-300' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.course_id ? 'border-red-300' : 'border-gray-300'
+                  }`}
               >
                 <option value=''>Chọn khóa học</option>
                 {courses.map((course) => (
@@ -281,9 +279,8 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                 name='teacher_id'
                 value={formData.teacher_id}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.teacher_id ? 'border-red-300' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.teacher_id ? 'border-red-300' : 'border-gray-300'
+                  }`}
               >
                 <option value=''>Chọn giáo viên</option>
                 {teachers.map((teacher) => (
@@ -315,9 +312,8 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                   name='start_date'
                   value={formData.start_date}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.start_date ? 'border-red-300' : 'border-gray-300'
-                  }`}
+                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.start_date ? 'border-red-300' : 'border-gray-300'
+                    }`}
                 />
               </div>
               {errors.start_date && (
@@ -340,9 +336,8 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                   name='end_date'
                   value={formData.end_date}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.end_date ? 'border-red-300' : 'border-gray-300'
-                  }`}
+                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.end_date ? 'border-red-300' : 'border-gray-300'
+                    }`}
                 />
               </div>
               {errors.end_date && (
@@ -350,6 +345,23 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
               )}
             </div>
           </div>
+          {/* Status Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Trạng thái <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent border-gray-300"
+            >
+              <option value="active">Đang hoạt động</option>
+              <option value="completed">Đã hoàn thành</option>
+              <option value="cancelled">Đã hủy</option>
+            </select>
+          </div>
+
 
           {/* Action Buttons */}
           <div className='flex items-center justify-end gap-3 pt-6 border-t border-gray-200'>
@@ -364,11 +376,10 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
             <button
               type='submit'
               disabled={loading || hasErrors()}
-              className={`px-6 py-2 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 ${
-                loading || hasErrors()
+              className={`px-6 py-2 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 ${loading || hasErrors()
                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                   : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}
+                }`}
             >
               {loading ? (
                 <>

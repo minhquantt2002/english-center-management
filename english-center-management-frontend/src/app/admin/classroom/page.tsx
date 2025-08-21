@@ -43,12 +43,14 @@ const ClassManagement: React.FC = () => {
 
   const getLevelBadgeColor = (level: string) => {
     switch (level) {
-      case 'Cơ bản':
+      case 'A2 - Sơ cấp':
         return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'Trung cấp':
+      case 'B1 - Trung cấp thấp':
         return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'Nâng cao':
+      case 'B2 - Trung cấp cao':
         return 'bg-red-50 text-red-700 border-red-200';
+      case 'C1 - Nâng cao':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
       default:
         return 'bg-gray-50 text-gray-700 border-gray-200';
     }
@@ -103,7 +105,30 @@ const ClassManagement: React.FC = () => {
       console.error('Failed to update classroom:', err);
     }
   };
-
+  const getStatusDisplayInfo = (status: string) => {
+  switch (status) {
+    case 'active':
+      return {
+        text: 'Đang hoạt động',
+        className: 'bg-emerald-50 text-emerald-700 border-emerald-200'
+      };
+    case 'completed':
+      return {
+        text: 'Đã hoàn thành',
+        className: 'bg-blue-50 text-blue-700 border-blue-200'
+      };
+    case 'cancelled':
+      return {
+        text: 'Không hoạt động',
+        className: 'bg-red-50 text-red-700 border-red-200'
+      };
+    default:
+      return {
+        text: 'Không xác định',
+        className: 'bg-gray-50 text-gray-700 border-gray-200'
+      };
+  }
+};
   // Filter classrooms based on search term
   const filteredClassrooms = classrooms.filter((classroom) => {
     const matchesSearch =
@@ -248,11 +273,12 @@ const ClassManagement: React.FC = () => {
           {/* Table Header */}
           <div className='bg-gray-50 px-6 py-4 border-b border-gray-200'>
             <div className='grid grid-cols-12 gap-4 text-sm font-medium text-gray-500'>
-              <div className='col-span-3'>Tên lớp</div>
+              <div className='col-span-2'>Tên lớp</div>
               <div className='col-span-2'>Cấp độ</div>
               <div className='col-span-2'>Giáo viên phụ trách</div>
               <div className='col-span-1'>Học viên</div>
-              <div className='col-span-3'>Thời gian học</div>
+              <div className='col-span-2'>Trạng thái</div>
+              <div className='col-span-2'>Thời gian học</div>
               <div className='col-span-1'>Thao tác</div>
             </div>
           </div>
@@ -287,7 +313,7 @@ const ClassManagement: React.FC = () => {
               >
                 <div className='grid grid-cols-12 gap-4 items-center'>
                   {/* Class Name */}
-                  <div className='col-span-3'>
+                  <div className='col-span-2'>
                     <p className='font-medium text-gray-900'>
                       {classroom.class_name}
                     </p>
@@ -337,9 +363,15 @@ const ClassManagement: React.FC = () => {
                       {classroom.enrollments.length}
                     </span>
                   </div>
+                  {/* Status */}
+                  <div className='col-span-2'>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusDisplayInfo(classroom.status).className}`}>
+                      {getStatusDisplayInfo(classroom.status).text}
+                    </span>
+                  </div>
 
                   {/* Schedule */}
-                  <div className='col-span-3'>
+                  <div className='col-span-2'>
                     <div className='text-sm'>
                       <p className='text-gray-900 font-medium'>
                         {formatDate(classroom.start_date)} -{' '}
