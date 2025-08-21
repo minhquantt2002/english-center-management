@@ -19,178 +19,242 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<Partial<UserUpdate>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
-  console.log(student);
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string>('');
 
-  // Validate form in real-time
-  const validateFormRealtime = (data: Partial<UserUpdate>) => {
-    setErrors(() => {
-      const newErrors: Record<string, string> = {};
+  // Progressive validation - only show errors when appropriate
+  const shouldShowError = (field: string) => {
+    return formSubmitted || touchedFields[field];
+  };
 
-      if (!data.name?.trim()) {
-        newErrors.name = 'Họ và tên là bắt buộc';
-      }
+  // Validation helpers for button logic (always validate)
+  const isValidEmail = (email: string) => {
+    return email.trim() !== '' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
 
-      if (!data.email?.trim()) {
-        newErrors.email = 'Email là bắt buộc';
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-        newErrors.email = 'Email không hợp lệ';
-      }
+  const isValidPhone = (phone: string) => {
+    return phone.trim() !== '' && /^[0-9]{10,11}$/.test(phone.replace(/\s/g, ''));
+  };
 
-      if (!data.phone_number?.trim()) {
-        newErrors.phone_number = 'Số điện thoại là bắt buộc';
-      } else if (!/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))) {
-        newErrors.phone_number = 'Số điện thoại không hợp lệ';
-      }
+  const isValidDate = (date: string) => {
+    if (!date) return true; // Optional field
+    const selectedDate = new Date(date);
+    const today = new Date();
+    return selectedDate <= today;
+  };
 
-      if (!data.input_level) {
-        newErrors.input_level = 'Trình độ là bắt buộc';
-      }
+  // Button validation logic (independent of UI state)
+  const isFormValidForSubmit = () => {
+    if (!formData.name?.trim()) return false;
+    if (!isValidEmail(formData.email || '')) return false;
+    if (!isValidPhone(formData.phone_number || '')) return false;
+    if (!formData.input_level) return false;
+    if (!formData.status) return false;
+    if (!isValidDate(formData.date_of_birth || '')) return false;
+    
+    // Check parent_phone if provided
+    if (formData.parent_phone && !isValidPhone(formData.parent_phone)) return false;
 
-      if (!data.status) {
-        newErrors.status = 'Trạng thái là bắt buộc';
-      }
+    return true;
+  };
 
-      // Validation cho parent_phone (không bắt buộc nhưng nếu có thì phải đúng format)
-      if (data.parent_phone && !/^[0-9]{10,11}$/.test(data.parent_phone.replace(/\s/g, ''))) {
-        newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
+  // Validate single field for display (with detailed messages)
+  const validateFieldForDisplay = (field: string, value: any) => {
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+
+      switch (field) {
+        case 'name':
+          if (!value?.trim()) {
+            newErrors.name = 'Họ và tên là bắt buộc';
+          } else {
+            delete newErrors.name;
+          }
+          break;
+
+        case 'email':
+          if (!value?.trim()) {
+            newErrors.email = 'Email là bắt buộc';
+          } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+            newErrors.email = 'Email không hợp lệ';
+          } else {
+            delete newErrors.email;
+          }
+          break;
+
+        case 'phone_number':
+          if (!value?.trim()) {
+            newErrors.phone_number = 'Số điện thoại là bắt buộc';
+          } else if (!/^[0-9]{10,11}$/.test(value.replace(/\s/g, ''))) {
+            newErrors.phone_number = 'Số điện thoại không hợp lệ';
+          } else {
+            delete newErrors.phone_number;
+          }
+          break;
+
+        case 'input_level':
+          if (!value) {
+            newErrors.input_level = 'Trình độ là bắt buộc';
+          } else {
+            delete newErrors.input_level;
+          }
+          break;
+
+        case 'status':
+          if (!value) {
+            newErrors.status = 'Trạng thái là bắt buộc';
+          } else {
+            delete newErrors.status;
+          }
+          break;
+
+        case 'date_of_birth':
+          if (value) {
+            const selectedDate = new Date(value);
+            const today = new Date();
+            if (selectedDate > today) {
+              newErrors.date_of_birth = 'Ngày sinh không được vượt quá ngày hiện tại';
+            } else {
+              delete newErrors.date_of_birth;
+            }
+          } else {
+            delete newErrors.date_of_birth;
+          }
+          break;
+
+        case 'parent_phone':
+          if (value && !/^[0-9]{10,11}$/.test(value.replace(/\s/g, ''))) {
+            newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
+          } else {
+            delete newErrors.parent_phone;
+          }
+          break;
+
+        default:
+          break;
       }
 
       return newErrors;
     });
   };
 
-  useEffect(() => {
-    if (student) {
-      setFormData({
-        ...student,
+  // Validate all fields for form submission
+  const validateAllFields = () => {
+    const fieldsToValidate = ['name', 'email', 'phone_number', 'input_level', 'status', 'date_of_birth', 'parent_phone'];
+    
+    fieldsToValidate.forEach(field => {
+      validateFieldForDisplay(field, formData[field as keyof UserUpdate]);
+    });
+
+    // Return true if no errors and form is valid for submit
+    return Object.keys(errors).length === 0 && isFormValidForSubmit();
+  };
+
+  const handleInputChange = (field: string, value: string | number | boolean | any) => {
+    const newFormData = {
+      ...formData,
+      [field]: value,
+    };
+
+    setFormData(newFormData);
+    setSubmitError(''); // Clear submit error when user makes changes
+
+    // Progressive error display - only show if field has been touched or form submitted
+    if (shouldShowError(field)) {
+      validateFieldForDisplay(field, value);
+    }
+  };
+
+  const handleFieldBlur = (field: string) => {
+    setTouchedFields((prev) => ({
+      ...prev,
+      [field]: true,
+    }));
+
+    // Validate field when user leaves it
+    validateFieldForDisplay(field, formData[field as keyof UserUpdate]);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setFormSubmitted(true);
+    setSubmitError('');
+
+    // Mark all required fields as touched
+    const fieldsToTouch = ['name', 'email', 'phone_number', 'input_level', 'status'];
+    setTouchedFields((prev) => {
+      const newTouched = { ...prev };
+      fieldsToTouch.forEach((field) => {
+        newTouched[field] = true;
       });
-      // Validate initial data
-      validateFormRealtime({
-        ...student,
-      });
-    }
-  }, [student]);
+      return newTouched;
+    });
 
-  if (!isOpen || !student) return null;
-
-  const handleInputChange = (
-    field: string,
-    value: string | number | boolean | any
-  ) => {
-    // Xử lý riêng cho ngày sinh
-    if (field === "date_of_birth") {
-      const selectedDate = new Date(value);
-      const today = new Date();
-
-      if (selectedDate > today) {
-        setErrors((prev) => ({
-          ...prev,
-          date_of_birth: "Ngày sinh không được vượt quá ngày hiện tại",
-        }));
-
-      } else {
-        setErrors((prev) => ({
-          ...prev,
-          date_of_birth: undefined,
-        }));
-      }
-    }
-    else if (field === "phone_number") {
-      if (!/^[0-9]{10,11}$/.test(value.replace(/\s/g, ''))) {
-        setErrors((prev) => ({
-          ...prev,
-          phone_number: "Số điện thoại không hợp lệ",
-        }));
-      } else {
-        setErrors((prev) => ({
-          ...prev,
-          phone_number: undefined,
-        }));
-      }
-    }
-    else if (field === "parent_phone") {
-      // Validation cho số điện thoại phụ huynh (không bắt buộc nhưng nếu có thì phải đúng format)
-      if (value && !/^[0-9]{10,11}$/.test(value.replace(/\s/g, ''))) {
-        setErrors((prev) => ({
-          ...prev,
-          parent_phone: "Số điện thoại phụ huynh không hợp lệ",
-        }));
-      } else {
-        setErrors((prev) => ({
-          ...prev,
-          parent_phone: undefined,
-        }));
-      }
-    }
-    else {
-      // Validate form in real-time for other fields
-      const newFormData = {
-        ...formData,
-        [field]: value,
-      };
-      setFormData(newFormData);
-      validateFormRealtime(newFormData);
+    // Validate all fields
+    const isValid = validateAllFields();
+    
+    if (!isValid) {
       return;
     }
 
-    // Cập nhật formData
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+    if (!student) return;
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+    setIsSubmitting(true);
 
-    if (!formData.name?.trim()) {
-      newErrors.name = 'Họ và tên là bắt buộc';
-    }
-
-    if (!formData.email?.trim()) {
-      newErrors.email = 'Email là bắt buộc';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Email không hợp lệ';
-    }
-
-    if (!formData.phone_number?.trim()) {
-      newErrors.phone = 'Số điện thoại là bắt buộc';
-    }
-    else if (!/^[0-9]{10,11}$/.test(formData.phone_number.replace(/\s/g, ''))) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
-    }
-
-    if (!formData.input_level) {
-      newErrors.level = 'Trình độ là bắt buộc';
-    }
-
-    if (!formData.status) {
-      newErrors.status = 'Trạng thái là bắt buộc';
-    }
-
-    // Validation cho parent_phone (không bắt buộc nhưng nếu có thì phải đúng format)
-    if (formData.parent_phone && !/^[0-9]{10,11}$/.test(formData.parent_phone.replace(/\s/g, ''))) {
-      newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (validateForm()) {
+    try {
       const updatedStudent: UserUpdate = {
         ...student,
         ...formData,
         updatedAt: new Date().toLocaleDateString('vi-VN'),
       } as UserUpdate;
 
-      onSave(updatedStudent);
+      await onSave(updatedStudent);
+      handleClose();
+    } catch (error) {
+      console.error('Error updating student:', error);
+      setSubmitError('Có lỗi xảy ra khi cập nhật thông tin học viên. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (!isSubmitting) {
+      setErrors({});
+      setTouchedFields({});
+      setFormSubmitted(false);
+      setSubmitError('');
       onClose();
     }
   };
+
+  // Initialize form data when student prop changes
+  useEffect(() => {
+    if (student) {
+      setFormData({
+        ...student,
+      });
+      // Reset validation state
+      setErrors({});
+      setTouchedFields({});
+      setFormSubmitted(false);
+      setSubmitError('');
+    }
+  }, [student]);
+
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      if (isSubmitting) {
+        setIsSubmitting(false);
+      }
+    };
+  }, [isSubmitting]);
+
+  if (!isOpen || !student) return null;
 
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
@@ -204,7 +268,7 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                 src={
                   'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
                 }
-                alt={formData.name}
+                alt={formData.name || 'Student'}
               />
             </div>
             <div>
@@ -214,8 +278,10 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
+            disabled={isSubmitting}
             className='text-gray-400 hover:text-gray-600 transition-colors'
+            aria-label='Đóng modal'
           >
             <X size={24} />
           </button>
@@ -223,6 +289,13 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className='p-6 space-y-6'>
+          {/* Submit Error Message */}
+          {submitError && (
+            <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
+              <p className='text-sm text-red-600'>{submitError}</p>
+            </div>
+          )}
+
           {/* Personal Information */}
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             <div className='space-y-4'>
@@ -240,12 +313,15 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                     type='text'
                     value={formData.name || ''}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                    onBlur={() => handleFieldBlur('name')}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      shouldShowError('name') && errors.name ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     placeholder='Nhập họ và tên'
+                    aria-describedby={shouldShowError('name') && errors.name ? 'name-error' : undefined}
                   />
-                  {errors.name && (
-                    <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
+                  {shouldShowError('name') && errors.name && (
+                    <p id='name-error' className='text-red-500 text-sm mt-1 flex items-center gap-1'>
                       <AlertCircle size={14} />
                       {errors.name}
                     </p>
@@ -260,16 +336,19 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                     <Calendar className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
                     <input
                       type='date'
-                      value={formData.date_of_birth?.split('T')[0]}
+                      value={formData.date_of_birth?.split('T')[0] || ''}
                       onChange={(e) =>
                         handleInputChange('date_of_birth', e.target.value)
                       }
-                      className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.date_of_birth ? 'border-red-500' : 'border-gray-300'
-                        }`}
+                      onBlur={() => handleFieldBlur('date_of_birth')}
+                      className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        shouldShowError('date_of_birth') && errors.date_of_birth ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      aria-describedby={shouldShowError('date_of_birth') && errors.date_of_birth ? 'dob-error' : undefined}
                     />
                   </div>
-                  {errors.date_of_birth && (
-                    <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
+                  {shouldShowError('date_of_birth') && errors.date_of_birth && (
+                    <p id='dob-error' className='text-red-500 text-sm mt-1 flex items-center gap-1'>
                       <AlertCircle size={14} />
                       {errors.date_of_birth}
                     </p>
@@ -281,6 +360,7 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                     Địa chỉ
                   </label>
                   <input
+                    type='text'
                     value={formData.address || ''}
                     onChange={(e) =>
                       handleInputChange('address', e.target.value)
@@ -308,12 +388,15 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                     type='email'
                     value={formData.email || ''}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                    onBlur={() => handleFieldBlur('email')}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      shouldShowError('email') && errors.email ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     placeholder='Nhập email'
+                    aria-describedby={shouldShowError('email') && errors.email ? 'email-error' : undefined}
                   />
-                  {errors.email && (
-                    <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
+                  {shouldShowError('email') && errors.email && (
+                    <p id='email-error' className='text-red-500 text-sm mt-1 flex items-center gap-1'>
                       <AlertCircle size={14} />
                       {errors.email}
                     </p>
@@ -330,12 +413,15 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                     onChange={(e) =>
                       handleInputChange('phone_number', e.target.value)
                     }
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.phone_number ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                    onBlur={() => handleFieldBlur('phone_number')}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      shouldShowError('phone_number') && errors.phone_number ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     placeholder='Nhập số điện thoại'
+                    aria-describedby={shouldShowError('phone_number') && errors.phone_number ? 'phone-error' : undefined}
                   />
-                  {errors.phone_number && (
-                    <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
+                  {shouldShowError('phone_number') && errors.phone_number && (
+                    <p id='phone-error' className='text-red-500 text-sm mt-1 flex items-center gap-1'>
                       <AlertCircle size={14} />
                       {errors.phone_number}
                     </p>
@@ -358,20 +444,25 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   Trình độ *
                 </label>
                 <select
-                  value={formData.input_level}
+                  value={formData.input_level || ''}
                   onChange={(e) =>
                     handleInputChange('input_level', e.target.value)
                   }
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                  onBlur={() => handleFieldBlur('input_level')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    shouldShowError('input_level') && errors.input_level ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  aria-describedby={shouldShowError('input_level') && errors.input_level ? 'level-error' : undefined}
                 >
+                  <option value=''>Chọn trình độ</option>
                   <option value='A1'>A1 - Mất gốc</option>
                   <option value='A2'>A2 - Sơ cấp</option>
                   <option value='B1'>B1 - Trung cấp thấp</option>
                   <option value='B2'>B2 - Trung cấp cao</option>
                   <option value='C1'>C1 - Nâng cao</option>
                 </select>
-                {errors.input_level && (
-                  <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
+                {shouldShowError('input_level') && errors.input_level && (
+                  <p id='level-error' className='text-red-500 text-sm mt-1 flex items-center gap-1'>
                     <AlertCircle size={14} />
                     {errors.input_level}
                   </p>
@@ -383,17 +474,22 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   Trạng thái *
                 </label>
                 <select
-                  value={formData.status}
+                  value={formData.status || ''}
                   onChange={(e) => handleInputChange('status', e.target.value)}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                  onBlur={() => handleFieldBlur('status')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    shouldShowError('status') && errors.status ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  aria-describedby={shouldShowError('status') && errors.status ? 'status-error' : undefined}
                 >
+                  <option value=''>Chọn trạng thái</option>
                   <option value='active'>Đang học</option>
                   <option value='inactive'>Tạm nghỉ</option>
                   <option value='suspended'>Tạm đình chỉ</option>
                   <option value='graduated'>Đã tốt nghiệp</option>
                 </select>
-                {errors.status && (
-                  <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
+                {shouldShowError('status') && errors.status && (
+                  <p id='status-error' className='text-red-500 text-sm mt-1 flex items-center gap-1'>
                     <AlertCircle size={14} />
                     {errors.status}
                   </p>
@@ -435,11 +531,15 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   onChange={(e) =>
                     handleInputChange('parent_phone', e.target.value)
                   }
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                  onBlur={() => handleFieldBlur('parent_phone')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    shouldShowError('parent_phone') && errors.parent_phone ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder='Nhập số điện thoại'
+                  aria-describedby={shouldShowError('parent_phone') && errors.parent_phone ? 'parent-phone-error' : undefined}
                 />
-                {errors.parent_phone && (
-                  <p className='text-red-500 text-sm mt-1 flex items-center gap-1'>
+                {shouldShowError('parent_phone') && errors.parent_phone && (
+                  <p id='parent-phone-error' className='text-red-500 text-sm mt-1 flex items-center gap-1'>
                     <AlertCircle size={14} />
                     {errors.parent_phone}
                   </p>
@@ -452,18 +552,32 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
           <div className='flex justify-end space-x-3 pt-6 border-t border-gray-200'>
             <button
               type='button'
-              onClick={onClose}
-              className='px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors'
+              onClick={handleClose}
+              disabled={isSubmitting}
+              className='px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50'
             >
               Hủy
             </button>
             <button
               type='submit'
-              className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'
-              disabled={Object.values(errors).some(Boolean)}
+              disabled={isSubmitting || !isFormValidForSubmit()}
+              className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                isSubmitting || !isFormValidForSubmit()
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
             >
-              <Save size={16} />
-              Lưu thay đổi
+              {isSubmitting ? (
+                <>
+                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                  <span>Đang lưu...</span>
+                </>
+              ) : (
+                <>
+                  <Save size={16} />
+                  <span>Lưu thay đổi</span>
+                </>
+              )}
             </button>
           </div>
         </form>

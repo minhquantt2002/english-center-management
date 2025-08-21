@@ -196,7 +196,7 @@ export interface TeacherBase {
 }
 
 export interface TeacherCreate extends TeacherBase {
-  password: string;
+  password?: string;
 }
 
 export interface TeacherUpdate {

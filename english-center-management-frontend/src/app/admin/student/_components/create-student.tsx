@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, User, Mail, Phone, Calendar, MapPin, Users } from 'lucide-react';
 import { StudentCreate } from '../../../../types/admin';
 
@@ -10,105 +10,159 @@ interface CreateStudentModalProps {
   onSave: (student: StudentCreate) => Promise<void>;
 }
 
+// Initial form data constant for consistency
+const INITIAL_FORM_DATA: StudentCreate = {
+  name: '',
+  email: '',
+  phone_number: '',
+  date_of_birth: '',
+  input_level: 'A1',
+  address: '',
+  password: '',
+  parent_name: '',
+  parent_phone: '',
+  status: 'active',
+};
+
 const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
   isOpen,
   onClose,
   onSave,
 }) => {
-  const [formData, setFormData] = useState<StudentCreate>({
-    name: '',
-    email: '',
-    password: '',
-    status: 'active',
-    date_of_birth: '',
-    input_level: 'A1',
-    address: '',
-  });
-
+  const [formData, setFormData] = useState<StudentCreate>(INITIAL_FORM_DATA);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [formSubmitted, setFormSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string>('');
 
-  // Check if form has any errors
-  const hasErrors = () => {
-    return Object.values(errors).some(error => error && error.trim() !== '');
+  // Progressive validation - only show errors when appropriate
+  const shouldShowError = (field: string) => {
+    return formSubmitted || touchedFields[field];
   };
 
-  // Check if all required fields are filled
-  const isFormValid = () => {
-    return (
-      formData.name.trim() !== '' &&
-      formData.email.trim() !== '' &&
-      formData.phone_number?.trim() !== '' &&
-      formData.date_of_birth !== '' &&
-      formData.password.trim() !== '' &&
-      !hasErrors()
+  // Validation helpers for button logic (always validate)
+  const isValidEmail = (email: string) => {
+    return email.trim() !== '' && /\S+@\S+\.\S+/.test(email);
+  };
+
+  const isValidPhone = (phone: string) => {
+    return phone.trim() !== '' && /^[0-9]{10,11}$/.test(phone.replace(/\s/g, ''));
+  };
+
+  const isValidPassword = (password: string) => {
+    return password.trim() !== '' && password.length >= 6;
+  };
+
+  const isValidDate = (date: string) => {
+    if (!date) return false;
+    const selectedDate = new Date(date);
+    const today = new Date();
+    return selectedDate <= today;
+  };
+
+  // Button validation logic (independent of UI state)
+  const isFormValidForSubmit = () => {
+    const requiredFields = [
+      formData.name.trim(),
+      formData.email.trim(),
+      formData.phone_number?.trim(),
+      formData.date_of_birth,
+      formData.password.trim(),
+    ];
+
+    // Check required fields
+    const hasRequiredFields = requiredFields.every(
+      (field) => field !== '' && field !== undefined
     );
+
+    // Check format validation
+    const hasValidFormats =
+      isValidEmail(formData.email) &&
+      isValidPhone(formData.phone_number || '') &&
+      isValidPassword(formData.password) &&
+      isValidDate(formData.date_of_birth) &&
+      formData.name.trim().length > 0;
+
+    return hasRequiredFields && hasValidFormats;
   };
 
-  // Validate form in real-time
-  const validateFormRealtime = (data: StudentCreate) => {
-    setErrors(() => {
-      const newErrors: Record<string, string> = {};
+  // Validate single field for display (with detailed messages)
+  const validateFieldForDisplay = (field: string, value: any) => {
+    setErrors((prev) => {
+      const newErrors = { ...prev };
 
-      if (!data.name.trim()) {
-        newErrors.name = 'Tên học viên là bắt buộc';
-      }
+      switch (field) {
+        case 'name':
+          if (!value.trim()) {
+            newErrors.name = 'Tên học viên là bắt buộc';
+          } else {
+            delete newErrors.name;
+          }
+          break;
 
-      if (!data.email.trim()) {
-        newErrors.email = 'Email là bắt buộc';
-      } else if (!/\S+@\S+\.\S+/.test(data.email)) {
-        newErrors.email = 'Email không hợp lệ';
-      }
+        case 'email':
+          if (!value.trim()) {
+            newErrors.email = 'Email là bắt buộc';
+          } else if (!/\S+@\S+\.\S+/.test(value)) {
+            newErrors.email = 'Email không hợp lệ';
+          } else {
+            delete newErrors.email;
+          }
+          break;
 
-      if (!data.phone_number?.trim()) {
-        newErrors.phone_number = 'Số điện thoại là bắt buộc';
-      } else if (
-        !/^[0-9]{10,11}$/.test(data.phone_number?.replace(/\s/g, ''))
-      ) {
-        newErrors.phone_number = 'Số điện thoại không hợp lệ';
-      }
+        case 'phone_number':
+          if (!value?.trim()) {
+            newErrors.phone_number = 'Số điện thoại là bắt buộc';
+          } else if (!/^[0-9]{10,11}$/.test(value?.replace(/\s/g, ''))) {
+            newErrors.phone_number = 'Số điện thoại không hợp lệ';
+          } else {
+            delete newErrors.phone_number;
+          }
+          break;
 
-      if (!data.date_of_birth) {
-        newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
-      }
+        case 'password':
+          if (!value.trim()) {
+            newErrors.password = 'Mật khẩu là bắt buộc';
+          } else if (value.length < 6) {
+            newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+          } else {
+            delete newErrors.password;
+          }
+          break;
 
-      if (!data.password.trim()) {
-        newErrors.password = 'Mật khẩu là bắt buộc';
-      } else if (data.password.length < 6) {
-        newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+        case 'date_of_birth':
+          if (!value) {
+            delete newErrors.date_of_birth;
+          } else {
+            const selectedDate = new Date(value);
+            const today = new Date();
+            if (selectedDate > today) {
+              newErrors.date_of_birth = 'Ngày sinh không được vượt quá ngày hiện tại';
+            } else {
+              delete newErrors.date_of_birth;
+            }
+          }
+          break;
+
+        default:
+          break;
       }
 
       return newErrors;
     });
   };
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  // Validate all fields for form submission
+  const validateAllFields = () => {
+    const fieldsToValidate = ['name', 'email', 'phone_number', 'password', 'date_of_birth'];
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Tên học viên là bắt buộc';
-    }
+    fieldsToValidate.forEach(field => {
+      validateFieldForDisplay(field, formData[field as keyof StudentCreate]);
+    });
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email là bắt buộc';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email không hợp lệ';
-    }
-
-    if (!formData.phone_number?.trim()) {
-      newErrors.phone_number = 'Số điện thoại là bắt buộc';
-    } else if (
-      !/^[0-9]{10,11}$/.test(formData.phone_number?.replace(/\s/g, ''))
-    ) {
-      newErrors.phone_number = 'Số điện thoại không hợp lệ';
-    }
-
-    if (!formData.date_of_birth) {
-      newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // Check if there are any errors after validation
+    return Object.keys(errors).length === 0 && isFormValidForSubmit();
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -118,34 +172,44 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
     };
 
     setFormData(newFormData);
+    setSubmitError(''); // Clear submit error when user makes changes
 
-    // Handle date of birth validation separately
-    if (field === "date_of_birth") {
-      const selectedDate = new Date(value);
-      const today = new Date();
-
-      if (selectedDate > today) {
-        setErrors((prev) => ({
-          ...prev,
-          date_of_birth: "Ngày sinh không được vượt quá ngày hiện tại",
-        }));
-      } else {
-        setErrors((prev) => {
-          const newErrors = { ...prev };
-          delete newErrors.date_of_birth;
-          return newErrors;
-        });
-      }
-    } else {
-      // Validate form in real-time for other fields
-      validateFormRealtime(newFormData);
+    // Progressive error display - only show if field has been touched or form submitted
+    if (shouldShowError(field)) {
+      validateFieldForDisplay(field, value);
     }
+  };
+
+  const handleFieldBlur = (field: string) => {
+    setTouchedFields((prev) => ({
+      ...prev,
+      [field]: true,
+    }));
+
+    // Validate field when user leaves it
+    validateFieldForDisplay(field, formData[field as keyof StudentCreate]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    setFormSubmitted(true);
+    setSubmitError('');
+
+    // Mark all required fields as touched
+    const requiredFields = ['name', 'email', 'phone_number', 'password', 'date_of_birth'];
+    setTouchedFields((prev) => {
+      const newTouched = { ...prev };
+      requiredFields.forEach((field) => {
+        newTouched[field] = true;
+      });
+      return newTouched;
+    });
+
+    // Validate all fields
+    const isValid = validateAllFields();
+
+    if (!isValid) {
       return;
     }
 
@@ -165,22 +229,11 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
         status: formData.status,
       };
 
-
       await onSave(newStudent);
-
-      setFormData({
-        name: '',
-        email: '',
-        password: '',
-        status: 'active',
-        date_of_birth: '',
-        input_level: 'beginner',
-        address: '',
-      });
-      setErrors({});
-      onClose();
+      handleClose();
     } catch (error) {
       console.error('Error creating student:', error);
+      setSubmitError('Có lỗi xảy ra khi tạo học viên. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
     }
@@ -188,22 +241,23 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
 
   const handleClose = () => {
     if (!isSubmitting) {
-      setFormData({
-        name: '',
-        email: '',
-        phone_number: '',
-        date_of_birth: '',
-        input_level: 'A1',
-        address: '',
-        password: '',
-        parent_name: '',
-        parent_phone: '',
-        status: 'active',
-      });
+      setFormData(INITIAL_FORM_DATA);
       setErrors({});
+      setTouchedFields({});
+      setFormSubmitted(false);
+      setSubmitError('');
       onClose();
     }
   };
+
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      if (isSubmitting) {
+        setIsSubmitting(false);
+      }
+    };
+  }, [isSubmitting]);
 
   if (!isOpen) return null;
 
@@ -229,6 +283,7 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
             onClick={handleClose}
             disabled={isSubmitting}
             className='text-gray-400 hover:text-gray-600 transition-colors'
+            aria-label='Đóng modal'
           >
             <X className='h-6 w-6' />
           </button>
@@ -236,6 +291,13 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className='p-6 space-y-6'>
+          {/* Submit Error Message */}
+          {submitError && (
+            <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
+              <p className='text-sm text-red-600'>{submitError}</p>
+            </div>
+          )}
+
           {/* Basic Information */}
           <div>
             <h3 className='text-lg font-medium text-gray-900 mb-4'>
@@ -251,12 +313,16 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                   type='text'
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
+                  onBlur={() => handleFieldBlur('name')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('name') && errors.name
+                      ? 'border-red-500'
+                      : 'border-gray-300'
                     }`}
                   placeholder='Nhập họ và tên'
+                  aria-describedby={shouldShowError('name') && errors.name ? 'name-error' : undefined}
                 />
-                {errors.name && (
-                  <p className='mt-1 text-sm text-red-600'>{errors.name}</p>
+                {shouldShowError('name') && errors.name && (
+                  <p id='name-error' className='mt-1 text-sm text-red-600'>{errors.name}</p>
                 )}
               </div>
 
@@ -271,13 +337,17 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                     type='email'
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
+                    onBlur={() => handleFieldBlur('email')}
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('email') && errors.email
+                        ? 'border-red-500'
+                        : 'border-gray-300'
                       }`}
                     placeholder='example@email.com'
+                    aria-describedby={shouldShowError('email') && errors.email ? 'email-error' : undefined}
                   />
                 </div>
-                {errors.email && (
-                  <p className='mt-1 text-sm text-red-600'>{errors.email}</p>
+                {shouldShowError('email') && errors.email && (
+                  <p id='email-error' className='mt-1 text-sm text-red-600'>{errors.email}</p>
                 )}
               </div>
 
@@ -290,17 +360,21 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                   <Phone className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
                   <input
                     type='tel'
-                    value={formData.phone_number}
+                    value={formData.phone_number || ''}
                     onChange={(e) =>
                       handleInputChange('phone_number', e.target.value)
                     }
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.phone_number ? 'border-red-500' : 'border-gray-300'
+                    onBlur={() => handleFieldBlur('phone_number')}
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('phone_number') && errors.phone_number
+                        ? 'border-red-500'
+                        : 'border-gray-300'
                       }`}
                     placeholder='0123456789'
+                    aria-describedby={shouldShowError('phone_number') && errors.phone_number ? 'phone-error' : undefined}
                   />
                 </div>
-                {errors.phone_number && (
-                  <p className='mt-1 text-sm text-red-600'>
+                {shouldShowError('phone_number') && errors.phone_number && (
+                  <p id='phone-error' className='mt-1 text-sm text-red-600'>
                     {errors.phone_number}
                   </p>
                 )}
@@ -319,14 +393,16 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                     onChange={(e) =>
                       handleInputChange('date_of_birth', e.target.value)
                     }
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.date_of_birth
+                    onBlur={() => handleFieldBlur('date_of_birth')}
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('date_of_birth') && errors.date_of_birth
                         ? 'border-red-500'
                         : 'border-gray-300'
                       }`}
+                    aria-describedby={shouldShowError('date_of_birth') && errors.date_of_birth ? 'dob-error' : undefined}
                   />
                 </div>
-                {errors.date_of_birth && (
-                  <p className='mt-1 text-sm text-red-600'>
+                {shouldShowError('date_of_birth') && errors.date_of_birth && (
+                  <p id='dob-error' className='mt-1 text-sm text-red-600'>
                     {errors.date_of_birth}
                   </p>
                 )}
@@ -341,7 +417,7 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                   <MapPin className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
                   <input
                     type='text'
-                    value={formData.address}
+                    value={formData.address || ''}
                     onChange={(e) =>
                       handleInputChange('address', e.target.value)
                     }
@@ -360,12 +436,16 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                   type='password'
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-500' : 'border-gray-300'
+                  onBlur={() => handleFieldBlur('password')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('password') && errors.password
+                      ? 'border-red-500'
+                      : 'border-gray-300'
                     }`}
                   placeholder='Nhập mật khẩu (tối thiểu 6 ký tự)'
+                  aria-describedby={shouldShowError('password') && errors.password ? 'password-error' : undefined}
                 />
-                {errors.password && (
-                  <p className='mt-1 text-sm text-red-600'>{errors.password}</p>
+                {shouldShowError('password') && errors.password && (
+                  <p id='password-error' className='mt-1 text-sm text-red-600'>{errors.password}</p>
                 )}
               </div>
             </div>
@@ -428,7 +508,7 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                 </label>
                 <input
                   type='text'
-                  value={formData.parent_name}
+                  value={formData.parent_name || ''}
                   onChange={(e) =>
                     handleInputChange('parent_name', e.target.value)
                   }
@@ -443,7 +523,7 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
                 </label>
                 <input
                   type='tel'
-                  value={formData.parent_phone}
+                  value={formData.parent_phone || ''}
                   onChange={(e) =>
                     handleInputChange('parent_phone', e.target.value)
                   }
@@ -466,12 +546,11 @@ const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
             </button>
             <button
               type='submit'
-              disabled={isSubmitting || !isFormValid()}
-              className={`px-4 py-2 text-sm font-medium border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2 ${
-                isSubmitting || !isFormValid()
+              disabled={isSubmitting || !isFormValidForSubmit()}
+              className={`px-4 py-2 text-sm font-medium border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2 ${isSubmitting || !isFormValidForSubmit()
                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
                   : 'text-white bg-blue-600 hover:bg-blue-700'
-              }`}
+                }`}
             >
               {isSubmitting ? (
                 <>

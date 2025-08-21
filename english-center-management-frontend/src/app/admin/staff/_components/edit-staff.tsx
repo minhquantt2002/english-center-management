@@ -135,8 +135,36 @@ export default function EditStaffModal({
 
     setFormData(newFormData);
 
-    // Validate form in real-time
-    validateFormRealtime(newFormData);
+    // Handle date of birth validation separately
+    if (field === 'date_of_birth') {
+      const selectedDate = new Date(value);
+      const today = new Date();
+      const minBirthDate = new Date(
+        today.getFullYear() - 18,
+        today.getMonth(),
+        today.getDate()
+      );
+      if (selectedDate > today) {
+        setErrors((prev) => ({
+          ...prev,
+          date_of_birth: 'Ngày sinh không được vượt quá ngày hiện tại',
+        }));
+      } else if (selectedDate > minBirthDate) {
+        setErrors((prev) => ({
+          ...prev,
+          date_of_birth: 'Giáo viên phải đủ 18 tuổi',
+        }));
+      } else {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.date_of_birth;
+          return newErrors;
+        });
+      }
+    } else {
+      // Validate form in real-time for other fields
+      validateFormRealtime(newFormData);
+    }
   };
 
   if (!isOpen || !staff) return null;
@@ -171,9 +199,8 @@ export default function EditStaffModal({
                 type='text'
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.name ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder='Nhập họ và tên'
               />
               {errors.name && (
@@ -190,9 +217,8 @@ export default function EditStaffModal({
                 type='email'
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder='Nhập email'
               />
               {errors.email && (
@@ -211,9 +237,8 @@ export default function EditStaffModal({
                 onChange={(e) =>
                   handleInputChange('phone_number', e.target.value)
                 }
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.phone_number ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.phone_number ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder='Nhập số điện thoại'
               />
               {errors.phone_number && (
@@ -235,9 +260,8 @@ export default function EditStaffModal({
                   onChange={(e) =>
                     handleInputChange('date_of_birth', e.target.value)
                   }
-                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.date_of_birth ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.date_of_birth ? 'border-red-500' : 'border-gray-300'
+                    }`}
                 />
               </div>
               {errors.date_of_birth && (
@@ -291,11 +315,10 @@ export default function EditStaffModal({
             <button
               type='submit'
               disabled={hasErrors()}
-              className={`px-6 py-3 rounded-lg transition-colors ${
-                hasErrors()
+              className={`px-6 py-3 rounded-lg transition-colors ${hasErrors()
                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                   : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
+                }`}
             >
               Cập nhật
             </button>

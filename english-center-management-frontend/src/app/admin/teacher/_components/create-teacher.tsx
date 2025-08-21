@@ -1,18 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
 import {
-  X,
-  User,
-  Phone,
-  Mail,
   BookOpen,
-  GraduationCap,
+  Calendar,
   Clock,
   FileText,
-  Calendar,
+  GraduationCap,
+  Mail,
   MapPin,
+  Phone,
+  User,
+  X,
 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { TeacherCreate } from '../../../../types/admin';
 
 interface CreateTeacherModalProps {
@@ -20,6 +20,18 @@ interface CreateTeacherModalProps {
   onClose: () => void;
   onCreateTeacher: (teacherData: TeacherCreate) => Promise<void>;
 }
+
+const INITIAL_FORM_DATA: TeacherCreate = {
+  name: '',
+  email: '',
+  phone_number: '',
+  specialization: 'general-english',
+  education: 'bachelor',
+  bio: '',
+  experience_years: 0,
+  date_of_birth: '',
+  address: '',
+};
 
 export const specializations = [
   { value: 'general-english', label: 'Tiếng Anh tổng quát' },
@@ -71,156 +83,212 @@ export default function CreateTeacherModal({
     specialization: 'general-english',
     education: 'bachelor',
     bio: '',
-    password: '',
     experience_years: 0,
+    date_of_birth: '',
+    address: '',
   });
-
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Progressive validation - only show errors when appropriate
+  const shouldShowError = (field: string) => {
+    return formSubmitted || touchedFields[field];
+  };
   const [errors, setErrors] = useState<
     Partial<Record<keyof TeacherCreate, string>>
   >({});
 
-  // Check if form has any errors
-  const hasErrors = () => {
-    return Object.values(errors).some(error => error && error.trim() !== '');
+
+  // Validation helpers for button logic (always validate)
+  const isValidEmail = (email: string) => {
+    return email.trim() !== '' && /\S+@\S+\.\S+/.test(email);
+  };
+
+  const isValidPhone = (phone: string) => {
+    return phone.trim() !== '' && /^[0-9]{10,11}$/.test(phone.replace(/\s/g, ''));
+  };
+
+
+  const isValidDate = (date: string) => {
+    if (!date) return false;
+    const selectedDate = new Date(date);
+    const today = new Date();
+    const minBirthDate = new Date(
+      today.getFullYear() - 18,
+      today.getMonth(),
+      today.getDate()
+    );
+    return selectedDate <= today && selectedDate <= minBirthDate;
   };
 
   // Check if all required fields are filled
   const isFormValid = () => {
-    return (
-      formData.name.trim() !== '' &&
-      formData.email.trim() !== '' &&
-      formData.phone_number.trim() !== '' &&
-      formData.date_of_birth !== '' &&
-      !hasErrors()
-    );
+    const requiredFields = [
+      formData.name.trim(),
+      formData.email.trim(),
+      formData.phone_number.trim(),
+      formData.date_of_birth
+    ];
+    const hasRequiredFields = requiredFields.every(field => field !== '' && field !== undefined);
+    const hasValidFormats =
+
+      isValidEmail(formData.email) &&
+      isValidPhone(formData.phone_number) &&
+      isValidDate(formData.date_of_birth) && formData.name.trim().length > 0;
+    return hasRequiredFields && hasValidFormats;
   };
 
-  // Validate form in real-time
-  const validateFormRealtime = (data: TeacherCreate) => {
-    setErrors(() => {
-      const newErrors: typeof errors = {};
+  // Validate field for display
+  const validateFieldForDisplay = (field: string, value: any) => {
+    setErrors((prev) => {
+      const newErrors = { ...prev };
 
-      if (!data.name.trim()) {
-        newErrors.name = 'Họ tên là bắt buộc';
+      if (field === 'name') {
+        if (!value.trim()) {
+          newErrors.name = 'Họ tên là bắt buộc';
+        } else {
+          delete newErrors.name;
+        }
+      } else if (field === 'email') {
+        if (!value.trim()) {
+          newErrors.email = 'Email là bắt buộc';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          newErrors.email = 'Email không hợp lệ';
+        } else {
+          delete newErrors.email;
+        }
+      } else if (field === 'phone_number') {
+        if (!value.trim()) {
+          newErrors.phone_number = 'Số điện thoại là bắt buộc';
+        } else if (
+          !/^[0-9]{10,11}$/.test(value.replace(/\s/g, ''))
+        ) {
+          newErrors.phone_number = 'Số điện thoại không hợp lệ';
+        } else {
+          delete newErrors.phone_number;
+        }
+      } else if (field === 'specialization') {
+        if (!value) {
+          newErrors.specialization = 'Chuyên môn là bắt buộc';
+        } else {
+          delete newErrors.specialization;
+        }
+      } else if (field === 'date_of_birth') {
+        if (!value) {
+          delete newErrors.date_of_birth;
+        } else {
+          const selectedDate = new Date(value);
+          const today = new Date();
+          const minBirthDate = new Date(
+            today.getFullYear() - 18,
+            today.getMonth(),
+            today.getDate()
+          );
+          if (selectedDate > today) {
+            newErrors.date_of_birth = 'Ngày sinh không được vượt quá ngày hiện tại';
+          } else if (selectedDate > minBirthDate) {
+            newErrors.date_of_birth = 'Ngày sinh không được nhỏ hơn 18 tuổi';
+          } else {
+            delete newErrors.date_of_birth;
+          }
+        }
       }
 
-      if (!data.email.trim()) {
-        newErrors.email = 'Email là bắt buộc';
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-        newErrors.email = 'Email không hợp lệ';
-      }
-
-      if (!data.phone_number.trim()) {
-        newErrors.phone_number = 'Số điện thoại là bắt buộc';
-      } else if (
-        !/^[0-9]{10,11}$/.test(data.phone_number.replace(/\s/g, ''))
-      ) {
-        newErrors.phone_number = 'Số điện thoại không hợp lệ';
-      }
-
-      if (!data.date_of_birth) {
-        newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
-      }
       return newErrors;
     });
   };
 
-  const validateForm = () => {
-    const newErrors: typeof errors = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Họ tên là bắt buộc';
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email là bắt buộc';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Email không hợp lệ';
-    }
-
-    if (!formData.phone_number.trim()) {
-      newErrors.phone_number = 'Số điện thoại là bắt buộc';
-    } else if (
-      !/^[0-9]{10,11}$/.test(formData.phone_number.replace(/\s/g, ''))
-    ) {
-      newErrors.phone_number = 'Số điện thoại không hợp lệ';
-    }
-
-    if (!formData.specialization) {
-      newErrors.specialization = 'Chuyên môn là bắt buộc';
-    }
-
-    if (!formData.date_of_birth) {
-      newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  // Validate all fields for form submission
+  const validateAllFields = () => {
+    const fieldsToValidate = ['name', 'email', 'phone_number', 'specialization', 'date_of_birth'];
+    fieldsToValidate.forEach((field) => {
+      validateFieldForDisplay(field, formData[field as keyof TeacherCreate]);
+    });
+    return Object.keys(errors).length === 0 && isFormValid();
   };
 
+  const handleFieldBlur = (field: string) => {
+    setTouchedFields((prev) => ({
+      ...prev,
+      [field]: true,
+    }));
+
+    // Validate field when user leaves it
+    validateFieldForDisplay(field, formData[field as keyof TeacherCreate]);
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormSubmitted(true);
+    setSubmitError('');
+    // Mark all required fields as touched
+    const requiredFields = ['name', 'email', 'phone_number', 'specialization', 'date_of_birth'];
+    setTouchedFields((prev) => {
+      const newTouchedFields = { ...prev };
+      requiredFields.forEach((field) => {
+        newTouchedFields[field] = true;
+      });
+      return newTouchedFields;
+    });
 
-    if (validateForm()) {
-      await onCreateTeacher(formData);
-      // handleClose();
+    const isValid = validateAllFields();
+    if (!isValid) {
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const newTeacher: TeacherCreate = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone_number: formData.phone_number.trim(),
+        specialization: formData.specialization,
+        bio: formData.bio.trim(),
+        date_of_birth: formData.date_of_birth,
+        address: formData.address.trim(),
+      };
+      await onCreateTeacher(newTeacher);
+    } catch (error) {
+      console.error('Error creating teacher:', error);
+      setSubmitError('Đã có lỗi xảy ra. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleClose = () => {
-    setFormData({
-      name: '',
-      email: '',
-      phone_number: '',
-      specialization: 'general-english',
-      bio: '',
-      password: '',
-      date_of_birth: '',
-      address: '',
-    });
-    setErrors({});
-    onClose();
+    if (!isSubmitting) {
+      setFormData(INITIAL_FORM_DATA);
+      setErrors({});
+      setTouchedFields({});
+      setFormSubmitted(false);
+      setSubmitError('');
+      onClose();
+    }
   };
 
-  const handleInputChange = (field: keyof TeacherCreate, value: any) => {
+  const handleInputChange = (field: string, value: any) => {
     const newFormData = {
       ...formData,
       [field]: value,
     };
 
     setFormData(newFormData);
+    setSubmitError(''); // Clear submit error when user makes changes
 
-    // Handle date of birth validation separately
-    if (field === "date_of_birth") {
-      const selectedDate = new Date(value);
-      const today = new Date();
-      const minBirthDate = new Date(
-        today.getFullYear() - 18,
-        today.getMonth(),
-        today.getDate()
-      );
-
-      if (selectedDate > today) {
-        setErrors((prev) => ({
-          ...prev,
-          date_of_birth: "Ngày sinh không được vượt quá ngày hiện tại",
-        }));
-      } else if (selectedDate > minBirthDate) {
-        setErrors((prev) => ({
-          ...prev,
-          date_of_birth: "Giáo viên phải đủ 18 tuổi",
-        }));
-      } else {
-        setErrors((prev) => {
-          const newErrors = { ...prev };
-          delete newErrors.date_of_birth;
-          return newErrors;
-        });
-      }
-    } else {
-      // Validate form in real-time for other fields
-      validateFormRealtime(newFormData);
+    // Progressive error display - only show if field has been touched or form submitted
+    if (shouldShowError(field)) {
+      validateFieldForDisplay(field, value);
     }
+
   };
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      if (isSubmitting) {
+        setIsSubmitting(false);
+      }
+    };
+  }, [isSubmitting]);
 
   if (!isOpen) return null;
 
@@ -243,6 +311,12 @@ export default function CreateTeacherModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className='p-6 space-y-6'>
+          {/* Submit Error Message */}
+          {submitError && (
+            <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
+              <p className='text-sm text-red-600'>{submitError}</p>
+            </div>
+          )}
           {/* Personal Information */}
           <div>
             <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
@@ -259,12 +333,14 @@ export default function CreateTeacherModal({
                   type='text'
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.name ? 'border-red-500' : 'border-gray-300'
+                  onBlur={() => handleFieldBlur('name')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${shouldShowError('name') && errors.name ? 'border-red-500' : 'border-gray-300'
                     }`}
                   placeholder='Nhập họ và tên'
+                  aria-describedby={shouldShowError('name') && errors.name ? 'name-error' : undefined}
                 />
-                {errors.name && (
-                  <p className='text-red-500 text-sm mt-1'>{errors.name}</p>
+                {shouldShowError('name') && errors.name && (
+                  <p id='name-error' className='text-red-500 text-sm mt-1'>{errors.name}</p>
                 )}
               </div>
 
@@ -277,12 +353,14 @@ export default function CreateTeacherModal({
                   type='email'
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-300'
+                  onBlur={() => handleFieldBlur('email')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${shouldShowError('email') && errors.email ? 'border-red-500' : 'border-gray-300'
                     }`}
                   placeholder='example@email.com'
+                  aria-describedby={shouldShowError('email') && errors.email ? 'email-error' : undefined}
                 />
-                {errors.email && (
-                  <p className='text-red-500 text-sm mt-1'>{errors.email}</p>
+                {shouldShowError('email') && errors.email && (
+                  <p id='email-error' className='text-red-500 text-sm mt-1'>{errors.email}</p>
                 )}
               </div>
 
@@ -297,12 +375,14 @@ export default function CreateTeacherModal({
                   onChange={(e) =>
                     handleInputChange('phone_number', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.phone_number ? 'border-red-500' : 'border-gray-300'
+                  onBlur={() => handleFieldBlur('phone_number')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${shouldShowError('phone_number') && errors.phone_number ? 'border-red-500' : 'border-gray-300'
                     }`}
                   placeholder='0123456789'
+                  aria-describedby={shouldShowError('phone_number') && errors.phone_number ? 'phone-error' : undefined}
                 />
-                {errors.phone_number && (
-                  <p className='text-red-500 text-sm mt-1'>
+                {shouldShowError('phone_number') && errors.phone_number && (
+                  <p id='phone-error' className='text-red-500 text-sm mt-1'>
                     {errors.phone_number}
                   </p>
                 )}
@@ -320,14 +400,16 @@ export default function CreateTeacherModal({
                     onChange={(e) =>
                       handleInputChange('date_of_birth', e.target.value)
                     }
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.date_of_birth
+                    onBlur={() => handleFieldBlur('date_of_birth')}
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('date_of_birth') && errors.date_of_birth
                       ? 'border-red-500'
                       : 'border-gray-300'
                       }`}
+                    aria-describedby={shouldShowError('date_of_birth') && errors.date_of_birth ? 'date-error' : undefined}
                   />
                 </div>
-                {errors.date_of_birth && (
-                  <p className='mt-1 text-sm text-red-600'>
+                {shouldShowError('date_of_birth') && errors.date_of_birth && (
+                  <p id='date-error' className='mt-1 text-sm text-red-600'>
                     {errors.date_of_birth}
                   </p>
                 )}
@@ -458,20 +540,30 @@ export default function CreateTeacherModal({
             <button
               type='button'
               onClick={handleClose}
+              disabled={isSubmitting}
               className='px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors'
             >
               Hủy
             </button>
             <button
               type='submit'
-              disabled={!isFormValid()}
-              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${!isFormValid()
-                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                  : 'bg-teal-600 hover:bg-teal-700 text-white'
+              disabled={isSubmitting || !isFormValid()}
+              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${isSubmitting || !isFormValid()
+                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                : 'bg-teal-600 hover:bg-teal-700 text-white'
                 }`}
             >
-              <GraduationCap className='w-4 h-4' />
-              Thêm giáo viên
+              {isSubmitting ? (
+                <>
+                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                  <span>Đang tạo...</span>
+                </>
+              ) : (
+                <>
+                  <GraduationCap className='w-4 h-4' />
+                  Thêm giáo viên
+                </>
+              )}
             </button>
           </div>
         </form>
