@@ -205,6 +205,7 @@ export default function CreateStaffModal({
         bio: formData.bio,
         address: formData.address,
         role_name: formData.role_name,
+        password: formData.password.trim(),
       };
       await onCreateStaff(newStaff);
     } catch (error) {
@@ -251,7 +252,7 @@ export default function CreateStaffModal({
 
   return (
     <div className='fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50'>
-      <div className='bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-gray-100'>
+      <div className='bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-gray-100'>
         {/* Header */}
         <div className='flex items-center justify-between px-8 py-6 border-b border-gray-100 bg-gradient-to-r from-teal-50 to-white rounded-t-2xl'>
           <h2 className='text-2xl font-bold text-gray-900 flex items-center gap-3'>
@@ -271,81 +272,90 @@ export default function CreateStaffModal({
         <form onSubmit={handleSubmit} className='px-8 py-7 space-y-7'>
           {/* Submit Error Message */}
           {submitError && (
-            <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
+            <div className='bg-red-50 border border-red-200 rounded-lg p-4 col-span-2'>
               <p className='text-sm text-red-600'>{submitError}</p>
             </div>
           )}
-          {/* Personal Information */}
-          <div className='space-y-5'>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Họ và tên <span className='text-red-500'>*</span>
-              </label>
-              <input
-                type='text'
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                onBlur={() => handleFieldBlur('name')}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${shouldShowError('name') && errors.name ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                placeholder='Nhập họ và tên'
-                aria-describedby={shouldShowError('name') && errors.name ? 'name-error' : undefined}
-              />
-              {shouldShowError('name') && errors.name && (
-                <p id='name-error' className='text-red-500 text-sm mt-1'>{errors.name}</p>
-              )}
+
+          {/* Personal Information - 2 Column Grid */}
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+            {/* Left Column */}
+            <div className='space-y-5'>
+              {/* Full Name */}
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
+                  Họ và tên <span className='text-red-500'>*</span>
+                </label>
+                <input
+                  type='text'
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  onBlur={() => handleFieldBlur('name')}
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm ${shouldShowError('name') && errors.name ? 'border-red-400' : 'border-gray-300'
+                    }`}
+                  placeholder='Nhập họ và tên'
+                  aria-describedby={shouldShowError('name') && errors.name ? 'name-error' : undefined}
+                />
+                {shouldShowError('name') && errors.name && (
+                  <p id='name-error' className='text-red-500 text-sm mt-1'>{errors.name}</p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-1'>
+                  <Mail className='w-4 h-4' />
+                  Email <span className='text-red-500'>*</span>
+                </label>
+                <input
+                  type='email'
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  onBlur={() => handleFieldBlur('email')}
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm ${shouldShowError('email') && errors.email ? 'border-red-400' : 'border-gray-300'
+                    }`}
+                  placeholder='example@email.com'
+                  aria-describedby={shouldShowError('email') && errors.email ? 'email-error' : undefined}
+                />
+                {shouldShowError('email') && errors.email && (
+                  <p id='email-error' className='text-red-500 text-sm mt-1'>{errors.email}</p>
+                )}
+              </div>
+
+              {/* Phone Number */}
+              <div>
+                <label className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-1'>
+                  <Phone className='w-4 h-4' />
+                  Số điện thoại <span className='text-red-500'>*</span>
+                </label>
+                <input
+                  type='tel'
+                  value={formData.phone_number}
+                  onChange={(e) =>
+                    handleInputChange('phone_number', e.target.value)
+                  }
+                  onBlur={() => handleFieldBlur('phone_number')}
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm ${shouldShowError('phone_number') ? 'border-red-400' : 'border-gray-300'
+                    }`}
+                  placeholder='0123456789'
+                  aria-describedby={shouldShowError('phone_number') ? 'phone-error' : undefined}
+                />
+                {shouldShowError('phone_number') && errors.phone_number && (
+                  <p id='phone-error' className='text-red-500 text-sm mt-1'>
+                    {errors.phone_number}
+                  </p>
+                )}
+              </div>
             </div>
 
-            <div>
-              <label className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-1'>
-                <Mail className='w-4 h-4' />
-                Email <span className='text-red-500'>*</span>
-              </label>
-              <input
-                type='email'
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                onBlur={() => handleFieldBlur('email')}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${shouldShowError('email') && errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                placeholder='example@email.com'
-                aria-describedby={shouldShowError('email') && errors.email ? 'email-error' : undefined}
-              />
-              {shouldShowError('email') && errors.email && (
-                <p id='email-error' className='text-red-500 text-sm mt-1'>{errors.email}</p>
-              )}
-            </div>
-
-            <div>
-              <label className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-1'>
-                <Phone className='w-4 h-4' />
-                Số điện thoại <span className='text-red-500'>*</span>
-              </label>
-              <input
-                type='tel'
-                value={formData.phone_number}
-                onChange={(e) =>
-                  handleInputChange('phone_number', e.target.value)
-                }
-                onBlur={() => handleFieldBlur('phone_number')}
-                className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm ${shouldShowError('phone_number') ? 'border-red-400' : 'border-gray-300'
-                  }`}
-                placeholder='0123456789'
-                aria-describedby={shouldShowError('phone_number') ? 'phone-error' : undefined}
-              />
-              {shouldShowError('phone_number') && errors.phone_number && (
-                <p id='phone-error' className='text-red-500 text-sm mt-1'>
-                  {errors.phone_number}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Ngày sinh <span className='text-red-500'>*</span>
-              </label>
-              <div className='relative'>
-                <Calendar className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
+            {/* Right Column */}
+            <div className='space-y-5'>
+              {/* Date of Birth */}
+              <div>
+                <label className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-1'>
+                  <Calendar className='w-4 h-4' />
+                  Ngày sinh <span className='text-red-500'>*</span>
+                </label>
                 <input
                   type='date'
                   value={formData.date_of_birth}
@@ -353,51 +363,74 @@ export default function CreateStaffModal({
                     handleInputChange('date_of_birth', e.target.value)
                   }
                   onBlur={() => handleFieldBlur('date_of_birth')}
-                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('date_of_birth') && errors.date_of_birth
-                    ? 'border-red-500'
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm ${shouldShowError('date_of_birth') && errors.date_of_birth
+                    ? 'border-red-400'
                     : 'border-gray-300'
                     }`}
                   aria-describedby={shouldShowError('date_of_birth') && errors.date_of_birth ? 'date-error' : undefined}
                 />
+                {shouldShowError('date_of_birth') && errors.date_of_birth && (
+                  <p id='date-error' className='mt-1 text-sm text-red-600'>
+                    {errors.date_of_birth}
+                  </p>
+                )}
               </div>
-              {shouldShowError('date_of_birth') && errors.date_of_birth && (
-                <p id='date-error' className='mt-1 text-sm text-red-600'>
-                  {errors.date_of_birth}
-                </p>
-              )}
-            </div>
 
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Địa chỉ <span className='text-red-500'>*</span>
-              </label>
-              <input
-                type='text'
-                value={formData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-                className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm ${shouldShowError('address') ? 'border-red-400' : 'border-gray-300'
-                  }`}
-                placeholder='Nhập địa chỉ'
-                aria-describedby={shouldShowError('address') ? 'address-error' : undefined}
-              />
-              {shouldShowError('address') && (
-                <p id='address-error' className='text-red-500 text-sm mt-1'>
-                  {errors.address}
-                </p>
-              )}
+              {/* Address */}
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
+                  Địa chỉ <span className='text-red-500'>*</span>
+                </label>
+                <input
+                  type='text'
+                  value={formData.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  onBlur={() => handleFieldBlur('address')}
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm ${shouldShowError('address') ? 'border-red-400' : 'border-gray-300'
+                    }`}
+                  placeholder='Nhập địa chỉ'
+                  aria-describedby={shouldShowError('address') ? 'address-error' : undefined}
+                />
+                {shouldShowError('address') && errors.address && (
+                  <p id='address-error' className='text-red-500 text-sm mt-1'>
+                    {errors.address}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
+                  Mật khẩu
+                </label>
+                <input
+                  type='text'
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  onBlur={() => handleFieldBlur('password')}
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm ${shouldShowError('password') ? 'border-red-400' : 'border-gray-300'
+                    }`}
+                  placeholder='Nhập mật khẩu'
+                  aria-describedby={shouldShowError('password') ? 'password-error' : undefined}
+                />
+                {shouldShowError('password') && errors.password && (
+                  <p id='password-error' className='text-red-500 text-sm mt-1'>
+                    {errors.password}
+                  </p>
+                )}
+              </div>
             </div>
+          </div>
 
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Giới thiệu
-              </label>
-              <textarea
-                value={formData.bio}
-                onChange={(e) => handleInputChange('bio', e.target.value)}
-                className='w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm min-h-[80px] resize-y'
-                placeholder='Giới thiệu ngắn về nhân viên (không bắt buộc)'
-              />
-            </div>
+          {/* Bio - Full Width */}
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>
+              Giới thiệu
+            </label>
+            <textarea
+              value={formData.bio}
+              onChange={(e) => handleInputChange('bio', e.target.value)}
+              className='w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm border-gray-300 min-h-[100px] resize-y'
+              placeholder='Giới thiệu ngắn về nhân viên (không bắt buộc)'
+            />
           </div>
 
           {/* Form Actions */}
@@ -406,14 +439,14 @@ export default function CreateStaffModal({
               type='button'
               onClick={handleClose}
               disabled={isSubmitting}
-              className='px-5 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-teal-300'
+              className='px-6 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-teal-300'
             >
               Hủy
             </button>
             <button
               type='submit'
               disabled={!isFormValid() || isSubmitting}
-              className={`px-7 py-2.5 rounded-xl transition-colors flex items-center gap-2 font-semibold shadow focus:outline-none focus:ring-2 focus:ring-teal-400 ${!isFormValid() || isSubmitting
+              className={`px-8 py-2.5 rounded-xl transition-colors flex items-center gap-2 font-semibold shadow focus:outline-none focus:ring-2 focus:ring-teal-400 ${!isFormValid() || isSubmitting
                 ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                 : 'bg-teal-600 hover:bg-teal-700 text-white'
                 }`}

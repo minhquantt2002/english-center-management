@@ -11,6 +11,7 @@ import {
   Phone,
   User,
   X,
+  Lock
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { TeacherCreate } from '../../../../types/admin';
@@ -194,6 +195,15 @@ export default function CreateTeacherModal({
           }
         }
       }
+      else if (field === 'password') {
+        if (!value) {
+          newErrors.password = 'Mật khẩu là bắt buộc';
+        } else if (value.trim().length < 6) {
+          newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+        } else {
+          delete newErrors.password;
+        }
+      }
 
       return newErrors;
     });
@@ -238,6 +248,7 @@ export default function CreateTeacherModal({
     setIsSubmitting(true);
     try {
       const newTeacher: TeacherCreate = {
+        ...formData,
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone_number: formData.phone_number.trim(),
@@ -245,6 +256,9 @@ export default function CreateTeacherModal({
         bio: formData.bio.trim(),
         date_of_birth: formData.date_of_birth,
         address: formData.address.trim(),
+        password: formData.password.trim(),
+        education: formData.education,
+        experience_years: formData.experience_years,
       };
       await onCreateTeacher(newTeacher);
     } catch (error) {
@@ -415,20 +429,50 @@ export default function CreateTeacherModal({
                 )}
               </div>
             </div>
-            {/* Address */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Địa chỉ
-              </label>
-              <div className='relative'>
-                <MapPin className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              {/* Address */}
+              <div>
+                <label className='block text-sm font-medium text-gray-700 my-2'>
+                  Địa chỉ
+                </label>
+                <div className='relative'>
+                  <MapPin className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
+                  <input
+                    type='text'
+                    value={formData.address}
+                    onChange={(e) =>
+                      handleInputChange('address', e.target.value)
+                    }
+                    className='w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    placeholder='Nhập địa chỉ'
+                  />
+                </div>
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 flex my-2'>
+                  <Lock className=' h-4 w-4' />
+                  Mật khẩu <span className='text-red-500'>*</span>
+                </label>
                 <input
-                  type='text'
-                  value={formData.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  className='w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='Nhập địa chỉ'
+                  type='password'
+                  value={formData.password}
+                  onChange={(e) =>
+                    handleInputChange('password', e.target.value)
+                  }
+                  onBlur={() => handleFieldBlur('password')}
+                  className={`w-full pl-5 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('password') && errors.password
+                    ? 'border-red-500'
+                    : 'border-gray-300'
+                    }`}
+                  placeholder='Nhập mật khẩu'
+                  aria-describedby={shouldShowError('password') && errors.password ? 'password-error' : undefined}
                 />
+                {shouldShowError('password') && errors.password && (
+                  <p id='password-error' className='text-red-500 text-sm mt-1'>
+                    {errors.password}
+                  </p>
+                )}
+
               </div>
             </div>
           </div>

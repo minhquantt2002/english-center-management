@@ -634,7 +634,7 @@ async def create_teacher(
     teacher = user_service.create_teacher(db, teacher_data.model_copy(
             update={
                 "role_name": UserRole.TEACHER,
-                "password": teacher_data.date_of_birth.strftime("%d%m%Y")
+                "password": teacher_data.password.strip()  # Ensure password is stripped of whitespace
             }
         ))
     return teacher
@@ -785,7 +785,7 @@ async def create_student(
         student_data.model_copy(
             update={
                 "role_name": UserRole.STUDENT,
-                "password": student_data.date_of_birth.strftime("%d%m%Y")
+                "password": student_data.password
             }
         )
     )
@@ -905,7 +905,7 @@ async def create_staff(
     staff = user_service.create_staff(db, staff_data.model_copy(
         update={
             "role_name": UserRole.STAFF,
-            "password": staff_data.date_of_birth.strftime("%d%m%Y")
+            "password": staff_data.password
         }
     ))
     return staff

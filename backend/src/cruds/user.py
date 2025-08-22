@@ -2,6 +2,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import delete
 from typing import Optional, List
 from uuid import UUID
+
+from ..services import auth
 from ..models.user import User
 from ..schemas.user import UserCreate, UserUpdate
 
@@ -58,8 +60,12 @@ def update_user(db: Session, user_id: UUID, user_update: UserUpdate) -> Optional
     db_user = get_user(db, user_id)
     if not db_user:
         return None
-    
-    update_data = user_update.model_dump(exclude_unset=True)
+
+    if user_update.password:
+        # Hash the new password
+        user_update.password = auth.get_password_hash(user_update.password)
+
+    update_data = user_update.model_dump(exclude_unset=True,exclude_none=True)
     for field, value in update_data.items():
         setattr(db_user, field, value)
     

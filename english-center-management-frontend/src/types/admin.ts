@@ -34,6 +34,7 @@ export interface UserUpdate {
   phone_number?: string;
   input_level?: string;
   specialization?: string;
+  password?: string;
   address?: string;
   education?: string;
   experience_years?: number;
@@ -205,6 +206,7 @@ export interface TeacherUpdate {
   specialization?: string;
   address?: string;
   education?: string;
+  password?: string;
   experience_years?: number;
   bio?: string;
   date_of_birth?: string;

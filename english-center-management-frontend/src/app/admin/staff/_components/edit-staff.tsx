@@ -10,6 +10,7 @@ import {
   Edit,
   Calendar,
   MapPin,
+  Lock,
 } from 'lucide-react';
 import { UserUpdate } from '../../../../types/admin';
 
@@ -287,6 +288,21 @@ export default function EditStaffModal({
               />
             </div>
           </div>
+          <div className='w-full'>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>
+              Mật khẩu
+            </label>
+            <div className='relative'>
+              <Lock className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
+              <input
+                type='password'
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                className='w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                placeholder='Nhập mật khẩu'
+              />
+            </div>
+          </div>
 
           {/* Bio */}
           <div>
@@ -316,8 +332,8 @@ export default function EditStaffModal({
               type='submit'
               disabled={hasErrors()}
               className={`px-6 py-3 rounded-lg transition-colors ${hasErrors()
-                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
             >
               Cập nhật

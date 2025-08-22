@@ -53,6 +53,7 @@ class UserUpdate(BaseSchema):
     date_of_birth: Optional[date] = None
     phone_number: Optional[str] = None
     input_level: Optional[str] = None
+    password:Optional[str]=None
     
     specialization: Optional[str] = None
     address: Optional[str] = None
