@@ -9,6 +9,7 @@ import {
   Menu,
   Home,
   ArrowRight,
+  Lock,
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { usePersonalInfo } from '../../../components/PersonalInfoContext';
@@ -21,7 +22,7 @@ interface AdminNavbarProps {
 const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar }) => {
   const pathname = usePathname();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const { openModal } = usePersonalInfo();
+  const { openModal, openChangePasswordModal } = usePersonalInfo();
   const { userInfo, loading } = useUserInfo();
 
   // Generate breadcrumbs from pathname
@@ -119,7 +120,10 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar }) => {
           {/* Breadcrumbs */}
           <nav className='flex items-center space-x-2 text-sm'>
             {breadcrumbs.map((crumb, index) => (
-              <div key={crumb.href} className='flex items-center'>
+              <div
+                key={crumb.href}
+                className='flex items-center'
+              >
                 {index > 0 && (
                   <ArrowRight className='w-4 h-4 text-gray-400 mx-2' />
                 )}
@@ -202,6 +206,13 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar }) => {
                   >
                     <User className='w-4 h-4' />
                     Hồ sơ cá nhân
+                  </button>
+                  <button
+                    onClick={openChangePasswordModal}
+                    className='w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors'
+                  >
+                    <Lock className='w-4 h-4' />
+                    Đổi mật khẩu
                   </button>
                   <hr className='my-2 border-gray-200' />
                   <button

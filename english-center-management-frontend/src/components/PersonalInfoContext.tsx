@@ -9,6 +9,9 @@ interface PersonalInfoContextType {
   userRole?: UserRole;
   openModal: (role: UserRole) => void;
   closeModal: () => void;
+  isOpenChangePasswordModal: boolean;
+  openChangePasswordModal: () => void;
+  closeChangePasswordModal: () => void;
 }
 
 const PersonalInfoContext = createContext<PersonalInfoContextType | undefined>(
@@ -33,6 +36,8 @@ export const PersonalInfoProvider: React.FC<PersonalInfoProviderProps> = ({
   children,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenChangePasswordModal, setIsOpenChangePasswordModal] =
+    useState(false);
   const [userRole, setUserRole] = useState<UserRole>();
 
   const openModal = (role: UserRole) => {
@@ -44,11 +49,22 @@ export const PersonalInfoProvider: React.FC<PersonalInfoProviderProps> = ({
     setIsOpen(false);
   };
 
+  const openChangePasswordModal = () => {
+    setIsOpenChangePasswordModal(true);
+  };
+
+  const closeChangePasswordModal = () => {
+    setIsOpenChangePasswordModal(false);
+  };
+
   const value = {
     isOpen,
+    isOpenChangePasswordModal,
     userRole,
     openModal,
+    openChangePasswordModal,
     closeModal,
+    closeChangePasswordModal,
   };
 
   return (

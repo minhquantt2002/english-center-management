@@ -105,3 +105,19 @@ def get_current_user(db: Session, token: str) -> Optional[User]:
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     """Get user by email"""
     return user_crud.get_user_by_email(db, email) 
+
+
+def change_password(db: Session, user_id: int, new_password: str) -> bool:
+    try:
+        user = user_crud.get_user_by_id(db, user_id)
+        if not user:
+            return False
+            
+        user.password = get_password_hash(new_password)
+        db.commit()
+        return True
+        
+    except Exception as e:
+        db.rollback()
+        print(f"Error changing password: {str(e)}")
+        return False

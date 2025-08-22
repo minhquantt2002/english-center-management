@@ -38,3 +38,7 @@ class TokenData(BaseSchema):
     email: Optional[str] = None
     user_id: Optional[UUID] = None
     role: Optional[str] = None 
+
+class ChangePasswordForm(BaseSchema):
+    old_password: str
+    new_password: str

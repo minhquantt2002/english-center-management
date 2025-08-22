@@ -7,6 +7,9 @@ import { UserInfoProvider } from './UserInfoContext';
 import PersonalInfoModal from './PersonalInfoModal';
 import TokenExpirationModal from './TokenExpirationModal';
 import TokenWarningModal from './TokenWarningModal';
+import ChangePasswordModal from './ChangePasswordModal';
+import { api } from '../lib/api';
+import { toast } from 'react-toastify';
 
 interface SessionWrapperProps {
   children: ReactNode;
@@ -50,6 +53,17 @@ const PersonalInfoModalRenderer = () => {
 };
 
 export default function SessionWrapper({ children }: SessionWrapperProps) {
+  const ChangePasswordModalRenderer = () => {
+    const { closeChangePasswordModal, isOpenChangePasswordModal } =
+      usePersonalInfo();
+
+    return isOpenChangePasswordModal ? (
+      <ChangePasswordModal onClose={closeChangePasswordModal} />
+    ) : (
+      <></>
+    );
+  };
+
   return (
     <SessionProvider>
       <UserInfoProvider>
@@ -57,6 +71,7 @@ export default function SessionWrapper({ children }: SessionWrapperProps) {
           <TokenExpirationHandler />
           {children}
           <PersonalInfoModalRenderer />
+          <ChangePasswordModalRenderer />
         </PersonalInfoProvider>
       </UserInfoProvider>
     </SessionProvider>

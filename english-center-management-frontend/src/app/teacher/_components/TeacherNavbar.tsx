@@ -9,6 +9,7 @@ import {
   Menu,
   Home,
   ArrowRight,
+  Lock,
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { usePersonalInfo } from '../../../components/PersonalInfoContext';
@@ -21,7 +22,7 @@ interface TeacherNavbarProps {
 const TeacherNavbar: React.FC<TeacherNavbarProps> = ({ onToggleSidebar }) => {
   const pathname = usePathname();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const { openModal } = usePersonalInfo();
+  const { openModal, openChangePasswordModal } = usePersonalInfo();
   const { userInfo, loading } = useUserInfo();
 
   // Generate breadcrumbs from pathname
@@ -86,41 +87,6 @@ const TeacherNavbar: React.FC<TeacherNavbarProps> = ({ onToggleSidebar }) => {
 
   const breadcrumbs = generateBreadcrumbs();
 
-  const notifications = [
-    {
-      id: 1,
-      title: 'Lớp học sắp bắt đầu',
-      message: 'Lớp Speaking nâng cao sẽ bắt đầu trong 15 phút',
-      time: '5 phút trước',
-      unread: true,
-      type: 'class',
-    },
-    {
-      id: 2,
-      title: 'Bài tập mới được nộp',
-      message: 'Emma Chen đã nộp bài tập Grammar Unit 5',
-      time: '1 giờ trước',
-      unread: true,
-      type: 'assignment',
-    },
-    {
-      id: 3,
-      title: 'Nhận xét từ học viên',
-      message: 'John Martinez đã gửi feedback về bài học hôm qua',
-      time: '2 giờ trước',
-      unread: false,
-      type: 'feedback',
-    },
-    {
-      id: 4,
-      title: 'Báo cáo tuần',
-      message: 'Báo cáo hiệu suất tuần này đã sẵn sàng',
-      time: '1 ngày trước',
-      unread: false,
-      type: 'report',
-    },
-  ];
-
   // Get user display info
   const getUserDisplayInfo = () => {
     if (loading) {
@@ -153,7 +119,6 @@ const TeacherNavbar: React.FC<TeacherNavbarProps> = ({ onToggleSidebar }) => {
   };
 
   const userDisplay = getUserDisplayInfo();
-  const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
     <header className='h-16 bg-white border-b border-gray-200 fixed top-0 right-0 left-64 z-20 shadow-sm'>
@@ -171,7 +136,10 @@ const TeacherNavbar: React.FC<TeacherNavbarProps> = ({ onToggleSidebar }) => {
           {/* Breadcrumbs */}
           <nav className='flex items-center space-x-2 text-sm'>
             {breadcrumbs.map((crumb, index) => (
-              <div key={crumb.href} className='flex items-center'>
+              <div
+                key={crumb.href}
+                className='flex items-center'
+              >
                 {index > 0 && (
                   <ArrowRight className='w-4 h-4 text-gray-400 mx-2' />
                 )}
@@ -254,6 +222,13 @@ const TeacherNavbar: React.FC<TeacherNavbarProps> = ({ onToggleSidebar }) => {
                   >
                     <User className='w-4 h-4' />
                     Hồ sơ cá nhân
+                  </button>
+                  <button
+                    onClick={openChangePasswordModal}
+                    className='w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors'
+                  >
+                    <Lock className='w-4 h-4' />
+                    Đổi mật khẩu
                   </button>
                   <hr className='my-2 border-gray-200' />
                   <button

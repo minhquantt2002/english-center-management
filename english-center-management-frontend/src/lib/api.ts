@@ -86,6 +86,7 @@ export const api = {
   },
 
   async post(endpoint: string, data?: any) {
+    console.log('post');
     const token = await getAuthToken();
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',

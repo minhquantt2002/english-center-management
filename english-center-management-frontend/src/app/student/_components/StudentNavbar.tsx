@@ -12,6 +12,7 @@ import {
   ArrowRight,
   BookOpen,
   Award,
+  Lock,
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { usePersonalInfo } from '../../../components/PersonalInfoContext';
@@ -24,8 +25,7 @@ interface StudentNavbarProps {
 const StudentNavbar: React.FC<StudentNavbarProps> = ({ onToggleSidebar }) => {
   const pathname = usePathname();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const { openModal } = usePersonalInfo();
+  const { openModal, openChangePasswordModal } = usePersonalInfo();
   const { userInfo, loading } = useUserInfo();
 
   // Generate breadcrumbs from pathname
@@ -87,41 +87,6 @@ const StudentNavbar: React.FC<StudentNavbarProps> = ({ onToggleSidebar }) => {
 
   const breadcrumbs = generateBreadcrumbs();
 
-  const notifications = [
-    {
-      id: 1,
-      title: 'Lớp học sắp bắt đầu',
-      message: 'Lớp Speaking nâng cao sẽ bắt đầu trong 15 phút',
-      time: '5 phút trước',
-      unread: true,
-      type: 'class',
-    },
-    {
-      id: 2,
-      title: 'Bài tập mới',
-      message: 'Giáo viên đã giao bài tập mới cho lớp Grammar',
-      time: '1 giờ trước',
-      unread: true,
-      type: 'assignment',
-    },
-    {
-      id: 3,
-      title: 'Kết quả kiểm tra',
-      message: 'Kết quả bài kiểm tra tuần trước đã có',
-      time: '2 giờ trước',
-      unread: false,
-      type: 'result',
-    },
-    {
-      id: 4,
-      title: 'Thành tích mới',
-      message: 'Chúc mừng! Bạn đã đạt được huy chương "Học viên xuất sắc"',
-      time: '1 ngày trước',
-      unread: false,
-      type: 'achievement',
-    },
-  ];
-
   // Get user display info
   const getUserDisplayInfo = () => {
     if (loading) {
@@ -154,8 +119,6 @@ const StudentNavbar: React.FC<StudentNavbarProps> = ({ onToggleSidebar }) => {
   };
 
   const userDisplay = getUserDisplayInfo();
-  const unreadCount = notifications.filter((n) => n.unread).length;
-
   return (
     <header className='h-16 bg-white border-b border-gray-200 fixed top-0 right-0 left-64 z-20 shadow-sm'>
       <div className='h-full flex items-center justify-between px-6'>
@@ -172,7 +135,10 @@ const StudentNavbar: React.FC<StudentNavbarProps> = ({ onToggleSidebar }) => {
           {/* Breadcrumbs */}
           <nav className='flex items-center space-x-2 text-sm'>
             {breadcrumbs.map((crumb, index) => (
-              <div key={crumb.href} className='flex items-center'>
+              <div
+                key={crumb.href}
+                className='flex items-center'
+              >
                 {index > 0 && (
                   <ArrowRight className='w-4 h-4 text-gray-400 mx-2' />
                 )}
@@ -219,7 +185,6 @@ const StudentNavbar: React.FC<StudentNavbarProps> = ({ onToggleSidebar }) => {
                 <p className='text-sm font-semibold text-gray-900'>
                   {userDisplay.name}
                 </p>
-                {/* <p className='text-xs text-gray-500'>{userDisplay.level}</p> */}
               </div>
               <ChevronDown className='w-4 h-4 text-gray-500' />
             </button>
@@ -243,9 +208,6 @@ const StudentNavbar: React.FC<StudentNavbarProps> = ({ onToggleSidebar }) => {
                       <p className='text-xs text-gray-500'>
                         {userDisplay.email}
                       </p>
-                      {/* <p className='text-xs text-purple-600 font-medium mt-1'>
-                        {userDisplay.level}
-                      </p> */}
                     </div>
                   </div>
                 </div>
@@ -259,6 +221,13 @@ const StudentNavbar: React.FC<StudentNavbarProps> = ({ onToggleSidebar }) => {
                   >
                     <User className='w-4 h-4' />
                     Hồ sơ cá nhân
+                  </button>
+                  <button
+                    onClick={openChangePasswordModal}
+                    className='w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors'
+                  >
+                    <Lock className='w-4 h-4' />
+                    Đổi mật khẩu
                   </button>
                   <hr className='my-2 border-gray-200' />
                   <button
