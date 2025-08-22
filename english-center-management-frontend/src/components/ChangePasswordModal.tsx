@@ -74,11 +74,11 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
         old_password: formData.oldPassword.trim(),
         new_password: formData.newPassword.trim(),
       });
-      toast('Đổi mật khẩu thành công!');
+      toast.success('Đổi mật khẩu thành công!');
       onClose();
     } catch (error) {
       console.error('Error changing password:', error);
-      toast(error);
+      toast.error(error);
     } finally {
       setIsLoading(false);
     }

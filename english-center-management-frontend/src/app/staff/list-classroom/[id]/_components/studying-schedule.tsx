@@ -202,11 +202,11 @@ export default function StudyingScheduleModal({
     try {
       await createSchedule(scheduleData);
       setIsCreateScheduleOpen(false);
-      toast('Lịch học mới đã được tạo thành công!');
+      toast.success('Lịch học mới đã được tạo thành công!');
       fetchSchedules();
     } catch (error) {
       console.error('Error creating schedule:', error);
-      toast('Có lỗi xảy ra khi tạo lịch học mới!');
+      toast.error('Có lỗi xảy ra khi tạo lịch học mới!');
     }
   };
 

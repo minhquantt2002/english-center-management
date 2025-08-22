@@ -120,11 +120,11 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
       }
 
       await updateUserInfo(updateData);
-      toast('Cập nhật thông tin thành công!');
+      toast.success('Cập nhật thông tin thành công!');
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating user info:', error);
-      toast('Có lỗi xảy ra khi cập nhật thông tin. Vui lòng thử lại.');
+      toast.error('Có lỗi xảy ra khi cập nhật thông tin. Vui lòng thử lại.');
     } finally {
       setIsSaving(false);
     }

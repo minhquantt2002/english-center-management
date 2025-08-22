@@ -125,10 +125,10 @@ const StudentManagement = () => {
       setIsEditModalOpen(false);
       setSelectedStudent(null);
       await fetchStudents(); // Refresh the list
-      toast('Thông tin học viên đã được cập nhật thành công!');
+      toast.success('Thông tin học viên đã được cập nhật thành công!');
     } catch (error) {
       console.error('Error updating student:', error);
-      toast('Có lỗi xảy ra khi cập nhật thông tin học viên!');
+      toast.error('Có lỗi xảy ra khi cập nhật thông tin học viên!');
     }
   };
 
@@ -139,10 +139,10 @@ const StudentManagement = () => {
       await createStudent(newStudent);
       setIsCreateModalOpen(false);
       await fetchStudents(); // Refresh the list
-      toast('Học viên mới đã được tạo thành công!');
+      toast.success('Học viên mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating student:', error);
-      toast(error.detail);
+      toast.error(error.detail);
     }
   };
 
@@ -151,10 +151,10 @@ const StudentManagement = () => {
       try {
         await deleteStudent(studentId);
         await fetchStudents(); // Refresh the list
-        toast('Học viên đã được xóa thành công!');
+        toast.success('Học viên đã được xóa thành công!');
       } catch (error) {
         console.error('Error deleting student:', error);
-        toast('Có lỗi xảy ra khi xóa học viên!');
+        toast.error('Có lỗi xảy ra khi xóa học viên!');
       }
     }
   };
@@ -439,11 +439,13 @@ const StudentManagement = () => {
         <div className='bg-white rounded-xl border border-gray-100 shadow-sm mt-4 px-6 py-4'>
           <div className='flex items-center justify-between'>
             <div className='text-sm text-gray-700'>
-              Hiển thị {startIndex + 1} đến {Math.min(endIndex, filteredStudents.length)} trong tổng số {filteredStudents.length} học viên
+              Hiển thị {startIndex + 1} đến{' '}
+              {Math.min(endIndex, filteredStudents.length)} trong tổng số{' '}
+              {filteredStudents.length} học viên
             </div>
             <div className='flex items-center space-x-2'>
               <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
                   currentPage === 1
@@ -455,23 +457,27 @@ const StudentManagement = () => {
               </button>
 
               <div className='flex items-center space-x-1'>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      currentPage === page
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        currentPage === page
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
               </div>
 
               <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
                   currentPage === totalPages

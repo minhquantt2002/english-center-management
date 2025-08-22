@@ -196,7 +196,7 @@ const AttendanceManagement: React.FC<{
       setAlertMessage('');
       setTopic('');
       setSelectedSchedule(null);
-      toast('Điểm danh thành công!');
+      toast.success('Điểm danh thành công!');
     } catch (error) {
       setAlertMessage('Điểm danh không thành công! Vui lòng thử lại.');
     }
@@ -254,7 +254,10 @@ const AttendanceManagement: React.FC<{
                   !sessionAttendances.map((v) => v.schedule_id).includes(v.id)
               )
               .map((schedule, index) => (
-                <p key={schedule.id} className='text text-green-700'>
+                <p
+                  key={schedule.id}
+                  className='text text-green-700'
+                >
                   • Ca {index + 1} -{' '}
                   <strong>
                     {schedule.start_time.substring(0, 5)} -{' '}
@@ -405,7 +408,10 @@ const AttendanceManagement: React.FC<{
                 <option value=''>-- Chọn ca học --</option>
                 {formatSchedules(schedules).map((v) => {
                   return (
-                    <option key={v.value} value={v.value}>
+                    <option
+                      key={v.value}
+                      value={v.value}
+                    >
                       {v.label}
                     </option>
                   );

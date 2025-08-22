@@ -1,7 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Loader2, Users, BookOpen, Calendar, BarChart3, Search } from 'lucide-react';
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Loader2,
+  Users,
+  BookOpen,
+  Calendar,
+  BarChart3,
+  Search,
+} from 'lucide-react';
 import { useClassroomApi } from '../_hooks';
 import { CreateClassroomModal, EditClassroomModal } from './_components';
 import { ClassroomResponse } from '../../../types/admin';
@@ -86,10 +96,10 @@ const ClassManagement: React.FC = () => {
       await createClassroom(classroomData);
       setShowCreateModal(false);
       await fetchClassrooms(); // Refresh the list
-      toast('Lớp học mới đã được tạo thành công!');
+      toast.success('Lớp học mới đã được tạo thành công!');
     } catch (err) {
       console.error('Failed to create classroom:', err);
-      toast('Có lỗi xảy ra khi tạo lớp học mới!');
+      toast.error('Có lỗi xảy ra khi tạo lớp học mới!');
     }
   };
 
@@ -106,35 +116,41 @@ const ClassManagement: React.FC = () => {
     }
   };
   const getStatusDisplayInfo = (status: string) => {
-  switch (status) {
-    case 'active':
-      return {
-        text: 'Đang hoạt động',
-        className: 'bg-emerald-50 text-emerald-700 border-emerald-200'
-      };
-    case 'completed':
-      return {
-        text: 'Đã hoàn thành',
-        className: 'bg-blue-50 text-blue-700 border-blue-200'
-      };
-    case 'cancelled':
-      return {
-        text: 'Không hoạt động',
-        className: 'bg-red-50 text-red-700 border-red-200'
-      };
-    default:
-      return {
-        text: 'Không xác định',
-        className: 'bg-gray-50 text-gray-700 border-gray-200'
-      };
-  }
-};
+    switch (status) {
+      case 'active':
+        return {
+          text: 'Đang hoạt động',
+          className: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        };
+      case 'completed':
+        return {
+          text: 'Đã hoàn thành',
+          className: 'bg-blue-50 text-blue-700 border-blue-200',
+        };
+      case 'cancelled':
+        return {
+          text: 'Không hoạt động',
+          className: 'bg-red-50 text-red-700 border-red-200',
+        };
+      default:
+        return {
+          text: 'Không xác định',
+          className: 'bg-gray-50 text-gray-700 border-gray-200',
+        };
+    }
+  };
   // Filter classrooms based on search term
   const filteredClassrooms = classrooms.filter((classroom) => {
     const matchesSearch =
       classroom.class_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (classroom.course?.course_name && classroom.course.course_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (classroom.teacher?.name && classroom.teacher.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      (classroom.course?.course_name &&
+        classroom.course.course_name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())) ||
+      (classroom.teacher?.name &&
+        classroom.teacher.name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()));
     return matchesSearch;
   });
 
@@ -142,7 +158,10 @@ const ClassManagement: React.FC = () => {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
         <div className='flex items-center gap-2'>
-          <Loader2 className='animate-spin' size={24} />
+          <Loader2
+            className='animate-spin'
+            size={24}
+          />
           <span className='text-gray-600'>Đang tải dữ liệu...</span>
         </div>
       </div>
@@ -194,7 +213,11 @@ const ClassManagement: React.FC = () => {
                   Đang hoạt động
                 </p>
                 <p className='text-3xl font-bold text-green-600'>
-                  {filteredClassrooms.filter((classroom) => classroom.status === 'active').length}
+                  {
+                    filteredClassrooms.filter(
+                      (classroom) => classroom.status === 'active'
+                    ).length
+                  }
                 </p>
               </div>
               <div className='p-3 bg-green-100 rounded-xl'>
@@ -206,9 +229,15 @@ const ClassManagement: React.FC = () => {
           <div className='bg-white rounded-2xl shadow-sm border border-gray-100 p-6'>
             <div className='flex items-center justify-between'>
               <div>
-                <p className='text-sm font-medium text-gray-600'>Đã hoàn thành</p>
+                <p className='text-sm font-medium text-gray-600'>
+                  Đã hoàn thành
+                </p>
                 <p className='text-3xl font-bold text-purple-600'>
-                  {filteredClassrooms.filter((classroom) => classroom.status === 'completed').length}
+                  {
+                    filteredClassrooms.filter(
+                      (classroom) => classroom.status === 'completed'
+                    ).length
+                  }
                 </p>
               </div>
               <div className='p-3 bg-purple-100 rounded-xl'>
@@ -224,7 +253,11 @@ const ClassManagement: React.FC = () => {
                   Tổng học viên
                 </p>
                 <p className='text-3xl font-bold text-orange-600'>
-                  {filteredClassrooms.reduce((total, classroom) => total + (classroom.enrollments?.length || 0), 0)}
+                  {filteredClassrooms.reduce(
+                    (total, classroom) =>
+                      total + (classroom.enrollments?.length || 0),
+                    0
+                  )}
                 </p>
               </div>
               <div className='p-3 bg-orange-100 rounded-xl'>
@@ -259,7 +292,10 @@ const ClassManagement: React.FC = () => {
               className='px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg flex items-center gap-2 transition-colors duration-200 font-medium'
             >
               {loading ? (
-                <Loader2 className='animate-spin' size={16} />
+                <Loader2
+                  className='animate-spin'
+                  size={16}
+                />
               ) : (
                 <Plus size={16} />
               )}
@@ -307,111 +343,114 @@ const ClassManagement: React.FC = () => {
               </div>
             ) : (
               filteredClassrooms.map((classroom) => (
-              <div
-                key={classroom.id}
-                className='px-6 py-4 hover:bg-gray-50 transition-colors duration-150'
-              >
-                <div className='grid grid-cols-12 gap-4 items-center'>
-                  {/* Class Name */}
-                  <div className='col-span-2'>
-                    <p className='font-medium text-gray-900'>
-                      {classroom.class_name}
-                    </p>
-                    <p className='text-sm text-gray-500'>
-                      {classroom.course?.course_name || 'Không tồn tại'}
-                    </p>
-                  </div>
+                <div
+                  key={classroom.id}
+                  className='px-6 py-4 hover:bg-gray-50 transition-colors duration-150'
+                >
+                  <div className='grid grid-cols-12 gap-4 items-center'>
+                    {/* Class Name */}
+                    <div className='col-span-2'>
+                      <p className='font-medium text-gray-900'>
+                        {classroom.class_name}
+                      </p>
+                      <p className='text-sm text-gray-500'>
+                        {classroom.course?.course_name || 'Không tồn tại'}
+                      </p>
+                    </div>
 
-                  {/* Level */}
-                  <div className='col-span-2'>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${getLevelBadgeColor(
-                        classroom.course?.level
+                    {/* Level */}
+                    <div className='col-span-2'>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${getLevelBadgeColor(
+                          classroom.course?.level
+                            ? levels.find(
+                                (v) => v.value === classroom.course.level
+                              )?.label
+                            : 'Không tồn tại'
+                        )}`}
+                      >
+                        {classroom.course?.level
                           ? levels.find(
                               (v) => v.value === classroom.course.level
                             )?.label
-                          : 'Không tồn tại'
-                      )}`}
-                    >
-                      {classroom.course?.level
-                        ? levels.find((v) => v.value === classroom.course.level)
-                            ?.label
-                        : 'Không tồn tại'}
-                    </span>
-                  </div>
+                          : 'Không tồn tại'}
+                      </span>
+                    </div>
 
-                  {/* Assigned Teacher */}
-                  <div className='col-span-2'>
-                    <div className='flex items-center gap-2'>
-                      <div className='w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center'>
-                        <span className='text-blue-600 font-medium text-sm'>
-                          {classroom.teacher?.name?.charAt(0) ||
-                            'Không tồn tại'}
-                        </span>
-                      </div>
-                      <div>
-                        <span className='text-gray-700 font-medium'>
-                          {classroom.teacher?.name || 'Không tồn tại'}
-                        </span>
+                    {/* Assigned Teacher */}
+                    <div className='col-span-2'>
+                      <div className='flex items-center gap-2'>
+                        <div className='w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center'>
+                          <span className='text-blue-600 font-medium text-sm'>
+                            {classroom.teacher?.name?.charAt(0) ||
+                              'Không tồn tại'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className='text-gray-700 font-medium'>
+                            {classroom.teacher?.name || 'Không tồn tại'}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Students */}
-                  <div className='col-span-1'>
-                    <span className='text-gray-900 font-medium'>
-                      {classroom.enrollments.length}
-                    </span>
-                  </div>
-                  {/* Status */}
-                  <div className='col-span-2'>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusDisplayInfo(classroom.status).className}`}>
-                      {getStatusDisplayInfo(classroom.status).text}
-                    </span>
-                  </div>
-
-                  {/* Schedule */}
-                  <div className='col-span-2'>
-                    <div className='text-sm'>
-                      <p className='text-gray-900 font-medium'>
-                        {formatDate(classroom.start_date)} -{' '}
-                        {formatDate(classroom.end_date)}
-                      </p>
-                      <p className='text-gray-500'>
-                        {classroom.schedules.length} buổi
-                      </p>
+                    {/* Students */}
+                    <div className='col-span-1'>
+                      <span className='text-gray-900 font-medium'>
+                        {classroom.enrollments.length}
+                      </span>
                     </div>
-                  </div>
+                    {/* Status */}
+                    <div className='col-span-2'>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          getStatusDisplayInfo(classroom.status).className
+                        }`}
+                      >
+                        {getStatusDisplayInfo(classroom.status).text}
+                      </span>
+                    </div>
 
-                  {/* Actions */}
-                  <div className='col-span-1'>
-                    <div className='flex items-center gap-2'>
-                      <button
-                        onClick={() => handleEditClass(classroom)}
-                        disabled={loading}
-                        className='p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors duration-150 disabled:opacity-50'
-                        title='Sửa lớp học'
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClass(classroom.id)}
-                        disabled={loading}
-                        className='p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors duration-150 disabled:opacity-50'
-                        title='Xóa lớp học'
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                    {/* Schedule */}
+                    <div className='col-span-2'>
+                      <div className='text-sm'>
+                        <p className='text-gray-900 font-medium'>
+                          {formatDate(classroom.start_date)} -{' '}
+                          {formatDate(classroom.end_date)}
+                        </p>
+                        <p className='text-gray-500'>
+                          {classroom.schedules.length} buổi
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className='col-span-1'>
+                      <div className='flex items-center gap-2'>
+                        <button
+                          onClick={() => handleEditClass(classroom)}
+                          disabled={loading}
+                          className='p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors duration-150 disabled:opacity-50'
+                          title='Sửa lớp học'
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClass(classroom.id)}
+                          disabled={loading}
+                          className='p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors duration-150 disabled:opacity-50'
+                          title='Xóa lớp học'
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
               ))
             )}
           </div>
         </div>
-
-
 
         {/* Create Classroom Modal */}
         <CreateClassroomModal

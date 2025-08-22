@@ -86,10 +86,10 @@ export default function EnglishCourseInterface() {
       setIsEditModalOpen(false);
       setSelectedClassroom(null);
       await fetchClassrooms(); // Refresh the list
-      toast('Thông tin lớp học đã được cập nhật thành công!');
+      toast.success('Thông tin lớp học đã được cập nhật thành công!');
     } catch (error) {
       console.error('Error updating classroom:', error);
-      toast('Có lỗi xảy ra khi cập nhật thông tin lớp học!');
+      toast.error('Có lỗi xảy ra khi cập nhật thông tin lớp học!');
     }
   };
 
@@ -98,10 +98,10 @@ export default function EnglishCourseInterface() {
       await createClassroom(classData);
       setIsCreateModalOpen(false);
       await fetchClassrooms(); // Refresh the list
-      toast('Lớp học mới đã được tạo thành công!');
+      toast.success('Lớp học mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating classroom:', error);
-      toast('Có lỗi xảy ra khi tạo lớp học mới!');
+      toast.error('Có lỗi xảy ra khi tạo lớp học mới!');
     }
   };
 

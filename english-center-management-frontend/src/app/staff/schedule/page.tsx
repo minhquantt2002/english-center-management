@@ -64,10 +64,10 @@ const SchedulePage: React.FC = () => {
       await createClassroom(classroomData);
       setShowCreateModal(false);
       await fetchData();
-      toast('Lớp học mới đã được tạo thành công!');
+      toast.success('Lớp học mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating classroom:', error);
-      toast('Có lỗi xảy ra khi tạo lớp học mới!');
+      toast.error('Có lỗi xảy ra khi tạo lớp học mới!');
     }
   };
 
@@ -76,10 +76,10 @@ const SchedulePage: React.FC = () => {
       await createSchedule(scheduleData);
       setShowCreateScheduleModal(false);
       await fetchData();
-      toast('Lịch học mới đã được tạo thành công!');
+      toast.success('Lịch học mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating schedule:', error);
-      toast('Có lỗi xảy ra khi tạo lịch học mới!');
+      toast.error('Có lỗi xảy ra khi tạo lịch học mới!');
     }
   };
 

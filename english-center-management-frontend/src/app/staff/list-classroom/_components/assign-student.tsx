@@ -112,7 +112,7 @@ export default function AssignStudentModal({
       .map((student) => student.id.toString());
 
     if (selectedStudentIds.length === 0) {
-      toast('Vui lòng chọn ít nhất một học viên để phân công.');
+      toast.warning('Vui lòng chọn ít nhất một học viên để phân công.');
       return;
     }
 
@@ -121,12 +121,14 @@ export default function AssignStudentModal({
       // Assign multiple students at once
       await assignMultipleStudentsToClassroom(classroom.id, selectedStudentIds);
 
-      toast(`Đã phân công ${selectedStudentIds.length} học viên thành công!`);
+      toast.success(
+        `Đã phân công ${selectedStudentIds.length} học viên thành công!`
+      );
 
       onClose();
     } catch (error) {
       console.error('Error assigning students:', error);
-      toast('Có lỗi xảy ra khi phân công học viên. Vui lòng thử lại.');
+      toast.error('Có lỗi xảy ra khi phân công học viên. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }

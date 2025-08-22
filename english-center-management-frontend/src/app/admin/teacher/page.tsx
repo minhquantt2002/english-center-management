@@ -57,9 +57,9 @@ const TeacherManagement = () => {
   const teachersList = teachers.map((teacher: TeacherResponse) => ({
     id: teacher.id,
     name: teacher.name,
-    specialization: specializations.find(
-      (s) => s.value === teacher.specialization
-    )?.label || '',
+    specialization:
+      specializations.find((s) => s.value === teacher.specialization)?.label ||
+      '',
     email: teacher.email,
     phone: teacher.phone_number,
     assignedClasses: teacher.taught_classes || [],
@@ -68,7 +68,10 @@ const TeacherManagement = () => {
   const filteredTeachers = teachersList.filter((teacher) => {
     const matchesSearch =
       teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (teacher.specialization && teacher.specialization.toLowerCase().includes(searchTerm.toLowerCase()));
+      (teacher.specialization &&
+        teacher.specialization
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()));
     return matchesSearch;
   });
 
@@ -77,9 +80,9 @@ const TeacherManagement = () => {
       await createTeacher(teacherData);
       setIsCreateModalOpen(false);
       await fetchTeachers(); // Refresh the list
-      toast('Giáo viên mới đã được tạo thành công!');
+      toast.success('Giáo viên mới đã được tạo thành công!');
     } catch (error) {
-      toast(error.detail);
+      toast.error(error.detail);
     }
   };
 
@@ -101,10 +104,10 @@ const TeacherManagement = () => {
       setIsEditModalOpen(false);
       setSelectedTeacher(null);
       await fetchTeachers(); // Refresh the list
-      toast('Thông tin giáo viên đã được cập nhật thành công!');
+      toast.success('Thông tin giáo viên đã được cập nhật thành công!');
     } catch (error) {
       console.error('Error updating teacher:', error);
-      toast('Có lỗi xảy ra khi cập nhật thông tin giáo viên!');
+      toast.error('Có lỗi xảy ra khi cập nhật thông tin giáo viên!');
     }
   };
 
@@ -113,10 +116,10 @@ const TeacherManagement = () => {
       try {
         await deleteTeacher(teacherId);
         await fetchTeachers(); // Refresh the list
-        toast('Giáo viên đã được xóa thành công!');
+        toast.success('Giáo viên đã được xóa thành công!');
       } catch (error) {
         console.error('Error deleting teacher:', error);
-        toast('Có lỗi xảy ra khi xóa giáo viên!');
+        toast.error('Có lỗi xảy ra khi xóa giáo viên!');
       }
     }
   };

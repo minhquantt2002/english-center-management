@@ -104,9 +104,10 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
     try {
       await onSubmit(formData);
       handleClose();
-      toast('Tạo lịch học thành công!');
+      toast.success('Tạo lịch học thành công!');
     } catch (error) {
       console.error('Error creating schedule:', error);
+      toast.error(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -145,7 +146,10 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className='p-6 space-y-4'>
+        <form
+          onSubmit={handleSubmit}
+          className='p-6 space-y-4'
+        >
           {/* Weekday Selection */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>
@@ -159,7 +163,10 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
               }`}
             >
               {weekdays.map((day) => (
-                <option key={day.value} value={day.value}>
+                <option
+                  key={day.value}
+                  value={day.value}
+                >
                   {day.label}
                 </option>
               ))}
@@ -187,7 +194,10 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
                       : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
-                  <Clock size={14} className='inline mr-1' />
+                  <Clock
+                    size={14}
+                    className='inline mr-1'
+                  />
                   {slot.start} - {slot.end}
                 </button>
               ))}

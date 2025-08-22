@@ -64,10 +64,10 @@ const StaffManagement = () => {
       await createStaff(staffData);
       setIsCreateModalOpen(false);
       await fetchStaffs(); // Refresh the list
-      toast('Nhân sự mới đã được tạo thành công!');
+      toast.success('Nhân sự mới đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating staff:', error);
-      toast(error.detail);
+      toast.error(error.detail);
     }
   };
 
@@ -89,10 +89,10 @@ const StaffManagement = () => {
       setIsEditModalOpen(false);
       setSelectedStaff(null);
       await fetchStaffs(); // Refresh the list
-      toast('Thông tin nhân sự đã được cập nhật thành công!');
+      toast.success('Thông tin nhân sự đã được cập nhật thành công!');
     } catch (error) {
       console.error('Error updating staff:', error);
-      toast('Có lỗi xảy ra khi cập nhật thông tin nhân sự!');
+      toast.error('Có lỗi xảy ra khi cập nhật thông tin nhân sự!');
     }
   };
 
@@ -101,10 +101,10 @@ const StaffManagement = () => {
       try {
         await deleteStaff(staffId);
         await fetchStaffs(); // Refresh the list
-        toast('Nhân sự đã được xóa thành công!');
+        toast.success('Nhân sự đã được xóa thành công!');
       } catch (error) {
         console.error('Error deleting staff:', error);
-        toast('Có lỗi xảy ra khi xóa nhân sự!');
+        toast.error('Có lỗi xảy ra khi xóa nhân sự!');
       }
     }
   };

@@ -124,10 +124,10 @@ const CourseManagement = () => {
       await createCourse(courseData as CourseCreate);
       setIsCreateModalOpen(false);
       await fetchCourses(); // Refresh the list
-      toast('Khóa học đã được tạo thành công!');
+      toast.success('Khóa học đã được tạo thành công!');
     } catch (error) {
       console.error('Error creating course:', error);
-      toast('Có lỗi xảy ra khi tạo khóa học!');
+      toast.error('Có lỗi xảy ra khi tạo khóa học!');
     }
   };
 
@@ -160,10 +160,10 @@ const CourseManagement = () => {
       setIsEditModalOpen(false);
       setSelectedCourse(null);
       await fetchCourses(); // Refresh the list
-      toast('Khóa học đã được cập nhật thành công!');
+      toast.success('Khóa học đã được cập nhật thành công!');
     } catch (error) {
       console.error('Error updating course:', error);
-      toast('Có lỗi xảy ra khi cập nhật khóa học!');
+      toast.error('Có lỗi xảy ra khi cập nhật khóa học!');
     }
   };
 
@@ -172,10 +172,10 @@ const CourseManagement = () => {
       try {
         await deleteCourse(courseId);
         await fetchCourses(); // Refresh the list
-        toast('Khóa học đã được xóa thành công!');
+        toast.success('Khóa học đã được xóa thành công!');
       } catch (error) {
         console.error('Error deleting course:', error);
-        toast('Có lỗi xảy ra khi xóa khóa học!');
+        toast.error('Có lỗi xảy ra khi xóa khóa học!');
       }
     }
   };
@@ -311,10 +311,11 @@ const CourseManagement = () => {
             <div className='flex items-center gap-2'>
               <button
                 onClick={() => setViewMode('table')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'table'
+                className={`p-2 rounded-lg transition-colors ${
+                  viewMode === 'table'
                     ? 'bg-blue-100 text-blue-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
+                }`}
                 title='Chế độ bảng'
               >
                 <div className='w-5 h-5 grid grid-cols-2 gap-0.5'>
@@ -326,10 +327,11 @@ const CourseManagement = () => {
               </button>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'grid'
+                className={`p-2 rounded-lg transition-colors ${
+                  viewMode === 'grid'
                     ? 'bg-blue-100 text-blue-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
+                }`}
                 title='Chế độ lưới'
               >
                 <div className='w-5 h-5 grid grid-cols-3 gap-0.5'>
@@ -405,9 +407,7 @@ const CourseManagement = () => {
                           {course.displayLevel}
                         </span>
                       </td>
-                      <td className='px-6 py-4'>
-                        {course.classes.length}
-                      </td>
+                      <td className='px-6 py-4'>{course.classes.length}</td>
                       <td className='px-6 py-4 text-sm text-gray-900'>
                         {course.displayDuration}
                       </td>
@@ -489,21 +489,30 @@ const CourseManagement = () => {
                         onClick={() => handleViewCourse(course)}
                         className='flex-1 bg-green-50 text-green-700 items-center flex justify-center hover:bg-green-100 px-3 py-2 rounded-lg text-sm font-medium transition-colors'
                       >
-                        <Eye size={14} className='mr-1' />
+                        <Eye
+                          size={14}
+                          className='mr-1'
+                        />
                         Xem
                       </button>
                       <button
                         onClick={() => handleEditCourse(course)}
                         className='flex-1 bg-blue-50 text-blue-700 items-center flex justify-center hover:bg-blue-100 px-3 py-2 rounded-lg text-sm font-medium transition-colors'
                       >
-                        <Edit size={14} className='mr-1' />
+                        <Edit
+                          size={14}
+                          className='mr-1'
+                        />
                         Sửa
                       </button>
                       <button
                         onClick={() => handleDeleteCourse(course.id)}
                         className='flex-1 bg-red-50 text-red-700 items-center flex justify-center hover:bg-red-100 px-3 py-2 rounded-lg text-sm font-medium transition-colors'
                       >
-                        <Trash2 size={14} className='mr-1' />
+                        <Trash2
+                          size={14}
+                          className='mr-1'
+                        />
                         Xóa
                       </button>
                     </div>

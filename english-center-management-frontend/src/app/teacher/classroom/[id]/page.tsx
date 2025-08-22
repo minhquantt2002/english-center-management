@@ -153,7 +153,14 @@ const ClassDetailPage = () => {
             )}
 
             {activeTab === 'grades' && (
-              <GradeManagement enrollments={classDetails.enrollments} />
+              <GradeManagement
+                isFullSkills={
+                  !['A1', 'A2', 'B1', 'B2'].includes(
+                    classDetails.course.level.toUpperCase()
+                  )
+                }
+                enrollments={classDetails.enrollments}
+              />
             )}
           </div>
         </div>
