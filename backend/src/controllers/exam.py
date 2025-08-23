@@ -7,6 +7,8 @@ import uuid
 
 from src.database import get_db
 from src.models.exam import Exam
+from src.models.classroom import Class
+from src.models.score import Score
 from pydantic import Field
 from src.schemas.base import BaseSchema
 from src.schemas.classroom import ClassroomBase
@@ -27,10 +29,30 @@ class ExamUpdate(BaseSchema):
     start_time: Optional[datetime] = None
     duration: Optional[int] = None
 
+
+class StudentBase(BaseSchema):
+    id: uuid.UUID
+    name: str
+    email: str
+
+class ScoreBase(BaseSchema):
+    id: uuid.UUID
+    listening: Optional[float] = None
+    reading: Optional[float] = None
+    speaking: Optional[float] = None
+    writing: Optional[float] = None
+    feedback: Optional[str] = Field(None, max_length=255)
+    student: StudentBase
+
 class ExamResponse(ExamBase):
     id: uuid.UUID
-    created_at: datetime
     classroom: ClassroomBase
+    created_at: datetime
+
+
+class ExamDetailResponse(ExamResponse):
+    scores: List[ScoreBase]
+
 
 # Router
 router = APIRouter()
@@ -53,7 +75,7 @@ def get_exams_by_class_id(
 
     return exams
 
-@router.get("/{exam_id}", response_model=ExamResponse)
+@router.get("/{exam_id}", response_model=ExamDetailResponse)
 def get_exam_by_id(
     exam_id: uuid.UUID,
     db: Session = Depends(get_db)
@@ -82,6 +104,14 @@ def create_exam(
         db.add(db_exam)
         db.commit()
         db.refresh(db_exam)
+        db_class = db.query(Class).filter(Class.id == exam.class_id).first()
+        for enrollment in db_class.enrollments:
+            db.add(Score(
+                student_id=enrollment.student.id,
+                exam_id=db_exam.id
+            ))
+        db.commit()
+
         return db_exam
     except Exception as e:
         db.rollback()

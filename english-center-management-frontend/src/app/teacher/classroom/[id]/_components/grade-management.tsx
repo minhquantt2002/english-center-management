@@ -27,9 +27,7 @@ const GradeManagement: React.FC<{
   const [students, setStudents] = useState<StudentScore[]>([]);
   const [isLoading, setIsLoading] = useState<{ [key: number]: boolean }>({});
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStudents, setSelectedStudents] = useState<Set<number>>(
-    new Set()
-  );
+
   const [skills, setSkills] = useState(
     isFullSkills
       ? ['listening', 'speaking', 'reading', 'writing']
@@ -53,7 +51,6 @@ const GradeManagement: React.FC<{
     if (!searchTerm) return enrollments;
 
     return enrollments.filter((enrollment, index) => {
-      const student = students[index];
       return (
         enrollment.student.name
           .toLowerCase()
@@ -207,54 +204,22 @@ const GradeManagement: React.FC<{
           if (!student) return null;
 
           const completion = getStudentCompletion(student);
-          const isSelected = selectedStudents.has(index);
 
           return (
             <div
               key={enrollment.student.id}
-              className={`bg-white border rounded-lg shadow-sm transition-all duration-200 ${
-                isSelected
-                  ? 'border-blue-500 ring-2 ring-blue-100'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
+              className={`bg-white border rounded-lg shadow-sm transition-all duration-200 'border-gray-200 hover:border-gray-300`}
             >
               <div className='p-6'>
                 <div className='flex items-center justify-between mb-6'>
                   <div className='flex items-center space-x-4'>
-                    <div className='flex-1'>
-                      <h3 className='text-lg font-semibold text-gray-900 mb-1'>
-                        {enrollment.student.name}
+                    <div className='flex-1 flex items-center space-x-2'>
+                      <h3 className='text-lg font-semibold text-gray-900 '>
+                        {enrollment.student.name} -
                       </h3>
                       <p className='text-gray-600 text-sm'>
                         {enrollment.student.email}
                       </p>
-
-                      {/* Completion indicator */}
-                      <div className='flex items-center mt-2 space-x-2'>
-                        <div className='flex-1 bg-gray-200 rounded-full h-1.5'>
-                          <div
-                            className={`h-1.5 rounded-full transition-all duration-300 ${
-                              completion === 100
-                                ? 'bg-green-500'
-                                : completion > 50
-                                ? 'bg-yellow-500'
-                                : 'bg-red-500'
-                            }`}
-                            style={{ width: `${completion}%` }}
-                          />
-                        </div>
-                        <span
-                          className={`text-xs font-medium ${
-                            completion === 100
-                              ? 'text-green-600'
-                              : completion > 50
-                              ? 'text-yellow-600'
-                              : 'text-red-600'
-                          }`}
-                        >
-                          {completion}%
-                        </span>
-                      </div>
                     </div>
                   </div>
 

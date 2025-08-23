@@ -16,6 +16,7 @@ import ExamCreateModal from './_components/create-exam';
 import ExamEditModal from './_components/edit-exam';
 import { ExamResponse, useExam } from '../_hooks/use-exam';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 type ExamStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
 
@@ -88,7 +89,7 @@ export const formatDate = (dateString: string) => {
 const ExamManagement: React.FC = () => {
   const router = useRouter();
   const [exams, setExams] = useState<ExamResponse[]>([]);
-  const { getExams } = useExam();
+  const { getExams, deleteExam } = useExam();
 
   const fetchExams = async () => {
     const exams = await getExams();
@@ -127,14 +128,16 @@ const ExamManagement: React.FC = () => {
       exam.classroom.class_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const deleteExam = (id: string) => {
+  const handleDeleteExam = async (id: string) => {
     if (confirm('Bạn có chắc chắn muốn xóa bài kiểm tra này?')) {
-      setExams(exams.filter((exam) => exam.id !== id));
+      await deleteExam(id);
+      toast.success('Xóa bài kiểm tra thành công!');
+      fetchExams();
     }
   };
 
   const gradeExam = (exam: ExamResponse) => {
-    router.push(`/teacher/exams/${exam.id}`);
+    router.push(`/teacher/exam/${exam.id}`);
   };
 
   return (
@@ -291,7 +294,7 @@ const ExamManagement: React.FC = () => {
                         </button>
 
                         <button
-                          onClick={() => deleteExam(exam.id)}
+                          onClick={() => handleDeleteExam(exam.id)}
                           onMouseEnter={(e) => showTooltip('Xóa', e)}
                           onMouseLeave={hideTooltip}
                           className='text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-xl transition-all duration-200 border border-transparent hover:border-red-200'

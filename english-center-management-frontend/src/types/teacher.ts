@@ -54,7 +54,6 @@ export interface ScoreUpdate {
   reading: number | null;
   speaking: number | null;
   writing: number | null;
-
   feedback: string | null;
 }
 

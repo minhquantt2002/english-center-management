@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
 import { api } from '../../../lib/api';
+import { ScoreNested } from '../../../types/teacher';
+import { CourseLevel } from '../../../types/admin';
 
 export interface ExamBase {
   exam_name: string;
@@ -18,13 +20,30 @@ export interface ExamUpdate {
   duration?: number;
 }
 
+export interface StudentScore {
+  id: string;
+  listening: number | null;
+  speaking: number | null;
+  reading: number | null;
+  writing: number | null;
+  feedback: string;
+  student: {
+    name: string;
+    email: string;
+    id: string;
+  };
+}
+
 export interface ExamResponse extends ExamBase {
   id: string;
   created_at: string;
   classroom: {
     id: string;
     class_name: string;
+    course_level: CourseLevel;
   };
+
+  scores: StudentScore[];
 }
 
 export const useExam = () => {
@@ -42,8 +61,6 @@ export const useExam = () => {
       const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
       setError(errorMessage);
       throw err;
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -137,8 +154,6 @@ export const useExam = () => {
       const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
       setError(errorMessage);
       throw err;
-    } finally {
-      setLoading(false);
     }
   }, []);
 

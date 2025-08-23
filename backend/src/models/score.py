@@ -17,8 +17,10 @@ class Score(Base):
 
     feedback = Column(String(255))
 
-    enrollment_id = Column(UUID(), ForeignKey("enrollments.id", ondelete="CASCADE"), unique=True, nullable=False)
+    enrollment_id = Column(UUID(), ForeignKey("enrollments.id", ondelete="CASCADE"), unique=True, nullable=True)
     exam_id = Column(UUID(), ForeignKey("exams.id", ondelete="CASCADE"), nullable=True)
+    student_id = Column(UUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
 
     enrollment = relationship("Enrollment", back_populates="score")
     exam = relationship("Exam", back_populates="scores")
+    student = relationship("User", back_populates="scores")

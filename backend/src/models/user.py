@@ -35,6 +35,7 @@ class User(Base):
     taught_classes = relationship("Class", back_populates="teacher")
     
     enrollments = relationship("Enrollment", back_populates="student")
+    scores = relationship("Score", back_populates="student")
 
     attendances = relationship("Attendance", back_populates="student")
     homeworks = relationship("Homework", back_populates="student")
