@@ -426,9 +426,6 @@ const GradeManagement: React.FC<{
             <kbd className='px-1 py-0.5 bg-gray-200 rounded text-xs'>Enter</kbd>{' '}
             để chuyển sang ô điểm tiếp theo
           </li>
-          <li>
-            • Sử dụng checkbox để chọn nhiều học sinh và cập nhật cùng lúc
-          </li>
           <li>• Thanh tiến độ hiển thị % hoàn thành cho từng học sinh</li>
           <li>• Tìm kiếm theo tên hoặc email để lọc danh sách</li>
         </ul>

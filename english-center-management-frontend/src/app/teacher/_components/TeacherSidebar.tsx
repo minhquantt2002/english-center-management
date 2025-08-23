@@ -9,6 +9,7 @@ import {
   School,
   ChevronRight,
   GraduationCap,
+  FileText,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -39,6 +40,12 @@ const TeacherSidebar: React.FC = () => {
       href: '/teacher/classroom',
       icon: <School className='w-5 h-5' />,
       description: 'Quản lý lớp học',
+    },
+    {
+      name: 'Kỳ thi',
+      href: '/teacher/exam',
+      icon: <FileText className='w-5 h-5' />,
+      description: 'Quản lý kỳ thi',
     },
   ];
 

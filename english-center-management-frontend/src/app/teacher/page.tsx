@@ -38,7 +38,7 @@ const TeacherDashboard = () => {
   }>({});
   const [isLoading, setIsLoading] = useState(true);
 
-  const { error, getTeacherDashboard, getTeacherClasses } = useTeacherApi();
+  const { error, getTeacherDashboard, getClassrooms } = useTeacherApi();
 
   // Fetch teacher data on component mount
   useEffect(() => {
@@ -49,7 +49,7 @@ const TeacherDashboard = () => {
     try {
       const [dashboard, classes] = await Promise.all([
         getTeacherDashboard(),
-        getTeacherClasses(),
+        getClassrooms(),
       ]);
 
       setDashboardData(dashboard);
@@ -225,7 +225,10 @@ const TeacherDashboard = () => {
             </div>
           </div>
           <div className='flex items-center gap-2'>
-            <ArrowUp size={16} className='text-green-500' />
+            <ArrowUp
+              size={16}
+              className='text-green-500'
+            />
             <span className='text-sm font-medium text-green-500'>
               +2 so với tuần trước
             </span>
@@ -243,7 +246,10 @@ const TeacherDashboard = () => {
             </div>
           </div>
           <div className='flex items-center gap-2'>
-            <CheckCircle size={16} className='text-blue-500' />
+            <CheckCircle
+              size={16}
+              className='text-blue-500'
+            />
             <span className='text-sm font-medium text-blue-500'>
               Đang giảng dạy tích cực
             </span>
@@ -261,7 +267,10 @@ const TeacherDashboard = () => {
             </div>
           </div>
           <div className='flex items-center gap-2'>
-            <TrendingUp size={16} className='text-green-500' />
+            <TrendingUp
+              size={16}
+              className='text-green-500'
+            />
             <span className='text-sm font-medium text-green-500'>Tuần này</span>
           </div>
         </div>
@@ -279,7 +288,10 @@ const TeacherDashboard = () => {
             </div>
           </div>
           <div className='flex items-center gap-2'>
-            <Award size={16} className='text-purple-500' />
+            <Award
+              size={16}
+              className='text-purple-500'
+            />
             <span className='text-sm font-medium text-purple-500'>
               Xuất sắc
             </span>
@@ -400,7 +412,10 @@ const TeacherDashboard = () => {
               <div className='space-y-4'>
                 {Object.entries(studentsByClass).map(
                   ([className, students]) => (
-                    <div key={className} className='space-y-3'>
+                    <div
+                      key={className}
+                      className='space-y-3'
+                    >
                       <h3 className='font-semibold text-gray-900 text-sm'>
                         {className}
                       </h3>
@@ -503,7 +518,10 @@ const TeacherDashboard = () => {
 
               <div className='space-y-2'>
                 {calendarDays.map((week, weekIndex) => (
-                  <div key={weekIndex} className='grid grid-cols-7 gap-1'>
+                  <div
+                    key={weekIndex}
+                    className='grid grid-cols-7 gap-1'
+                  >
                     {week.map((day, dayIndex) => (
                       <div
                         key={dayIndex}

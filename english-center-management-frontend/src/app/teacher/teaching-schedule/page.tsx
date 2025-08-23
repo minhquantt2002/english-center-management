@@ -256,7 +256,10 @@ const TeachingSchedule = () => {
 
               {/* Time Slots Rows */}
               {timeSlots.map((timeSlot) => (
-                <div key={timeSlot.id} className='grid grid-cols-8 gap-1 mb-1'>
+                <div
+                  key={timeSlot.id}
+                  className='grid grid-cols-8 gap-1 mb-1'
+                >
                   <div className='p-3 bg-gray-50 text-gray-600 text-sm font-medium text-center border border-gray-200'>
                     {timeSlot.label}
                   </div>

@@ -5,6 +5,7 @@ from .schedule import Schedule, Weekday
 from .score import Score
 from .enrollment import Enrollment
 from .attendance import Session, Attendance, Homework
+from .exam import Exam
 
 __all__ = [
     "User",
@@ -18,5 +19,6 @@ __all__ = [
     "Enrollment",
     "Session",
     "Attendance",
-    "Homework"
-] 
+    "Homework",
+    "Exam"
+]

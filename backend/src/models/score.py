@@ -1,6 +1,5 @@
-from sqlalchemy import Column, Date, ForeignKey, String, DateTime, Float
+from sqlalchemy import Column, ForeignKey, String, Float
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 from src.database import Base
 from src.utils.database import UUID
 import uuid
@@ -19,5 +18,7 @@ class Score(Base):
     feedback = Column(String(255))
 
     enrollment_id = Column(UUID(), ForeignKey("enrollments.id", ondelete="CASCADE"), unique=True, nullable=False)
+    exam_id = Column(UUID(), ForeignKey("exams.id", ondelete="CASCADE"), nullable=True)
 
     enrollment = relationship("Enrollment", back_populates="score")
+    exam = relationship("Exam", back_populates="scores")
