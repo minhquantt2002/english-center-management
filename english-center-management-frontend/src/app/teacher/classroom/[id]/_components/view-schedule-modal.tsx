@@ -96,6 +96,35 @@ export default function ViewScheduleModal({
     setCurrentWeek(newDate);
   };
 
+  // Get dates for the current week
+  const getWeekDates = (date) => {
+    const startOfWeek = new Date(date);
+    const dayOfWeek = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    startOfWeek.setDate(diff);
+
+    const weekDates = {};
+    Object.keys(dayNames).forEach((day, index) => {
+      const currentDate = new Date(startOfWeek);
+      currentDate.setDate(startOfWeek.getDate() + index);
+      weekDates[day] = currentDate;
+    });
+
+    return weekDates;
+  };
+
+  // Check if a date is today
+  const isToday = (date) => {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const weekDates = useMemo(() => getWeekDates(currentWeek), [currentWeek]);
+
   // Get schedules for current week
   const weekSchedules = useMemo(() => {
     const startOfWeek = new Date(currentWeek);
@@ -262,14 +291,25 @@ export default function ViewScheduleModal({
                   <div className='p-3 bg-gray-100 font-medium text-gray-700 text-center text-sm'>
                     Thời gian
                   </div>
-                  {Object.entries(dayNames).map(([key, value]) => (
-                    <div
-                      key={key}
-                      className='p-3 bg-gray-100 font-medium text-gray-700 text-center text-sm'
-                    >
-                      {value}
-                    </div>
-                  ))}
+                  {Object.entries(dayNames).map(([key, value]) => {
+                    const dayDate = weekDates[key];
+                    const isTodayColumn = isToday(dayDate);
+                    return (
+                      <div
+                        key={key}
+                        className={`p-3 font-medium text-center text-sm ${
+                          isTodayColumn
+                            ? 'bg-purple-100 text-purple-800'
+                            : 'bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        <div>{value}</div>
+                        <div className='text-xs mt-1 font-normal'>
+                          {dayDate.getDate()}/{dayDate.getMonth() + 1}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* Time Slots Rows */}
@@ -283,30 +323,62 @@ export default function ViewScheduleModal({
                     </div>
                     {Object.keys(dayNames).map((day) => {
                       const session = getSessionForSlot(day, timeSlot);
+                      const dayDate = weekDates[day];
+                      const isTodayColumn = isToday(dayDate);
                       return (
                         <div
                           key={day}
-                          className='p-2 border border-gray-200 min-h-[100px] relative'
+                          className={`p-2 border border-gray-200 min-h-[100px] relative ${
+                            isTodayColumn ? 'bg-purple-50' : ''
+                          }`}
                         >
                           {session ? (
-                            <div className='h-full bg-blue-50 border-l-4 border-blue-500 rounded p-2'>
+                            <div
+                              className={`h-full border-l-4 rounded p-2 ${
+                                isTodayColumn
+                                  ? 'bg-purple-100 border-purple-500'
+                                  : 'bg-blue-50 border-blue-500'
+                              }`}
+                            >
                               <div className='h-full flex flex-col'>
                                 <div className='flex items-start justify-between mb-2'>
-                                  <div className='text-xs font-semibold text-blue-900 line-clamp-2'>
+                                  <div
+                                    className={`text-xs font-semibold line-clamp-2 ${
+                                      isTodayColumn
+                                        ? 'text-purple-900'
+                                        : 'text-blue-900'
+                                    }`}
+                                  >
                                     {session.classroom?.class_name || 'Lớp học'}
                                   </div>
                                   <button
                                     onClick={() => setSelectedSchedule(session)}
-                                    className='text-blue-600 hover:text-blue-800 text-xs ml-1 flex-shrink-0'
+                                    className={`hover:opacity-80 text-xs ml-1 flex-shrink-0 ${
+                                      isTodayColumn
+                                        ? 'text-purple-600'
+                                        : 'text-blue-600'
+                                    }`}
                                   >
                                     <Eye className='w-3 h-3' />
                                   </button>
                                 </div>
-                                <div className='text-xs text-blue-700 mb-1 flex items-center gap-1'>
+                                <div
+                                  className={`text-xs mb-1 flex items-center gap-1 ${
+                                    isTodayColumn
+                                      ? 'text-purple-700'
+                                      : 'text-blue-700'
+                                  }`}
+                                >
                                   <MapPin className='w-3 h-3' />
                                   {session.classroom?.room || 'N/A'}
                                 </div>
-                                <div className='text-xs text-blue-600 flex items-center gap-1'>
+                                <div
+                                  className={`text-xs flex items-center gap-1 ${
+                                    isTodayColumn
+                                      ? 'text-purple-600'
+                                      : 'text-blue-600'
+                                  }`}
+                                >
                                   <Clock className='w-3 h-3' />
                                   {formatTime(session.start_time)} -{' '}
                                   {formatTime(session.end_time)}

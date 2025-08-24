@@ -18,14 +18,12 @@ def get_schedules(db: Session, skip: int = 0, limit: int = 100) -> List[Schedule
     """Get schedules with pagination"""
     return db.query(Schedule)\
         .options(joinedload(Schedule.classroom))\
-        .order_by(Schedule.created_at.desc())\
         .offset(skip).limit(limit).all()
 
 def get_all_schedules(db: Session) -> List[Schedule]:
     """Get all schedules without pagination"""
     return db.query(Schedule)\
         .options(joinedload(Schedule.classroom))\
-        .order_by(Schedule.created_at.desc())\
         .all()
 
 def get_schedules_by_classroom(db: Session, class_id: UUID) -> List[Schedule]:
@@ -33,7 +31,6 @@ def get_schedules_by_classroom(db: Session, class_id: UUID) -> List[Schedule]:
     return db.query(Schedule)\
         .options(joinedload(Schedule.classroom))\
         .filter(Schedule.class_id == class_id)\
-        .order_by(Schedule.created_at.desc())\
         .all()
 
 def get_schedules_by_student(db: Session, student_id: UUID,) -> List[Schedule]:
@@ -43,14 +40,13 @@ def get_schedules_by_student(db: Session, student_id: UUID,) -> List[Schedule]:
         .join(Class, Schedule.class_id == Class.id)\
         .join(Enrollment, Class.id == Enrollment.class_id)
     
-    return query.filter(Enrollment.student_id == student_id).order_by(Schedule.created_at.desc()).all()
+    return query.filter(Enrollment.student_id == student_id).all()
 
 def get_schedules_by_room(db: Session, room: str) -> List[Schedule]:
     """Get schedules for specific room"""
     return db.query(Schedule)\
         .options(joinedload(Schedule.classroom))\
         .filter(Schedule.room == room)\
-        .order_by(Schedule.created_at.desc())\
         .all()
 
 def get_schedule_by_classroom_time(
@@ -111,7 +107,6 @@ def get_schedules_by_teacher(db: Session):
     return db.query(Schedule)\
         .options(joinedload(Schedule.classroom))\
         .join(Class, Schedule.class_id == Class.id)\
-        .order_by(Schedule.created_at.desc())\
         .all()
 
 def get_schedules_by_student_weekday(db: Session, student_id: UUID, weekday: str) -> List[Schedule]:
@@ -129,7 +124,7 @@ def get_schedules_by_student_weekday(db: Session, student_id: UUID, weekday: str
         .join(Enrollment, Class.id == Enrollment.class_id)\
         .filter(Enrollment.student_id == student_id)\
         .filter(Schedule.weekday == weekday_enum)\
-        .order_by(Schedule.created_at.desc()).all()
+        .all()
 
 def get_schedules_by_teacher_weekday(db: Session, teacher_id: UUID, weekday: str) -> List[Schedule]:
     """Get schedules for specific teacher on specific weekday"""
@@ -145,7 +140,7 @@ def get_schedules_by_teacher_weekday(db: Session, teacher_id: UUID, weekday: str
         .join(Class, Schedule.class_id == Class.id)\
         .filter(Class.teacher_id == teacher_id)\
         .filter(Schedule.weekday == weekday_enum)\
-        .order_by(Schedule.created_at.desc()).all()
+        .all()
 
 def get_schedules_with_filters(
     db: Session,
@@ -171,4 +166,4 @@ def get_schedules_with_filters(
             # Invalid weekday, return empty result
             return []
 
-    return query.order_by(Schedule.created_at.desc()).all()
+    return query.all()
