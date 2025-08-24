@@ -105,8 +105,7 @@ export default function EditStudentModal({
         newErrors.phone_number = 'Số điện thoại không hợp lệ';
       }
 
-
-      if (!/^[0-9]{10,11}$/.test(data.parent_phone.replace(/\s/g, ''))) {
+      if (data.parent_phone && !/^[0-9]{10,11}$/.test(data.parent_phone.replace(/\s/g, ''))) {
         newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
       }
 
@@ -400,7 +399,7 @@ export default function EditStudentModal({
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Họ tên <span className='text-red-500'>*</span>
+                  Họ tên
                 </label>
                 <input
                   type='text'
@@ -421,7 +420,7 @@ export default function EditStudentModal({
 
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Số điện thoại <span className='text-red-500'>*</span>
+                  Số điện thoại
                 </label>
                 <input
                   type='tel'

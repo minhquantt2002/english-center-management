@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MapPin, Calendar, User, Edit, UserPlus, Plus } from 'lucide-react';
+import { MapPin, Calendar, User, Edit, UserPlus, Plus, Users, PlayCircle, CheckCircle2, XCircle } from 'lucide-react';
 import EditClassroomModal from './_components/edit-classroom';
 import CreateClassroomModal from './_components/create-classroom';
 import AssignStudentModal from './_components/assign-student';
@@ -20,6 +20,7 @@ export default function EnglishCourseInterface() {
     useState<ClassroomResponse | null>(null);
   const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { error, getClassrooms, createClassroom, updateClassroom } =
     useStaffClassroomApi();
@@ -148,9 +149,59 @@ export default function EnglishCourseInterface() {
           </button>
         </div>
 
+        {/* Stats Cards */}
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>Tổng số lớp</p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>{classrooms.length}</p>
+              </div>
+              <div className='w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center'>
+                <Users className='w-6 h-6 text-cyan-600' />
+              </div>
+            </div>
+          </div>
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>Đang hoạt động</p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>{classrooms.filter(c => c.status === 'active').length}</p>
+              </div>
+              <div className='w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center'>
+                <PlayCircle className='w-6 h-6 text-green-600' />
+              </div>
+            </div>
+          </div>
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>Đã hoàn thành</p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>{classrooms.filter(c => c.status === 'completed').length}</p>
+              </div>
+              <div className='w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center'>
+                <CheckCircle2 className='w-6 h-6 text-blue-600' />
+              </div>
+            </div>
+          </div>
+          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-gray-500 text-sm font-medium'>Đã hủy</p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>{classrooms.filter(c => c.status === 'cancelled').length}</p>
+              </div>
+              <div className='w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center'>
+                <XCircle className='w-6 h-6 text-red-600' />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Course Cards Grid */}
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {courses.map((course) => (
+          {courses
+            .slice((currentPage - 1) * 6, currentPage * 6)
+            .map((course) => (
             <div
               key={course.id}
               className='bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow'
@@ -237,6 +288,29 @@ export default function EnglishCourseInterface() {
             </div>
           ))}
         </div>
+
+        {/* Pagination Controls */}
+        {courses.length > 6 && (
+          <div className='flex justify-center items-center mt-8'>
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className='px-4 py-2 mx-1 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              Trước
+            </button>
+            <span className='px-4 py-2 mx-1'>
+              Trang {currentPage} / {Math.ceil(courses.length / 6)}
+            </span>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(courses.length / 6)))}
+              disabled={currentPage >= Math.ceil(courses.length / 6)}
+              className='px-4 py-2 mx-1 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              Sau
+            </button>
+          </div>
+        )}
       </main>
 
       {/* Create Classroom Modal */}
