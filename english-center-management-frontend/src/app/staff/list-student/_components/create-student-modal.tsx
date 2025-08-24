@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { X, User, Phone, Mail, BookOpen, Users, MapPin } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, User, Mail, Phone, Calendar, MapPin, Users, BookOpen } from 'lucide-react';
 import { StudentCreate } from '../../../../types/staff';
 
 interface CreateStudentModalProps {
@@ -9,6 +9,21 @@ interface CreateStudentModalProps {
   onClose: () => void;
   onCreateStudent: (studentData: StudentCreate) => Promise<void> | void;
 }
+
+// Initial form data constant for consistency
+const INITIAL_FORM_DATA: StudentCreate = {
+  name: '',
+  email: '',
+  phone_number: '',
+  date_of_birth: '',
+  input_level: 'A1',
+  address: '',
+  password: '',
+  parent_name: '',
+  parent_phone: '',
+  status: 'active',
+  role_name: 'student',
+};
 
 const levels = [
   { value: 'A1', label: 'A1 - Mất gốc' },
@@ -23,180 +38,242 @@ export default function CreateStudentModal({
   onClose,
   onCreateStudent,
 }: CreateStudentModalProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<StudentCreate>({
-    name: '',
-    email: '',
-    phone_number: '',
-    date_of_birth: '',
-    input_level: 'A1',
-    role_name: 'student',
-    parent_name: '',
-    parent_phone: '',
-    bio: '',
-    status: 'active',
-    password: '',
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState<StudentCreate>(INITIAL_FORM_DATA);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string>('');
 
-  const [errors, setErrors] = useState<
-    Partial<
-      Record<keyof StudentCreate | 'parent_name' | 'parent_phone', string>
-    >
-  >({});
-
-  // Check if form has any errors
-  const hasErrors = () => {
-    return Object.values(errors).some(error => error && error.trim() !== '');
+  // Progressive validation - only show errors when appropriate
+  const shouldShowError = (field: string) => {
+    return formSubmitted || touchedFields[field];
   };
 
-  // Check if all required fields are filled
-  const isFormValid = () => {
-    return (
-      formData.name.trim() !== '' &&
-      formData.email.trim() !== '' &&
-      formData.phone_number?.trim() !== '' &&
-      formData.date_of_birth !== '' &&
-      formData.password?.trim() !== '' &&
-      !hasErrors()
+  // Validation helpers for button logic (always validate)
+  const isValidEmail = (email: string) => {
+    return email.trim() !== '' && /\S+@\S+\.\S+/.test(email);
+  };
+
+  const isValidPhone = (phone: string) => {
+    return phone.trim() !== '' && /^[0-9]{10,11}$/.test(phone.replace(/\s/g, ''));
+  };
+
+  const isValidPassword = (password: string) => {
+    return password.trim() !== '' && password.length >= 6;
+  };
+
+  const isValidDate = (date: string) => {
+    if (!date) return false;
+    const selectedDate = new Date(date);
+    const today = new Date();
+    return selectedDate <= today;
+  };
+
+  // Button validation logic (independent of UI state)
+  const isFormValidForSubmit = () => {
+    const requiredFields = [
+      formData.name.trim(),
+      formData.email.trim(),
+      formData.phone_number?.trim(),
+      formData.date_of_birth,
+      formData.password.trim(),
+    ];
+
+    // Check required fields
+    const hasRequiredFields = requiredFields.every(
+      (field) => field !== '' && field !== undefined
     );
+
+    // Check format validation
+    const hasValidFormats =
+      isValidEmail(formData.email) &&
+      isValidPhone(formData.phone_number || '') &&
+      isValidPassword(formData.password) &&
+      isValidDate(formData.date_of_birth) &&
+      formData.name.trim().length > 0;
+
+    return hasRequiredFields && hasValidFormats;
   };
 
-  // Validate form in real-time
-  const validateFormRealtime = (data: StudentCreate) => {
-    setErrors(() => {
-      const newErrors: typeof errors = {};
+  // Validate single field for display (with detailed messages)
+  const validateFieldForDisplay = (field: string, value: any) => {
+    setErrors((prev) => {
+      const newErrors = { ...prev };
 
-      if (!data.name.trim()) {
-        newErrors.name = 'Tên học viên là bắt buộc';
-      }
+      switch (field) {
+        case 'name':
+          if (!value.trim()) {
+            newErrors.name = 'Tên học viên là bắt buộc';
+          } else {
+            delete newErrors.name;
+          }
+          break;
 
-      if (!data.email.trim()) {
-        newErrors.email = 'Email là bắt buộc';
-      } else if (!/\S+@\S+\.\S+/.test(data.email)) {
-        newErrors.email = 'Email không hợp lệ';
-      }
+        case 'email':
+          if (!value.trim()) {
+            newErrors.email = 'Email là bắt buộc';
+          } else if (!/\S+@\S+\.\S+/.test(value)) {
+            newErrors.email = 'Email không hợp lệ';
+          } else {
+            delete newErrors.email;
+          }
+          break;
 
-      if (!data.phone_number?.trim()) {
-        newErrors.phone_number = 'Số điện thoại là bắt buộc';
-      } else if (
-        !/^[0-9]{10,11}$/.test(data.phone_number?.replace(/\s/g, ''))
-      ) {
-        newErrors.phone_number = 'Số điện thoại không hợp lệ';
-      }
+        case 'phone_number':
+          if (!value?.trim()) {
+            newErrors.phone_number = 'Số điện thoại là bắt buộc';
+          } else if (!/^[0-9]{10,11}$/.test(value?.replace(/\s/g, ''))) {
+            newErrors.phone_number = 'Số điện thoại không hợp lệ';
+          } else {
+            delete newErrors.phone_number;
+          }
+          break;
 
-      if (!data.date_of_birth) {
-        newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
-      }
+        case 'password':
+          if (!value.trim()) {
+            newErrors.password = 'Mật khẩu là bắt buộc';
+          } else if (value.length < 6) {
+            newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+          } else {
+            delete newErrors.password;
+          }
+          break;
 
-      if (!data.password?.trim()) {
-        newErrors.password = 'Mật khẩu là bắt buộc';
-      } else if (data.password.length < 6) {
-        newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
-      }
+        case 'date_of_birth':
+          if (!value) {
+            delete newErrors.date_of_birth;
+          } else {
+            const selectedDate = new Date(value);
+            const today = new Date();
+            if (selectedDate > today) {
+              newErrors.date_of_birth = 'Ngày sinh không được vượt quá ngày hiện tại';
+            } else {
+              delete newErrors.date_of_birth;
+            }
+          }
+          break;
 
-      if (
-        !/^[0-9]{10,11}$/.test(data.parent_phone?.replace(/\s/g, ''))
-      ) {
-        newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
+        default:
+          break;
       }
 
       return newErrors;
     });
   };
 
-  const validateForm = () => {
-    const newErrors: typeof errors = {};
+  // Validate all fields for form submission
+  const validateAllFields = () => {
+    const fieldsToValidate = ['name', 'email', 'phone_number', 'password', 'date_of_birth'];
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Họ tên là bắt buộc';
-    }
+    fieldsToValidate.forEach(field => {
+      validateFieldForDisplay(field, formData[field as keyof StudentCreate]);
+    });
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email là bắt buộc';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Email không hợp lệ';
-    }
+    // Check if there are any errors after validation
+    return Object.keys(errors).length === 0 && isFormValidForSubmit();
+  };
 
-    if (!formData.phone_number.trim()) {
-      newErrors.phone_number = 'Số điện thoại là bắt buộc';
-    } else if (
-      !/^[0-9]{10,11}$/.test(formData.phone_number.replace(/\s/g, ''))
-    ) {
-      newErrors.phone_number = 'Số điện thoại không hợp lệ';
-    }
-
-    if (!formData.date_of_birth) {
-      newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  // Check if form has any errors
+  const hasErrors = () => {
+    return Object.values(errors).some(error => error && error.trim() !== '');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (validateForm()) {
-      setIsLoading(true);
-      try {
-        await onCreateStudent(formData);
-        handleClose();
-      } catch (error) {
-        console.error('Error creating student:', error);
-        // You could show an error message here
-      } finally {
-        setIsLoading(false);
-      }
+    setFormSubmitted(true);
+    setSubmitError('');
+
+    // Mark all required fields as touched
+    const requiredFields = ['name', 'email', 'phone_number', 'password', 'date_of_birth'];
+    setTouchedFields((prev) => {
+      const newTouched = { ...prev };
+      requiredFields.forEach((field) => {
+        newTouched[field] = true;
+      });
+      return newTouched;
+    });
+
+    // Validate all fields
+    const isValid = validateAllFields();
+
+    if (!isValid) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const newStudent: StudentCreate = {
+        name: formData.name,
+        email: formData.email,
+        phone_number: formData.phone_number,
+        date_of_birth: formData.date_of_birth,
+        input_level: formData.input_level,
+        address: formData.address || undefined,
+        password: formData.password,
+        parent_name: formData.parent_name,
+        parent_phone: formData.parent_phone,
+        status: formData.status,
+        role_name: 'student', // Add this line, or set as appropriate
+      };
+
+      await onCreateStudent(newStudent);
+      handleClose();
+    } catch (error) {
+      console.error('Error creating student:', error);
+      setSubmitError('Có lỗi xảy ra khi tạo học viên. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleClose = () => {
-    setFormData({
-      name: '',
-      email: '',
-      phone_number: '',
-      date_of_birth: '',
-      input_level: 'A1',
-      parent_name: '',
-      role_name: 'student',
-      parent_phone: '',
-      bio: '',
-      status: 'active',
-      password: '',
-    });
-    setErrors({});
-    onClose();
+    if (!isSubmitting) {
+      setFormData(INITIAL_FORM_DATA);
+      setErrors({});
+      setTouchedFields({});
+      setFormSubmitted(false);
+      setSubmitError('');
+      onClose();
+    }
   };
 
-  const handleInputChange = (field: keyof StudentCreate, value: any) => {
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      if (isSubmitting) {
+        setIsSubmitting(false);
+      }
+    };
+  }, [isSubmitting]);
+
+  
+
+  const handleInputChange = (field: string, value: string) => {
     const newFormData = {
       ...formData,
       [field]: value,
     };
 
     setFormData(newFormData);
+    setSubmitError(''); // Clear submit error when user makes changes
 
-    // Handle date of birth validation separately
-    if (field === "date_of_birth") {
-      const selectedDate = new Date(value);
-      const today = new Date();
-
-      if (selectedDate > today) {
-        setErrors((prev) => ({
-          ...prev,
-          date_of_birth: "Ngày sinh không được vượt quá ngày hiện tại",
-        }));
-      } else {
-        setErrors((prev) => {
-          const newErrors = { ...prev };
-          delete newErrors.date_of_birth;
-          return newErrors;
-        });
-      }
-    } else {
-      // Validate form in real-time for other fields
-      validateFormRealtime(newFormData);
+    // Progressive error display - only show if field has been touched or form submitted
+    if (shouldShowError(field)) {
+      validateFieldForDisplay(field, value);
     }
+  };
+
+  const handleFieldBlur = (field: string) => {
+    setTouchedFields((prev) => ({
+      ...prev,
+      [field]: true,
+    }));
+
+    // Validate field when user leaves it
+    validateFieldForDisplay(field, formData[field as keyof StudentCreate]);
   };
 
   if (!isOpen) return null;
@@ -229,110 +306,141 @@ export default function CreateStudentModal({
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Họ và tên <span className='text-red-500'>*</span>
+                  Họ và tên *
                 </label>
                 <input
                   type='text'
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.name ? 'border-red-500' : 'border-gray-300'
+                  onBlur={() => handleFieldBlur('name')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('name') && errors.name
+                      ? 'border-red-500'
+                      : 'border-gray-300'
                     }`}
                   placeholder='Nhập họ và tên'
+                  aria-describedby={shouldShowError('name') && errors.name ? 'name-error' : undefined}
                 />
-                {errors.name && (
-                  <p className='text-red-500 text-sm mt-1'>{errors.name}</p>
+                {shouldShowError('name') && errors.name && (
+                  <p id='name-error' className='mt-1 text-sm text-red-600'>{errors.name}</p>
                 )}
               </div>
 
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Ngày sinh <span className='text-red-500'>*</span>
+                  Ngày sinh *
                 </label>
-                <input
-                  type='date'
-                  value={formData.date_of_birth}
-                  onChange={(e) =>
-                    handleInputChange('date_of_birth', e.target.value)
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.date_of_birth ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                />
-                {errors.date_of_birth && (
-                  <p className='text-red-500 text-sm mt-1'>
+                <div className='relative'>
+                  <Calendar className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
+                  <input
+                    type='date'
+                    value={formData.date_of_birth}
+                    onChange={(e) =>
+                      handleInputChange('date_of_birth', e.target.value)
+                    }
+                    onBlur={() => handleFieldBlur('date_of_birth')}
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('date_of_birth') && errors.date_of_birth
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                      }`}
+                    aria-describedby={shouldShowError('date_of_birth') && errors.date_of_birth ? 'dob-error' : undefined}
+                  />
+                </div>
+                {shouldShowError('date_of_birth') && errors.date_of_birth && (
+                  <p id='dob-error' className='mt-1 text-sm text-red-600'>
                     {errors.date_of_birth}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-1'>
-                  <Mail className='w-4 h-4' />
-                  Email <span className='text-red-500'>*</span>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
+                  Email *
                 </label>
-                <input
-                  type='email'
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder='example@email.com'
-                />
-                {errors.email && (
-                  <p className='text-red-500 text-sm mt-1'>{errors.email}</p>
+                <div className='relative'>
+                  <Mail className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
+                  <input
+                    type='email'
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    onBlur={() => handleFieldBlur('email')}
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('email') && errors.email
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                      }`}
+                    placeholder='example@email.com'
+                    aria-describedby={shouldShowError('email') && errors.email ? 'email-error' : undefined}
+                  />
+                </div>
+                {shouldShowError('email') && errors.email && (
+                  <p id='email-error' className='mt-1 text-sm text-red-600'>{errors.email}</p>
                 )}
               </div>
 
               <div>
-                <label className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-1'>
-                  <Phone className='w-4 h-4' />
-                  Số điện thoại <span className='text-red-500'>*</span>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
+                  Số điện thoại *
                 </label>
-                <input
-                  type='tel'
-                  value={formData.phone_number}
-                  onChange={(e) =>
-                    handleInputChange('phone_number', e.target.value)
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.phone_number ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder='0123456789'
-                />
-                {errors.phone_number && (
-                  <p className='text-red-500 text-sm mt-1'>
+                <div className='relative'>
+                  <Phone className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
+                  <input
+                    type='tel'
+                    value={formData.phone_number || ''}
+                    onChange={(e) =>
+                      handleInputChange('phone_number', e.target.value)
+                    }
+                    onBlur={() => handleFieldBlur('phone_number')}
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('phone_number') && errors.phone_number
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                      }`}
+                    placeholder='0123456789'
+                    aria-describedby={shouldShowError('phone_number') && errors.phone_number ? 'phone-error' : undefined}
+                  />
+                </div>
+                {shouldShowError('phone_number') && errors.phone_number && (
+                  <p id='phone-error' className='mt-1 text-sm text-red-600'>
                     {errors.phone_number}
                   </p>
                 )}
               </div>
 
-              <div className='md:col-span-2'>
-                <label className='text-sm font-medium text-gray-700 mb-2 flex items-center gap-1'>
-                  <MapPin className='w-4 h-4' />
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Địa chỉ
                 </label>
-                <textarea
-                  value={formData.bio}
-                  onChange={(e) => handleInputChange('bio', e.target.value)}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
-                  rows={2}
-                  placeholder='Nhập địa chỉ'
-                />
+                <div className='relative'>
+                  <MapPin className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4' />
+                  <input
+                    type='text'
+                    value={formData.address || ''}
+                    onChange={(e) =>
+                      handleInputChange('address', e.target.value)
+                    }
+                    className='w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    placeholder='Nhập địa chỉ'
+                  />
+                </div>
               </div>
 
               {/* Password */}
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Mật khẩu <span className='text-red-500'>*</span>
+                  Mật khẩu *
                 </label>
                 <input
                   type='password'
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.password ? 'border-red-500' : 'border-gray-300'
+                  onBlur={() => handleFieldBlur('password')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('password') && errors.password
+                      ? 'border-red-500'
+                      : 'border-gray-300'
                     }`}
                   placeholder='Nhập mật khẩu (tối thiểu 6 ký tự)'
+                  aria-describedby={shouldShowError('password') && errors.password ? 'password-error' : undefined}
                 />
-                {errors.password && (
-                  <p className='text-red-500 text-sm mt-1'>{errors.password}</p>
+                {shouldShowError('password') && errors.password && (
+                  <p id='password-error' className='mt-1 text-sm text-red-600'>{errors.password}</p>
                 )}
               </div>
 
@@ -395,23 +503,17 @@ export default function CreateStudentModal({
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Họ tên
+                  Tên người liên hệ
                 </label>
                 <input
                   type='text'
-                  value={formData.parent_name}
+                  value={formData.parent_name || ''}
                   onChange={(e) =>
                     handleInputChange('parent_name', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.parent_name ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                   placeholder='Tên người liên hệ'
                 />
-                {errors.parent_name && (
-                  <p className='text-red-500 text-sm mt-1'>
-                    {errors.parent_name}
-                  </p>
-                )}
               </div>
 
               <div>
@@ -420,19 +522,13 @@ export default function CreateStudentModal({
                 </label>
                 <input
                   type='tel'
-                  value={formData.parent_phone}
+                  value={formData.parent_phone || ''}
                   onChange={(e) =>
                     handleInputChange('parent_phone', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.parent_phone ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                   placeholder='0123456789'
                 />
-                {errors.parent_phone && (
-                  <p className='text-red-500 text-sm mt-1'>
-                    {errors.parent_phone}
-                  </p>
-                )}
               </div>
             </div>
           </div>
@@ -448,14 +544,23 @@ export default function CreateStudentModal({
             </button>
             <button
               type='submit'
-              disabled={isLoading || !isFormValid()}
-              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${isLoading || !isFormValid()
+              disabled={isSubmitting || !isFormValidForSubmit()}
+              className={`px-4 py-2 text-sm font-medium border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2 ${isSubmitting || !isFormValidForSubmit()
                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
-                  : 'bg-teal-600 hover:bg-teal-700 text-white'
+                  : 'text-white bg-blue-600 hover:bg-blue-700'
                 }`}
             >
-              <User className='w-4 h-4' />
-              {isLoading ? 'Đang tạo...' : 'Thêm học viên'}
+              {isSubmitting ? (
+                <>
+                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                  <span>Đang tạo...</span>
+                </>
+              ) : (
+                <>
+                  <Users className='h-4 w-4' />
+                  <span>Tạo học viên</span>
+                </>
+              )}
             </button>
           </div>
         </form>

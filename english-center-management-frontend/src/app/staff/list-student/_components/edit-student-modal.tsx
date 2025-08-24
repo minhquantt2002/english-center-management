@@ -105,13 +105,8 @@ export default function EditStudentModal({
         newErrors.phone_number = 'Số điện thoại không hợp lệ';
       }
 
-      if (!data.parent_name?.trim()) {
-        newErrors.parent_name = 'Tên phụ huynh là bắt buộc';
-      }
 
-      if (!data.parent_phone?.trim()) {
-        newErrors.parent_phone = 'Số điện thoại phụ huynh là bắt buộc';
-      } else if (!/^[0-9]{10,11}$/.test(data.parent_phone.replace(/\s/g, ''))) {
+      if (!/^[0-9]{10,11}$/.test(data.parent_phone.replace(/\s/g, ''))) {
         newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
       }
 
@@ -127,8 +122,8 @@ export default function EditStudentModal({
         email: student.email || '',
         phone_number: student.phone_number || '',
         date_of_birth: student.date_of_birth
-        ? new Date(student.date_of_birth).toISOString().split('T')[0] // yyyy-mm-dd
-        : '',
+          ? new Date(student.date_of_birth).toISOString().split('T')[0] // yyyy-mm-dd
+          : '',
         input_level: student.input_level || 'A1',
         bio: student.bio || '',
         parent_name: student.parent_name || '',
@@ -166,14 +161,6 @@ export default function EditStudentModal({
       newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
     }
 
-    if (!formData.parent_name.trim()) {
-      newErrors.parent_name = 'Tên người liên hệ khẩn cấp là bắt buộc';
-    }
-
-    if (!formData.parent_phone.trim()) {
-      newErrors.parent_phone =
-        'Số điện thoại người liên hệ khẩn cấp là bắt buộc';
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -467,11 +454,10 @@ export default function EditStudentModal({
             <button
               type='submit'
               disabled={isLoading || !isFormValid()}
-              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${
-                isLoading || !isFormValid()
+              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${isLoading || !isFormValid()
                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
                   : 'bg-teal-600 hover:bg-teal-700 text-white'
-              }`}
+                }`}
             >
               <Save className='w-4 h-4' />
               {isLoading ? 'Đang cập nhật...' : 'Cập nhật học viên'}
