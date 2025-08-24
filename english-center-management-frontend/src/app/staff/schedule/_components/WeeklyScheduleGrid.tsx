@@ -26,12 +26,10 @@ const WeeklyScheduleGrid: React.FC<WeeklyScheduleGridProps> = ({
 
   // Khung giờ học
   const timeSlots = [
-    { start: '08:00', end: '09:30', label: '08:00 - 09:30' },
-    { start: '09:45', end: '11:15', label: '09:45 - 11:15' },
-    { start: '13:30', end: '15:00', label: '13:30 - 15:00' },
-    { start: '15:15', end: '16:45', label: '15:15 - 16:45' },
-    { start: '17:00', end: '18:30', label: '17:00 - 18:30' },
-    { start: '18:45', end: '20:15', label: '18:45 - 20:15' },
+    { start: '14:00', end: '16:00', label: '14:00 - 16:00' },
+    { start: '16:00', end: '18:00', label: '16:00 - 18:00' },
+    { start: '18:00', end: '20:00', label: '18:00 - 20:00' },
+    { start: '20:00', end: '22:00', label: '20:00 - 22:00' },
   ];
 
   // Lấy lịch học cho một ngày và khung giờ cụ thể
@@ -77,7 +75,10 @@ const WeeklyScheduleGrid: React.FC<WeeklyScheduleGridProps> = ({
         >
           {/* Time Slot */}
           <div className='p-4 font-medium text-gray-600 border-r border-gray-200 flex items-center'>
-            <Clock size={16} className='mr-2 text-gray-400' />
+            <Clock
+              size={16}
+              className='mr-2 text-gray-400'
+            />
             {timeSlot.label}
           </div>
 
@@ -102,14 +103,20 @@ const WeeklyScheduleGrid: React.FC<WeeklyScheduleGridProps> = ({
                             {classroom?.class_name || 'N/A'}
                           </div>
                           <div className='text-cyan-600 flex items-center mt-1'>
-                            <Users size={12} className='mr-1' />
+                            <Users
+                              size={12}
+                              className='mr-1'
+                            />
                             <span className='truncate'>
                               {classroom?.teacher?.name || 'N/A'}
                             </span>
                           </div>
                           {classroom?.room && (
                             <div className='text-cyan-600 flex items-center mt-1'>
-                              <MapPin size={12} className='mr-1' />
+                              <MapPin
+                                size={12}
+                                className='mr-1'
+                              />
                               <span className='truncate'>{classroom.room}</span>
                             </div>
                           )}

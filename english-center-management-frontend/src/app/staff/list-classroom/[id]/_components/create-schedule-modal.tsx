@@ -38,12 +38,10 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
   ];
 
   const timeSlots = [
-    { start: '08:00', end: '09:30' },
-    { start: '09:45', end: '11:15' },
-    { start: '13:30', end: '15:00' },
-    { start: '15:15', end: '16:45' },
-    { start: '17:00', end: '18:30' },
-    { start: '18:45', end: '20:15' },
+    { start: '14:00', end: '16:00' },
+    { start: '16:00', end: '18:00' },
+    { start: '18:00', end: '20:00' },
+    { start: '20:00', end: '22:00' },
   ];
 
   const handleInputChange = (field: keyof ScheduleCreate, value: string) => {

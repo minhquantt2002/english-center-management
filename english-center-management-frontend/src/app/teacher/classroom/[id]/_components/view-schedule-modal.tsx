@@ -45,13 +45,10 @@ export default function ViewScheduleModal({
   }, [getClassroomSchedules]);
 
   const timeSlots = [
-    { id: '1', startTime: '07:00', endTime: '08:30', label: '07:00 - 08:30' },
-    { id: '2', startTime: '08:30', endTime: '10:00', label: '08:30 - 10:00' },
-    { id: '3', startTime: '10:00', endTime: '12:00', label: '10:00 - 12:00' }, // Updated for 10-12 class
     { id: '4', startTime: '14:00', endTime: '16:00', label: '14:00 - 16:00' }, // Updated for 14-16 class
     { id: '5', startTime: '16:00', endTime: '18:00', label: '16:00 - 18:00' }, // Updated for 16-18 classes
     { id: '6', startTime: '18:00', endTime: '20:00', label: '18:00 - 20:00' }, // Updated for 18-20 class
-    { id: '7', startTime: '20:00', endTime: '21:30', label: '20:00 - 21:30' },
+    { id: '7', startTime: '20:00', endTime: '22:00', label: '20:00 - 22:00' },
   ];
 
   const dayNames = {

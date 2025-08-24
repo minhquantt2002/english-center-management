@@ -23,8 +23,8 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
   const [formData, setFormData] = useState<ScheduleCreate>({
     class_id: '',
     weekday: 'monday' as Weekday,
-    start_time: '08:00',
-    end_time: '09:30',
+    start_time: '',
+    end_time: '',
   });
 
   const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
@@ -44,12 +44,10 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
   ];
 
   const timeSlots = [
-    { start: '08:00', end: '09:30' },
-    { start: '09:45', end: '11:15' },
-    { start: '13:30', end: '15:00' },
-    { start: '15:15', end: '16:45' },
-    { start: '17:00', end: '18:30' },
-    { start: '18:45', end: '20:15' },
+    { start: '14:00', end: '16:00' },
+    { start: '16:00', end: '18:00' },
+    { start: '18:00', end: '20:00' },
+    { start: '20:00', end: '22:00' },
   ];
 
   useEffect(() => {
@@ -135,8 +133,8 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
     setFormData({
       class_id: '',
       weekday: 'monday' as Weekday,
-      start_time: '08:00',
-      end_time: '09:30',
+      start_time: '',
+      end_time: '',
     });
     setErrors({});
     onClose();
@@ -164,7 +162,10 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className='p-6 space-y-4'>
+        <form
+          onSubmit={handleSubmit}
+          className='p-6 space-y-4'
+        >
           {/* Classroom Selection */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>
@@ -179,7 +180,10 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
             >
               <option value=''>Chọn lớp học</option>
               {classrooms.map((classroom) => (
-                <option key={classroom.id} value={classroom.id}>
+                <option
+                  key={classroom.id}
+                  value={classroom.id}
+                >
                   {classroom.class_name} - {classroom.teacher?.name || 'N/A'}
                 </option>
               ))}
@@ -202,7 +206,10 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
               }`}
             >
               {weekdays.map((day) => (
-                <option key={day.value} value={day.value}>
+                <option
+                  key={day.value}
+                  value={day.value}
+                >
                   {day.label}
                 </option>
               ))}
@@ -230,7 +237,10 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
                       : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
-                  <Clock size={14} className='inline mr-1' />
+                  <Clock
+                    size={14}
+                    className='inline mr-1'
+                  />
                   {slot.start} - {slot.end}
                 </button>
               ))}
