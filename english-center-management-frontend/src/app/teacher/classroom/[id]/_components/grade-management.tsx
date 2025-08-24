@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { EnrollmentNested } from '../../../../../types/teacher';
 import { useTeacherApi } from '../../../_hooks/use-api';
 import { toast } from 'react-toastify';
+import { Save } from 'lucide-react';
 
 export const skillMapping = {
   listening: 'Nghe',
@@ -19,19 +20,41 @@ interface StudentScore {
   feedback: string;
 }
 
+export const LRSkillBand = {
+  listening: 495,
+  reading: 495,
+  total: 990,
+};
+
+export const LSRWSkillBand = {
+  listening: 200,
+  reading: 200,
+  speaking: 200,
+  writing: 200,
+  total: 1000,
+};
+
 const GradeManagement: React.FC<{
   isFullSkills: boolean;
   enrollments: EnrollmentNested[];
 }> = ({ isFullSkills, enrollments }) => {
   const { updateScore } = useTeacherApi();
   const [students, setStudents] = useState<StudentScore[]>([]);
+  const [originalScores, setOriginalScores] = useState<StudentScore[]>([]);
   const [isLoading, setIsLoading] = useState<{ [key: number]: boolean }>({});
   const [searchTerm, setSearchTerm] = useState('');
 
-  const [skills, setSkills] = useState(
-    isFullSkills
-      ? ['listening', 'speaking', 'reading', 'writing']
-      : ['listening', 'reading']
+  const skills = useMemo(
+    () =>
+      isFullSkills
+        ? ['listening', 'speaking', 'reading', 'writing']
+        : ['listening', 'reading'],
+    [isFullSkills]
+  );
+
+  const selectedSkillBands = useMemo(
+    () => (!isFullSkills ? LRSkillBand : LSRWSkillBand),
+    [isFullSkills]
   );
 
   useEffect(() => {
@@ -44,6 +67,7 @@ const GradeManagement: React.FC<{
       feedback: enrollment.score[0]?.feedback ?? '',
     }));
     setStudents(initialStudents);
+    setOriginalScores(initialStudents);
   }, [enrollments]);
 
   // Filter students based on search term
@@ -77,14 +101,50 @@ const GradeManagement: React.FC<{
     };
   }, [students, skills]);
 
+  // Check if a student's score has been modified
+  const hasStudentScoreChanged = (scoreId: string) => {
+    const current = students.find((s) => s.id === scoreId);
+    const original = originalScores.find((s) => s.id === scoreId);
+
+    if (!current || !original) return false;
+
+    return (
+      current.listening !== original.listening ||
+      current.speaking !== original.speaking ||
+      current.reading !== original.reading ||
+      current.writing !== original.writing ||
+      current.feedback !== original.feedback
+    );
+  };
+
+  // Calculate total score for a student
+  const calculateTotalScore = (student: StudentScore) => {
+    const skillScores = skills
+      .map((skill) => student[skill as keyof StudentScore])
+      .filter((score) => score !== null && score !== undefined) as number[];
+
+    if (skillScores.length === 0) return null;
+
+    const total = skillScores.reduce((sum, score) => sum + score, 0);
+    return Math.round(total / skillScores.length); // Return as integer
+  };
+
   const updateStudentScore = (
     studentIndex: number,
     skill: string,
     value: string
   ) => {
-    const numValue = value === '' ? null : parseInt(value);
-    if (numValue !== null && (numValue < 0 || numValue > 10)) return;
+    // Only allow empty string or integers
+    if (value !== '' && (!/^\d+$/.test(value) || isNaN(parseInt(value)))) {
+      return;
+    }
 
+    const numValue = value === '' ? null : parseInt(value);
+    if (
+      numValue !== null &&
+      (numValue < 0 || numValue > selectedSkillBands[skill])
+    )
+      return;
     setStudents((prev) =>
       prev.map((student, index) =>
         index === studentIndex ? { ...student, [skill]: numValue } : student
@@ -120,6 +180,11 @@ const GradeManagement: React.FC<{
         reading: currentStudent.reading,
         speaking: currentStudent.speaking,
       });
+
+      // Update original scores after successful save
+      setOriginalScores((prev) =>
+        prev.map((s) => (s.id === scoreId ? { ...currentStudent } : s))
+      );
 
       toast.success(`Cập nhật điểm thành công cho ${enrollment.student.name}!`);
     } catch (error) {
@@ -204,6 +269,8 @@ const GradeManagement: React.FC<{
           if (!student) return null;
 
           const completion = getStudentCompletion(student);
+          const hasChanged = hasStudentScoreChanged(student.id);
+          const totalScore = calculateTotalScore(student);
 
           return (
             <div
@@ -220,6 +287,11 @@ const GradeManagement: React.FC<{
                       <p className='text-gray-600 text-sm'>
                         {enrollment.student.email}
                       </p>
+                      {totalScore !== null && (
+                        <div className='ml-4 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium'>
+                          Tổng điểm: {totalScore}/{selectedSkillBands.total}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -229,10 +301,16 @@ const GradeManagement: React.FC<{
                     className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
                       isLoading[originalIndex]
                         ? 'bg-gray-400 cursor-not-allowed'
+                        : !hasChanged
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : completion === 100
                         ? 'bg-green-500 hover:bg-green-600'
                         : 'bg-blue-500 hover:bg-blue-600'
-                    } text-white shadow-sm hover:shadow-md`}
+                    } ${
+                      !hasChanged && !isLoading[student.id]
+                        ? 'text-gray-500'
+                        : 'text-white'
+                    }`}
                   >
                     {isLoading[originalIndex] ? (
                       <div className='flex items-center'>
@@ -240,7 +318,10 @@ const GradeManagement: React.FC<{
                         Đang lưu...
                       </div>
                     ) : (
-                      'Cập nhật'
+                      <>
+                        <Save className='w-4 h-4' />
+                        {hasChanged ? 'Cập nhật' : 'Đã lưu'}
+                      </>
                     )}
                   </button>
                 </div>
@@ -294,8 +375,8 @@ const GradeManagement: React.FC<{
                         <input
                           type='number'
                           min='0'
-                          max='10'
-                          step='0.1'
+                          max={selectedSkillBands[skill]}
+                          step='1'
                           value={student[skill] ?? ''}
                           onChange={(e) =>
                             updateStudentScore(
@@ -304,7 +385,7 @@ const GradeManagement: React.FC<{
                               e.target.value
                             )
                           }
-                          placeholder='0-10'
+                          placeholder={`0-${selectedSkillBands[skill]}`}
                           className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all'
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
@@ -325,7 +406,7 @@ const GradeManagement: React.FC<{
                         {student[skill] !== null &&
                           student[skill] !== undefined && (
                             <div className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm'>
-                              /10
+                              /{selectedSkillBands[skill]}
                             </div>
                           )}
                       </div>

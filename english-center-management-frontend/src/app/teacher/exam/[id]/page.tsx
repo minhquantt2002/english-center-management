@@ -24,9 +24,24 @@ export const skillMapping = {
   writing: 'Viết',
 };
 
+export const LRSkillBand = {
+  listening: 495,
+  reading: 495,
+  total: 990,
+};
+
+export const LSRWSkillBand = {
+  listening: 200,
+  reading: 200,
+  speaking: 200,
+  writing: 200,
+  total: 1000,
+};
+
 const ExamDetailPage = () => {
   const { id: examId } = useParams<{ id: string }>();
   const [scores, setScores] = useState<StudentScore[]>([]);
+  const [originalScores, setOriginalScores] = useState<StudentScore[]>([]);
   const [exam, setExam] = useState<ExamResponse | null>(null);
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,6 +52,15 @@ const ExamDetailPage = () => {
         : ['listening', 'reading', 'speaking', 'writing'],
     [exam?.classroom.course_level]
   );
+
+  const selectedSkillBands = useMemo(
+    () =>
+      ['A1', 'A2', 'B1', 'B2'].includes(exam?.classroom.course_level)
+        ? LRSkillBand
+        : LSRWSkillBand,
+    [exam?.classroom.course_level]
+  );
+
   const { getExamById } = useExam();
   const { updateScore } = useTeacherApi();
 
@@ -45,6 +69,7 @@ const ExamDetailPage = () => {
       const exam = await getExamById(examId);
       if (exam) {
         setScores(exam?.scores ?? []);
+        setOriginalScores(exam?.scores ?? []);
       }
       setExam(exam);
     };
@@ -81,13 +106,50 @@ const ExamDetailPage = () => {
     };
   }, [scores, selectedSkills]);
 
+  // Check if a student's score has been modified
+  const hasStudentScoreChanged = (scoreId: string) => {
+    const current = scores.find((s) => s.id === scoreId);
+    const original = originalScores.find((s) => s.id === scoreId);
+
+    if (!current || !original) return false;
+
+    return (
+      current.listening !== original.listening ||
+      current.speaking !== original.speaking ||
+      current.reading !== original.reading ||
+      current.writing !== original.writing ||
+      current.feedback !== original.feedback
+    );
+  };
+
+  // Calculate total score for a student
+  const calculateTotalScore = (student: StudentScore) => {
+    const skillScores = selectedSkills
+      .map((skill) => student[skill as keyof StudentScore])
+      .filter((score) => score !== null && score !== undefined) as number[];
+
+    if (skillScores.length === 0) return null;
+
+    const total = skillScores.reduce((sum, score) => sum + score, 0);
+    return Math.round(total / skillScores.length); // Return as integer
+  };
+
   const updateStudentScore = (
     scoreId: string,
     skill: string,
     value: string
   ) => {
-    const numValue = value === '' ? null : parseFloat(value);
-    if (numValue !== null && (numValue < 0 || numValue > 10)) return;
+    // Only allow empty string or integers
+    if (value !== '' && (!/^\d+$/.test(value) || isNaN(parseInt(value)))) {
+      return;
+    }
+
+    const numValue = value === '' ? null : parseInt(value);
+    if (
+      numValue !== null &&
+      (numValue < 0 || numValue > selectedSkillBands[skill])
+    )
+      return;
 
     setScores((prev) =>
       prev.map((student) =>
@@ -120,6 +182,12 @@ const ExamDetailPage = () => {
         writing: score.writing,
         feedback: score.feedback,
       });
+
+      // Update original scores after successful save
+      setOriginalScores((prev) =>
+        prev.map((s) => (s.id === scoreId ? { ...score } : s))
+      );
+
       toast.success(`Cập nhật điểm thành công!`);
     } catch (error) {
       console.error('Error saving score:', error);
@@ -247,6 +315,8 @@ const ExamDetailPage = () => {
       <div className='space-y-4'>
         {filteredStudents.map((score) => {
           const completion = getStudentCompletion(score);
+          const hasChanged = hasStudentScoreChanged(score.id);
+          const totalScore = calculateTotalScore(score);
 
           return (
             <div
@@ -261,19 +331,30 @@ const ExamDetailPage = () => {
                         {score.student.name} -
                       </h3>
                       <p className='text-gray-600'>{score.student.email}</p>
+                      {totalScore !== null && (
+                        <div className='ml-4 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium'>
+                          Tổng điểm: {totalScore}/{selectedSkillBands.total}
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   <button
                     onClick={() => saveStudentScore(score.id)}
-                    disabled={isLoading[score.id]}
+                    disabled={isLoading[score.id] || !hasChanged}
                     className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
                       isLoading[score.id]
                         ? 'bg-gray-400 cursor-not-allowed'
+                        : !hasChanged
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : completion === 100
                         ? 'bg-green-500 hover:bg-green-600'
                         : 'bg-blue-500 hover:bg-blue-600'
-                    } text-white shadow-sm hover:shadow-md`}
+                    } ${
+                      !hasChanged && !isLoading[score.id]
+                        ? 'text-gray-500'
+                        : 'text-white'
+                    } shadow-sm hover:shadow-md`}
                   >
                     {isLoading[score.id] ? (
                       <>
@@ -283,7 +364,7 @@ const ExamDetailPage = () => {
                     ) : (
                       <>
                         <Save className='w-4 h-4' />
-                        Cập nhật
+                        {hasChanged ? 'Cập nhật' : 'Đã lưu'}
                       </>
                     )}
                   </button>
@@ -318,19 +399,19 @@ const ExamDetailPage = () => {
                         <input
                           type='number'
                           min='0'
-                          max='10'
-                          step='0.1'
+                          max={selectedSkillBands[skill]}
+                          step='1'
                           value={score[skill] ?? ''}
                           onChange={(e) =>
                             updateStudentScore(score.id, skill, e.target.value)
                           }
-                          placeholder='0-10'
+                          placeholder={`0-${selectedSkillBands[skill]}`}
                           className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all'
                         />
                         {score[skill] !== null &&
                           score[skill] !== undefined && (
                             <div className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm'>
-                              /10
+                              /{selectedSkillBands[skill]}
                             </div>
                           )}
                       </div>
