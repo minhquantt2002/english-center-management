@@ -21,15 +21,15 @@ def get_user_by_email(db: Session, email: str) -> Optional[User]:
 
 def get_users(db: Session) -> List[User]:
     """Get users with pagination"""
-    return db.query(User).all()
+    return db.query(User).order_by(User.created_at.desc()).all()
 
 def get_all_users(db: Session) -> List[User]:
     """Get all users without pagination"""
-    return db.query(User).all()
+    return db.query(User).order_by(User.created_at.desc()).all()
 
 def get_users_by_role(db: Session, role_name: str) -> List[User]:
-    """Get users by role name"""    
-    return db.query(User).filter(User.role_name == role_name).all()
+    """Get users by role name"""
+    return db.query(User).filter(User.role_name == role_name).order_by(User.created_at.desc()).all()
 
 def create_user(db: Session, user_data: UserCreate, hashed_password: str) -> User:
     """Create new user with hashed password"""

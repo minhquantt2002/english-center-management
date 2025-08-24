@@ -33,6 +33,7 @@ export interface StudentCreate {
   parent_name?: string;
   parent_phone?: string;
   role_name: UserRole;
+  address?: string;
   bio?: string;
   date_of_birth?: string;
   phone_number?: string;
@@ -45,6 +46,7 @@ export interface StudentUpdate {
   input_level?: string;
   parent_name?: string;
   parent_phone?: string;
+  address?: string;
   status?: StudentStatus;
   bio?: string;
   date_of_birth?: string;

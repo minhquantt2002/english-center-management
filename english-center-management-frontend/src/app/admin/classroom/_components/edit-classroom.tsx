@@ -29,6 +29,7 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
     course_id: '',
     teacher_id: '',
     start_date: '',
+    status: 'active',
     end_date: '',
   });
 
@@ -44,41 +45,33 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
     return Object.values(errors).some(error => error !== undefined && error !== '');
   };
 
-  // Validate form in real-time
-  const validateFormRealtime = (data: ClassroomUpdate) => {
-    setErrors(() => {
-      const newErrors: Record<string, string> = {};
+  // Unified validation function
+  const validate = (data: ClassroomUpdate): Record<string, string> => {
+    const newErrors: Record<string, string> = {};
 
-      if (!data.class_name.trim()) {
-        newErrors.class_name = 'Tên lớp học là bắt buộc';
+    if (!data.class_name.trim()) {
+      newErrors.class_name = 'Tên lớp học là bắt buộc';
+    }
+    if (!data.course_id) {
+      newErrors.course_id = 'Vui lòng chọn khóa học';
+    }
+    if (!data.teacher_id) {
+      newErrors.teacher_id = 'Vui lòng chọn giáo viên';
+    }
+    if (!data.start_date) {
+      newErrors.start_date = 'Ngày bắt đầu là bắt buộc';
+    }
+    if (!data.end_date) {
+      newErrors.end_date = 'Ngày kết thúc là bắt buộc';
+    }
+    if (data.start_date && data.end_date) {
+      const startDate = new Date(data.start_date);
+      const endDate = new Date(data.end_date);
+      if (startDate >= endDate) {
+        newErrors.end_date = 'Ngày kết thúc phải sau ngày bắt đầu';
       }
-
-      if (!data.course_id) {
-        newErrors.course_id = 'Vui lòng chọn khóa học';
-      }
-
-      if (!data.teacher_id) {
-        newErrors.teacher_id = 'Vui lòng chọn giáo viên';
-      }
-
-      if (!data.start_date) {
-        newErrors.start_date = 'Ngày bắt đầu là bắt buộc';
-      }
-
-      if (!data.end_date) {
-        newErrors.end_date = 'Ngày kết thúc là bắt buộc';
-      }
-
-      if (data.start_date && data.end_date) {
-        const startDate = new Date(data.start_date);
-        const endDate = new Date(data.end_date);
-        if (startDate >= endDate) {
-          newErrors.end_date = 'Ngày kết thúc phải sau ngày bắt đầu';
-        }
-      }
-
-      return newErrors;
-    });
+    }
+    return newErrors;
   };
 
   useEffect(() => {
@@ -97,10 +90,11 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
           ? classroom.start_date.split('T')[0]
           : '',
         end_date: classroom.end_date ? classroom.end_date.split('T')[0] : '',
+        status: classroom.status || 'active',
       };
-      setFormData(initialData);
+      setFormData(initialData as ClassroomUpdate);
       // Validate initial data
-      validateFormRealtime(initialData);
+      setErrors(validate(initialData as ClassroomUpdate));
     }
   }, [classroom, isOpen]);
 
@@ -129,50 +123,16 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
     };
 
     setFormData(newFormData);
-
     // Validate form in real-time
-    validateFormRealtime(newFormData);
-  };
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.class_name.trim()) {
-      newErrors.class_name = 'Tên lớp học là bắt buộc';
-    }
-
-    if (!formData.course_id) {
-      newErrors.course_id = 'Vui lòng chọn khóa học';
-    }
-
-    if (!formData.teacher_id) {
-      newErrors.teacher_id = 'Vui lòng chọn giáo viên';
-    }
-
-    if (!formData.start_date) {
-      newErrors.start_date = 'Ngày bắt đầu là bắt buộc';
-    }
-
-    if (!formData.end_date) {
-      newErrors.end_date = 'Ngày kết thúc là bắt buộc';
-    }
-
-    if (formData.start_date && formData.end_date) {
-      const startDate = new Date(formData.start_date);
-      const endDate = new Date(formData.end_date);
-      if (startDate >= endDate) {
-        newErrors.end_date = 'Ngày kết thúc phải sau ngày bắt đầu';
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(validate(newFormData));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const validationErrors = validate(formData);
+    setErrors(validationErrors);
 
-    if (!validateForm()) {
+    if (Object.keys(validationErrors).length > 0) {
       return;
     }
 
@@ -343,6 +303,22 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
                 <p className='text-red-500 text-sm mt-1'>{errors.end_date}</p>
               )}
             </div>
+          </div>
+             {/* Status Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Trạng thái <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent border-gray-300"
+            >
+              <option value="active">Đang hoạt động</option>
+              <option value="completed">Đã hoàn thành</option>
+              <option value="cancelled">Đã hủy</option>
+            </select>
           </div>
 
           {/* Current Students Info */}

@@ -11,15 +11,15 @@ def get_course(db: Session, course_id: UUID) -> Optional[Course]:
 
 def get_courses(db: Session) -> List[Course]:
     """Get courses with pagination"""
-    return db.query(Course).all()
+    return db.query(Course).order_by(Course.created_at.desc()).all()
 
 def get_all_courses(db: Session) -> List[Course]:
     """Get all courses without pagination"""
-    return db.query(Course).all()
+    return db.query(Course).order_by(Course.created_at.desc()).all()
 
 def get_courses_by_level(db: Session, level: str) -> List[Course]:
     """Get courses by level"""
-    return db.query(Course).filter(Course.level == level).all()
+    return db.query(Course).filter(Course.level == level).order_by(Course.created_at.desc()).all()
 
 def create_course(db: Session, course_data: CourseCreate) -> Course:
     """Create new course"""
