@@ -21,7 +21,9 @@ import {
 import CreateTeacherModal, {
   specializations,
 } from './_components/create-teacher';
-import ViewTeacherModal from './_components/view-teacher';
+import ViewTeacherModal, {
+  getSpecializationLabel,
+} from './_components/view-teacher';
 import EditTeacherModal from './_components/edit-teacher';
 import { useTeacherApi } from '../_hooks';
 import { toast } from 'react-toastify';
@@ -58,8 +60,7 @@ const TeacherManagement = () => {
     id: teacher.id,
     name: teacher.name,
     specialization:
-      specializations.find((s) => s.value === teacher.specialization)?.label ||
-      '',
+      getSpecializationLabel(teacher.specialization) || 'Chưa cập nhật',
     email: teacher.email,
     phone: teacher.phone_number,
     assignedClasses: teacher.taught_classes || [],
@@ -127,13 +128,10 @@ const TeacherManagement = () => {
   return (
     <>
       {/* Header */}
-      <div className='mb-8'>
+      <div className='mb-4'>
         <div className='flex items-center gap-4 mb-4'>
-          <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg'>
-            <GraduationCap className='w-6 h-6 text-white' />
-          </div>
           <div>
-            <h1 className='text-3xl font-bold text-gray-900'>
+            <h1 className='text-2xl font-bold text-gray-900'>
               Quản lý giáo viên
             </h1>
             <p className='text-gray-600 mt-1'>
@@ -143,7 +141,7 @@ const TeacherManagement = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
           <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
             <div className='flex items-center justify-between'>
               <div>
@@ -182,7 +180,7 @@ const TeacherManagement = () => {
       </div>
 
       {/* Filters and Search */}
-      <div className='bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-8'>
+      <div className='bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-6'>
         <div className='flex flex-col lg:flex-row gap-4'>
           {/* Search */}
           <div className='flex-1 relative'>
@@ -226,7 +224,7 @@ const TeacherManagement = () => {
                   Chuyên môn
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
-                  Lớp đang dạy
+                  Lớp đã phân công
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                   Thao tác

@@ -22,7 +22,6 @@ export const levels: { value: CourseLevel; label: string }[] = [
   { value: 'C1', label: 'C1 - Nâng cao' },
 ];
 
-
 export default function CreateCourseModal({
   isOpen,
   onClose,
@@ -43,7 +42,9 @@ export default function CreateCourseModal({
 
   // Check if form has any errors
   const hasErrors = () => {
-    return Object.values(errors).some(error => error !== undefined && error !== '');
+    return Object.values(errors).some(
+      (error) => error !== undefined && error !== ''
+    );
   };
 
   // Validate form in real-time
@@ -70,7 +71,6 @@ export default function CreateCourseModal({
       if (!data.level) {
         newErrors.level = 'Cấp độ khóa học là bắt buộc';
       }
-
 
       return newErrors;
     });
@@ -174,7 +174,10 @@ export default function CreateCourseModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className='p-6 space-y-6'>
+        <form
+          onSubmit={handleSubmit}
+          className='p-6 space-y-6'
+        >
           {/* Basic Information */}
           <div>
             <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
@@ -215,7 +218,10 @@ export default function CreateCourseModal({
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
                 >
                   {levels.map((level) => (
-                    <option key={level.value} value={level.value}>
+                    <option
+                      key={level.value}
+                      value={level.value}
+                    >
                       {level.label}
                     </option>
                   ))}
@@ -243,39 +249,7 @@ export default function CreateCourseModal({
                   </p>
                 )}
               </div>
-            </div>
 
-            <div className='mt-4'>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Mô tả khóa học <span className='text-red-500'>*</span>
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) =>
-                  handleInputChange('description', e.target.value)
-                }
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                  errors.description ? 'border-red-500' : 'border-gray-300'
-                }`}
-                rows={3}
-                placeholder='Mô tả chi tiết về khóa học, mục tiêu học tập...'
-              />
-              {errors.description && (
-                <p className='text-red-500 text-sm mt-1'>
-                  {errors.description}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Pricing and Capacity */}
-          <div>
-            <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
-              <DollarSign className='w-5 h-5 text-teal-600' />
-              Học phí
-            </h3>
-
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Học phí (VND)
@@ -299,6 +273,28 @@ export default function CreateCourseModal({
                   <p className='text-red-500 text-sm mt-1'>{errors.price}</p>
                 )}
               </div>
+            </div>
+
+            <div className='mt-4'>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Mô tả khóa học <span className='text-red-500'>*</span>
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) =>
+                  handleInputChange('description', e.target.value)
+                }
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                  errors.description ? 'border-red-500' : 'border-gray-300'
+                }`}
+                rows={3}
+                placeholder='Mô tả chi tiết về khóa học, mục tiêu học tập...'
+              />
+              {errors.description && (
+                <p className='text-red-500 text-sm mt-1'>
+                  {errors.description}
+                </p>
+              )}
             </div>
           </div>
 

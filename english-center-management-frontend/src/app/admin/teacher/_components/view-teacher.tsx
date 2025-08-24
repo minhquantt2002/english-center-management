@@ -71,7 +71,7 @@ const getStatusText = (status: string) => {
   }
 };
 
-const getSpecializationLabel = (value: string) => {
+export const getSpecializationLabel = (value: string) => {
   const spec = specializations.find((s) => s.value === value);
   return spec ? spec.label : value;
 };
@@ -106,12 +106,12 @@ export default function ViewTeacherModal({
         </div>
 
         {/* Content */}
-        <div className='p-6 space-y-6'>
+        <div className='p-6 space-y-4'>
           {/* Teacher Header */}
           <div className='flex items-start gap-6 p-6 bg-gradient-to-r from-teal-50 to-blue-50 rounded-lg'>
             <div className='flex-shrink-0'>
               <img
-                className='h-24 w-24 rounded-full object-cover border-4 border-white shadow-lg'
+                className='h-16 w-16 rounded-full object-cover border-4 border-white shadow-lg'
                 src={
                   'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
                 }
@@ -119,12 +119,9 @@ export default function ViewTeacherModal({
               />
             </div>
             <div className='flex-1'>
-              <h3 className='text-2xl font-bold text-gray-900 mb-2'>
+              <h3 className='text-xl font-bold text-gray-900 mb-1'>
                 {teacher.name}
               </h3>
-              <p className='text-lg text-gray-600 mb-3'>
-                {getSpecializationLabel(teacher.specialization)}
-              </p>
               <div className='flex items-center gap-4 text-sm text-gray-600'>
                 <span className='flex items-center gap-1'>
                   <Mail className='w-4 h-4' />
@@ -216,28 +213,6 @@ export default function ViewTeacherModal({
             </div>
           </div>
 
-          {/* Additional Information */}
-          <div className='bg-white p-6 rounded-lg border border-gray-200'>
-            <h4 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
-              <FileText className='w-5 h-5 text-teal-600' />
-              Thông tin bổ sung
-            </h4>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <div>
-                <label className='text-sm font-medium text-gray-500'>
-                  Mã giáo viên
-                </label>
-                <p className='text-gray-900 font-mono'>{teacher.id}</p>
-              </div>
-              <div>
-                <label className='text-sm font-medium text-gray-500'>
-                  Vai trò
-                </label>
-                <p className='text-gray-900 capitalize'>Giáo viên</p>
-              </div>
-            </div>
-          </div>
-
           {/* Assigned Classes */}
           {teacher.taught_classes && teacher.taught_classes.length > 0 && (
             <div className='bg-white p-6 rounded-lg border border-gray-200'>
@@ -258,32 +233,6 @@ export default function ViewTeacherModal({
               </div>
             </div>
           )}
-
-          {/* Statistics */}
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-            <div className='bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-lg text-white'>
-              <div className='flex items-center justify-between'>
-                <div>
-                  <p className='text-blue-100 text-sm'>Tổng số lớp</p>
-                  <p className='text-2xl font-bold'>
-                    {teacher.taught_classes?.length || 0}
-                  </p>
-                </div>
-                <Users className='w-8 h-8 text-blue-200' />
-              </div>
-            </div>
-            <div className='bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-lg text-white'>
-              <div className='flex items-center justify-between'>
-                <div>
-                  <p className='text-green-100 text-sm'>Kinh nghiệm</p>
-                  <p className='text-2xl font-bold'>
-                    {teacher.experience_years || 0} năm
-                  </p>
-                </div>
-                <Clock className='w-8 h-8 text-green-200' />
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}

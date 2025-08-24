@@ -11,7 +11,7 @@ import {
   Phone,
   User,
   X,
-  Lock
+  Lock,
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { TeacherCreate } from '../../../../types/admin';
@@ -88,7 +88,9 @@ export default function CreateTeacherModal({
     date_of_birth: '',
     address: '',
   });
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>(
+    {}
+  );
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -100,16 +102,16 @@ export default function CreateTeacherModal({
     Partial<Record<keyof TeacherCreate, string>>
   >({});
 
-
   // Validation helpers for button logic (always validate)
   const isValidEmail = (email: string) => {
     return email.trim() !== '' && /\S+@\S+\.\S+/.test(email);
   };
 
   const isValidPhone = (phone: string) => {
-    return phone.trim() !== '' && /^[0-9]{10,11}$/.test(phone.replace(/\s/g, ''));
+    return (
+      phone.trim() !== '' && /^[0-9]{10,11}$/.test(phone.replace(/\s/g, ''))
+    );
   };
-
 
   const isValidDate = (date: string) => {
     if (!date) return false;
@@ -129,14 +131,16 @@ export default function CreateTeacherModal({
       formData.name.trim(),
       formData.email.trim(),
       formData.phone_number.trim(),
-      formData.date_of_birth
+      formData.date_of_birth,
     ];
-    const hasRequiredFields = requiredFields.every(field => field !== '' && field !== undefined);
+    const hasRequiredFields = requiredFields.every(
+      (field) => field !== '' && field !== undefined
+    );
     const hasValidFormats =
-
       isValidEmail(formData.email) &&
       isValidPhone(formData.phone_number) &&
-      isValidDate(formData.date_of_birth) && formData.name.trim().length > 0;
+      isValidDate(formData.date_of_birth) &&
+      formData.name.trim().length > 0;
     return hasRequiredFields && hasValidFormats;
   };
 
@@ -162,9 +166,7 @@ export default function CreateTeacherModal({
       } else if (field === 'phone_number') {
         if (!value.trim()) {
           newErrors.phone_number = 'Số điện thoại là bắt buộc';
-        } else if (
-          !/^[0-9]{10,11}$/.test(value.replace(/\s/g, ''))
-        ) {
+        } else if (!/^[0-9]{10,11}$/.test(value.replace(/\s/g, ''))) {
           newErrors.phone_number = 'Số điện thoại không hợp lệ';
         } else {
           delete newErrors.phone_number;
@@ -187,15 +189,15 @@ export default function CreateTeacherModal({
             today.getDate()
           );
           if (selectedDate > today) {
-            newErrors.date_of_birth = 'Ngày sinh không được vượt quá ngày hiện tại';
+            newErrors.date_of_birth =
+              'Ngày sinh không được vượt quá ngày hiện tại';
           } else if (selectedDate > minBirthDate) {
             newErrors.date_of_birth = 'Ngày sinh không được nhỏ hơn 18 tuổi';
           } else {
             delete newErrors.date_of_birth;
           }
         }
-      }
-      else if (field === 'password') {
+      } else if (field === 'password') {
         if (!value) {
           newErrors.password = 'Mật khẩu là bắt buộc';
         } else if (value.trim().length < 6) {
@@ -211,7 +213,13 @@ export default function CreateTeacherModal({
 
   // Validate all fields for form submission
   const validateAllFields = () => {
-    const fieldsToValidate = ['name', 'email', 'phone_number', 'specialization', 'date_of_birth'];
+    const fieldsToValidate = [
+      'name',
+      'email',
+      'phone_number',
+      'specialization',
+      'date_of_birth',
+    ];
     fieldsToValidate.forEach((field) => {
       validateFieldForDisplay(field, formData[field as keyof TeacherCreate]);
     });
@@ -232,7 +240,13 @@ export default function CreateTeacherModal({
     setFormSubmitted(true);
     setSubmitError('');
     // Mark all required fields as touched
-    const requiredFields = ['name', 'email', 'phone_number', 'specialization', 'date_of_birth'];
+    const requiredFields = [
+      'name',
+      'email',
+      'phone_number',
+      'specialization',
+      'date_of_birth',
+    ];
     setTouchedFields((prev) => {
       const newTouchedFields = { ...prev };
       requiredFields.forEach((field) => {
@@ -293,7 +307,6 @@ export default function CreateTeacherModal({
     if (shouldShowError(field)) {
       validateFieldForDisplay(field, value);
     }
-
   };
   // Cleanup on component unmount
   useEffect(() => {
@@ -324,7 +337,10 @@ export default function CreateTeacherModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className='p-6 space-y-6'>
+        <form
+          onSubmit={handleSubmit}
+          className='p-6 space-y-6'
+        >
           {/* Submit Error Message */}
           {submitError && (
             <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
@@ -348,13 +364,25 @@ export default function CreateTeacherModal({
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   onBlur={() => handleFieldBlur('name')}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${shouldShowError('name') && errors.name ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    shouldShowError('name') && errors.name
+                      ? 'border-red-500'
+                      : 'border-gray-300'
+                  }`}
                   placeholder='Nhập họ và tên'
-                  aria-describedby={shouldShowError('name') && errors.name ? 'name-error' : undefined}
+                  aria-describedby={
+                    shouldShowError('name') && errors.name
+                      ? 'name-error'
+                      : undefined
+                  }
                 />
                 {shouldShowError('name') && errors.name && (
-                  <p id='name-error' className='text-red-500 text-sm mt-1'>{errors.name}</p>
+                  <p
+                    id='name-error'
+                    className='text-red-500 text-sm mt-1'
+                  >
+                    {errors.name}
+                  </p>
                 )}
               </div>
 
@@ -368,13 +396,25 @@ export default function CreateTeacherModal({
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   onBlur={() => handleFieldBlur('email')}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${shouldShowError('email') && errors.email ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    shouldShowError('email') && errors.email
+                      ? 'border-red-500'
+                      : 'border-gray-300'
+                  }`}
                   placeholder='example@email.com'
-                  aria-describedby={shouldShowError('email') && errors.email ? 'email-error' : undefined}
+                  aria-describedby={
+                    shouldShowError('email') && errors.email
+                      ? 'email-error'
+                      : undefined
+                  }
                 />
                 {shouldShowError('email') && errors.email && (
-                  <p id='email-error' className='text-red-500 text-sm mt-1'>{errors.email}</p>
+                  <p
+                    id='email-error'
+                    className='text-red-500 text-sm mt-1'
+                  >
+                    {errors.email}
+                  </p>
                 )}
               </div>
 
@@ -390,13 +430,23 @@ export default function CreateTeacherModal({
                     handleInputChange('phone_number', e.target.value)
                   }
                   onBlur={() => handleFieldBlur('phone_number')}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${shouldShowError('phone_number') && errors.phone_number ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    shouldShowError('phone_number') && errors.phone_number
+                      ? 'border-red-500'
+                      : 'border-gray-300'
+                  }`}
                   placeholder='0123456789'
-                  aria-describedby={shouldShowError('phone_number') && errors.phone_number ? 'phone-error' : undefined}
+                  aria-describedby={
+                    shouldShowError('phone_number') && errors.phone_number
+                      ? 'phone-error'
+                      : undefined
+                  }
                 />
                 {shouldShowError('phone_number') && errors.phone_number && (
-                  <p id='phone-error' className='text-red-500 text-sm mt-1'>
+                  <p
+                    id='phone-error'
+                    className='text-red-500 text-sm mt-1'
+                  >
                     {errors.phone_number}
                   </p>
                 )}
@@ -415,15 +465,23 @@ export default function CreateTeacherModal({
                       handleInputChange('date_of_birth', e.target.value)
                     }
                     onBlur={() => handleFieldBlur('date_of_birth')}
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('date_of_birth') && errors.date_of_birth
-                      ? 'border-red-500'
-                      : 'border-gray-300'
-                      }`}
-                    aria-describedby={shouldShowError('date_of_birth') && errors.date_of_birth ? 'date-error' : undefined}
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      shouldShowError('date_of_birth') && errors.date_of_birth
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                    }`}
+                    aria-describedby={
+                      shouldShowError('date_of_birth') && errors.date_of_birth
+                        ? 'date-error'
+                        : undefined
+                    }
                   />
                 </div>
                 {shouldShowError('date_of_birth') && errors.date_of_birth && (
-                  <p id='date-error' className='mt-1 text-sm text-red-600'>
+                  <p
+                    id='date-error'
+                    className='mt-1 text-sm text-red-600'
+                  >
                     {errors.date_of_birth}
                   </p>
                 )}
@@ -449,7 +507,7 @@ export default function CreateTeacherModal({
                 </div>
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 flex my-2'>
+                <label className='text-sm font-medium text-gray-700 flex my-2'>
                   <Lock className=' h-4 w-4' />
                   Mật khẩu <span className='text-red-500'>*</span>
                 </label>
@@ -460,19 +518,26 @@ export default function CreateTeacherModal({
                     handleInputChange('password', e.target.value)
                   }
                   onBlur={() => handleFieldBlur('password')}
-                  className={`w-full pl-5 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('password') && errors.password
-                    ? 'border-red-500'
-                    : 'border-gray-300'
-                    }`}
+                  className={`w-full pl-5 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    shouldShowError('password') && errors.password
+                      ? 'border-red-500'
+                      : 'border-gray-300'
+                  }`}
                   placeholder='Nhập mật khẩu'
-                  aria-describedby={shouldShowError('password') && errors.password ? 'password-error' : undefined}
+                  aria-describedby={
+                    shouldShowError('password') && errors.password
+                      ? 'password-error'
+                      : undefined
+                  }
                 />
                 {shouldShowError('password') && errors.password && (
-                  <p id='password-error' className='text-red-500 text-sm mt-1'>
+                  <p
+                    id='password-error'
+                    className='text-red-500 text-sm mt-1'
+                  >
                     {errors.password}
                   </p>
                 )}
-
               </div>
             </div>
           </div>
@@ -494,11 +559,15 @@ export default function CreateTeacherModal({
                   onChange={(e) =>
                     handleInputChange('specialization', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.specialization ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    errors.specialization ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 >
                   {specializations.map((spec) => (
-                    <option key={spec.value} value={spec.value}>
+                    <option
+                      key={spec.value}
+                      value={spec.value}
+                    >
                       {spec.label}
                     </option>
                   ))}
@@ -519,11 +588,15 @@ export default function CreateTeacherModal({
                   onChange={(e) =>
                     handleInputChange('education', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.education ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    errors.education ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 >
                   {qualifications.map((qual) => (
-                    <option key={qual.value} value={qual.value}>
+                    <option
+                      key={qual.value}
+                      value={qual.value}
+                    >
                       {qual.label}
                     </option>
                   ))}
@@ -548,13 +621,17 @@ export default function CreateTeacherModal({
                       Number(e.target.value)
                     )
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.experience_years
-                    ? 'border-red-500'
-                    : 'border-gray-300'
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    errors.experience_years
+                      ? 'border-red-500'
+                      : 'border-gray-300'
+                  }`}
                 >
                   {experienceYears.map((exp) => (
-                    <option key={exp.value} value={exp.value}>
+                    <option
+                      key={exp.value}
+                      value={exp.value}
+                    >
                       {exp.label}
                     </option>
                   ))}
@@ -592,10 +669,11 @@ export default function CreateTeacherModal({
             <button
               type='submit'
               disabled={isSubmitting || !isFormValid()}
-              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${isSubmitting || !isFormValid()
-                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                : 'bg-teal-600 hover:bg-teal-700 text-white'
-                }`}
+              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                isSubmitting || !isFormValid()
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  : 'bg-teal-600 hover:bg-teal-700 text-white'
+              }`}
             >
               {isSubmitting ? (
                 <>

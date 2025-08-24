@@ -28,7 +28,6 @@ const ClassManagement: React.FC = () => {
 
   const {
     loading,
-    error,
     getClassrooms,
     createClassroom,
     updateClassroom,
@@ -169,11 +168,11 @@ const ClassManagement: React.FC = () => {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50 p-6'>
-      <div className='max-w-7xl mx-auto'>
+    <>
+      <div>
         {/* Header */}
-        <div className='mb-8'>
-          <h1 className='text-2xl font-bold text-gray-900 mb-2'>
+        <div className='mb-4'>
+          <h1 className='text-2xl font-bold text-gray-900 mb-1'>
             Quản lý lớp học
           </h1>
           <p className='text-gray-600'>
@@ -181,15 +180,8 @@ const ClassManagement: React.FC = () => {
           </p>
         </div>
 
-        {/* Error Display */}
-        {error && (
-          <div className='mb-6 bg-red-50 border border-red-200 rounded-lg p-4'>
-            <p className='text-red-700'>{error}</p>
-          </div>
-        )}
-
         {/* Statistics Cards */}
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-4'>
           <div className='bg-white rounded-2xl shadow-sm border border-gray-100 p-6'>
             <div className='flex items-center justify-between'>
               <div>
@@ -268,7 +260,7 @@ const ClassManagement: React.FC = () => {
         </div>
 
         {/* Filters and Search */}
-        <div className='bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-8'>
+        <div className='bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-4'>
           <div className='flex flex-col lg:flex-row gap-4'>
             {/* Search */}
             <div className='flex-1 relative'>
@@ -472,7 +464,7 @@ const ClassManagement: React.FC = () => {
           loading={loading}
         />
       </div>
-    </div>
+    </>
   );
 };
 

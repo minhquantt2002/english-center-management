@@ -79,18 +79,6 @@ const CourseManagement = () => {
       : 'Không có thông tin',
   }));
 
-  // const getLevelBadgeColor = (level: string) => {
-  //   switch (level) {
-  //     case 'Cơ bản':
-  //       return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-  //     case 'Trung cấp':
-  //       return 'bg-amber-50 text-amber-700 border-amber-200';
-  //     case 'Nâng cao':
-  //       return 'bg-red-50 text-red-700 border-red-200';
-  //     default:
-  //       return 'bg-gray-50 text-gray-700 border-gray-200';
-  //   }
-  // };
   const getLevelBadgeColor = (level: string) => {
     switch (level) {
       case 'A1 - Mất gốc':
@@ -181,33 +169,27 @@ const CourseManagement = () => {
   };
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6'>
-      <div className='max-w-7xl mx-auto space-y-6'>
-        {/* Header Section */}
-        <div className='bg-white rounded-2xl shadow-sm border border-gray-100 p-8'>
-          <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6'>
-            <div className='flex-1'>
-              <div className='flex items-center gap-3 mb-2'>
-                <div className='p-2 bg-blue-100 rounded-lg'>
-                  <BookOpen className='w-6 h-6 text-blue-600' />
-                </div>
-                <h1 className='text-3xl font-bold text-gray-900'>
-                  Quản lý khóa học
-                </h1>
-              </div>
-              <p className='text-gray-600 text-lg'>
-                Quản lý và tổ chức tất cả các khóa học đào tạo trong hệ thống
-              </p>
+    <>
+      <div className='space-y-4'>
+        <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6'>
+          <div className='flex-1'>
+            <div className='flex items-center gap-3 mb-1'>
+              <h1 className='text-2xl font-bold text-gray-900'>
+                Quản lý khóa học
+              </h1>
             </div>
-            <div className='flex flex-col sm:flex-row gap-3'>
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className='bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl font-medium'
-              >
-                <Plus size={20} />
-                Thêm khóa học mới
-              </button>
-            </div>
+            <p className='text-gray-600 text-lg'>
+              Quản lý và tổ chức tất cả các khóa học đào tạo trong hệ thống
+            </p>
+          </div>
+          <div className='flex flex-col sm:flex-row gap-3'>
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className='bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl font-medium'
+            >
+              <Plus size={20} />
+              Thêm khóa học mới
+            </button>
           </div>
         </div>
 
@@ -564,7 +546,7 @@ const CourseManagement = () => {
         onUpdateCourse={handleUpdateCourse}
         course={selectedCourse}
       />
-    </div>
+    </>
   );
 };
 

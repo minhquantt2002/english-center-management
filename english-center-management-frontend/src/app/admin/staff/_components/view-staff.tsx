@@ -111,36 +111,6 @@ export default function ViewStaffModal({
               </div>
             </div>
           </div>
-
-          {/* Additional Information */}
-          <div className='bg-white p-6 rounded-lg border border-gray-200'>
-            <h4 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
-              <FileText className='w-5 h-5 text-teal-600' />
-              Thông tin bổ sung
-            </h4>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <div>
-                <label className='text-sm font-medium text-gray-500'>
-                  Mã nhân viên
-                </label>
-                <p className='text-gray-900 font-mono'>{staff.id}</p>
-              </div>
-              <div>
-                <label className='text-sm font-medium text-gray-500'>
-                  Vai trò
-                </label>
-                <p className='text-gray-900 capitalize'>Nhân viên</p>
-              </div>
-            </div>
-            {staff.bio && (
-              <div>
-                <label className='text-sm font-medium text-gray-500'>
-                  Tiểu sử
-                </label>
-                <p className='text-gray-900'>{staff.bio}</p>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Footer */}
