@@ -178,6 +178,36 @@ export const useStaffClassroomApi = () => {
     []
   );
 
+  const deleteClassroom = useCallback(async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await api.delete(`/admin/classrooms/${id}`);
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const deleteStudent = useCallback(async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await api.delete(`/admin/students/${id}`);
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     loading,
     error,
@@ -188,5 +218,7 @@ export const useStaffClassroomApi = () => {
     assignStudentToClassroom,
     assignMultipleStudentsToClassroom,
     getClassroomStudents,
+    deleteClassroom,
+    deleteStudent,
   };
 };

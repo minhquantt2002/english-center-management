@@ -1,3 +1,7 @@
+import { SessionAttendanceResponse } from '../app/teacher/_hooks/use-attendance';
+import { SessionHomeworkResponse } from '../app/teacher/_hooks/use-homework';
+import { AttendanceStudentResponse, HomeworkStudentResponse } from './student';
+
 // Staff specific types based on backend schemas
 export type InvoiceStatus = 'pending' | 'paid' | 'overdue' | 'cancelled';
 export type Weekday =
@@ -16,7 +20,7 @@ export type AchievementType =
 
 export type UserRole = 'admin' | 'staff' | 'teacher' | 'student';
 export type StudentStatus = 'active' | 'inactive' | 'suspended' | 'graduated';
-export type ClassStatus = 'active' | 'completed' | 'cancelled';
+export type ClassStatus = 'active' | 'completed' | 'inactive';
 export type CourseLevel =
   | 'A1' // TOEIC 0–250 (FOUNDATION) - Mất gốc
   | 'A2' // TOEIC 250–450 (BEGINNER) - Sơ cấp
@@ -66,6 +70,8 @@ export interface StudentResponse {
   phone_number?: string;
   created_at: string;
   enrollments?: EnrollmentNested[];
+  attendances?: AttendanceStudentResponse[];
+  homeworks?: HomeworkStudentResponse[];
 }
 
 // ==================== TEACHER MANAGEMENT ====================
@@ -89,7 +95,7 @@ export interface CourseResponse {
   id: string;
   course_name: string;
   description?: string;
-  level?: string;
+  level?: CourseLevel;
   total_weeks?: number;
   price?: number;
   created_at: string;
@@ -160,34 +166,6 @@ export interface ScheduleResponse {
   classroom?: ClassroomNested;
 }
 
-// ==================== INVOICE MANAGEMENT ====================
-export interface InvoiceCreate {
-  student_id: string;
-  amount: number;
-  description: string;
-  due_date: string;
-  status: InvoiceStatus;
-}
-
-export interface InvoiceUpdate {
-  student_id?: string;
-  amount?: number;
-  description?: string;
-  due_date?: string;
-  status?: InvoiceStatus;
-}
-
-export interface InvoiceResponse {
-  id: string;
-  student_id: string;
-  amount: number;
-  description: string;
-  due_date: string;
-  status: InvoiceStatus;
-  created_at: string;
-  student?: StudentNested;
-}
-
 // ==================== STATS MANAGEMENT ====================
 export interface StaffStats {
   totalStudents: number;
@@ -205,23 +183,7 @@ export interface RecentEnrollment {
   enrollment_date: string;
 }
 
-// ==================== ACHIEVEMENT TYPES ====================
-export interface StudentAchievement {
-  id: string;
-  title: string;
-  description: string;
-  achieved_date: string;
-  type: AchievementType;
-}
-
 // ==================== API RESPONSE TYPES ====================
-export interface StudentAchievementsResponse {
-  achievements: StudentAchievement[];
-}
-
-export interface StudentInvoicesResponse {
-  invoices: InvoiceResponse[];
-}
 
 export interface TeacherScheduleResponse {
   schedule: ScheduleResponse[];
@@ -233,10 +195,6 @@ export interface ClassroomStudentsResponse {
 
 export interface ClassroomSchedulesResponse {
   schedules: ScheduleResponse[];
-}
-
-export interface AllInvoicesResponse {
-  invoices: InvoiceResponse[];
 }
 
 export interface RoomsResponse {

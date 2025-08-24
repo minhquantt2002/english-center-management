@@ -10,9 +10,6 @@ export { useStaffCourseApi } from './use-course';
 // Classroom hooks
 export { useStaffClassroomApi } from './use-classroom';
 
-// Invoice hooks
-export { useStaffInvoiceApi } from './use-invoice';
-
 // Schedule hooks
 export { useStaffScheduleApi } from './use-schedule';
 

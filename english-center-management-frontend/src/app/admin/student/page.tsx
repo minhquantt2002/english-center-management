@@ -209,7 +209,9 @@ const StudentManagement = () => {
           <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
             <div className='flex items-center justify-between'>
               <div>
-                <p className='text-gray-500 text-sm font-medium'>Tạm nghỉ</p>
+                <p className='text-gray-500 text-sm font-medium'>
+                  Không hoạt động
+                </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
                   {students.filter((s) => s.status === 'inactive').length}
                 </p>
@@ -372,8 +374,8 @@ const StudentManagement = () => {
                       {student.status === 'active'
                         ? 'Đang học'
                         : student.status === 'inactive'
-                        ? 'Tạm nghỉ'
-                        : 'Đã tốt nghiệp'}
+                        ? 'Không hoạt động'
+                        : 'Đã hoàn thành'}
                     </span>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>

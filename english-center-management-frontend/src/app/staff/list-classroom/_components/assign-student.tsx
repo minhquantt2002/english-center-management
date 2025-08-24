@@ -297,7 +297,7 @@ export default function AssignStudentModal({
                               {student.name}
                             </p>
                             <p className='text-sm text-gray-500 truncate'>
-                              {student.id}
+                              #{student.id.substring(0, 5)}
                             </p>
                           </div>
                         </div>

@@ -12,6 +12,10 @@ import {
   Eye,
 } from 'lucide-react';
 import { useTeacherApi } from '../_hooks/use-api';
+import {
+  dayNames,
+  timeSlots,
+} from '../../staff/list-teacher/_components/teaching-schedule-modal';
 
 const TeachingSchedule = () => {
   const { loading, getTeachingSchedule } = useTeacherApi();
@@ -32,24 +36,6 @@ const TeachingSchedule = () => {
 
     fetchSchedules();
   }, [getTeachingSchedule]);
-
-  // Time slots for the timetable - Updated to match your actual schedule times
-  const timeSlots = [
-    { id: '4', startTime: '14:00', endTime: '16:00', label: '14:00 - 16:00' }, // Updated for 14-16 class
-    { id: '5', startTime: '16:00', endTime: '18:00', label: '16:00 - 18:00' }, // Updated for 16-18 classes
-    { id: '6', startTime: '18:00', endTime: '20:00', label: '18:00 - 20:00' }, // Updated for 18-20 class
-    { id: '7', startTime: '20:00', endTime: '22:00', label: '20:00 - 22:00' },
-  ];
-
-  const dayNames = {
-    Monday: 'Thứ 2',
-    Tuesday: 'Thứ 3',
-    Wednesday: 'Thứ 4',
-    Thursday: 'Thứ 5',
-    Friday: 'Thứ 6',
-    Saturday: 'Thứ 7',
-    Sunday: 'Chủ nhật',
-  };
 
   // Get week range for current week
   const getWeekRange = (date) => {

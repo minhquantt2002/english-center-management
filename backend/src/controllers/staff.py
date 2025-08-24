@@ -460,8 +460,7 @@ async def delete_schedule(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Lịch học không tồn tại"
         )
-    
-    # TODO: Implement logic to delete schedule
+    schedule_service.delete_schedule(db=db, schedule_id=schedule_uuid)
     return {"message": "Lịch học đã được xóa"}
 
 @router.get("/classrooms/{classroom_id}/schedules")

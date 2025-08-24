@@ -32,10 +32,10 @@ class User(Base):
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    taught_classes = relationship("Class", back_populates="teacher")
+    taught_classes = relationship("Class", back_populates="teacher", cascade="all, delete-orphan")
     
-    enrollments = relationship("Enrollment", back_populates="student")
-    scores = relationship("Score", back_populates="student")
+    enrollments = relationship("Enrollment", back_populates="student", cascade="all, delete-orphan")
+    scores = relationship("Score", back_populates="student", cascade="all, delete-orphan")
 
-    attendances = relationship("Attendance", back_populates="student")
-    homeworks = relationship("Homework", back_populates="student")
+    attendances = relationship("Attendance", back_populates="student", cascade="all, delete-orphan")
+    homeworks = relationship("Homework", back_populates="student", cascade="all, delete-orphan")

@@ -65,6 +65,26 @@ export const useStudentApi = () => {
     }
   }, []);
 
+  const getStudentScheduleById = useCallback(
+    async (id: string): Promise<ScheduleResponse[]> => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await api.get(`/student/schedule/${id}`);
+        return response;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Có lỗi xảy ra';
+        setError(errorMessage);
+        console.error('Error fetching student schedule:', err);
+        return [];
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
   const getClassDetails = useCallback(
     async (classId: string): Promise<ClassroomResponse | null> => {
       setLoading(true);
@@ -190,5 +210,6 @@ export const useStudentApi = () => {
     getHomeworksByStudentId,
     getScoresByStudentId,
     getAttendancesByStudentId,
+    getStudentScheduleById,
   };
 };

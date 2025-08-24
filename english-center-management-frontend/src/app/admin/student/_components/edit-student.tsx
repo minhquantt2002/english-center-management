@@ -1,7 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Phone, User, BookOpen, Save, AlertCircle, Calendar } from 'lucide-react';
+import {
+  X,
+  Phone,
+  User,
+  BookOpen,
+  Save,
+  AlertCircle,
+  Calendar,
+} from 'lucide-react';
 import { UserUpdate } from '../../../../types/admin';
 
 interface EditStudentModalProps {
@@ -19,7 +27,9 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<Partial<UserUpdate>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>(
+    {}
+  );
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string>('');
@@ -35,7 +45,9 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
   };
 
   const isValidPhone = (phone: string) => {
-    return phone.trim() !== '' && /^[0-9]{10,11}$/.test(phone.replace(/\s/g, ''));
+    return (
+      phone.trim() !== '' && /^[0-9]{10,11}$/.test(phone.replace(/\s/g, ''))
+    );
   };
 
   const isValidDate = (date: string) => {
@@ -55,7 +67,8 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
     if (!isValidDate(formData.date_of_birth || '')) return false;
 
     // Check parent_phone if provided
-    if (formData.parent_phone && !isValidPhone(formData.parent_phone)) return false;
+    if (formData.parent_phone && !isValidPhone(formData.parent_phone))
+      return false;
 
     return true;
   };
@@ -115,7 +128,8 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
             const selectedDate = new Date(value);
             const today = new Date();
             if (selectedDate > today) {
-              newErrors.date_of_birth = 'Ngày sinh không được vượt quá ngày hiện tại';
+              newErrors.date_of_birth =
+                'Ngày sinh không được vượt quá ngày hiện tại';
             } else {
               delete newErrors.date_of_birth;
             }
@@ -142,9 +156,17 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
 
   // Validate all fields for form submission
   const validateAllFields = () => {
-    const fieldsToValidate = ['name', 'email', 'phone_number', 'input_level', 'status', 'date_of_birth', 'parent_phone'];
+    const fieldsToValidate = [
+      'name',
+      'email',
+      'phone_number',
+      'input_level',
+      'status',
+      'date_of_birth',
+      'parent_phone',
+    ];
 
-    fieldsToValidate.forEach(field => {
+    fieldsToValidate.forEach((field) => {
       validateFieldForDisplay(field, formData[field as keyof UserUpdate]);
     });
 
@@ -152,7 +174,10 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
     return Object.keys(errors).length === 0 && isFormValidForSubmit();
   };
 
-  const handleInputChange = (field: string, value: string | number | boolean | any) => {
+  const handleInputChange = (
+    field: string,
+    value: string | number | boolean | any
+  ) => {
     const newFormData = {
       ...formData,
       [field]: value,
@@ -184,7 +209,13 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
     setSubmitError('');
 
     // Mark all required fields as touched
-    const fieldsToTouch = ['name', 'email', 'phone_number', 'input_level', 'status'];
+    const fieldsToTouch = [
+      'name',
+      'email',
+      'phone_number',
+      'input_level',
+      'status',
+    ];
     setTouchedFields((prev) => {
       const newTouched = { ...prev };
       fieldsToTouch.forEach((field) => {
@@ -215,7 +246,9 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
       handleClose();
     } catch (error) {
       console.error('Error updating student:', error);
-      setSubmitError('Có lỗi xảy ra khi cập nhật thông tin học viên. Vui lòng thử lại.');
+      setSubmitError(
+        'Có lỗi xảy ra khi cập nhật thông tin học viên. Vui lòng thử lại.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -288,7 +321,10 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className='p-6 space-y-6'>
+        <form
+          onSubmit={handleSubmit}
+          className='p-6 space-y-6'
+        >
           {/* Submit Error Message */}
           {submitError && (
             <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
@@ -300,7 +336,10 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             <div className='space-y-4'>
               <h3 className='text-lg font-medium text-gray-900 flex items-center gap-2'>
-                <User size={20} className='text-blue-500' />
+                <User
+                  size={20}
+                  className='text-blue-500'
+                />
                 Thông tin cá nhân
               </h3>
 
@@ -314,13 +353,23 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                     value={formData.name || ''}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     onBlur={() => handleFieldBlur('name')}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('name') && errors.name ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      shouldShowError('name') && errors.name
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                    }`}
                     placeholder='Nhập họ và tên'
-                    aria-describedby={shouldShowError('name') && errors.name ? 'name-error' : undefined}
+                    aria-describedby={
+                      shouldShowError('name') && errors.name
+                        ? 'name-error'
+                        : undefined
+                    }
                   />
                   {shouldShowError('name') && errors.name && (
-                    <p id='name-error' className='text-red-500 text-sm mt-1 flex items-center gap-1'>
+                    <p
+                      id='name-error'
+                      className='text-red-500 text-sm mt-1 flex items-center gap-1'
+                    >
                       <AlertCircle size={14} />
                       {errors.name}
                     </p>
@@ -340,13 +389,23 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                         handleInputChange('date_of_birth', e.target.value)
                       }
                       onBlur={() => handleFieldBlur('date_of_birth')}
-                      className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('date_of_birth') && errors.date_of_birth ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                      aria-describedby={shouldShowError('date_of_birth') && errors.date_of_birth ? 'dob-error' : undefined}
+                      className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        shouldShowError('date_of_birth') && errors.date_of_birth
+                          ? 'border-red-500'
+                          : 'border-gray-300'
+                      }`}
+                      aria-describedby={
+                        shouldShowError('date_of_birth') && errors.date_of_birth
+                          ? 'dob-error'
+                          : undefined
+                      }
                     />
                   </div>
                   {shouldShowError('date_of_birth') && errors.date_of_birth && (
-                    <p id='dob-error' className='text-red-500 text-sm mt-1 flex items-center gap-1'>
+                    <p
+                      id='dob-error'
+                      className='text-red-500 text-sm mt-1 flex items-center gap-1'
+                    >
                       <AlertCircle size={14} />
                       {errors.date_of_birth}
                     </p>
@@ -373,7 +432,10 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
             {/* Contact Information */}
             <div className='space-y-4'>
               <h3 className='text-lg font-medium text-gray-900 flex items-center gap-2'>
-                <Phone size={20} className='text-green-500' />
+                <Phone
+                  size={20}
+                  className='text-green-500'
+                />
                 Thông tin liên hệ
               </h3>
 
@@ -387,13 +449,23 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                     value={formData.email || ''}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     onBlur={() => handleFieldBlur('email')}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('email') && errors.email ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      shouldShowError('email') && errors.email
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                    }`}
                     placeholder='Nhập email'
-                    aria-describedby={shouldShowError('email') && errors.email ? 'email-error' : undefined}
+                    aria-describedby={
+                      shouldShowError('email') && errors.email
+                        ? 'email-error'
+                        : undefined
+                    }
                   />
                   {shouldShowError('email') && errors.email && (
-                    <p id='email-error' className='text-red-500 text-sm mt-1 flex items-center gap-1'>
+                    <p
+                      id='email-error'
+                      className='text-red-500 text-sm mt-1 flex items-center gap-1'
+                    >
                       <AlertCircle size={14} />
                       {errors.email}
                     </p>
@@ -411,13 +483,23 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                       handleInputChange('phone_number', e.target.value)
                     }
                     onBlur={() => handleFieldBlur('phone_number')}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('phone_number') && errors.phone_number ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      shouldShowError('phone_number') && errors.phone_number
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                    }`}
                     placeholder='Nhập số điện thoại'
-                    aria-describedby={shouldShowError('phone_number') && errors.phone_number ? 'phone-error' : undefined}
+                    aria-describedby={
+                      shouldShowError('phone_number') && errors.phone_number
+                        ? 'phone-error'
+                        : undefined
+                    }
                   />
                   {shouldShowError('phone_number') && errors.phone_number && (
-                    <p id='phone-error' className='text-red-500 text-sm mt-1 flex items-center gap-1'>
+                    <p
+                      id='phone-error'
+                      className='text-red-500 text-sm mt-1 flex items-center gap-1'
+                    >
                       <AlertCircle size={14} />
                       {errors.phone_number}
                     </p>
@@ -430,171 +512,220 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
                   <input
                     type='password'
                     value={formData.password}
-                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange('password', e.target.value)
+                    }
                     onBlur={() => handleFieldBlur('password')}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('password') && errors.password
-                      ? 'border-red-500'
-                      : 'border-gray-300'
-                      }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      shouldShowError('password') && errors.password
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                    }`}
                     placeholder='Nhập mật khẩu (tối thiểu 6 ký tự)'
-                    aria-describedby={shouldShowError('password') && errors.password ? 'password-error' : undefined}
+                    aria-describedby={
+                      shouldShowError('password') && errors.password
+                        ? 'password-error'
+                        : undefined
+                    }
                   />
                   {shouldShowError('password') && errors.password && (
-                    <p id='password-error' className='mt-1 text-sm text-red-600'>{errors.password}</p>
+                    <p
+                      id='password-error'
+                      className='mt-1 text-sm text-red-600'
+                    >
+                      {errors.password}
+                    </p>
                   )}
                 </div>
               </div>
             </div>
           </div>
 
-            {/* Academic Information */}
-            <div className='space-y-4'>
-              <h3 className='text-lg font-medium text-gray-900 flex items-center gap-2'>
-                <BookOpen size={20} className='text-purple-500' />
-                Thông tin học tập
-              </h3>
+          {/* Academic Information */}
+          <div className='space-y-4'>
+            <h3 className='text-lg font-medium text-gray-900 flex items-center gap-2'>
+              <BookOpen
+                size={20}
+                className='text-purple-500'
+              />
+              Thông tin học tập
+            </h3>
 
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>
-                    Trình độ *
-                  </label>
-                  <select
-                    value={formData.input_level || ''}
-                    onChange={(e) =>
-                      handleInputChange('input_level', e.target.value)
-                    }
-                    onBlur={() => handleFieldBlur('input_level')}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('input_level') && errors.input_level ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                    aria-describedby={shouldShowError('input_level') && errors.input_level ? 'level-error' : undefined}
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  Trình độ *
+                </label>
+                <select
+                  value={formData.input_level || ''}
+                  onChange={(e) =>
+                    handleInputChange('input_level', e.target.value)
+                  }
+                  onBlur={() => handleFieldBlur('input_level')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    shouldShowError('input_level') && errors.input_level
+                      ? 'border-red-500'
+                      : 'border-gray-300'
+                  }`}
+                  aria-describedby={
+                    shouldShowError('input_level') && errors.input_level
+                      ? 'level-error'
+                      : undefined
+                  }
+                >
+                  <option value=''>Chọn trình độ</option>
+                  <option value='A1'>A1 - Mất gốc</option>
+                  <option value='A2'>A2 - Sơ cấp</option>
+                  <option value='B1'>B1 - Trung cấp thấp</option>
+                  <option value='B2'>B2 - Trung cấp cao</option>
+                  <option value='C1'>C1 - Nâng cao</option>
+                </select>
+                {shouldShowError('input_level') && errors.input_level && (
+                  <p
+                    id='level-error'
+                    className='text-red-500 text-sm mt-1 flex items-center gap-1'
                   >
-                    <option value=''>Chọn trình độ</option>
-                    <option value='A1'>A1 - Mất gốc</option>
-                    <option value='A2'>A2 - Sơ cấp</option>
-                    <option value='B1'>B1 - Trung cấp thấp</option>
-                    <option value='B2'>B2 - Trung cấp cao</option>
-                    <option value='C1'>C1 - Nâng cao</option>
-                  </select>
-                  {shouldShowError('input_level') && errors.input_level && (
-                    <p id='level-error' className='text-red-500 text-sm mt-1 flex items-center gap-1'>
-                      <AlertCircle size={14} />
-                      {errors.input_level}
-                    </p>
-                  )}
-                </div>
+                    <AlertCircle size={14} />
+                    {errors.input_level}
+                  </p>
+                )}
+              </div>
 
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>
-                    Trạng thái *
-                  </label>
-                  <select
-                    value={formData.status || ''}
-                    onChange={(e) => handleInputChange('status', e.target.value)}
-                    onBlur={() => handleFieldBlur('status')}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('status') && errors.status ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                    aria-describedby={shouldShowError('status') && errors.status ? 'status-error' : undefined}
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  Trạng thái *
+                </label>
+                <select
+                  value={formData.status || ''}
+                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  onBlur={() => handleFieldBlur('status')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    shouldShowError('status') && errors.status
+                      ? 'border-red-500'
+                      : 'border-gray-300'
+                  }`}
+                  aria-describedby={
+                    shouldShowError('status') && errors.status
+                      ? 'status-error'
+                      : undefined
+                  }
+                >
+                  <option value=''>Chọn trạng thái</option>
+                  <option value='active'>Đang học</option>
+                  <option value='inactive'>Không hoạt động</option>
+                  <option value='suspended'>Tạm đình chỉ</option>
+                  <option value='graduated'>Đã tốt nghiệp</option>
+                </select>
+                {shouldShowError('status') && errors.status && (
+                  <p
+                    id='status-error'
+                    className='text-red-500 text-sm mt-1 flex items-center gap-1'
                   >
-                    <option value=''>Chọn trạng thái</option>
-                    <option value='active'>Đang học</option>
-                    <option value='inactive'>Tạm nghỉ</option>
-                    <option value='suspended'>Tạm đình chỉ</option>
-                    <option value='graduated'>Đã tốt nghiệp</option>
-                  </select>
-                  {shouldShowError('status') && errors.status && (
-                    <p id='status-error' className='text-red-500 text-sm mt-1 flex items-center gap-1'>
-                      <AlertCircle size={14} />
-                      {errors.status}
-                    </p>
-                  )}
-                </div>
+                    <AlertCircle size={14} />
+                    {errors.status}
+                  </p>
+                )}
               </div>
             </div>
+          </div>
 
-            {/* Emergency Contact */}
-            <div className='space-y-4'>
-              <h3 className='text-lg font-medium text-gray-900 flex items-center gap-2'>
-                <AlertCircle size={20} className='text-red-500' />
-                Thông tin liên hệ khác
-              </h3>
+          {/* Emergency Contact */}
+          <div className='space-y-4'>
+            <h3 className='text-lg font-medium text-gray-900 flex items-center gap-2'>
+              <AlertCircle
+                size={20}
+                className='text-red-500'
+              />
+              Thông tin liên hệ khác
+            </h3>
 
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>
-                    Họ và tên
-                  </label>
-                  <input
-                    type='text'
-                    value={formData.parent_name || ''}
-                    onChange={(e) =>
-                      handleInputChange('parent_name', e.target.value)
-                    }
-                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                    placeholder='Nhập họ và tên'
-                  />
-                </div>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  Họ và tên
+                </label>
+                <input
+                  type='text'
+                  value={formData.parent_name || ''}
+                  onChange={(e) =>
+                    handleInputChange('parent_name', e.target.value)
+                  }
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                  placeholder='Nhập họ và tên'
+                />
+              </div>
 
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>
-                    Số điện thoại
-                  </label>
-                  <input
-                    type='tel'
-                    value={formData.parent_phone || ''}
-                    onChange={(e) =>
-                      handleInputChange('parent_phone', e.target.value)
-                    }
-                    onBlur={() => handleFieldBlur('parent_phone')}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('parent_phone') && errors.parent_phone ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                    placeholder='Nhập số điện thoại'
-                    aria-describedby={shouldShowError('parent_phone') && errors.parent_phone ? 'parent-phone-error' : undefined}
-                  />
-                  {shouldShowError('parent_phone') && errors.parent_phone && (
-                    <p id='parent-phone-error' className='text-red-500 text-sm mt-1 flex items-center gap-1'>
-                      <AlertCircle size={14} />
-                      {errors.parent_phone}
-                    </p>
-                  )}
-                </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  Số điện thoại
+                </label>
+                <input
+                  type='tel'
+                  value={formData.parent_phone || ''}
+                  onChange={(e) =>
+                    handleInputChange('parent_phone', e.target.value)
+                  }
+                  onBlur={() => handleFieldBlur('parent_phone')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    shouldShowError('parent_phone') && errors.parent_phone
+                      ? 'border-red-500'
+                      : 'border-gray-300'
+                  }`}
+                  placeholder='Nhập số điện thoại'
+                  aria-describedby={
+                    shouldShowError('parent_phone') && errors.parent_phone
+                      ? 'parent-phone-error'
+                      : undefined
+                  }
+                />
+                {shouldShowError('parent_phone') && errors.parent_phone && (
+                  <p
+                    id='parent-phone-error'
+                    className='text-red-500 text-sm mt-1 flex items-center gap-1'
+                  >
+                    <AlertCircle size={14} />
+                    {errors.parent_phone}
+                  </p>
+                )}
               </div>
             </div>
+          </div>
 
-            {/* Action Buttons */}
-            <div className='flex justify-end space-x-3 pt-6 border-t border-gray-200'>
-              <button
-                type='button'
-                onClick={handleClose}
-                disabled={isSubmitting}
-                className='px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50'
-              >
-                Hủy
-              </button>
-              <button
-                type='submit'
-                disabled={isSubmitting || !isFormValidForSubmit()}
-                className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${isSubmitting || !isFormValidForSubmit()
+          {/* Action Buttons */}
+          <div className='flex justify-end space-x-3 pt-6 border-t border-gray-200'>
+            <button
+              type='button'
+              onClick={handleClose}
+              disabled={isSubmitting}
+              className='px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50'
+            >
+              Hủy
+            </button>
+            <button
+              type='submit'
+              disabled={isSubmitting || !isFormValidForSubmit()}
+              className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                isSubmitting || !isFormValidForSubmit()
                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
                   : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
-                    <span>Đang lưu...</span>
-                  </>
-                ) : (
-                  <>
-                    <Save size={16} />
-                    <span>Lưu thay đổi</span>
-                  </>
-                )}
-              </button>
-            </div>
-        </form >
-      </div >
-    </div >
+              }`}
+            >
+              {isSubmitting ? (
+                <>
+                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                  <span>Đang lưu...</span>
+                </>
+              ) : (
+                <>
+                  <Save size={16} />
+                  <span>Lưu thay đổi</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 

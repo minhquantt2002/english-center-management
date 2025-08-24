@@ -12,11 +12,16 @@ import {
   Eye,
   XCircle,
   BookOpen,
+  Trash2,
 } from 'lucide-react';
 import CreateScheduleModal from './create-schedule-modal';
 import { useStaffScheduleApi } from '../../../_hooks';
 import { ClassroomResponse } from '../../../../../types/staff';
 import { toast } from 'react-toastify';
+import {
+  dayNames,
+  timeSlots,
+} from '../../../list-teacher/_components/teaching-schedule-modal';
 
 interface StudyingScheduleModalProps {
   isOpen: boolean;
@@ -29,7 +34,7 @@ export default function StudyingScheduleModal({
   onClose,
   classroom,
 }: StudyingScheduleModalProps) {
-  const { loading, getClassroomSchedules, createSchedule } =
+  const { loading, getClassroomSchedules, createSchedule, deleteSchedule } =
     useStaffScheduleApi();
   const [currentWeek, setCurrentWeek] = useState(new Date()); // January 22, 2024
   const [selectedSchedule, setSelectedSchedule] = useState(null);
@@ -48,24 +53,6 @@ export default function StudyingScheduleModal({
   useEffect(() => {
     fetchSchedules();
   }, [getClassroomSchedules]);
-
-  // Time slots for the timetable - Updated to match your actual schedule times
-  const timeSlots = [
-    { id: '4', startTime: '14:00', endTime: '16:00', label: '14:00 - 16:00' }, // Updated for 14-16 class
-    { id: '5', startTime: '16:00', endTime: '18:00', label: '16:00 - 18:00' }, // Updated for 16-18 classes
-    { id: '6', startTime: '18:00', endTime: '20:00', label: '18:00 - 20:00' }, // Updated for 18-20 class
-    { id: '7', startTime: '20:00', endTime: '22:00', label: '20:00 - 22:00' },
-  ];
-
-  const dayNames = {
-    Monday: 'Thứ 2',
-    Tuesday: 'Thứ 3',
-    Wednesday: 'Thứ 4',
-    Thursday: 'Thứ 5',
-    Friday: 'Thứ 6',
-    Saturday: 'Thứ 7',
-    Sunday: 'Chủ nhật',
-  };
 
   // Get week range for current week
   const getWeekRange = (date) => {
@@ -235,6 +222,17 @@ export default function StudyingScheduleModal({
   };
 
   const weekDates = useMemo(() => getWeekDates(currentWeek), [currentWeek]);
+
+  const handleDeleteSchedule = async (scheduleId) => {
+    try {
+      await deleteSchedule(scheduleId);
+      toast.success('Lịch học đã được xóa thành công!');
+      fetchSchedules();
+    } catch (error) {
+      console.error('Error deleting schedule:', error);
+      toast.error('Có lỗi xảy ra khi xóa lịch học!');
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -511,7 +509,15 @@ export default function StudyingScheduleModal({
                 </div>
 
                 {/* Footer */}
-                <div className='flex items-center justify-end p-6 border-t border-gray-200 bg-gray-50'>
+                <div className='flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50'>
+                  <button
+                    onClick={() => handleDeleteSchedule(selectedSchedule.id)}
+                    className='flex items-center space-x-2 px-4 py-2 text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors'
+                  >
+                    <Trash2 className='w-4 h-4' />
+                    <span>Xóa lịch học</span>
+                  </button>
+
                   <button
                     onClick={() => setSelectedSchedule(null)}
                     className='px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'

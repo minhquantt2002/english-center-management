@@ -133,7 +133,10 @@ export default function AssignStudentModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className='h-full p-6 space-y-6'>
+        <form
+          onSubmit={handleSubmit}
+          className='h-full p-6 space-y-6'
+        >
           {/* Search */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>

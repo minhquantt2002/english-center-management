@@ -18,6 +18,7 @@ class CourseLevel(str, enum.Enum):
     B1 = "B1"  # TOEIC 450–600 (CAMP BOMB) - Trung cấp thấp 
     B2 = "B2"  # TOEIC 600–850 (SUBMARINE) - Trung cấp cao 
     C1 = "C1"  # TOEIC SW 250+ (MASTER) - Nâng cao kỹ năng Nói/Viết
+
 class Class(Base):
     __tablename__ = "classes"
 
@@ -35,12 +36,12 @@ class Class(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # Relationships
+    # Relationships với cascade delete
     course = relationship("Course", back_populates="classes")
     teacher = relationship("User", back_populates="taught_classes")
-    enrollments = relationship("Enrollment", back_populates="classroom")
-    exams = relationship("Exam", back_populates="classroom")
-    sessions = relationship("Session", back_populates="classroom")
-    schedules = relationship("Schedule", back_populates="classroom")
-
- 
+    
+    # Các relationship này cần cascade để xóa được các bản ghi liên quan
+    enrollments = relationship("Enrollment", back_populates="classroom", cascade="all, delete-orphan")
+    exams = relationship("Exam", back_populates="classroom", cascade="all, delete-orphan")
+    sessions = relationship("Session", back_populates="classroom", cascade="all, delete-orphan")
+    schedules = relationship("Schedule", back_populates="classroom", cascade="all, delete-orphan")

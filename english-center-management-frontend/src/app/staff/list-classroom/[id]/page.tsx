@@ -15,13 +15,14 @@ import {
   Trash2,
   Eye,
 } from 'lucide-react';
-import { useStaffClassroomApi } from '../../_hooks';
+import { useStaffClassroomApi, useStaffStudentApi } from '../../_hooks';
 import AssignStudentModal from './_components/create-student';
 import ViewStudentModal from './_components/view-student';
 import EditStudentModal from './_components/edit-student';
 import StudyingScheduleModal from './_components/studying-schedule';
 import EditClassroomInfoModal from './_components/edit-classroom-info';
 import { ClassroomResponse, StudentResponse } from '../../../../types/staff';
+import { toast } from 'react-toastify';
 
 export function formatDays(days: string[]) {
   const mapDays: Record<string, string> = {
@@ -62,8 +63,9 @@ export default function ClassroomDetailPage() {
   const classroomId = params.id as string;
   const {
     loading: classroomLoading,
-    error: classroomError,
     getClassroomById,
+    deleteClassroom,
+    deleteStudent,
   } = useStaffClassroomApi();
 
   const [classroom, setClassroom] = useState<ClassroomResponse | null>(null);
@@ -79,30 +81,29 @@ export default function ClassroomDetailPage() {
   const [isEditClassroomModalOpen, setIsEditClassroomModalOpen] =
     useState(false);
 
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch classroom details
-        const classroomData = await getClassroomById(classroomId);
-        setClassroom(classroomData);
-        setStudents(classroomData.enrollments.map((v) => v.student));
-      } catch (err) {
-        console.error('Error loading classroom data:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      const classroomData = await getClassroomById(classroomId);
+      setClassroom(classroomData);
+      setStudents(classroomData.enrollments.map((v) => v.student));
+    } catch (err) {
+      console.error('Error loading classroom data:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadData();
   }, [classroomId, getClassroomById]);
 
   const filteredStudents = students.filter((student) => {
+    if (!student) return false;
     const matchesSearch =
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.id.toLowerCase().includes(searchTerm.toLowerCase());
-
     return matchesSearch;
   });
 
@@ -127,11 +128,6 @@ export default function ClassroomDetailPage() {
     }
   };
 
-  const handleEditStudent = (student: StudentResponse) => {
-    setSelectedStudent(student);
-    setIsEditModalOpen(true);
-  };
-
   const handleSaveStudent = (updatedStudent: StudentResponse) => {
     setStudents((prev) =>
       prev.map((student) =>
@@ -146,20 +142,46 @@ export default function ClassroomDetailPage() {
     console.log('Classroom updated:', updatedClassroom);
   };
 
+  const handleDeleteClassroom = async () => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa lớp học này?')) {
+      try {
+        await deleteClassroom(classroomId);
+        toast.success('Xóa lớp học thành công!');
+        router.push('/staff/list-classroom');
+      } catch (err) {
+        toast.error('Xóa lớp học thất bại!');
+        console.error('Failed to delete classroom:', err);
+      }
+    }
+  };
+
+  const handleDeleteStudent = (studentId: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa học viên này?')) {
+      try {
+        deleteStudent(studentId);
+        toast.success('Xóa học viên thành công!');
+        loadData();
+      } catch (err) {
+        toast.error('Xóa học viên thất bại!');
+        console.error('Failed to delete student:', err);
+      }
+    }
+  };
+
   const getLevelColor = (level: string) => {
     switch (level) {
       case 'A1':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 font-semibold';
       case 'A2':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-orange-100 text-orange-800 font-semibold';
       case 'B1':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 font-semibold';
       case 'B2':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 font-semibold';
       case 'C1':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 text-purple-800 font-semibold';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 font-semibold';
     }
   };
 
@@ -191,25 +213,6 @@ export default function ClassroomDetailPage() {
     );
   }
 
-  if (classroomError) {
-    return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-        <div className='text-center'>
-          <h2 className='text-2xl font-bold text-gray-900 mb-4'>
-            Có lỗi xảy ra
-          </h2>
-          <p className='text-gray-600 mb-6'>{classroomError}</p>
-          <button
-            onClick={() => router.back()}
-            className='bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-lg transition-colors'
-          >
-            Quay lại
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   if (!classroom) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
@@ -232,18 +235,10 @@ export default function ClassroomDetailPage() {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50'>
-      <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+    <>
+      <main>
         {/* Header */}
-        <div className='mb-8'>
-          <button
-            onClick={() => router.back()}
-            className='flex items-center space-x-2 text-cyan-600 hover:text-cyan-800 mb-4 transition-colors'
-          >
-            <ArrowLeft className='w-4 h-4' />
-            <span>Quay lại danh sách lớp</span>
-          </button>
-
+        <div className='mb-4'>
           <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 relative'>
             <div className='flex items-center justify-between mb-4'>
               <h1 className='text-2xl font-bold text-gray-900'>
@@ -253,21 +248,25 @@ export default function ClassroomDetailPage() {
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-medium ${
                     classroom.status === 'active'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
+                      ? 'bg-blue-100 text-blue-800'
+                      : classroom.status === 'inactive'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-green-100 text-green-800'
                   }`}
                 >
                   {classroom.status === 'active'
                     ? 'Đang hoạt động'
-                    : 'Không hoạt động'}
+                    : classroom.status === 'inactive'
+                    ? 'Không hoạt động'
+                    : 'Đã hoàn thành'}
                 </span>
-                {/* <button
-                  onClick={() => setIsEditClassroomModalOpen(true)}
-                  className='p-2 text-gray-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors'
+                <button
+                  onClick={handleDeleteClassroom}
+                  className='p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                   title='Chỉnh sửa thông tin lớp học'
                 >
-                  <Settings className='w-5 h-5' />
-                </button> */}
+                  <Trash2 className='w-5 h-5' />
+                </button>
               </div>
             </div>
 
@@ -364,9 +363,6 @@ export default function ClassroomDetailPage() {
                     Học viên
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Mã số
-                  </th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                     Trình độ
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
@@ -396,7 +392,10 @@ export default function ClassroomDetailPage() {
                   </tr>
                 ) : (
                   filteredStudents.map((student) => (
-                    <tr key={student.id} className='hover:bg-gray-50'>
+                    <tr
+                      key={student.id}
+                      className='hover:bg-gray-50'
+                    >
                       <td className='px-6 py-4 whitespace-nowrap'>
                         <div className='flex items-center'>
                           <img
@@ -411,11 +410,11 @@ export default function ClassroomDetailPage() {
                             <div className='text-sm text-gray-500'>
                               {student.email}
                             </div>
+                            <div className='text-sm text-gray-500'>
+                              #{student.id.substring(0, 5)}
+                            </div>
                           </div>
                         </div>
-                      </td>
-                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                        {student.id}
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap'>
                         <span
@@ -458,7 +457,10 @@ export default function ClassroomDetailPage() {
                           >
                             <Eye className='w-4 h-4' />
                           </button>
-                          <button className='text-red-600 hover:text-red-800 transition-colors'>
+                          <button
+                            onClick={() => handleDeleteStudent(student.id)}
+                            className='text-red-600 hover:text-red-800 transition-colors'
+                          >
                             <Trash2 className='w-4 h-4' />
                           </button>
                         </div>
@@ -473,49 +475,57 @@ export default function ClassroomDetailPage() {
       </main>
 
       {/* Assign Student Modal */}
-      <AssignStudentModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onAssign={handleAssignStudent}
-        classroomName={classroom?.class_name || ''}
-        existingStudentIds={students.map((student) => student.id)}
-      />
-
+      {isCreateModalOpen && (
+        <AssignStudentModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onAssign={handleAssignStudent}
+          classroomName={classroom?.class_name || ''}
+          existingStudentIds={students.map((student) => student?.id)}
+        />
+      )}
       {/* Edit Student Modal */}
-      <EditStudentModal
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedStudent(null);
-        }}
-        student={selectedStudent}
-        onSave={handleSaveStudent}
-      />
-
+      {isEditModalOpen && (
+        <EditStudentModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedStudent(null);
+          }}
+          student={selectedStudent}
+          onSave={handleSaveStudent}
+        />
+      )}
       {/* View Student Modal */}
-      <ViewStudentModal
-        isOpen={isViewModalOpen}
-        onClose={() => {
-          setIsViewModalOpen(false);
-          setSelectedStudent(null);
-        }}
-        student={selectedStudent}
-      />
+      {isViewModalOpen && (
+        <ViewStudentModal
+          isOpen={isViewModalOpen}
+          onClose={() => {
+            setIsViewModalOpen(false);
+            setSelectedStudent(null);
+          }}
+          studentId={selectedStudent.id}
+          classroomId={classroom.id}
+        />
+      )}
 
-      {/* Studying Schedule Modal */}
-      <StudyingScheduleModal
-        isOpen={isScheduleModalOpen}
-        onClose={() => setIsScheduleModalOpen(false)}
-        classroom={classroom}
-      />
+      {isScheduleModalOpen && (
+        <StudyingScheduleModal
+          isOpen={isScheduleModalOpen}
+          onClose={() => setIsScheduleModalOpen(false)}
+          classroom={classroom}
+        />
+      )}
 
       {/* Edit Classroom Info Modal */}
-      <EditClassroomInfoModal
-        isOpen={isEditClassroomModalOpen}
-        onClose={() => setIsEditClassroomModalOpen(false)}
-        classroom={classroom}
-        onSave={handleSaveClassroom}
-      />
-    </div>
+      {isEditClassroomModalOpen && (
+        <EditClassroomInfoModal
+          isOpen={isEditClassroomModalOpen}
+          onClose={() => setIsEditClassroomModalOpen(false)}
+          classroom={classroom}
+          onSave={handleSaveClassroom}
+        />
+      )}
+    </>
   );
 }

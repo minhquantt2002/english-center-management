@@ -18,7 +18,7 @@ class Exam(Base):
     class_id = Column(UUID(), ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
     classroom = relationship("Class", back_populates="exams")
 
-    scores = relationship("Score", back_populates="exam")
+    scores = relationship("Score", back_populates="exam", cascade="all, delete-orphan")
 
     start_time = Column(DateTime(timezone=True), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

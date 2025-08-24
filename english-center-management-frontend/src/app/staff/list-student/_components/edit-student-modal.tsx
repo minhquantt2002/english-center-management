@@ -70,7 +70,7 @@ export default function EditStudentModal({
 
   // Check if form has any errors
   const hasErrors = () => {
-    return Object.values(errors).some(error => error && error.trim() !== '');
+    return Object.values(errors).some((error) => error && error.trim() !== '');
   };
 
   // Check if all required fields are filled
@@ -105,7 +105,10 @@ export default function EditStudentModal({
         newErrors.phone_number = 'Số điện thoại không hợp lệ';
       }
 
-      if (data.parent_phone && !/^[0-9]{10,11}$/.test(data.parent_phone.replace(/\s/g, ''))) {
+      if (
+        data.parent_phone &&
+        !/^[0-9]{10,11}$/.test(data.parent_phone.replace(/\s/g, ''))
+      ) {
         newErrors.parent_phone = 'Số điện thoại phụ huynh không hợp lệ';
       }
 
@@ -160,7 +163,6 @@ export default function EditStudentModal({
       newErrors.date_of_birth = 'Ngày sinh là bắt buộc';
     }
 
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -198,14 +200,14 @@ export default function EditStudentModal({
     setFormData(newFormData);
 
     // Handle date of birth validation separately
-    if (field === "date_of_birth") {
+    if (field === 'date_of_birth') {
       const selectedDate = new Date(value);
       const today = new Date();
 
       if (selectedDate > today) {
         setErrors((prev) => ({
           ...prev,
-          date_of_birth: "Ngày sinh không được vượt quá ngày hiện tại",
+          date_of_birth: 'Ngày sinh không được vượt quá ngày hiện tại',
         }));
       } else {
         setErrors((prev) => {
@@ -239,7 +241,10 @@ export default function EditStudentModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className='p-6 space-y-6'>
+        <form
+          onSubmit={handleSubmit}
+          className='p-6 space-y-6'
+        >
           {/* Personal Information */}
           <div>
             <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
@@ -256,8 +261,9 @@ export default function EditStudentModal({
                   type='text'
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.name ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    errors.name ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder='Nhập họ và tên'
                 />
                 {errors.name && (
@@ -275,8 +281,9 @@ export default function EditStudentModal({
                   onChange={(e) =>
                     handleInputChange('date_of_birth', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.date_of_birth ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    errors.date_of_birth ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
                 {errors.date_of_birth && (
                   <p className='text-red-500 text-sm mt-1'>
@@ -294,8 +301,9 @@ export default function EditStudentModal({
                   type='email'
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    errors.email ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder='example@email.com'
                 />
                 {errors.email && (
@@ -314,8 +322,9 @@ export default function EditStudentModal({
                   onChange={(e) =>
                     handleInputChange('phone_number', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.phone_number ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    errors.phone_number ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder='0123456789'
                 />
                 {errors.phone_number && (
@@ -338,8 +347,6 @@ export default function EditStudentModal({
                   placeholder='Nhập địa chỉ'
                 />
               </div>
-
-
             </div>
           </div>
 
@@ -363,7 +370,10 @@ export default function EditStudentModal({
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
                 >
                   {levels.map((level) => (
-                    <option key={level.value} value={level.value}>
+                    <option
+                      key={level.value}
+                      value={level.value}
+                    >
                       {level.label}
                     </option>
                   ))}
@@ -381,9 +391,9 @@ export default function EditStudentModal({
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
                 >
                   <option value='active'>Đang học</option>
-                  <option value='inactive'>Tạm nghỉ</option>
+                  <option value='inactive'>Không hoạt động</option>
                   <option value='suspended'>Tạm đình chỉ</option>
-                  <option value='graduated'>Đã tốt nghiệp</option>
+                  <option value='graduated'>Đã hoàn thành</option>
                 </select>
               </div>
             </div>
@@ -407,8 +417,9 @@ export default function EditStudentModal({
                   onChange={(e) =>
                     handleInputChange('parent_name', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.parent_name ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    errors.parent_name ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder='Tên người liên hệ'
                 />
                 {errors.parent_name && (
@@ -428,8 +439,9 @@ export default function EditStudentModal({
                   onChange={(e) =>
                     handleInputChange('parent_phone', e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.parent_phone ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    errors.parent_phone ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder='0123456789'
                 />
                 {errors.parent_phone && (
@@ -453,10 +465,11 @@ export default function EditStudentModal({
             <button
               type='submit'
               disabled={isLoading || !isFormValid()}
-              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${isLoading || !isFormValid()
+              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                isLoading || !isFormValid()
                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
                   : 'bg-teal-600 hover:bg-teal-700 text-white'
-                }`}
+              }`}
             >
               <Save className='w-4 h-4' />
               {isLoading ? 'Đang cập nhật...' : 'Cập nhật học viên'}

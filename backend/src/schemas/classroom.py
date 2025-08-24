@@ -10,7 +10,7 @@ from uuid import UUID
 class ClassStatus(str, enum.Enum):
     ACTIVE = "active"
     COMPLETED = "completed"
-    CANCELLED = "cancelled"
+    INACTIVE = "inactive"
 
 
 class CourseLevel(str, enum.Enum):

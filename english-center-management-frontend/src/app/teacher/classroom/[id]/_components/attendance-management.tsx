@@ -429,7 +429,7 @@ const AttendanceManagement: React.FC<{
               <div className='space-y-3'>
                 {enrollments.map((enrollment) => (
                   <div
-                    key={enrollment.student.id}
+                    key={enrollment?.student?.id}
                     className='flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50'
                   >
                     <div className='flex items-center'>
@@ -443,7 +443,7 @@ const AttendanceManagement: React.FC<{
                           {enrollment.student?.name || 'Không có tên'}
                         </h4>
                         <p className='text-sm text-gray-500'>
-                          #{enrollment.student.id.substring(0, 5)}
+                          #{enrollment?.student?.id?.substring(0, 5)}
                         </p>
                       </div>
                     </div>
@@ -452,10 +452,10 @@ const AttendanceManagement: React.FC<{
                       <div className='flex bg-gray-100 rounded-full p-1 space-x-1'>
                         <button
                           onClick={() =>
-                            toggleAttendance(enrollment.student.id, true)
+                            toggleAttendance(enrollment?.student?.id, true)
                           }
                           className={`relative flex items-center px-4 py-2 rounded-full text-sm font-medium ${
-                            attendance[enrollment.student.id] === true
+                            attendance[enrollment?.student?.id] === true
                               ? 'bg-green-500 text-white'
                               : 'text-gray-600 hover:text-green-600 hover:bg-green-50'
                           }`}
@@ -466,10 +466,10 @@ const AttendanceManagement: React.FC<{
 
                         <button
                           onClick={() =>
-                            toggleAttendance(enrollment.student.id, false)
+                            toggleAttendance(enrollment?.student?.id, false)
                           }
                           className={`relative flex items-center px-4 py-2 rounded-full text-sm font-medium ${
-                            attendance[enrollment.student.id] === false
+                            attendance[enrollment?.student?.id] === false
                               ? 'bg-red-500 text-white'
                               : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
                           }`}

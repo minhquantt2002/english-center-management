@@ -18,4 +18,4 @@ class Course(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    classes = relationship("Class", back_populates="course") 
+    classes = relationship("Class", back_populates="course", cascade="all, delete-orphan") 

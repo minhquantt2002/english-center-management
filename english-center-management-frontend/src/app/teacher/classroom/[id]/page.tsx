@@ -125,7 +125,7 @@ const ClassDetailPage = () => {
             {activeTab === 'students' && (
               <StudentList
                 classroomId={classDetails.id}
-                students={classDetails.enrollments}
+                students={classDetails.enrollments.filter((en) => en.student)}
                 refetchData={fetchClassData}
               />
             )}
@@ -141,14 +141,18 @@ const ClassDetailPage = () => {
               <AttendanceManagement
                 classId={classDetails.id}
                 schedules={classDetails.schedules}
-                enrollments={classDetails.enrollments}
+                enrollments={classDetails.enrollments.filter(
+                  (en) => en.student
+                )}
               />
             )}
 
             {activeTab === 'homework' && (
               <HomeworkManagement
                 classId={classDetails.id}
-                enrollments={classDetails.enrollments}
+                enrollments={classDetails.enrollments.filter(
+                  (en) => en.student
+                )}
               />
             )}
 
@@ -159,7 +163,9 @@ const ClassDetailPage = () => {
                     classDetails.course.level.toUpperCase()
                   )
                 }
-                enrollments={classDetails.enrollments}
+                enrollments={classDetails.enrollments.filter(
+                  (en) => en.student
+                )}
               />
             )}
           </div>

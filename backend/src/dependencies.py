@@ -40,7 +40,7 @@ async def get_current_admin_user(
     """
     Dependency để lấy current admin user
     """
-    if current_user.role_name != "admin":
+    if current_user.role_name not in ["admin", "staff"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Không có quyền truy cập"

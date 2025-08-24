@@ -71,6 +71,10 @@ def get_today_schedules_by_student(db: Session, student_id: UUID) -> List[Dict[s
     schedules = schedule_crud.get_schedules_by_student_weekday(db, student_id, weekday)
     return [_schedule_to_dict(schedule) for schedule in schedules]
 
+def delete_schedule(db: Session, schedule_id: UUID) -> None:
+    """Delete schedule by ID"""
+    schedule_crud.delete_schedule(db, schedule_id)
+
 def create_schedule(db: Session, schedule_data: ScheduleCreate) -> Dict[str, Any]:
     """Create new schedule"""
     schedule = schedule_crud.create_schedule(db, schedule_data)

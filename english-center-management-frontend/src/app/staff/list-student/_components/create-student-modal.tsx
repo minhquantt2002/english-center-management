@@ -1,7 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, User, Mail, Phone, Calendar, MapPin, Users, BookOpen } from 'lucide-react';
+import {
+  X,
+  User,
+  Mail,
+  Phone,
+  Calendar,
+  MapPin,
+  Users,
+  BookOpen,
+} from 'lucide-react';
 import { StudentCreate } from '../../../../types/staff';
 
 interface CreateStudentModalProps {
@@ -41,7 +50,9 @@ export default function CreateStudentModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<StudentCreate>(INITIAL_FORM_DATA);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>(
+    {}
+  );
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string>('');
 
@@ -56,7 +67,9 @@ export default function CreateStudentModal({
   };
 
   const isValidPhone = (phone: string) => {
-    return phone.trim() !== '' && /^[0-9]{10,11}$/.test(phone.replace(/\s/g, ''));
+    return (
+      phone.trim() !== '' && /^[0-9]{10,11}$/.test(phone.replace(/\s/g, ''))
+    );
   };
 
   const isValidPassword = (password: string) => {
@@ -147,7 +160,8 @@ export default function CreateStudentModal({
             const selectedDate = new Date(value);
             const today = new Date();
             if (selectedDate > today) {
-              newErrors.date_of_birth = 'Ngày sinh không được vượt quá ngày hiện tại';
+              newErrors.date_of_birth =
+                'Ngày sinh không được vượt quá ngày hiện tại';
             } else {
               delete newErrors.date_of_birth;
             }
@@ -164,9 +178,15 @@ export default function CreateStudentModal({
 
   // Validate all fields for form submission
   const validateAllFields = () => {
-    const fieldsToValidate = ['name', 'email', 'phone_number', 'password', 'date_of_birth'];
+    const fieldsToValidate = [
+      'name',
+      'email',
+      'phone_number',
+      'password',
+      'date_of_birth',
+    ];
 
-    fieldsToValidate.forEach(field => {
+    fieldsToValidate.forEach((field) => {
       validateFieldForDisplay(field, formData[field as keyof StudentCreate]);
     });
 
@@ -176,7 +196,7 @@ export default function CreateStudentModal({
 
   // Check if form has any errors
   const hasErrors = () => {
-    return Object.values(errors).some(error => error && error.trim() !== '');
+    return Object.values(errors).some((error) => error && error.trim() !== '');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -186,7 +206,13 @@ export default function CreateStudentModal({
     setSubmitError('');
 
     // Mark all required fields as touched
-    const requiredFields = ['name', 'email', 'phone_number', 'password', 'date_of_birth'];
+    const requiredFields = [
+      'name',
+      'email',
+      'phone_number',
+      'password',
+      'date_of_birth',
+    ];
     setTouchedFields((prev) => {
       const newTouched = { ...prev };
       requiredFields.forEach((field) => {
@@ -249,8 +275,6 @@ export default function CreateStudentModal({
     };
   }, [isSubmitting]);
 
-  
-
   const handleInputChange = (field: string, value: string) => {
     const newFormData = {
       ...formData,
@@ -295,7 +319,10 @@ export default function CreateStudentModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className='p-6 space-y-6'>
+        <form
+          onSubmit={handleSubmit}
+          className='p-6 space-y-6'
+        >
           {/* Personal Information */}
           <div>
             <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center gap-2'>
@@ -313,15 +340,25 @@ export default function CreateStudentModal({
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   onBlur={() => handleFieldBlur('name')}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('name') && errors.name
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    shouldShowError('name') && errors.name
                       ? 'border-red-500'
                       : 'border-gray-300'
-                    }`}
+                  }`}
                   placeholder='Nhập họ và tên'
-                  aria-describedby={shouldShowError('name') && errors.name ? 'name-error' : undefined}
+                  aria-describedby={
+                    shouldShowError('name') && errors.name
+                      ? 'name-error'
+                      : undefined
+                  }
                 />
                 {shouldShowError('name') && errors.name && (
-                  <p id='name-error' className='mt-1 text-sm text-red-600'>{errors.name}</p>
+                  <p
+                    id='name-error'
+                    className='mt-1 text-sm text-red-600'
+                  >
+                    {errors.name}
+                  </p>
                 )}
               </div>
 
@@ -338,15 +375,23 @@ export default function CreateStudentModal({
                       handleInputChange('date_of_birth', e.target.value)
                     }
                     onBlur={() => handleFieldBlur('date_of_birth')}
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('date_of_birth') && errors.date_of_birth
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      shouldShowError('date_of_birth') && errors.date_of_birth
                         ? 'border-red-500'
                         : 'border-gray-300'
-                      }`}
-                    aria-describedby={shouldShowError('date_of_birth') && errors.date_of_birth ? 'dob-error' : undefined}
+                    }`}
+                    aria-describedby={
+                      shouldShowError('date_of_birth') && errors.date_of_birth
+                        ? 'dob-error'
+                        : undefined
+                    }
                   />
                 </div>
                 {shouldShowError('date_of_birth') && errors.date_of_birth && (
-                  <p id='dob-error' className='mt-1 text-sm text-red-600'>
+                  <p
+                    id='dob-error'
+                    className='mt-1 text-sm text-red-600'
+                  >
                     {errors.date_of_birth}
                   </p>
                 )}
@@ -363,16 +408,26 @@ export default function CreateStudentModal({
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     onBlur={() => handleFieldBlur('email')}
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('email') && errors.email
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      shouldShowError('email') && errors.email
                         ? 'border-red-500'
                         : 'border-gray-300'
-                      }`}
+                    }`}
                     placeholder='example@email.com'
-                    aria-describedby={shouldShowError('email') && errors.email ? 'email-error' : undefined}
+                    aria-describedby={
+                      shouldShowError('email') && errors.email
+                        ? 'email-error'
+                        : undefined
+                    }
                   />
                 </div>
                 {shouldShowError('email') && errors.email && (
-                  <p id='email-error' className='mt-1 text-sm text-red-600'>{errors.email}</p>
+                  <p
+                    id='email-error'
+                    className='mt-1 text-sm text-red-600'
+                  >
+                    {errors.email}
+                  </p>
                 )}
               </div>
 
@@ -389,16 +444,24 @@ export default function CreateStudentModal({
                       handleInputChange('phone_number', e.target.value)
                     }
                     onBlur={() => handleFieldBlur('phone_number')}
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('phone_number') && errors.phone_number
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      shouldShowError('phone_number') && errors.phone_number
                         ? 'border-red-500'
                         : 'border-gray-300'
-                      }`}
+                    }`}
                     placeholder='0123456789'
-                    aria-describedby={shouldShowError('phone_number') && errors.phone_number ? 'phone-error' : undefined}
+                    aria-describedby={
+                      shouldShowError('phone_number') && errors.phone_number
+                        ? 'phone-error'
+                        : undefined
+                    }
                   />
                 </div>
                 {shouldShowError('phone_number') && errors.phone_number && (
-                  <p id='phone-error' className='mt-1 text-sm text-red-600'>
+                  <p
+                    id='phone-error'
+                    className='mt-1 text-sm text-red-600'
+                  >
                     {errors.phone_number}
                   </p>
                 )}
@@ -430,20 +493,31 @@ export default function CreateStudentModal({
                 <input
                   type='password'
                   value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('password', e.target.value)
+                  }
                   onBlur={() => handleFieldBlur('password')}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${shouldShowError('password') && errors.password
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    shouldShowError('password') && errors.password
                       ? 'border-red-500'
                       : 'border-gray-300'
-                    }`}
+                  }`}
                   placeholder='Nhập mật khẩu (tối thiểu 6 ký tự)'
-                  aria-describedby={shouldShowError('password') && errors.password ? 'password-error' : undefined}
+                  aria-describedby={
+                    shouldShowError('password') && errors.password
+                      ? 'password-error'
+                      : undefined
+                  }
                 />
                 {shouldShowError('password') && errors.password && (
-                  <p id='password-error' className='mt-1 text-sm text-red-600'>{errors.password}</p>
+                  <p
+                    id='password-error'
+                    className='mt-1 text-sm text-red-600'
+                  >
+                    {errors.password}
+                  </p>
                 )}
               </div>
-
             </div>
           </div>
 
@@ -467,7 +541,10 @@ export default function CreateStudentModal({
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
                 >
                   {levels.map((level) => (
-                    <option key={level.value} value={level.value}>
+                    <option
+                      key={level.value}
+                      value={level.value}
+                    >
                       {level.label}
                     </option>
                   ))}
@@ -485,9 +562,9 @@ export default function CreateStudentModal({
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
                 >
                   <option value='active'>Đang học</option>
-                  <option value='inactive'>Tạm nghỉ</option>
+                  <option value='inactive'>Không hoạt động</option>
                   <option value='suspended'>Tạm đình chỉ</option>
-                  <option value='graduated'>Đã tốt nghiệp</option>
+                  <option value='graduated'>Đã hoàn thành</option>
                 </select>
               </div>
             </div>
@@ -545,10 +622,11 @@ export default function CreateStudentModal({
             <button
               type='submit'
               disabled={isSubmitting || !isFormValidForSubmit()}
-              className={`px-4 py-2 text-sm font-medium border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2 ${isSubmitting || !isFormValidForSubmit()
+              className={`px-4 py-2 text-sm font-medium border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2 ${
+                isSubmitting || !isFormValidForSubmit()
                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
                   : 'text-white bg-blue-600 hover:bg-blue-700'
-                }`}
+              }`}
             >
               {isSubmitting ? (
                 <>

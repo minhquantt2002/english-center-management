@@ -279,7 +279,7 @@ const ViewStudentModal: React.FC<ViewStudentModalProps> = ({
                   >
                     {(student.status || 'active') === 'active'
                       ? 'Đang học'
-                      : 'Tạm nghỉ'}
+                      : 'Không hoạt động'}
                   </span>
                 </div>
               </div>

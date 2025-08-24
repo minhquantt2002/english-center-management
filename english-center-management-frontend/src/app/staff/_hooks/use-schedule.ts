@@ -86,24 +86,19 @@ export const useStaffScheduleApi = () => {
     []
   );
 
-  const deleteSchedule = useCallback(
-    async (id: string): Promise<DeleteScheduleResponse> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await api.delete(`/staff/schedules/${id}`);
-        return response;
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Có lỗi xảy ra';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
+  const deleteSchedule = useCallback(async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await api.delete(`/staff/schedules/${id}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const getClassroomSchedules = useCallback(
     async (classroomId: string): Promise<ScheduleResponse[]> => {

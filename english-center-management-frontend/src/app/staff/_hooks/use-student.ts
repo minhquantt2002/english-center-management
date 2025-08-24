@@ -4,8 +4,6 @@ import {
   StudentResponse,
   StudentCreate,
   StudentUpdate,
-  StudentAchievementsResponse,
-  StudentInvoicesResponse,
 } from '../../../types/staff';
 
 export const useStaffStudentApi = () => {
@@ -118,46 +116,6 @@ export const useStaffStudentApi = () => {
     }
   }, []);
 
-  const getStudentAchievements = useCallback(
-    async (studentId: string): Promise<StudentAchievementsResponse> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await api.get(
-          `/staff/students/${studentId}/achievements`
-        );
-        return response;
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Có lỗi xảy ra';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  const getStudentInvoices = useCallback(
-    async (studentId: string): Promise<StudentInvoicesResponse> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await api.get(`/staff/students/${studentId}/invoices`);
-        return response;
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Có lỗi xảy ra';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
   return {
     loading,
     error,
@@ -166,8 +124,6 @@ export const useStaffStudentApi = () => {
     updateStudent,
     deleteStudent,
     getAvailableStudents,
-    getStudentAchievements,
-    getStudentInvoices,
     getStudentById,
   };
 };

@@ -1,20 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-  X,
-  Users,
-  MapPin,
-  Calendar,
-  User,
-  BookOpen,
-  Save,
-  Plus,
-} from 'lucide-react';
+import { X, MapPin, Calendar, User, BookOpen, Save, Plus } from 'lucide-react';
 import { useStaffCourseApi, useStaffTeacherApi } from '../../_hooks';
 import {
   ClassroomCreate,
-  CourseLevel,
   CourseResponse,
   TeacherResponse,
 } from '../../../../types/staff';
@@ -41,10 +31,7 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
   const [teachers, setTeachers] = useState<TeacherResponse[]>([]);
   const [courses, setCourses] = useState<CourseResponse[]>([]);
   const { getCourses } = useStaffCourseApi();
-  const [schedules, setSchedules] = useState([
-    { weekday: '', start_time: '', end_time: '' },
-  ]);
-  const [scheduleErrors, setScheduleErrors] = useState<string[]>([]);
+
   const { getTeachers } = useStaffTeacherApi();
 
   // Fetch data for dropdowns
@@ -82,31 +69,6 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
     }
   };
 
-  const handleScheduleChange = (idx: number, field: string, value: string) => {
-    setSchedules((prev) =>
-      prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item))
-    );
-    // Clear error for this schedule
-    setScheduleErrors((prev) => {
-      const newErrs = [...prev];
-      newErrs[idx] = '';
-      return newErrs;
-    });
-  };
-
-  const handleAddSchedule = () => {
-    setSchedules((prev) => [
-      ...prev,
-      { weekday: '', start_time: '', end_time: '' },
-    ]);
-    setScheduleErrors((prev) => [...prev, '']);
-  };
-
-  const handleRemoveSchedule = (idx: number) => {
-    setSchedules((prev) => prev.filter((_, i) => i !== idx));
-    setScheduleErrors((prev) => prev.filter((_, i) => i !== idx));
-  };
-
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     let valid = true;
@@ -127,18 +89,6 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
       newErrors.end_date = 'Vui lòng chọn phòng học';
     }
 
-    // Validate schedules
-    const newScheduleErrors: string[] = [];
-    schedules.forEach((sch, idx) => {
-      if (!sch.weekday || !sch.start_time || !sch.end_time) {
-        newScheduleErrors[idx] = 'Vui lòng chọn đủ thông tin cho lịch học';
-        valid = false;
-      } else {
-        newScheduleErrors[idx] = '';
-      }
-    });
-    setScheduleErrors(newScheduleErrors);
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0 && valid;
   };
@@ -150,19 +100,15 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
       return;
     }
 
-    const classData: Partial<ClassroomCreate> & { schedules: any[] } = {
+    const classData: Partial<ClassroomCreate> = {
       class_name: formData.class_name,
       course_id: formData.course_id,
       teacher_id: formData.teacher_id,
-      status: formData.status,
+      status: 'active',
       room: formData.room,
       start_date: formData.start_date,
       end_date: formData.end_date,
-      schedules: schedules.map((sch) => ({
-        weekday: sch.weekday,
-        start_time: sch.start_time,
-        end_time: sch.end_time,
-      })),
+      course_level: courses.find((v) => v.id === formData.course_id)?.level,
     };
 
     onSubmit(classData);
@@ -177,8 +123,6 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
       status: 'active',
     });
     setErrors({});
-    setSchedules([{ weekday: '', start_time: '', end_time: '' }]);
-    setScheduleErrors([]);
     onClose();
   };
 
@@ -208,7 +152,10 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
         </div>
 
         {/* Content */}
-        <form onSubmit={handleSubmit} className='p-6 space-y-6'>
+        <form
+          onSubmit={handleSubmit}
+          className='p-6 space-y-6'
+        >
           {/* Basic Information */}
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             {/* Class Name */}
@@ -226,7 +173,7 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
                   errors.class_name ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder='Ví dụ: Tiếng Anh Cơ Bản A1'
+                placeholder='Nhập tên lớp học'
               />
               {errors.class_name && (
                 <p className='text-red-500 text-sm mt-1'>{errors.class_name}</p>
@@ -246,32 +193,11 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent ${
                   errors.room ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder='Ví dụ: Tiếng Anh Cơ Bản A1'
+                placeholder='Nhập tên phòng học'
               />
               {errors.room && (
                 <p className='text-red-500 text-sm mt-1'>{errors.room}</p>
               )}
-            </div>
-
-            {/* Course Level */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                <Users className='w-4 h-4 inline mr-2' />
-                Trình độ
-              </label>
-              <select
-                value={formData.course_id}
-                onChange={(e) =>
-                  handleInputChange('course_id', e.target.value as CourseLevel)
-                }
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
-              >
-                <option value='A1'>A1 - Mất gốc</option>
-                <option value='A2'>A2 - Sơ cấp</option>
-                <option value='B1'>B1 - Trung cấp thấp</option>
-                <option value='B2'>B2 - Trung cấp cao</option>
-                <option value='C1'>C1 - Nâng cao</option>
-              </select>
             </div>
 
             {/* Teacher */}
@@ -291,7 +217,10 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
               >
                 <option value=''>Chọn giáo viên</option>
                 {teachers.map((teacher) => (
-                  <option key={teacher.id} value={teacher.id}>
+                  <option
+                    key={teacher.id}
+                    value={teacher.id}
+                  >
                     {teacher.name}
                   </option>
                 ))}
@@ -314,123 +243,14 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
               >
                 <option value=''>Chọn khóa học (tùy chọn)</option>
                 {courses.map((course) => (
-                  <option key={course.id} value={course.id}>
+                  <option
+                    key={course.id}
+                    value={course.id}
+                  >
                     {course.course_name}
                   </option>
                 ))}
               </select>
-            </div>
-
-            {/* Status */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Trạng thái
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) =>
-                  handleInputChange(
-                    'status',
-                    e.target.value as 'active' | 'inactive'
-                  )
-                }
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
-              >
-                <option value='active'>Đang hoạt động</option>
-                <option value='inactive'>Tạm ngưng</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Schedule Information */}
-          <div className='border-t pt-6'>
-            <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
-              <Calendar className='w-5 h-5 mr-2' />
-              Lịch học
-            </h3>
-            <div className='space-y-4'>
-              {schedules.map((sch, idx) => (
-                <div
-                  key={idx}
-                  className='grid grid-cols-1 md:grid-cols-12 gap-4 items-end border p-4 rounded-lg relative bg-gray-50'
-                >
-                  {/* Weekday */}
-                  <div className='md:col-span-4'>
-                    <label className='block text-sm font-medium text-gray-700 mb-2'>
-                      Thứ *
-                    </label>
-                    <select
-                      value={sch.weekday}
-                      onChange={(e) =>
-                        handleScheduleChange(idx, 'weekday', e.target.value)
-                      }
-                      className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
-                    >
-                      <option value=''>Chọn thứ</option>
-                      <option value='monday'>Thứ Hai</option>
-                      <option value='tuesday'>Thứ Ba</option>
-                      <option value='wednesday'>Thứ Tư</option>
-                      <option value='thursday'>Thứ Năm</option>
-                      <option value='friday'>Thứ Sáu</option>
-                      <option value='saturday'>Thứ Bảy</option>
-                      <option value='sunday'>Chủ Nhật</option>
-                    </select>
-                  </div>
-                  {/* Start time */}
-                  <div className='md:col-span-4'>
-                    <label className='block text-sm font-medium text-gray-700 mb-2'>
-                      Giờ bắt đầu *
-                    </label>
-                    <input
-                      type='time'
-                      value={sch.start_time}
-                      onChange={(e) =>
-                        handleScheduleChange(idx, 'start_time', e.target.value)
-                      }
-                      className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
-                    />
-                  </div>
-                  {/* End time */}
-                  <div className='md:col-span-4'>
-                    <label className='block text-sm font-medium text-gray-700 mb-2'>
-                      Giờ kết thúc *
-                    </label>
-                    <input
-                      type='time'
-                      value={sch.end_time}
-                      onChange={(e) =>
-                        handleScheduleChange(idx, 'end_time', e.target.value)
-                      }
-                      className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
-                    />
-                  </div>
-                  {/* Remove button */}
-                  <div className='flex items-center justify-end md:col-span-12'>
-                    {schedules.length > 1 && (
-                      <button
-                        type='button'
-                        onClick={() => handleRemoveSchedule(idx)}
-                        className='text-red-500 hover:text-red-700 px-2 py-1 rounded-lg border border-red-200 bg-white ml-2'
-                      >
-                        <X className='w-4 h-4' />
-                      </button>
-                    )}
-                  </div>
-                  {/* Error message */}
-                  {scheduleErrors[idx] && (
-                    <div className='col-span-12 text-red-500 text-sm mt-1'>
-                      {scheduleErrors[idx]}
-                    </div>
-                  )}
-                </div>
-              ))}
-              <button
-                type='button'
-                onClick={handleAddSchedule}
-                className='mt-2 px-4 py-2 bg-cyan-100 text-cyan-700 rounded-lg flex items-center hover:bg-cyan-200'
-              >
-                <Plus className='w-4 h-4 mr-1' /> Thêm lịch học
-              </button>
             </div>
           </div>
 
@@ -439,6 +259,7 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
             {/* Start Date */}
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-2'>
+                <Calendar className='w-4 h-4 inline mr-2' />
                 Ngày bắt đầu *
               </label>
               <input
@@ -458,6 +279,7 @@ const CreateClassroomModal: React.FC<CreateClassroomModalProps> = ({
             {/* End Date */}
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-2'>
+                <Calendar className='w-4 h-4 inline mr-2' />
                 Ngày kết thúc *
               </label>
               <input

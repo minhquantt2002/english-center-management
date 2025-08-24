@@ -20,8 +20,8 @@ class Session(Base):
   schedule_id = Column(UUID(), ForeignKey("schedules.id", ondelete="CASCADE"), nullable=False)
   schedule = relationship("Schedule", back_populates="sessions")
 
-  attendances = relationship("Attendance", back_populates="session")
-  homeworks = relationship("Homework", back_populates="session")
+  attendances = relationship("Attendance", back_populates="session", cascade="all, delete-orphan")
+  homeworks = relationship("Homework", back_populates="session", cascade="all, delete-orphan")
 
 
 class Attendance(Base):

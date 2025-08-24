@@ -2,7 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MapPin, Calendar, User, Edit, UserPlus, Plus, Users, PlayCircle, CheckCircle2, XCircle } from 'lucide-react';
+import {
+  MapPin,
+  Calendar,
+  User,
+  Edit,
+  UserPlus,
+  Plus,
+  Users,
+  PlayCircle,
+  CheckCircle2,
+  XCircle,
+} from 'lucide-react';
 import EditClassroomModal from './_components/edit-classroom';
 import CreateClassroomModal from './_components/create-classroom';
 import AssignStudentModal from './_components/assign-student';
@@ -22,7 +33,7 @@ export default function EnglishCourseInterface() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { error, getClassrooms, createClassroom, updateClassroom } =
+  const { getClassrooms, createClassroom, updateClassroom } =
     useStaffClassroomApi();
 
   // Fetch classrooms on component mount
@@ -48,12 +59,13 @@ export default function EnglishCourseInterface() {
       id: classItem.id,
       name: classItem.class_name || 'Lớp học',
       level: classItem.course?.level || 'Chưa xác định',
-      status:
-        classItem.status === 'active'
-          ? 'active'
-          : ('upcoming' as 'active' | 'upcoming' | 'full'),
+      status: classItem.status,
       statusText:
-        classItem.status === 'active' ? 'Đang hoạt động' : 'Sắp khai giảng',
+        classItem.status === 'active'
+          ? 'Đang hoạt động'
+          : classItem.status === 'completed'
+          ? 'Đã hoàn thành'
+          : 'Không hoạt động',
       day:
         classItem.schedules.length > 0
           ? formatDays(classItem.schedules.map((schedule) => schedule.weekday))
@@ -66,13 +78,13 @@ export default function EnglishCourseInterface() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'upcoming':
-        return 'bg-orange-100 text-orange-800';
-      case 'full':
-        return 'bg-red-100 text-red-800';
+        return 'bg-blue-100 text-blue-800 font-semibold';
+      case 'completed':
+        return 'bg-green-100 text-green-800 font-semibold';
+      case 'inactive':
+        return 'bg-red-100 text-red-800 font-semibold';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 font-semibold';
     }
   };
 
@@ -117,27 +129,11 @@ export default function EnglishCourseInterface() {
     );
   }
 
-  if (error) {
-    return (
-      <div className='h-full bg-gray-50 flex items-center justify-center'>
-        <div className='text-center'>
-          <p className='text-red-600 mb-2'>Có lỗi xảy ra khi tải dữ liệu</p>
-          <button
-            onClick={fetchClassrooms}
-            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
-          >
-            Thử lại
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className='h-full w-full'>
       <main className='mx-auto'>
-        <div className='flex items-center justify-between mb-8'>
-          <h1 className='text-3xl font-bold text-gray-900 mb-2'>
+        <div className='flex items-center justify-between mb-6'>
+          <h1 className='text-2xl font-bold text-gray-900 mb-2'>
             Danh sách lớp học
           </h1>
           <button
@@ -150,12 +146,14 @@ export default function EnglishCourseInterface() {
         </div>
 
         {/* Stats Cards */}
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6'>
           <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
             <div className='flex items-center justify-between'>
               <div>
                 <p className='text-gray-500 text-sm font-medium'>Tổng số lớp</p>
-                <p className='text-2xl font-bold text-gray-900 mt-1'>{classrooms.length}</p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {classrooms.length}
+                </p>
               </div>
               <div className='w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center'>
                 <Users className='w-6 h-6 text-cyan-600' />
@@ -165,8 +163,12 @@ export default function EnglishCourseInterface() {
           <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
             <div className='flex items-center justify-between'>
               <div>
-                <p className='text-gray-500 text-sm font-medium'>Đang hoạt động</p>
-                <p className='text-2xl font-bold text-gray-900 mt-1'>{classrooms.filter(c => c.status === 'active').length}</p>
+                <p className='text-gray-500 text-sm font-medium'>
+                  Đang hoạt động
+                </p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {classrooms.filter((c) => c.status === 'active').length}
+                </p>
               </div>
               <div className='w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center'>
                 <PlayCircle className='w-6 h-6 text-green-600' />
@@ -176,8 +178,12 @@ export default function EnglishCourseInterface() {
           <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
             <div className='flex items-center justify-between'>
               <div>
-                <p className='text-gray-500 text-sm font-medium'>Đã hoàn thành</p>
-                <p className='text-2xl font-bold text-gray-900 mt-1'>{classrooms.filter(c => c.status === 'completed').length}</p>
+                <p className='text-gray-500 text-sm font-medium'>
+                  Đã hoàn thành
+                </p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {classrooms.filter((c) => c.status === 'completed').length}
+                </p>
               </div>
               <div className='w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center'>
                 <CheckCircle2 className='w-6 h-6 text-blue-600' />
@@ -188,7 +194,9 @@ export default function EnglishCourseInterface() {
             <div className='flex items-center justify-between'>
               <div>
                 <p className='text-gray-500 text-sm font-medium'>Đã hủy</p>
-                <p className='text-2xl font-bold text-gray-900 mt-1'>{classrooms.filter(c => c.status === 'cancelled').length}</p>
+                <p className='text-2xl font-bold text-gray-900 mt-1'>
+                  {classrooms.filter((c) => c.status === 'inactive').length}
+                </p>
               </div>
               <div className='w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center'>
                 <XCircle className='w-6 h-6 text-red-600' />
@@ -202,98 +210,98 @@ export default function EnglishCourseInterface() {
           {courses
             .slice((currentPage - 1) * 6, currentPage * 6)
             .map((course) => (
-            <div
-              key={course.id}
-              className='bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow'
-            >
-              {/* Card Header */}
-              <div className='p-6 pb-4'>
-                <div className='flex items-center space-x-1.5 mb-3'>
-                  <div className='flex-1'>
-                    <h3 className='text-lg font-semibold text-gray-900'>
-                      {course.name}
-                    </h3>
-                    <p className='text-sm text-gray-500 mt-1'>
-                      Cấp độ: {course.level}
-                    </p>
+              <div
+                key={course.id}
+                className='bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow'
+              >
+                {/* Card Header */}
+                <div className='p-6 pb-4'>
+                  <div className='flex items-center space-x-1.5 mb-3'>
+                    <div className='flex-1'>
+                      <h3 className='text-lg font-semibold text-gray-900'>
+                        {course.name}
+                      </h3>
+                      <p className='text-sm text-gray-500 mt-1'>
+                        Cấp độ: {course.level}
+                      </p>
+                    </div>
+                    <div
+                      className={`p-2 font-medium text-center rounded-full text-xs ${getStatusColor(
+                        course.status
+                      )}`}
+                    >
+                      {course.statusText}
+                    </div>
                   </div>
-                  <div
-                    className={`p-2 font-medium text-center rounded-full text-xs ${getStatusColor(
-                      course.status
-                    )}`}
-                  >
-                    {course.statusText}
+
+                  {/* Course Details */}
+                  <div className='space-y-3'>
+                    <div className='flex items-center space-x-2 text-sm text-gray-600'>
+                      <Calendar className='w-4 h-4' />
+                      <span>{course.day}</span>
+                    </div>
+                    <div className='flex items-center space-x-2 text-sm text-gray-600'>
+                      <User className='w-4 h-4' />
+                      <span>{course.instructor}</span>
+                    </div>
+                    <div className='flex items-center space-x-2 text-sm text-gray-600'>
+                      <MapPin className='w-4 h-4' />
+                      <span>{course.room}</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Course Details */}
-                <div className='space-y-3'>
-                  <div className='flex items-center space-x-2 text-sm text-gray-600'>
-                    <Calendar className='w-4 h-4' />
-                    <span>{course.day}</span>
-                  </div>
-                  <div className='flex items-center space-x-2 text-sm text-gray-600'>
-                    <User className='w-4 h-4' />
-                    <span>{course.instructor}</span>
-                  </div>
-                  <div className='flex items-center space-x-2 text-sm text-gray-600'>
-                    <MapPin className='w-4 h-4' />
-                    <span>{course.room}</span>
+                {/* Card Footer */}
+                <div className='px-6 py-4 bg-gray-50 border-t'>
+                  <button
+                    onClick={() =>
+                      router.push(`/staff/list-classroom/${course.id}`)
+                    }
+                    className='w-full bg-cyan-500 hover:bg-cyan-600 text-white py-2 px-4 rounded-lg font-medium transition-colors'
+                  >
+                    Xem chi tiết lớp
+                  </button>
+                  <div className='flex justify-between mt-3 text-xs text-gray-500'>
+                    <button
+                      onClick={() => {
+                        const originalClassroom = classrooms.find(
+                          (cls) => cls.id === course.id
+                        );
+                        if (originalClassroom) {
+                          setSelectedClassroom(originalClassroom);
+                          setIsAssignModalOpen(true);
+                        }
+                      }}
+                      className='text-cyan-600 hover:text-cyan-800 transition-colors flex items-center space-x-1'
+                    >
+                      <UserPlus className='w-3 h-3' />
+                      <span>Thêm học viên</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        const originalClassroom = classrooms.find(
+                          (cls) => cls.id === course.id
+                        );
+                        if (originalClassroom) {
+                          handleEditClassroom(originalClassroom);
+                        }
+                      }}
+                      className='text-cyan-600 hover:text-cyan-800 transition-colors flex items-center space-x-1'
+                    >
+                      <Edit className='w-3 h-3' />
+                      <span>Chỉnh sửa</span>
+                    </button>
                   </div>
                 </div>
               </div>
-
-              {/* Card Footer */}
-              <div className='px-6 py-4 bg-gray-50 border-t'>
-                <button
-                  onClick={() =>
-                    router.push(`/staff/list-classroom/${course.id}`)
-                  }
-                  className='w-full bg-cyan-500 hover:bg-cyan-600 text-white py-2 px-4 rounded-lg font-medium transition-colors'
-                >
-                  Xem chi tiết lớp
-                </button>
-                <div className='flex justify-between mt-3 text-xs text-gray-500'>
-                  <button
-                    onClick={() => {
-                      const originalClassroom = classrooms.find(
-                        (cls) => cls.id === course.id
-                      );
-                      if (originalClassroom) {
-                        setSelectedClassroom(originalClassroom);
-                        setIsAssignModalOpen(true);
-                      }
-                    }}
-                    className='text-cyan-600 hover:text-cyan-800 transition-colors flex items-center space-x-1'
-                  >
-                    <UserPlus className='w-3 h-3' />
-                    <span>Thêm học viên</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      const originalClassroom = classrooms.find(
-                        (cls) => cls.id === course.id
-                      );
-                      if (originalClassroom) {
-                        handleEditClassroom(originalClassroom);
-                      }
-                    }}
-                    className='text-cyan-600 hover:text-cyan-800 transition-colors flex items-center space-x-1'
-                  >
-                    <Edit className='w-3 h-3' />
-                    <span>Chỉnh sửa</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
 
         {/* Pagination Controls */}
         {courses.length > 6 && (
           <div className='flex justify-center items-center mt-8'>
             <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
               className='px-4 py-2 mx-1 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed'
             >
@@ -303,7 +311,11 @@ export default function EnglishCourseInterface() {
               Trang {currentPage} / {Math.ceil(courses.length / 6)}
             </span>
             <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(courses.length / 6)))}
+              onClick={() =>
+                setCurrentPage((prev) =>
+                  Math.min(prev + 1, Math.ceil(courses.length / 6))
+                )
+              }
               disabled={currentPage >= Math.ceil(courses.length / 6)}
               className='px-4 py-2 mx-1 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed'
             >

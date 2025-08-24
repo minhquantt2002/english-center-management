@@ -94,43 +94,39 @@ const SchedulePage: React.FC = () => {
   };
 
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <>
       {/* Header */}
-      <div className='bg-white shadow-sm border-b border-gray-200'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='flex justify-between items-center py-6'>
-            <div>
-              <h1 className='text-2xl font-bold text-gray-900'>
-                Thời khóa biểu
-              </h1>
-              <p className='text-gray-600 mt-1'>
-                Xem lịch học hàng tuần và quản lý lớp học
-              </p>
-            </div>
-            <div className='flex items-center gap-4'>
-              <div className='flex gap-2'>
-                <button
-                  onClick={() => setShowCreateScheduleModal(true)}
-                  className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors'
-                >
-                  <Calendar size={20} />
-                  Thêm lịch học
-                </button>
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className='bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors'
-                >
-                  <Plus size={20} />
-                  Thêm lớp học
-                </button>
-              </div>
+      <div>
+        <div className='flex justify-between items-center'>
+          <div>
+            <h1 className='text-2xl font-bold text-gray-900'>Thời khóa biểu</h1>
+            <p className='text-gray-600 mt-1'>
+              Xem lịch học hàng tuần và quản lý lớp học
+            </p>
+          </div>
+          <div className='flex items-center gap-4'>
+            <div className='flex gap-2'>
+              <button
+                onClick={() => setShowCreateScheduleModal(true)}
+                className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors'
+              >
+                <Calendar size={20} />
+                Thêm lịch học
+              </button>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className='bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors'
+              >
+                <Plus size={20} />
+                Thêm lớp học
+              </button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+      <div className='mx-auto mt-8'>
         {isLoading ? (
           <div className='flex justify-center items-center py-12'>
             <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600'></div>
@@ -138,7 +134,7 @@ const SchedulePage: React.FC = () => {
         ) : (
           <div>
             {/* Today's Schedule */}
-            <div className='bg-white rounded-lg shadow-sm border border-gray-200 mb-8'>
+            <div className='bg-white rounded-lg shadow-sm border border-gray-200 mb-4'>
               <div className='p-6 border-b border-gray-200 flex justify-between items-center'>
                 <div>
                   <h2 className='text-lg font-semibold text-gray-900'>
@@ -224,7 +220,7 @@ const SchedulePage: React.FC = () => {
             </div>
 
             {/* All Classrooms */}
-            <div className='bg-white rounded-lg shadow-sm border border-gray-200 mb-8'>
+            <div className='bg-white rounded-lg shadow-sm border border-gray-200 mb-4'>
               <div className='p-6 border-b border-gray-200'>
                 <h2 className='text-lg font-semibold text-gray-900'>
                   Tất cả lớp học
@@ -353,7 +349,7 @@ const SchedulePage: React.FC = () => {
         onClose={() => setShowCreateScheduleModal(false)}
         onSubmit={handleCreateSchedule}
       />
-    </div>
+    </>
   );
 };
 
