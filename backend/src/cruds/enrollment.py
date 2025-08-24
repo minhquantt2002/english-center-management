@@ -12,19 +12,19 @@ def get_enrollment(db: Session, enrollment_id: UUID) -> Optional[Enrollment]:
 
 def get_enrollments(db: Session, skip: int = 0, limit: int = 100) -> List[Enrollment]:
     """Get enrollments with pagination"""
-    return db.query(Enrollment).offset(skip).limit(limit).all()
+    return db.query(Enrollment).order_by(Enrollment.created_at.desc()).offset(skip).limit(limit).all()
 
 def get_all_enrollments(db: Session) -> List[Enrollment]:
     """Get all enrollments without pagination"""
-    return db.query(Enrollment).all()
+    return db.query(Enrollment).order_by(Enrollment.created_at.desc()).all()
 
 def get_enrollments_by_student(db: Session, student_id: UUID) -> List[Enrollment]:
     """Get enrollments for specific student"""
-    return db.query(Enrollment).filter(Enrollment.student_id == student_id).all()
+    return db.query(Enrollment).filter(Enrollment.student_id == student_id).order_by(Enrollment.created_at.desc()).all()
 
 def get_enrollments_by_classroom(db: Session, class_id: UUID) -> List[Enrollment]:
     """Get enrollments for specific classroom"""
-    return db.query(Enrollment).filter(Enrollment.class_id == class_id).all()
+    return db.query(Enrollment).filter(Enrollment.class_id == class_id).order_by(Enrollment.created_at.desc()).all()
 
 def get_enrollment_by_student_classroom(db: Session, student_id: UUID, class_id: UUID) -> Optional[Enrollment]:
     """Get specific enrollment by student and classroom"""
@@ -100,4 +100,4 @@ def get_students_by_teacher(db: Session, teacher_id: UUID):
         Class.teacher_id == teacher_id,
         User.role_name == "student"
     ).distinct()
-    return query.all() 
+    return query.order_by(User.created_at.desc()).all() 

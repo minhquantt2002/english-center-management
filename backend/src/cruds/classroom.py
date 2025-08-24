@@ -17,7 +17,7 @@ def get_classrooms(db: Session) -> List[Class]:
     """Get classrooms"""
     return db.query(Class)\
         .options(joinedload(Class.course), joinedload(Class.teacher), joinedload(Class.schedules))\
-        .all()
+        .order_by(Class.created_at.desc()).all()
 
 def get_classrooms_with_filters(
     db: Session, 
@@ -39,15 +39,15 @@ def get_classrooms_with_filters(
     if status:
         query = query.filter(Class.status == status)
     
-    return query.all()
+    return query.order_by(Class.created_at.desc()).all()
 
 def get_all_classrooms(db: Session) -> List[Class]:
     """Get all classrooms without pagination"""
-    return db.query(Class).all()
+    return db.query(Class).order_by(Class.created_at.desc()).all()
 
 def get_classrooms_by_teacher(db: Session, teacher_id: UUID) -> List[Class]:
     """Get classrooms taught by specific teacher"""
-    return db.query(Class).filter(Class.teacher_id == teacher_id).all()
+    return db.query(Class).filter(Class.teacher_id == teacher_id).order_by(Class.created_at.desc()).all()
 
 def get_classrooms_by_id(db: Session, classroom_id: UUID) ->Class:
     """Get classrooms taught by specific teacher"""
@@ -80,7 +80,7 @@ def get_upcoming_classes_by_student(db: Session, student_id: UUID) -> List[Class
 
 def get_classrooms_by_course(db: Session, course_id: UUID) -> List[Class]:
     """Get classrooms for specific course"""
-    return db.query(Class).filter(Class.course_id == course_id).all()
+    return db.query(Class).filter(Class.course_id == course_id).order_by(Class.created_at.desc()).all()
 
 def get_classrooms_by_student(db: Session, student_id: UUID, status: Optional[str] = None) -> List[Class]:
     """Get classrooms where student is enrolled"""
@@ -99,7 +99,7 @@ def get_classrooms_by_student(db: Session, student_id: UUID, status: Optional[st
     if status is not None:
         query = query.filter(Class.status == status)
     
-    return query.all()
+    return query.order_by(Class.created_at.desc()).all()
 
 def create_classroom(db: Session, classroom_data: ClassroomCreate) -> Class:
     """Create new classroom"""
