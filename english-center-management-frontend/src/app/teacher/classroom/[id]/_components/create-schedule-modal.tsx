@@ -105,7 +105,7 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
       toast.success('Tạo lịch học thành công!');
     } catch (error) {
       console.error('Error creating schedule:', error);
-      toast.error(error);
+      toast.error(error.detail || 'Tạo lịch học không thành công!');
     } finally {
       setIsSubmitting(false);
     }

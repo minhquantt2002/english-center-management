@@ -1,4 +1,5 @@
 import { HomeworkStatus } from '../app/teacher/_hooks/use-homework';
+import { CourseLevel } from './admin';
 
 // Student specific types based on backend schemas
 export type Weekday =
@@ -59,6 +60,7 @@ export interface ClassroomNested {
   id: string;
   class_name: string;
   room?: string;
+  course_level?: CourseLevel;
 }
 
 export interface EnrollmentNested {
@@ -149,5 +151,7 @@ export interface AttendanceStudentResponse {
 }
 
 export interface EnrollmentScoreResponse {
+  id: string;
+  classroom: ClassroomNested;
   score: ScoreNested;
 }

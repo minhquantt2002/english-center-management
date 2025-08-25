@@ -78,7 +78,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
       onClose();
     } catch (error) {
       console.error('Error changing password:', error);
-      toast.error(error);
+      toast.error(error.detail);
     } finally {
       setIsLoading(false);
     }

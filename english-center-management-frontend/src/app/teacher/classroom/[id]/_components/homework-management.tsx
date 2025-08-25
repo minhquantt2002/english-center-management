@@ -97,7 +97,7 @@ const HomeworkManagement: React.FC<{
       toast.success('Cập nhật thành công!');
     } catch (error) {
       console.error('Error updating homework status:', error);
-      toast.error(error);
+      toast.error(error.detail || 'Cập nhật không thành công!');
     }
   };
 
@@ -141,7 +141,7 @@ const HomeworkManagement: React.FC<{
       toast.success('Cập nhật thành công!');
     } catch (error) {
       console.error('Error updating feedback:', error);
-      toast.error(error);
+      toast.error(error.detail || 'Cập nhật không thành công!');
     } finally {
       setUpdating((prev) => ({ ...prev, [homeworkId]: false }));
     }

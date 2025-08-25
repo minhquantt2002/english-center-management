@@ -205,6 +205,7 @@ class StudentResponse(StudentBase):
 
 class EnrollmentScoreResponse(BaseSchema):
     id: UUID
+    classroom: ClassroomNested
     score: List[ScoreNested]
     
 class ScoreExamNested(BaseSchema):

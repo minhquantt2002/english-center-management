@@ -69,9 +69,7 @@ export const api = {
     });
 
     if (!response.ok) {
-      console.error('API Error:', response.status, response.statusText);
       const errorText = await response.text();
-      console.error('Error response:', errorText);
 
       // Check if it's a token expiration error
       if (response.status === 401 || isTokenExpiredError(errorText)) {
@@ -79,7 +77,7 @@ export const api = {
         return;
       }
 
-      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+      throw errorText;
     }
 
     return response.json();
@@ -132,7 +130,7 @@ export const api = {
         return;
       }
 
-      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+      throw errorText;
     }
 
     return response.json();
@@ -157,7 +155,7 @@ export const api = {
         return;
       }
 
-      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+      throw errorText;
     }
 
     return response.json();
