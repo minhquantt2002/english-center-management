@@ -275,7 +275,7 @@ export default function StudentManagement() {
                 </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
                   {
-                    studentsWithDisplay.filter((s) => s.status === 'suspended')
+                    studentsWithDisplay.filter((s) => s.enrollments.length === 0)
                       .length
                   }
                 </p>

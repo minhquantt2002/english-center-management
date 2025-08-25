@@ -50,12 +50,14 @@ const StaffManagement = () => {
     email: staff.email,
     phone: staff.phone_number,
     assignedClasses: staff.taught_classes || [],
+    bio: staff.bio, // Add bio property
   }));
 
   const filteredStaffs = staffsList.filter((staff) => {
     const matchesSearch =
       staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      staff.email.toLowerCase().includes(searchTerm.toLowerCase());
+      staff.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      staff.bio.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
@@ -146,11 +148,16 @@ const StaffManagement = () => {
             <div className='flex items-center justify-between'>
               <div>
                 <p className='text-gray-500 text-sm font-medium'>
-                  Lớp đang dạy
+                  Mới tháng này
                 </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
                   {staffs.reduce(
-                    (total, t) => total + (t.taught_classes?.length || 0),
+                    (total, t) =>
+                      total +
+                      (t.created_at &&
+                        new Date(t.created_at).getMonth() === new Date().getMonth()
+                        ? 1
+                        : 0),
                     0
                   )}
                 </p>
@@ -205,6 +212,9 @@ const StaffManagement = () => {
                   Liên hệ
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  Chuyên môn
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                   Thao tác
                 </th>
               </tr>
@@ -244,6 +254,9 @@ const StaffManagement = () => {
                         {staff.phone || 'Chưa cập nhật'}
                       </div>
                     </div>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                    {staff.bio || 'Chưa cập nhật'}
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                     <div className='flex items-center space-x-2'>

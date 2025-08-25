@@ -117,7 +117,7 @@ export default function TeacherManagement() {
         </div>
 
         {/* Stats Cards */}
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 '>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6 '>
           <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
             <div className='flex items-center justify-between'>
               <div>
@@ -141,27 +141,11 @@ export default function TeacherManagement() {
                   Lớp đang dạy
                 </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {teachersWithDisplay.length * 2} {/* Mock data */}
+                  {teachersWithDisplay.reduce((acc, teacher) => acc + (teacher.taught_classes.length || 0), 0)}
                 </p>
               </div>
               <div className='w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center'>
                 <Users className='w-6 h-6 text-purple-600' />
-              </div>
-            </div>
-          </div>
-
-          <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
-            <div className='flex items-center justify-between'>
-              <div>
-                <p className='text-gray-500 text-sm font-medium'>
-                  Giờ dạy tuần
-                </p>
-                <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {teachersWithDisplay.length * 20} {/* Mock data */}
-                </p>
-              </div>
-              <div className='w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center'>
-                <Clock className='w-6 h-6 text-orange-600' />
               </div>
             </div>
           </div>
