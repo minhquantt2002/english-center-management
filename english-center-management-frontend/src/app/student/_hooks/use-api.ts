@@ -9,6 +9,7 @@ import {
   EnrollmentScoreResponse,
   AttendanceStudentResponse,
 } from '../../../types/student';
+import { ExamResponse } from '../../teacher/_hooks/use-exam';
 
 export const useStudentApi = () => {
   const [loading, setLoading] = useState(false);
@@ -197,6 +198,20 @@ export const useStudentApi = () => {
     []
   );
 
+  const getExamsByStudentId = useCallback(
+    async (
+      classId: string
+    ): Promise<{ student_id: string; exams: ExamResponse[] }> => {
+      try {
+        const response = await api.get(`/student/exam/${classId}/`);
+        return response || { student_id: '', exams: [] };
+      } catch (err) {
+        throw err instanceof Error ? err.message : 'Có lỗi xảy ra';
+      }
+    },
+    []
+  );
+
   return {
     loading,
     error,
@@ -211,5 +226,6 @@ export const useStudentApi = () => {
     getScoresByStudentId,
     getAttendancesByStudentId,
     getStudentScheduleById,
+    getExamsByStudentId,
   };
 };

@@ -16,7 +16,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { useStaffClassroomApi, useStaffStudentApi } from '../../_hooks';
-import AssignStudentModal from './_components/create-student';
+import AssignStudentModal from './_components/assign-student';
 import ViewStudentModal from './_components/view-student';
 import EditStudentModal from './_components/edit-student';
 import StudyingScheduleModal from './_components/studying-schedule';
@@ -71,7 +71,6 @@ export default function ClassroomDetailPage() {
   const [classroom, setClassroom] = useState<ClassroomResponse | null>(null);
   const [students, setStudents] = useState<StudentResponse[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] =
     useState<StudentResponse | null>(null);
@@ -82,21 +81,18 @@ export default function ClassroomDetailPage() {
     useState(false);
 
   const loadData = async () => {
-    setIsLoading(true);
     try {
       const classroomData = await getClassroomById(classroomId);
       setClassroom(classroomData);
       setStudents(classroomData.enrollments.map((v) => v.student));
     } catch (err) {
       console.error('Error loading classroom data:', err);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     loadData();
-  }, [classroomId, getClassroomById]);
+  }, []);
 
   const filteredStudents = students.filter((student) => {
     if (!student) return false;
@@ -106,27 +102,6 @@ export default function ClassroomDetailPage() {
       student.id.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
-
-  const handleAssignStudent = async (studentId: string[]) => {
-    try {
-      const studentToAssign = students.filter((student: StudentResponse) =>
-        studentId.includes(student.id)
-      );
-
-      if (studentToAssign) {
-        const updatedStudent = {
-          ...studentToAssign,
-          currentClass: classroom?.class_name || '',
-        };
-
-        // Add to students list
-        setStudents((prev) => [...prev, ...updatedStudent]);
-      }
-    } catch (error) {
-      console.error('Error assigning student:', error);
-      throw error;
-    }
-  };
 
   const handleSaveStudent = (updatedStudent: StudentResponse) => {
     setStudents((prev) =>
@@ -202,7 +177,7 @@ export default function ClassroomDetailPage() {
     }
   };
 
-  if (isLoading || classroomLoading) {
+  if (classroomLoading) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
         <div className='text-center'>
@@ -479,7 +454,8 @@ export default function ClassroomDetailPage() {
         <AssignStudentModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
-          onAssign={handleAssignStudent}
+          refetch={loadData}
+          classroomId={classroom.id}
           classroomName={classroom?.class_name || ''}
           existingStudentIds={students.map((student) => student?.id)}
         />
@@ -513,6 +489,7 @@ export default function ClassroomDetailPage() {
         <StudyingScheduleModal
           isOpen={isScheduleModalOpen}
           onClose={() => setIsScheduleModalOpen(false)}
+          refetch={loadData}
           classroom={classroom}
         />
       )}

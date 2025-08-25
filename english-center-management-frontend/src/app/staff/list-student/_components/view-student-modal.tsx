@@ -283,8 +283,6 @@ export default function ViewStudentModal({
     </div>
   );
 
-  console.log('studentData', studentData);
-
   const renderAchievementsTab = () => (
     <div className='space-y-6'>
       <div className='flex items-center gap-3 mb-6'>
@@ -332,25 +330,14 @@ export default function ViewStudentModal({
                       </p>
                     </div>
                   </div>
-                  <span
-                    className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(
-                      enrollment.status || 'active'
-                    )}`}
-                  >
-                    {enrollment.status === 'active'
-                      ? 'Đang học'
-                      : enrollment.status === 'completed'
-                      ? 'Hoàn thành'
-                      : 'Đã huỷ'}
-                  </span>
                 </div>
 
                 <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-4'>
                   {skills.includes('listening') && (
                     <div className='text-center p-3 bg-blue-50 rounded-lg'>
                       <div className='text-lg font-bold text-blue-600 mb-1'>
-                        {enrollment.score[0].listening /
-                          selectedSkillBands.listening || '--'}
+                        {enrollment.score[0].listening || '--'} /{' '}
+                        {selectedSkillBands.listening}
                       </div>
                       <div className='text-xs text-gray-600'>Nghe</div>
                     </div>
@@ -359,8 +346,8 @@ export default function ViewStudentModal({
                   {skills.includes('reading') && (
                     <div className='text-center p-3 bg-green-50 rounded-lg'>
                       <div className='text-lg font-bold text-green-600 mb-1'>
-                        {enrollment.score[0].reading /
-                          selectedSkillBands.reading || '--'}
+                        {enrollment.score[0].reading || '--'} /{' '}
+                        {selectedSkillBands.reading}
                       </div>
                       <div className='text-xs text-gray-600'>Đọc</div>
                     </div>
@@ -369,8 +356,8 @@ export default function ViewStudentModal({
                   {skills.includes('speaking') && (
                     <div className='text-center p-3 bg-orange-50 rounded-lg'>
                       <div className='text-lg font-bold text-orange-600 mb-1'>
-                        {enrollment.score[0].speaking /
-                          (selectedSkillBands as any).speaking || '--'}
+                        {enrollment.score[0].speaking || '--'} /{' '}
+                        {(selectedSkillBands as any).speaking}
                       </div>
                       <div className='text-xs text-gray-600'>Nói</div>
                     </div>
@@ -379,8 +366,8 @@ export default function ViewStudentModal({
                   {skills.includes('writing') && (
                     <div className='text-center p-3 bg-purple-50 rounded-lg'>
                       <div className='text-lg font-bold text-purple-600 mb-1'>
-                        {enrollment.score[0].writing /
-                          (selectedSkillBands as any).writing || '--'}
+                        {enrollment.score[0].writing || '--'} /{' '}
+                        {(selectedSkillBands as any).writing}
                       </div>
                       <div className='text-xs text-gray-600'>Viết</div>
                     </div>

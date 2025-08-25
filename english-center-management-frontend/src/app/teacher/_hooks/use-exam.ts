@@ -27,6 +27,7 @@ export interface StudentScore {
   reading: number | null;
   writing: number | null;
   feedback: string;
+  student_id: string;
   student: {
     name: string;
     email: string;

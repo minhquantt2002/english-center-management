@@ -126,7 +126,7 @@ const GradeManagement: React.FC<{
     if (skillScores.length === 0) return null;
 
     const total = skillScores.reduce((sum, score) => sum + score, 0);
-    return Math.round(total / skillScores.length); // Return as integer
+    return total;
   };
 
   const updateStudentScore = (
@@ -209,7 +209,7 @@ const GradeManagement: React.FC<{
         <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6'>
           <div>
             <h2 className='text-2xl font-bold text-gray-900'>
-              Quản lý điểm số
+              Điểm thi thực tế
             </h2>
             <p className='text-gray-600 mt-1'>
               {completionStats.completed}/{completionStats.total} học sinh đã
@@ -294,12 +294,11 @@ const GradeManagement: React.FC<{
                       )}
                     </div>
                   </div>
-
                   <button
-                    onClick={() => saveStudentScore(originalIndex)}
-                    disabled={isLoading[originalIndex]}
-                    className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
-                      isLoading[originalIndex]
+                    onClick={() => saveStudentScore(index)}
+                    disabled={isLoading[enrollment.score[0].id] || !hasChanged}
+                    className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
+                      isLoading[enrollment.score[0].id]
                         ? 'bg-gray-400 cursor-not-allowed'
                         : !hasChanged
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -307,20 +306,24 @@ const GradeManagement: React.FC<{
                         ? 'bg-green-500 hover:bg-green-600'
                         : 'bg-blue-500 hover:bg-blue-600'
                     } ${
-                      !hasChanged && !isLoading[student.id]
+                      !hasChanged && !isLoading[enrollment.score[0].id]
                         ? 'text-gray-500'
                         : 'text-white'
-                    }`}
+                    } shadow-sm hover:shadow-md`}
                   >
-                    {isLoading[originalIndex] ? (
-                      <div className='flex items-center'>
-                        <div className='animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2'></div>
+                    {isLoading[enrollment.score[0].id] ? (
+                      <>
+                        <div className='animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent'></div>
                         Đang lưu...
-                      </div>
+                      </>
                     ) : (
                       <>
                         <Save className='w-4 h-4' />
-                        {hasChanged ? 'Cập nhật' : 'Đã lưu'}
+                        {!completion && !hasChanged
+                          ? 'Chưa chấm'
+                          : hasChanged
+                          ? 'Cập nhật'
+                          : 'Đã lưu'}
                       </>
                     )}
                   </button>

@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Search, Users, Check } from 'lucide-react';
 import { StudentResponse } from '../../../../../types/staff';
-import { useStaffStudentApi } from '../../../_hooks';
+import { useStaffClassroomApi, useStaffStudentApi } from '../../../_hooks';
+import { toast } from 'react-toastify';
 
 interface AssignStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAssign: (studentIds: string[]) => void;
+  refetch: () => void;
+  classroomId: string;
   classroomName: string;
   existingStudentIds?: string[];
 }
@@ -16,10 +18,13 @@ interface AssignStudentModalProps {
 export default function AssignStudentModal({
   isOpen,
   onClose,
-  onAssign,
+  refetch,
+  classroomId,
   classroomName,
   existingStudentIds = [],
 }: AssignStudentModalProps) {
+  const { assignMultipleStudentsToClassroom } = useStaffClassroomApi();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,27 +68,30 @@ export default function AssignStudentModal({
     setFilteredStudents(filtered);
   }, [searchTerm, availableStudents]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAssignStudents = async () => {
+    if (!classroomId) return;
 
     if (selectedStudentIds.length === 0) {
+      toast.warning('Vui lòng chọn ít nhất một học viên để phân công.');
       return;
     }
-
     setIsSubmitting(true);
 
     try {
-      await onAssign(selectedStudentIds);
+      // Assign multiple students at once
+      await assignMultipleStudentsToClassroom(classroomId, selectedStudentIds);
+      toast.success(
+        `Đã phân công ${selectedStudentIds.length} học viên thành công!`
+      );
+      refetch();
 
-      // Reset form
-      setSelectedStudentIds([]);
-      setSearchTerm('');
       onClose();
+      // refetch();
     } catch (error) {
       console.error('Error assigning students:', error);
-    } finally {
-      setIsSubmitting(false);
+      toast.error('Có lỗi xảy ra khi phân công học viên. Vui lòng thử lại.');
     }
+    setIsSubmitting(false);
   };
 
   const handleStudentToggle = (studentId: string) => {
@@ -133,10 +141,7 @@ export default function AssignStudentModal({
         </div>
 
         {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          className='h-full p-6 space-y-6'
-        >
+        <form className='h-full p-6 space-y-6'>
           {/* Search */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>
@@ -244,7 +249,7 @@ export default function AssignStudentModal({
               Hủy
             </button>
             <button
-              type='submit'
+              onClick={handleAssignStudents}
               disabled={selectedStudentIds.length === 0 || isSubmitting}
               className='px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
             >

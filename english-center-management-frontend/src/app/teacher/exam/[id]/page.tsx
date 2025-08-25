@@ -131,7 +131,7 @@ const ExamDetailPage = () => {
     if (skillScores.length === 0) return null;
 
     const total = skillScores.reduce((sum, score) => sum + score, 0);
-    return Math.round(total / skillScores.length); // Return as integer
+    return total;
   };
 
   const updateStudentScore = (
@@ -364,7 +364,11 @@ const ExamDetailPage = () => {
                     ) : (
                       <>
                         <Save className='w-4 h-4' />
-                        {hasChanged ? 'Cập nhật' : 'Đã lưu'}
+                        {!completion && !hasChanged
+                          ? 'Chưa chấm'
+                          : hasChanged
+                          ? 'Cập nhật'
+                          : 'Đã lưu'}
                       </>
                     )}
                   </button>

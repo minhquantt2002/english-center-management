@@ -16,6 +16,8 @@ import {
   Calendar,
   FileText,
   TrendingUp,
+  GraduationCap,
+  ClipboardList,
 } from 'lucide-react';
 import { useStudentApi } from '../../_hooks/use-api';
 import {
@@ -25,6 +27,8 @@ import {
 } from '../../../../types/student';
 import { formatDays } from '../../../staff/list-classroom/[id]/page';
 import { HomeworkStatus } from '../../../teacher/_hooks/use-homework';
+import { ExamResponse } from '../../../teacher/_hooks/use-exam';
+import { LRSkillBand, LSRWSkillBand } from '../../../teacher/exam/[id]/page';
 
 export interface ScoreNested {
   id: string;
@@ -47,28 +51,37 @@ const ClassDetailPage: React.FC = () => {
     error,
     getClassDetails,
     getScoresByStudentId,
+    getExamsByStudentId,
     getHomeworksByStudentId,
     getAttendancesByStudentId,
   } = useStudentApi();
   const [classData, setClassData] = useState<ClassroomResponse | null>(null);
   const [scores, setScores] = useState<EnrollmentScoreResponse>();
+  const [studentId, setStudentId] = useState<string | null>(null);
+  const [exams, setExams] = useState<ExamResponse[]>();
   const [homeworks, setHomeworks] = useState<HomeworkStudentResponse[]>();
   const [attendances, setAttendances] = useState<AttendanceStudentResponse[]>();
   const [activeTab, setActiveTab] = useState<
-    'homeworks' | 'scores' | 'attendances'
+    'homeworks' | 'scores' | 'attendances' | 'exams'
   >('scores');
 
   useEffect(() => {
     const fetchClassData = async () => {
       try {
         const classId = params.id as string;
-        const [classDetails, scoresDetail, homeworksDetail, attendancesDetail] =
-          await Promise.all([
-            getClassDetails(classId),
-            getScoresByStudentId(classId),
-            getHomeworksByStudentId(),
-            getAttendancesByStudentId(),
-          ]);
+        const [
+          classDetails,
+          scoresDetail,
+          homeworksDetail,
+          attendancesDetail,
+          examsDetail,
+        ] = await Promise.all([
+          getClassDetails(classId),
+          getScoresByStudentId(classId),
+          getHomeworksByStudentId(),
+          getAttendancesByStudentId(),
+          getExamsByStudentId(classId),
+        ]);
         setClassData(classDetails);
         setScores(scoresDetail);
         setHomeworks(
@@ -77,6 +90,8 @@ const ClassDetailPage: React.FC = () => {
         setAttendances(
           attendancesDetail.filter((v) => v.session.class_id === classId)
         );
+        setExams(examsDetail.exams);
+        setStudentId(examsDetail.student_id);
       } catch (err) {
         console.error('Error fetching class details:', err);
         router.push('/student/classroom');
@@ -124,24 +139,119 @@ const ClassDetailPage: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-        <div className='text-center'>
-          <h2 className='text-2xl font-bold text-gray-900 mb-4'>
-            Có lỗi xảy ra
-          </h2>
-          <p className='text-gray-600 mb-6'>{error}</p>
-          <button
-            onClick={() => router.push('/student/classroom')}
-            className='bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors'
-          >
-            Quay lại
-          </button>
+  const renderAchievementsTab = () => (
+    <div className='space-y-6'>
+      <div className='flex items-center gap-3 mb-6'>
+        <div className='w-10 h-10 bg-gradient-to-br from-yellow-100 to-orange-200 rounded-lg flex items-center justify-center'>
+          <Award className='w-5 h-5 text-orange-600' />
         </div>
+        <h3 className='text-lg font-semibold text-gray-900'>Bài thi</h3>
       </div>
-    );
-  }
+
+      {exams.length > 0 ? (
+        <div className='space-y-4'>
+          {exams.map((exam) => {
+            const skills = !['A1', 'A2', 'B1', 'B2'].includes(
+              exam.classroom.course_level.toUpperCase()
+            )
+              ? ['listening', 'speaking', 'reading', 'writing']
+              : ['listening', 'reading'];
+
+            const selectedSkillBands = ['A1', 'A2', 'B1', 'B2'].includes(
+              exam.classroom.course_level.toUpperCase()
+            )
+              ? LRSkillBand
+              : LSRWSkillBand;
+            return (
+              <div
+                key={exam.id}
+                className='group bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-200'
+              >
+                <div className='flex items-center justify-between mb-4'>
+                  <div className='flex items-center gap-3'>
+                    <div className='w-12 h-12 bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg flex items-center justify-center'>
+                      <GraduationCap className='w-6 h-6 text-purple-600' />
+                    </div>
+                    <div>
+                      <h4 className='font-semibold text-gray-900 group-hover:text-purple-700 transition-colors'>
+                        {exam?.classroom.class_name}
+                      </h4>
+                      <p className='text-sm text-gray-500'>
+                        #{exam.classroom.id.substring(0, 5)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-4'>
+                  {skills.includes('listening') && (
+                    <div className='text-center p-3 bg-blue-50 rounded-lg'>
+                      <div className='text-lg font-bold text-blue-600 mb-1'>
+                        {exam.scores.find(
+                          (score) => score.student_id === studentId
+                        ).listening || '--'}{' '}
+                        / {selectedSkillBands.listening}
+                      </div>
+                      <div className='text-xs text-gray-600'>Nghe</div>
+                    </div>
+                  )}
+
+                  {skills.includes('reading') && (
+                    <div className='text-center p-3 bg-green-50 rounded-lg'>
+                      <div className='text-lg font-bold text-green-600 mb-1'>
+                        {exam.scores.find(
+                          (score) => score.student_id === studentId
+                        ).reading || '--'}{' '}
+                        / {selectedSkillBands.reading}
+                      </div>
+                      <div className='text-xs text-gray-600'>Đọc</div>
+                    </div>
+                  )}
+
+                  {skills.includes('speaking') && (
+                    <div className='text-center p-3 bg-orange-50 rounded-lg'>
+                      <div className='text-lg font-bold text-orange-600 mb-1'>
+                        {exam.scores.find(
+                          (score) => score.student_id === studentId
+                        ).speaking || '--'}
+                        / {(selectedSkillBands as any).speaking}
+                      </div>
+                      <div className='text-xs text-gray-600'>Nói</div>
+                    </div>
+                  )}
+
+                  {skills.includes('writing') && (
+                    <div className='text-center p-3 bg-purple-50 rounded-lg'>
+                      <div className='text-lg font-bold text-purple-600 mb-1'>
+                        {exam.scores.find(
+                          (score) => score.student_id === studentId
+                        ).writing || '--'}{' '}
+                        / {(selectedSkillBands as any).writing}
+                      </div>
+                      <div className='text-xs text-gray-600'>Viết</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className='text-center py-12'>
+          <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
+            <Award className='w-8 h-8 text-gray-400' />
+          </div>
+          <h4 className='text-lg font-medium text-gray-900 mb-2'>
+            Chưa có thành tích học tập
+          </h4>
+          <p className='text-gray-500'>
+            Thành tích và điểm số sẽ được hiển thị ở đây khi học viên hoàn thành
+            các bài kiểm tra.
+          </p>
+        </div>
+      )}
+    </div>
+  );
 
   if (!classData) {
     return (
@@ -245,6 +355,7 @@ const ClassDetailPage: React.FC = () => {
         <div className='flex border-b border-gray-200'>
           {[
             { id: 'scores', label: 'Điểm số', icon: Award },
+            { id: 'exams', label: 'Kỳ thi', icon: ClipboardList },
             { id: 'homeworks', label: 'Bài tập về nhà', icon: BookOpen },
             { id: 'attendances', label: 'Điểm danh', icon: CheckCircle },
           ].map((tab) => (
@@ -467,6 +578,8 @@ const ClassDetailPage: React.FC = () => {
               )}
             </div>
           )}
+
+          {activeTab === 'exams' && renderAchievementsTab()}
 
           {activeTab === 'attendances' && (
             <div className='space-y-6'>

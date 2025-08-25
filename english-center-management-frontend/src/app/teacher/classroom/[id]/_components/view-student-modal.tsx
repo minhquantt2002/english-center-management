@@ -557,7 +557,7 @@ export default function ViewStudentModal({
   );
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+    <div className='fixed inset-0 bg-black bg-opacity-50 !mt-0 flex items-center justify-center z-50'>
       <div className='bg-white rounded-lg shadow-xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto'>
         {/* Header */}
         <div className='flex items-center justify-between p-4 border-b border-gray-200'>
@@ -595,7 +595,7 @@ export default function ViewStudentModal({
                 <span>Thông tin chi tiết</span>
               </div>
             </button>
-            <button
+            {/* <button
               onClick={() => setActiveTab('scores')}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'scores'
@@ -633,16 +633,16 @@ export default function ViewStudentModal({
                 <Calendar className='w-4 h-4' />
                 <span>Bài tập về nhà</span>
               </div>
-            </button>
+            </button> */}
           </div>
         </div>
 
         {/* Content */}
         <div className='p-6'>
           {activeTab === 'details' && renderDetailsTab()}
-          {activeTab === 'scores' && renderScoresTab()}
+          {/* {activeTab === 'scores' && renderScoresTab()}
           {activeTab === 'attendances' && renderAttendancesTab()}
-          {activeTab === 'homeworks' && renderHomeworksTab()}
+          {activeTab === 'homeworks' && renderHomeworksTab()} */}
         </div>
 
         {/* Footer */}

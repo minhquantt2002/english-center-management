@@ -26,12 +26,14 @@ import {
 interface StudyingScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
+  refetch: () => void;
   classroom: ClassroomResponse | null;
 }
 
 export default function StudyingScheduleModal({
   isOpen,
   onClose,
+  refetch,
   classroom,
 }: StudyingScheduleModalProps) {
   const { loading, getClassroomSchedules, createSchedule, deleteSchedule } =
@@ -227,6 +229,7 @@ export default function StudyingScheduleModal({
     try {
       await deleteSchedule(scheduleId);
       toast.success('Lịch học đã được xóa thành công!');
+      setSelectedSchedule(null);
       fetchSchedules();
     } catch (error) {
       console.error('Error deleting schedule:', error);

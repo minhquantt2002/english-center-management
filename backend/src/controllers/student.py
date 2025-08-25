@@ -7,11 +7,12 @@ from ..database import get_db
 from ..dependencies import get_current_student_user
 from ..models.user import User
 from ..models.enrollment import Enrollment as EnrollmentModel
+from ..models.exam import Exam as ExamModel
 from ..services import user as user_service
 from ..services import classroom as classroom_service
 from ..services import schedule as schedule_service
 from ..services import user as user_service
-from ..schemas.user import StudentResponse, StudentUpdate, EnrollmentScoreResponse
+from ..schemas.user import StudentResponse, StudentUpdate, EnrollmentScoreResponse, ExamStudentResponse
 from ..schemas.classroom import ClassroomResponse
 from ..schemas.schedule import ScheduleResponse
 
@@ -25,6 +26,20 @@ def get_student_score(
 ):
     enrollments = db.query(EnrollmentModel).where(and_(EnrollmentModel.student_id == current_user.id, EnrollmentModel.class_id == class_id)).first()
     return enrollments
+
+
+@router.get('/exam/{class_id}/', response_model=ExamStudentResponse)
+def get_student_exam(
+    class_id: UUID,
+    current_user: User = Depends(get_current_student_user),
+    db: Session = Depends(get_db)
+):
+    exams = db.query(ExamModel).where(ExamModel.class_id == class_id).all()
+    return {
+        "student_id": current_user.id,
+        "exams": exams
+    }
+
 
 @router.get("/dashboard")
 async def get_student_dashboard(

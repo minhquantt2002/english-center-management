@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import string
 from typing import Optional, List
 from pydantic import EmailStr
 from src.schemas.base import BaseSchema
@@ -206,3 +207,26 @@ class EnrollmentScoreResponse(BaseSchema):
     id: UUID
     score: List[ScoreNested]
     
+class ScoreExamNested(BaseSchema):
+    id: UUID
+    listening: Optional[float] = None
+    reading: Optional[float] = None
+    speaking: Optional[float] = None
+    writing: Optional[float] = None
+    feedback: Optional[str] = None
+    student_id: Optional[UUID] = None
+
+class ExamResponse(BaseSchema):
+    id: UUID
+    created_at: datetime
+    classroom: ClassroomNested
+    scores: List[ScoreExamNested] = []
+    exam_name: Optional[str]
+    description: Optional[str]
+    class_id: Optional[UUID]
+    start_time: Optional[datetime]
+    duration: Optional[int]
+
+class ExamStudentResponse(BaseSchema):
+    student_id: UUID
+    exams: List[ExamResponse]
