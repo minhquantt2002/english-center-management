@@ -101,3 +101,10 @@ def get_students_by_teacher(db: Session, teacher_id: UUID):
         User.role_name == "student"
     ).distinct()
     return query.order_by(User.created_at.desc()).all() 
+
+def delete_enrollment_by_classroom_student(db: Session, student_id: UUID, classroom_id: UUID) -> bool:
+    """Delete enrollment"""
+    stmt = delete(Enrollment).where(Enrollment.student_id == student_id, Enrollment.class_id == classroom_id)
+    db.execute(stmt)
+    db.commit()
+    return True

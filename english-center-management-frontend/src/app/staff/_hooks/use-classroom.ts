@@ -208,6 +208,27 @@ export const useStaffClassroomApi = () => {
     }
   }, []);
 
+  const deleteStudentFromClassroom = useCallback(
+    async (classroomId: string, studentId: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        await api.delete(
+          `/admin/students/${studentId}/classrooms/${classroomId}`
+        );
+        return true;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Có lỗi xảy ra';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
   return {
     loading,
     error,
@@ -220,5 +241,6 @@ export const useStaffClassroomApi = () => {
     getClassroomStudents,
     deleteClassroom,
     deleteStudent,
+    deleteStudentFromClassroom,
   };
 };

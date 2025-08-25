@@ -65,7 +65,7 @@ export default function EnglishCourseInterface() {
           ? 'Đang hoạt động'
           : classItem.status === 'completed'
           ? 'Đã hoàn thành'
-          : 'Không hoạt động',
+          : 'Đã huỷ',
       day:
         classItem.schedules.length > 0
           ? formatDays(classItem.schedules.map((schedule) => schedule.weekday))
@@ -81,7 +81,7 @@ export default function EnglishCourseInterface() {
         return 'bg-blue-100 text-blue-800 font-semibold';
       case 'completed':
         return 'bg-green-100 text-green-800 font-semibold';
-      case 'inactive':
+      case 'cancelled':
         return 'bg-red-100 text-red-800 font-semibold';
       default:
         return 'bg-gray-100 text-gray-800 font-semibold';
@@ -195,7 +195,7 @@ export default function EnglishCourseInterface() {
               <div>
                 <p className='text-gray-500 text-sm font-medium'>Đã hủy</p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {classrooms.filter((c) => c.status === 'inactive').length}
+                  {classrooms.filter((c) => c.status === 'cancelled').length}
                 </p>
               </div>
               <div className='w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center'>

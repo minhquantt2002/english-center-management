@@ -894,9 +894,6 @@ async def create_staff(
     current_user: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Tạo nhân viên mới
-    """
     if user_service.get_user_by_email(db, staff_data.email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -917,9 +914,6 @@ async def update_staff(
     current_user: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Cập nhật thông tin nhân viên
-    """
     try:
         staff_uuid = UUID(staff_id)
     except ValueError:
@@ -942,9 +936,6 @@ async def delete_staff(
     current_user: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Xóa nhân viên
-    """
     try:
         staff_uuid = UUID(staff_id)
     except ValueError:
@@ -965,3 +956,20 @@ async def delete_staff(
         )
     user_service.delete_staff(db, staff_uuid)
     return {"message": "Xóa nhân viên thành công"}
+
+
+@router.delete("/students/{student_id}/classrooms/{classroom_id}")
+async def delete_student_schedule(
+    student_id: UUID,
+    classroom_id: UUID,
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    student = user_service.get_student(db, student_id)
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Học sinh không tồn tại"
+        )
+    user_service.delete_student_from_classroom(db, student_id, classroom_id)
+    return {"message": "Xóa học sinh khỏi lớp học thành công"}

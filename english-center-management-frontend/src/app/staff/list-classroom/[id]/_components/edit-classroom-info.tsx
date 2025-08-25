@@ -234,7 +234,10 @@ export default function EditClassroomInfoModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className='p-6 space-y-6'>
+        <form
+          onSubmit={handleSubmit}
+          className='p-6 space-y-6'
+        >
           {/* Class Name */}
           <div>
             <label className='block text-sm font-semibold text-gray-800 mb-2'>
@@ -268,7 +271,10 @@ export default function EditClassroomInfoModal({
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
               >
                 {courseLevels.map((level) => (
-                  <option key={level.value} value={level.value}>
+                  <option
+                    key={level.value}
+                    value={level.value}
+                  >
                     {level.label}
                   </option>
                 ))}
@@ -288,7 +294,10 @@ export default function EditClassroomInfoModal({
               >
                 <option value=''>Chọn giáo viên</option>
                 {teachers.map((teacher) => (
-                  <option key={teacher.id} value={teacher.id}>
+                  <option
+                    key={teacher.id}
+                    value={teacher.id}
+                  >
                     {teacher.name}
                   </option>
                 ))}
@@ -346,7 +355,10 @@ export default function EditClassroomInfoModal({
                 >
                   <option value=''>Chọn thời gian</option>
                   {timeSlots.map((time) => (
-                    <option key={time} value={time}>
+                    <option
+                      key={time}
+                      value={time}
+                    >
                       {time}
                     </option>
                   ))}
@@ -374,7 +386,10 @@ export default function EditClassroomInfoModal({
             >
               <option value=''>Chọn phòng học</option>
               {rooms.map((room) => (
-                <option key={room} value={room}>
+                <option
+                  key={room}
+                  value={room}
+                >
                   {room}
                 </option>
               ))}
@@ -424,9 +439,8 @@ export default function EditClassroomInfoModal({
               className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
             >
               <option value='active'>Đang hoạt động</option>
-              <option value='inactive'>Không hoạt động</option>
+              <option value='cancelled'>Đã huỷ</option>
               <option value='completed'>Đã hoàn thành</option>
-              <option value='pending'>Chờ bắt đầu</option>
             </select>
           </div>
 

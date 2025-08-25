@@ -129,3 +129,7 @@ def check_student_enrollment_permission(db: Session, student_id: UUID, classroom
         return True
     
     return False
+
+def delete_student_from_classroom(db: Session, student_id: UUID, classroom_id: UUID) -> bool:
+    """Xóa học sinh khỏi lớp học"""
+    return enrollment_crud.delete_enrollment_by_classroom_student(db, student_id, classroom_id)

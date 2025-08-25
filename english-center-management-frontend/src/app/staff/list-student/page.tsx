@@ -210,7 +210,7 @@ export default function StudentManagement() {
 
   const statusLabels = {
     active: 'Đang học',
-    inactive: 'Không hoạt động',
+    inactive: 'Đã huỷ',
     graduated: 'Đã hoàn thành',
   };
 
@@ -289,9 +289,7 @@ export default function StudentManagement() {
           <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm'>
             <div className='flex items-center justify-between'>
               <div>
-                <p className='text-gray-500 text-sm font-medium'>
-                  Không hoạt động
-                </p>
+                <p className='text-gray-500 text-sm font-medium'>Đã huỷ</p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
                   {
                     studentsWithDisplay.filter((s) => s.status === 'inactive')

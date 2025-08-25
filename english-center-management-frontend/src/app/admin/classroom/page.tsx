@@ -128,7 +128,7 @@ const ClassManagement: React.FC = () => {
         };
       case 'cancelled':
         return {
-          text: 'Không hoạt động',
+          text: 'Đã huỷ',
           className: 'bg-red-50 text-red-700 border-red-200',
         };
       default:

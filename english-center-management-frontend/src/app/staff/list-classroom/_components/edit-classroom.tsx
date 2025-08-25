@@ -247,7 +247,7 @@ const EditClassroomModal: React.FC<EditClassroomModalProps> = ({
               >
                 <option value='active'>Đang hoạt động</option>
                 <option value='completed'>Đã hoàn thành</option>
-                <option value='inactive'>Không hoạt động</option>
+                <option value='cancelled'>Đã huỷ</option>
               </select>
             </div>
 

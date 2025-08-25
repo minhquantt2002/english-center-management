@@ -45,32 +45,6 @@ const qualifications = [
   { value: 'other', label: 'Khác' },
 ];
 
-const getStatusBadgeColor = (status: string) => {
-  switch (status) {
-    case 'active':
-      return 'bg-green-100 text-green-800';
-    case 'inactive':
-      return 'bg-gray-100 text-gray-800';
-    case 'on-leave':
-      return 'bg-yellow-100 text-yellow-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
-
-const getStatusText = (status: string) => {
-  switch (status) {
-    case 'active':
-      return 'Hoạt động';
-    case 'inactive':
-      return 'Không hoạt động';
-    case 'on-leave':
-      return 'Nghỉ phép';
-    default:
-      return status;
-  }
-};
-
 export const getSpecializationLabel = (value: string) => {
   const spec = specializations.find((s) => s.value === value);
   return spec ? spec.label : value;

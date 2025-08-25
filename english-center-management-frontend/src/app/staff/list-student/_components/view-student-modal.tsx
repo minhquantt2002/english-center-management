@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { StudentResponse } from '../../../../types/staff';
 import { useStaffStudentApi } from '../../_hooks';
+import { LRSkillBand, LSRWSkillBand } from '../../../teacher/exam/[id]/page';
 
 interface ViewStudentModalProps {
   isOpen: boolean;
@@ -208,7 +209,7 @@ export default function ViewStudentModal({
           </span>
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          {studentData?.enrollments?.map((enrollment, index) => (
+          {studentData?.enrollments?.map((enrollment) => (
             <div
               key={enrollment.id}
               className='group p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-purple-200 transition-all duration-200'
@@ -236,7 +237,7 @@ export default function ViewStudentModal({
                     ? 'Đang học'
                     : enrollment.status === 'completed'
                     ? 'Hoàn thành'
-                    : enrollment.status || 'Đang học'}
+                    : 'Đã huỷ'}
                 </span>
               </div>
             </div>
@@ -282,6 +283,8 @@ export default function ViewStudentModal({
     </div>
   );
 
+  console.log('studentData', studentData);
+
   const renderAchievementsTab = () => (
     <div className='space-y-6'>
       <div className='flex items-center gap-3 mb-6'>
@@ -298,72 +301,94 @@ export default function ViewStudentModal({
 
       {studentData?.enrollments && studentData.enrollments.length > 0 ? (
         <div className='space-y-4'>
-          {studentData.enrollments.map((enrollment, index) => (
-            <div
-              key={enrollment.id}
-              className='group bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-200'
-            >
-              <div className='flex items-center justify-between mb-4'>
-                <div className='flex items-center gap-3'>
-                  <div className='w-12 h-12 bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg flex items-center justify-center'>
-                    <GraduationCap className='w-6 h-6 text-purple-600' />
-                  </div>
-                  <div>
-                    <h4 className='font-semibold text-gray-900 group-hover:text-purple-700 transition-colors'>
-                      {enrollment?.classroom.class_name}
-                    </h4>
-                    <p className='text-sm text-gray-500'>
-                      #{enrollment.classroom.id.substring(0, 5)}
-                    </p>
-                  </div>
-                </div>
-                <span
-                  className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(
-                    enrollment.status || 'active'
-                  )}`}
-                >
-                  {enrollment.status === 'active'
-                    ? 'Đang học'
-                    : enrollment.status === 'completed'
-                    ? 'Hoàn thành'
-                    : enrollment.status || 'Đang học'}
-                </span>
-              </div>
+          {studentData.enrollments.map((enrollment) => {
+            const skills = !['A1', 'A2', 'B1', 'B2'].includes(
+              enrollment.classroom.course_level.toUpperCase()
+            )
+              ? ['listening', 'speaking', 'reading', 'writing']
+              : ['listening', 'reading'];
 
-              {/* Score Overview - You can add actual score data here */}
-              <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-4'>
-                <div className='text-center p-3 bg-blue-50 rounded-lg'>
-                  <div className='text-lg font-bold text-blue-600 mb-1'>--</div>
-                  <div className='text-xs text-gray-600'>Nghe</div>
-                </div>
-                <div className='text-center p-3 bg-green-50 rounded-lg'>
-                  <div className='text-lg font-bold text-green-600 mb-1'>
-                    --
+            const selectedSkillBands = ['A1', 'A2', 'B1', 'B2'].includes(
+              enrollment.classroom.course_level.toUpperCase()
+            )
+              ? LRSkillBand
+              : LSRWSkillBand;
+            return (
+              <div
+                key={enrollment.id}
+                className='group bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-200'
+              >
+                <div className='flex items-center justify-between mb-4'>
+                  <div className='flex items-center gap-3'>
+                    <div className='w-12 h-12 bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg flex items-center justify-center'>
+                      <GraduationCap className='w-6 h-6 text-purple-600' />
+                    </div>
+                    <div>
+                      <h4 className='font-semibold text-gray-900 group-hover:text-purple-700 transition-colors'>
+                        {enrollment?.classroom.class_name}
+                      </h4>
+                      <p className='text-sm text-gray-500'>
+                        #{enrollment.classroom.id.substring(0, 5)}
+                      </p>
+                    </div>
                   </div>
-                  <div className='text-xs text-gray-600'>Đọc</div>
+                  <span
+                    className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(
+                      enrollment.status || 'active'
+                    )}`}
+                  >
+                    {enrollment.status === 'active'
+                      ? 'Đang học'
+                      : enrollment.status === 'completed'
+                      ? 'Hoàn thành'
+                      : 'Đã huỷ'}
+                  </span>
                 </div>
-                <div className='text-center p-3 bg-orange-50 rounded-lg'>
-                  <div className='text-lg font-bold text-orange-600 mb-1'>
-                    --
-                  </div>
-                  <div className='text-xs text-gray-600'>Nói</div>
-                </div>
-                <div className='text-center p-3 bg-purple-50 rounded-lg'>
-                  <div className='text-lg font-bold text-purple-600 mb-1'>
-                    --
-                  </div>
-                  <div className='text-xs text-gray-600'>Viết</div>
-                </div>
-              </div>
 
-              <div className='flex items-center gap-2 pt-3 border-t border-gray-100'>
-                <TrendingUp className='w-4 h-4 text-green-600' />
-                <span className='text-sm text-green-600 font-medium'>
-                  Học viên đang có tiến bộ tốt trong lớp học này
-                </span>
+                <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-4'>
+                  {skills.includes('listening') && (
+                    <div className='text-center p-3 bg-blue-50 rounded-lg'>
+                      <div className='text-lg font-bold text-blue-600 mb-1'>
+                        {enrollment.score[0].listening /
+                          selectedSkillBands.listening || '--'}
+                      </div>
+                      <div className='text-xs text-gray-600'>Nghe</div>
+                    </div>
+                  )}
+
+                  {skills.includes('reading') && (
+                    <div className='text-center p-3 bg-green-50 rounded-lg'>
+                      <div className='text-lg font-bold text-green-600 mb-1'>
+                        {enrollment.score[0].reading /
+                          selectedSkillBands.reading || '--'}
+                      </div>
+                      <div className='text-xs text-gray-600'>Đọc</div>
+                    </div>
+                  )}
+
+                  {skills.includes('speaking') && (
+                    <div className='text-center p-3 bg-orange-50 rounded-lg'>
+                      <div className='text-lg font-bold text-orange-600 mb-1'>
+                        {enrollment.score[0].speaking /
+                          (selectedSkillBands as any).speaking || '--'}
+                      </div>
+                      <div className='text-xs text-gray-600'>Nói</div>
+                    </div>
+                  )}
+
+                  {skills.includes('writing') && (
+                    <div className='text-center p-3 bg-purple-50 rounded-lg'>
+                      <div className='text-lg font-bold text-purple-600 mb-1'>
+                        {enrollment.score[0].writing /
+                          (selectedSkillBands as any).writing || '--'}
+                      </div>
+                      <div className='text-xs text-gray-600'>Viết</div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className='text-center py-12'>

@@ -65,7 +65,7 @@ export default function ClassroomDetailPage() {
     loading: classroomLoading,
     getClassroomById,
     deleteClassroom,
-    deleteStudent,
+    deleteStudentFromClassroom,
   } = useStaffClassroomApi();
 
   const [classroom, setClassroom] = useState<ClassroomResponse | null>(null);
@@ -158,7 +158,7 @@ export default function ClassroomDetailPage() {
   const handleDeleteStudent = (studentId: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa học viên này?')) {
       try {
-        deleteStudent(studentId);
+        deleteStudentFromClassroom(classroomId, studentId);
         toast.success('Xóa học viên thành công!');
         loadData();
       } catch (err) {
@@ -249,15 +249,15 @@ export default function ClassroomDetailPage() {
                   className={`px-3 py-1 rounded-full text-sm font-medium ${
                     classroom.status === 'active'
                       ? 'bg-blue-100 text-blue-800'
-                      : classroom.status === 'inactive'
+                      : classroom.status === 'cancelled'
                       ? 'bg-red-100 text-red-800'
                       : 'bg-green-100 text-green-800'
                   }`}
                 >
                   {classroom.status === 'active'
                     ? 'Đang hoạt động'
-                    : classroom.status === 'inactive'
-                    ? 'Không hoạt động'
+                    : classroom.status === 'cancelled'
+                    ? 'Đã huỷ'
                     : 'Đã hoàn thành'}
                 </span>
                 <button

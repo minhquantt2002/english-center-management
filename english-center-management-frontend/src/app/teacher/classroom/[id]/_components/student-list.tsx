@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { EnrollmentNested, StudentInClass } from '../../../../../types/teacher';
 import ViewStudentModal from './view-student-modal';
 import AssignStudentModal from './assign-student';
+import { toast } from 'react-toastify';
+import { useStaffClassroomApi } from '../../../../staff/_hooks';
 
 interface StudentListProps {
   classroomId: string;
@@ -18,12 +20,26 @@ const StudentList: React.FC<StudentListProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpenView, setIsOpenView] = useState<StudentInClass | null>(null);
   const [isOpenAdd, setIsOpenAdd] = useState(false);
+  const { deleteStudentFromClassroom } = useStaffClassroomApi();
 
   const filteredStudents = students.filter(
     (student) =>
       student.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.student.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDeleteStudent = (studentId: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa học viên này?')) {
+      try {
+        deleteStudentFromClassroom(classroomId, studentId);
+        toast.success('Xóa học viên thành công!');
+        refetchData();
+      } catch (err) {
+        toast.error('Xóa học viên thất bại!');
+        console.error('Failed to delete student:', err);
+      }
+    }
+  };
 
   const renderStudentCard = (student: EnrollmentNested) => (
     <div
@@ -54,7 +70,7 @@ const StudentList: React.FC<StudentListProps> = ({
 
           <button
             className='p-1 text-red-600 hover:text-red-400'
-            onClick={() => console.log('Delete', student.id)}
+            onClick={() => handleDeleteStudent(student.student.id)}
           >
             <Trash2 className='w-4 h-4' />
           </button>
@@ -94,7 +110,8 @@ const StudentList: React.FC<StudentListProps> = ({
         <ViewStudentModal
           isOpen={isOpenView !== null}
           onClose={() => setIsOpenView(null)}
-          student={isOpenView.id}
+          studentId={isOpenView.id}
+          classroomId={classroomId}
         />
       )}
 

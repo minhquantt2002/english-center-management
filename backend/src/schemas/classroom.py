@@ -2,15 +2,10 @@ from datetime import date, datetime, time
 from typing import Optional, List
 from src.schemas.base import BaseSchema
 from src.schemas.user import StudentBase
+from src.models.classroom import ClassStatus
 
 import enum
 from uuid import UUID
-
-
-class ClassStatus(str, enum.Enum):
-    ACTIVE = "active"
-    COMPLETED = "completed"
-    INACTIVE = "inactive"
 
 
 class CourseLevel(str, enum.Enum):

@@ -20,7 +20,7 @@ export type AchievementType =
 
 export type UserRole = 'admin' | 'staff' | 'teacher' | 'student';
 export type StudentStatus = 'active' | 'inactive' | 'suspended' | 'graduated';
-export type ClassStatus = 'active' | 'completed' | 'inactive';
+export type ClassStatus = 'active' | 'completed' | 'cancelled';
 export type CourseLevel =
   | 'A1' // TOEIC 0–250 (FOUNDATION) - Mất gốc
   | 'A2' // TOEIC 250–450 (BEGINNER) - Sơ cấp
@@ -261,6 +261,7 @@ export interface ClassroomNested {
   id: string;
   class_name: string;
   room?: string;
+  course_level: CourseLevel;
 }
 
 export interface EnrollmentNested {

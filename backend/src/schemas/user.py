@@ -3,6 +3,7 @@ from typing import Optional, List
 from pydantic import EmailStr
 from src.schemas.base import BaseSchema
 from src.models.attendance import HomeworkStatus
+from src.models.classroom import CourseLevel
 import enum
 from uuid import UUID
 
@@ -132,6 +133,7 @@ class ClassroomNested(BaseSchema):
     id: UUID
     class_name: str
     room: Optional[str] = None
+    course_level: Optional[CourseLevel] = None
 
 
 class ScoreNested(BaseSchema):
@@ -146,7 +148,7 @@ class ScoreNested(BaseSchema):
 class EnrollmentNested(BaseSchema):
     id: UUID
     enrollment_at: date
-    status: str    
+    status: str
     classroom: Optional[ClassroomNested] = None
     score: List[ScoreNested] = []
 
