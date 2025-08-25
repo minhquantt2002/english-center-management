@@ -335,7 +335,7 @@ export default function CreateStaffModal({
                     handleInputChange('phone_number', e.target.value)
                   }
                   onBlur={() => handleFieldBlur('phone_number')}
-                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm ${shouldShowError('phone_number') ? 'border-red-400' : 'border-gray-300'
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm ${shouldShowError('phone_number') && errors.phone_number ? 'border-red-400' : 'border-gray-300'
                     }`}
                   placeholder='0123456789'
                   aria-describedby={shouldShowError('phone_number') ? 'phone-error' : undefined}
@@ -386,7 +386,7 @@ export default function CreateStaffModal({
                   value={formData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
                   onBlur={() => handleFieldBlur('address')}
-                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm ${shouldShowError('address') ? 'border-red-400' : 'border-gray-300'
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm ${shouldShowError('address') && errors.address ? 'border-red-400' : 'border-gray-300'
                     }`}
                   placeholder='Nhập địa chỉ'
                   aria-describedby={shouldShowError('address') ? 'address-error' : undefined}
@@ -406,7 +406,7 @@ export default function CreateStaffModal({
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   onBlur={() => handleFieldBlur('password')}
-                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm ${shouldShowError('password') ? 'border-red-400' : 'border-gray-300'
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-base bg-gray-50 transition-all duration-150 shadow-sm ${shouldShowError('password') && errors.password ? 'border-red-400' : 'border-gray-300'
                     }`}
                   placeholder='Nhập mật khẩu'
                   aria-describedby={shouldShowError('password') ? 'password-error' : undefined}
