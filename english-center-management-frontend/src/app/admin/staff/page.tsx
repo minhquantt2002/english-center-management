@@ -10,6 +10,8 @@ import {
   Mail,
   Phone,
   Users,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { UserCreate, UserResponse, UserUpdate } from '../../../types/admin';
 import { useStaffApi } from '../_hooks';
@@ -17,7 +19,8 @@ import ViewStaffModal from './_components/view-staff';
 import EditStaffModal from './_components/edit-staff';
 import CreateStaffModal from './_components/create-staff';
 import { toast } from 'react-toastify';
-
+import GenericExcelExportButton from '../../../components/GenericExcelExportButton';
+import { staffExportConfig } from '../../../components/GenericExcelExportButton';
 const StaffManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -25,6 +28,10 @@ const StaffManagement = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<UserResponse | null>(null);
   const [staffs, setStaffs] = useState<UserResponse[]>([]);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const { createStaff, updateStaff, deleteStaff, getStaffs } = useStaffApi();
 
@@ -51,6 +58,8 @@ const StaffManagement = () => {
     phone: staff.phone_number,
     assignedClasses: staff.taught_classes || [],
     bio: staff.bio, // Add bio property
+    created_at: staff.created_at,
+    status: staff.status,
   }));
 
   const filteredStaffs = staffsList.filter((staff) => {
@@ -60,6 +69,33 @@ const StaffManagement = () => {
       staff.bio.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredStaffs.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentStaffs = filteredStaffs.slice(startIndex, endIndex);
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   const handleCreateStaff = async (staffData: UserCreate) => {
     try {
@@ -111,6 +147,7 @@ const StaffManagement = () => {
     }
   };
 
+  const [loading, setLoading] = useState(false);
   return (
     <>
       {/* Header */}
@@ -187,6 +224,13 @@ const StaffManagement = () => {
               className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
             />
           </div>
+          {/* Export to Excel Button */}
+          <GenericExcelExportButton
+            data={filteredStaffs}
+            config={staffExportConfig}
+            onExportStart={() => setLoading(true)}
+            onExportComplete={() => setLoading(false)}
+          />
 
           {/* Add Staff Button */}
           <button
@@ -220,7 +264,7 @@ const StaffManagement = () => {
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-100'>
-              {filteredStaffs.map((staff) => (
+              {currentStaffs.map((staff) => (
                 <tr
                   key={staff.id}
                   className='hover:bg-gray-50 transition-colors'
@@ -296,6 +340,59 @@ const StaffManagement = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {filteredStaffs.length > 0 && totalPages > 1 && (
+          <div className='px-6 py-4 border-t border-gray-100 bg-gray-50'>
+            <div className='flex items-center justify-between'>
+              <div className='text-sm text-gray-700'>
+                Hiển thị {startIndex + 1} đến {Math.min(endIndex, filteredStaffs.length)} trong tổng số {filteredStaffs.length} nhân sự
+              </div>
+              <div className='flex items-center space-x-2'>
+                <button
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage === 1
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <ChevronLeft className='w-4 h-4' />
+                </button>
+                
+                {/* Page numbers */}
+                <div className='flex items-center space-x-1'>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        currentPage === page
+                          ? 'bg-green-600 text-white'
+                          : 'text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage === totalPages
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <ChevronRight className='w-4 h-4' />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Empty State */}
         {filteredStaffs.length === 0 && (

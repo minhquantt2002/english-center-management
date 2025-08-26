@@ -14,6 +14,7 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
+  Download,
 } from 'lucide-react';
 import { StudentResponse, StudentCreate } from '../../../types/admin';
 import ViewStudentModal from './_components/view-student';
@@ -21,7 +22,8 @@ import EditStudentModal from './_components/edit-student';
 import CreateStudentModal from './_components/create-student';
 import { useStudentApi } from '../_hooks';
 import { toast } from 'react-toastify';
-
+import GenericExcelExportButton from '../../../components/GenericExcelExportButton';
+import { studentsExportConfig } from '../../../components/GenericExcelExportButton';
 const StudentManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudent, setSelectedStudent] =
@@ -159,6 +161,9 @@ const StudentManagement = () => {
     }
   };
 
+
+  const [loading, setLoading] = useState(false);
+
   return (
     <>
       {/* Header */}
@@ -266,14 +271,24 @@ const StudentManagement = () => {
             />
           </div>
 
-          {/* Create Student Button */}
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className='px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl'
-          >
-            <Plus className='h-5 w-5' />
-            <span className='font-semibold'>Thêm học viên</span>
-          </button>
+          {/* Action Buttons */}
+          <div className='flex gap-3'>
+            {/* Export to Excel Button */}
+            <GenericExcelExportButton
+              data={filteredStudents}
+              config={studentsExportConfig}
+              onExportStart={() => setLoading(true)}
+              onExportComplete={() => setLoading(false)}
+            />
+            {/* Create Student Button */}
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className='px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl'
+            >
+              <Plus className='h-5 w-5' />
+              <span className='font-semibold'>Thêm học viên</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -348,18 +363,18 @@ const StudentManagement = () => {
                       {student.input_level === 'A1'
                         ? 'A1 - Mất gốc'
                         : student.input_level === 'A2'
-                        ? 'A2 - Sơ cấp'
-                        : student.input_level === 'B1'
-                        ? 'B1 - Trung cấp thấp'
-                        : student.input_level === 'B2'
-                        ? 'B2 - Trung cấp cao'
-                        : student.input_level === 'C1'
-                        ? 'C1 - Nâng cao'
-                        : student.input_level}
+                          ? 'A2 - Sơ cấp'
+                          : student.input_level === 'B1'
+                            ? 'B1 - Trung cấp thấp'
+                            : student.input_level === 'B2'
+                              ? 'B2 - Trung cấp cao'
+                              : student.input_level === 'C1'
+                                ? 'C1 - Nâng cao'
+                                : student.input_level}
                     </span>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                    {student.enrollments.length > 0
+                    {student.enrollments?.length > 0
                       ? student.enrollments.length
                       : 'Chưa phân lớp'}
                   </td>
@@ -372,8 +387,8 @@ const StudentManagement = () => {
                       {student.status === 'active'
                         ? 'Đang học'
                         : student.status === 'inactive'
-                        ? 'Đã huỷ'
-                        : 'Đã hoàn thành'}
+                          ? 'Đã huỷ'
+                          : 'Đã hoàn thành'}
                     </span>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
@@ -444,11 +459,10 @@ const StudentManagement = () => {
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                  currentPage === 1
+                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${currentPage === 1
                     ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 <ChevronLeft className='w-4 h-4' />
               </button>
@@ -459,11 +473,10 @@ const StudentManagement = () => {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        currentPage === page
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === page
                           ? 'bg-blue-600 text-white'
                           : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       {page}
                     </button>
@@ -476,11 +489,10 @@ const StudentManagement = () => {
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                  currentPage === totalPages
+                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${currentPage === totalPages
                     ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 <ChevronRight className='w-4 h-4' />
               </button>

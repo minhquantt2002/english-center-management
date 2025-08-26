@@ -13,7 +13,8 @@ import {
 import { TeacherResponse } from '../../../types/staff';
 import TeachingScheduleModal from './_components/teaching-schedule-modal';
 import { useStaffTeacherApi } from '../_hooks';
-
+import GenericExcelExportButton from '../../../components/GenericExcelExportButton';
+import { teachersExportConfig } from '../../../components/GenericExcelExportButton';
 export default function TeacherManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTeacher, setSelectedTeacher] =
@@ -51,13 +52,15 @@ export default function TeacherManagement() {
         : 'Giáo viên',
       phone: teacher.phone_number || 'N/A',
       email: teacher.email,
-      subject: teacher.specialization || 'N/A',
+      specialization: teacher.specialization || 'N/A',
       subjectColor:
         index % 2 === 0
           ? 'bg-blue-100 text-blue-800 border-blue-200'
           : 'bg-purple-100 text-purple-800 border-purple-200',
       levelColor: 'bg-green-100 text-green-800 border-green-200',
-      taught_classes: teacher.taught_classes || [],
+      assignedClasses: teacher.taught_classes || [],
+      address: teacher.address,
+      createdAt: teacher.created_at,
     })
   );
 
@@ -84,7 +87,7 @@ export default function TeacherManagement() {
   const filteredTeachers = teachersWithDisplay.filter((teacher) => {
     const matchesSearch =
       teacher.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.subject?.toLowerCase().includes(searchTerm.toLowerCase());
+      teacher.specialization?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
@@ -141,7 +144,7 @@ export default function TeacherManagement() {
                   Lớp đang dạy
                 </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {teachersWithDisplay.reduce((acc, teacher) => acc + (teacher.taught_classes.length || 0), 0)}
+                  {teachersWithDisplay.reduce((acc, teacher) => acc + (teacher.assignedClasses.length || 0), 0)}
                 </p>
               </div>
               <div className='w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center'>
@@ -153,8 +156,8 @@ export default function TeacherManagement() {
       </div>
 
       {/* Filters and Search */}
-      <div className='rounded-xl border border-gray-100 mb-4'>
-        <div className='flex flex-col lg:flex-row gap-4'>
+      <div className='rounded-xl border border-gray-100 mb-4 p-4'>
+        <div className='flex flex-col lg:flex-row gap-4 items-center'>
           {/* Search */}
           <div className='flex-1 relative'>
             <Search
@@ -167,6 +170,16 @@ export default function TeacherManagement() {
               className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {/* Export to Excel Button */}
+          <div className='flex-shrink-0'>
+            <GenericExcelExportButton
+              data={filteredTeachers}
+              config={teachersExportConfig}
+              onExportStart={() => setIsLoading(true)}
+              onExportComplete={() => setIsLoading(false)}
             />
           </div>
         </div>
@@ -234,11 +247,11 @@ export default function TeacherManagement() {
                     <span
                       className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${teacher.subjectColor}`}
                     >
-                      {teacher.subject}
+                      {teacher.specialization}
                     </span>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                    {teacher.taught_classes.length} lớp
+                    {teacher.assignedClasses.length} lớp
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                     <button

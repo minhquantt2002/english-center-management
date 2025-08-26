@@ -26,6 +26,8 @@ import {
 } from '../../../types/staff';
 import { Trash2 } from 'lucide-react';
 import { toast } from 'react-toastify';
+import GenericExcelExportButton from '../../../components/GenericExcelExportButton';
+import { studentsExportConfig } from '../../../components/GenericExcelExportButton';
 
 export default function StudentManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -322,7 +324,13 @@ export default function StudentManagement() {
               className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent'
             />
           </div>
-
+ {/* Export to Excel Button */}
+            <GenericExcelExportButton
+              data={filteredStudents}
+              config={studentsExportConfig}
+              onExportStart={() => setIsLoading(true)}
+              onExportComplete={() => setIsLoading(false)}
+            />
           {/* Add Student Button */}
           <button
             onClick={() => setIsCreateModalOpen(true)}

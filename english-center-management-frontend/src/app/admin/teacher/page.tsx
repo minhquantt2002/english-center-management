@@ -27,6 +27,8 @@ import ViewTeacherModal, {
 import EditTeacherModal from './_components/edit-teacher';
 import { useTeacherApi } from '../_hooks';
 import { toast } from 'react-toastify';
+import GenericExcelExportButton, { teachersExportConfig } from '../../../components/GenericExcelExportButton';
+import { create } from 'domain';
 
 const TeacherManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,6 +66,9 @@ const TeacherManagement = () => {
     email: teacher.email,
     phone: teacher.phone_number,
     assignedClasses: teacher.taught_classes || [],
+    createdAt: teacher.created_at,
+    address: teacher.address,
+    experience_years: teacher.experience_years || 0,
   }));
 
   const filteredTeachers = teachersList.filter((teacher) => {
@@ -124,7 +129,7 @@ const TeacherManagement = () => {
       }
     }
   };
-
+  const [loading, setLoading] = useState(false);
   return (
     <>
       {/* Header */}
@@ -196,6 +201,13 @@ const TeacherManagement = () => {
               className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
             />
           </div>
+          {/* Export to Excel Button */}
+          <GenericExcelExportButton
+            data={filteredTeachers}
+            config={teachersExportConfig}
+            onExportStart={() => setLoading(true)}
+            onExportComplete={() => setLoading(false)}
+          />
 
           {/* Add Teacher Button */}
           <button
