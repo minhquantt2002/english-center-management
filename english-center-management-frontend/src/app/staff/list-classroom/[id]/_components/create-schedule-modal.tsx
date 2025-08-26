@@ -113,8 +113,8 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
     setFormData({
       class_id: classId,
       weekday: 'monday' as Weekday,
-      start_time: '08:00',
-      end_time: '09:30',
+      start_time: '',
+      end_time: '',
     });
     setErrors({});
     onClose();

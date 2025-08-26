@@ -49,7 +49,7 @@ const ExamDetailPage = () => {
     () =>
       ['A1', 'A2', 'B1', 'B2'].includes(exam?.classroom.course_level)
         ? ['listening', 'reading']
-        : ['listening', 'reading', 'speaking', 'writing'],
+        : ['speaking', 'writing'],
     [exam?.classroom.course_level]
   );
 
@@ -375,7 +375,7 @@ const ExamDetailPage = () => {
                 </div>
 
                 {/* Skills grid */}
-                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
+                <div className='grid grid-cols-2 gap-8 mb-6'>
                   {selectedSkills.map((skill) => (
                     <div
                       key={skill}

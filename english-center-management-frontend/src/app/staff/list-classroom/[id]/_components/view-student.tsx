@@ -19,6 +19,7 @@ import {
 import { ScoreNested, StudentResponse } from '../../../../../types/staff';
 import { useStaffStudentApi } from '../../../_hooks';
 import { HomeworkStatus } from '../../../../teacher/_hooks/use-homework';
+import { LRSkillBand, LSRWSkillBand } from '../../../../teacher/exam/[id]/page';
 
 interface ViewStudentModalProps {
   isOpen: boolean;
@@ -62,7 +63,7 @@ export default function ViewStudentModal({
           const studentData = await getStudentById(studentId);
           setStudent(studentData);
           setScores(
-            studentData.enrollments.find((v) => v.class_id === classroomId)
+            studentData.enrollments.find((v) => v.classroom.id === classroomId)
               ?.score[0]
           );
         } catch (error) {
@@ -273,95 +274,119 @@ export default function ViewStudentModal({
     </div>
   );
 
-  const renderScoresTab = () => (
-    <div className='space-y-6'>
-      {scores ? (
-        <div className='space-y-6'>
-          <div className='bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-200'>
-            <div className='flex items-center gap-3 mb-4'>
-              <div className='w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center'>
-                <TrendingUp className='w-5 h-5 text-white' />
-              </div>
-              <div>
-                <h4 className='font-semibold text-gray-900'>
-                  Tổng quan điểm số
-                </h4>
-                <p className='text-sm text-gray-600'>
-                  Kết quả đánh giá các kỹ năng
-                </p>
-              </div>
-            </div>
+  const renderScoresTab = () => {
+    const courseLevel = student?.enrollments?.find(
+      (v) => v.classroom.id === classroomId
+    )?.classroom?.course_level;
 
-            <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-              {[
-                { key: 'listening', label: 'Nghe', icon: '🎧' },
-                { key: 'reading', label: 'Đọc', icon: '📖' },
-                { key: 'speaking', label: 'Nói', icon: '🗣️' },
-                { key: 'writing', label: 'Viết', icon: '✍️' },
-              ].map((skill) => {
-                const score =
-                  scores?.[
-                    skill.key as keyof Omit<ScoreNested, 'id' | 'feedback'>
-                  ] || null;
-                return (
-                  <div
-                    key={skill.key}
-                    className={`p-4 rounded-lg border-2 transition-all duration-200 ${getScoreBackground(
-                      score
-                    )} hover:shadow-md`}
-                  >
-                    <div className='text-center'>
-                      <div className='text-2xl mb-2'>{skill.icon}</div>
-                      <p className='text-sm font-medium text-gray-700 mb-1'>
-                        {skill.label}
-                      </p>
-                      <p
-                        className={`text-2xl font-bold ${getScoreColor(score)}`}
-                      >
-                        {score ? score : '--'}
-                      </p>
-                      <p className='text-xs text-gray-500 mt-1'>/ 10</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+    const skills = !['A1', 'A2', 'B1', 'B2'].includes(
+      courseLevel?.toUpperCase()
+    )
+      ? ['speaking', 'writing']
+      : ['listening', 'reading'];
 
-          {/* Feedback Section */}
-          {scores.feedback && (
-            <div className='bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200'>
-              <div className='flex items-start gap-3'>
-                <div className='w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mt-1'>
-                  <MessageCircle className='w-5 h-5 text-green-600' />
+    const skillBands = ['A1', 'A2', 'B1', 'B2'].includes(
+      courseLevel?.toUpperCase()
+    )
+      ? LRSkillBand
+      : LSRWSkillBand;
+
+    return (
+      <div className='space-y-6'>
+        {scores ? (
+          <div className='space-y-6'>
+            <div className='bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-200'>
+              <div className='flex items-center gap-3 mb-4'>
+                <div className='w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center'>
+                  <TrendingUp className='w-5 h-5 text-white' />
                 </div>
-                <div className='flex-1'>
-                  <h4 className='font-semibold text-gray-900 mb-2'>
-                    Nhận xét từ giáo viên
+                <div>
+                  <h4 className='font-semibold text-gray-900'>
+                    Tổng quan điểm số
                   </h4>
-                  <p className='text-gray-700 leading-relaxed'>
-                    {scores.feedback}
+                  <p className='text-sm text-gray-600'>
+                    Kết quả đánh giá các kỹ năng
                   </p>
                 </div>
               </div>
+
+              <div className='grid grid-cols-2 md:grid-cols-2 gap-8'>
+                {[
+                  { key: 'listening', label: 'Nghe', icon: '🎧' },
+                  { key: 'reading', label: 'Đọc', icon: '📖' },
+                  { key: 'speaking', label: 'Nói', icon: '🗣️' },
+                  { key: 'writing', label: 'Viết', icon: '✍️' },
+                ]
+                  .filter((skill) => skills.includes(skill.key))
+                  .map((skill) => {
+                    const score =
+                      scores?.[
+                        skill.key as keyof Omit<ScoreNested, 'id' | 'feedback'>
+                      ] || null;
+                    return (
+                      <div
+                        key={skill.key}
+                        className={`p-4 rounded-lg border-2 transition-all duration-200 ${getScoreBackground(
+                          score
+                        )} hover:shadow-md`}
+                      >
+                        <div className='text-center'>
+                          <div className='text-2xl mb-2'>{skill.icon}</div>
+                          <p className='text-sm font-medium text-gray-700 mb-1'>
+                            {skill.label}
+                          </p>
+                          <p
+                            className={`text-2xl font-bold ${getScoreColor(
+                              score
+                            )}`}
+                          >
+                            {score ? score : '--'}
+                          </p>
+                          <p className='text-xs text-gray-500 mt-1'>
+                            / {skillBands[skill.key]}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
             </div>
-          )}
-        </div>
-      ) : (
-        <div className='text-center py-12'>
-          <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-            <Award className='w-8 h-8 text-gray-400' />
+
+            {/* Feedback Section */}
+            {scores.feedback && (
+              <div className='bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200'>
+                <div className='flex items-start gap-3'>
+                  <div className='w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mt-1'>
+                    <MessageCircle className='w-5 h-5 text-green-600' />
+                  </div>
+                  <div className='flex-1'>
+                    <h4 className='font-semibold text-gray-900 mb-2'>
+                      Nhận xét từ giáo viên
+                    </h4>
+                    <p className='text-gray-700 leading-relaxed'>
+                      {scores.feedback}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-          <h4 className='text-lg font-medium text-gray-900 mb-2'>
-            Chưa có điểm số
-          </h4>
-          <p className='text-gray-500'>
-            Điểm số sẽ được cập nhật sau khi giáo viên chấm bài và đánh giá.
-          </p>
-        </div>
-      )}
-    </div>
-  );
+        ) : (
+          <div className='text-center py-12'>
+            <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
+              <Award className='w-8 h-8 text-gray-400' />
+            </div>
+            <h4 className='text-lg font-medium text-gray-900 mb-2'>
+              Chưa có điểm số
+            </h4>
+            <p className='text-gray-500'>
+              Điểm số sẽ được cập nhật sau khi giáo viên chấm bài và đánh giá.
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderHomeworksTab = () => (
     <div className='space-y-6'>

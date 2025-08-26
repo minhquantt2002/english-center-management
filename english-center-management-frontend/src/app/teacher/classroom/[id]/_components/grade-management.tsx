@@ -45,10 +45,7 @@ const GradeManagement: React.FC<{
   const [searchTerm, setSearchTerm] = useState('');
 
   const skills = useMemo(
-    () =>
-      isFullSkills
-        ? ['listening', 'speaking', 'reading', 'writing']
-        : ['listening', 'reading'],
+    () => (isFullSkills ? ['speaking', 'writing'] : ['listening', 'reading']),
     [isFullSkills]
   );
 
@@ -330,7 +327,7 @@ const GradeManagement: React.FC<{
                 </div>
 
                 {/* Skills grid */}
-                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
+                <div className='grid grid-cols-2 gap-8 mb-6'>
                   {skills.map((skill) => (
                     <div
                       key={skill}

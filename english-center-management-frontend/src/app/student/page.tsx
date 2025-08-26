@@ -186,7 +186,10 @@ const StudentDashboard = () => {
             </div>
           </div>
           <div className='flex items-center gap-2'>
-            <ArrowUp size={16} className='text-green-500' />
+            <ArrowUp
+              size={16}
+              className='text-green-500'
+            />
             <span className='text-sm font-medium text-green-500'>
               +5% so với tuần trước
             </span>
@@ -208,7 +211,10 @@ const StudentDashboard = () => {
             </div>
           </div>
           <div className='flex items-center gap-2'>
-            <CheckCircle size={16} className='text-blue-500' />
+            <CheckCircle
+              size={16}
+              className='text-blue-500'
+            />
             <span className='text-sm font-medium text-blue-500'>
               Đang học tích cực
             </span>
@@ -230,7 +236,10 @@ const StudentDashboard = () => {
             </div>
           </div>
           <div className='flex items-center gap-2'>
-            <ClockIcon size={16} className='text-green-500' />
+            <ClockIcon
+              size={16}
+              className='text-green-500'
+            />
             <span className='text-sm font-medium text-green-500'>
               Sẵn sàng học tập
             </span>
@@ -252,7 +261,10 @@ const StudentDashboard = () => {
             </div>
           </div>
           <div className='flex items-center gap-2'>
-            <Star size={16} className='text-orange-500' />
+            <Star
+              size={16}
+              className='text-orange-500'
+            />
             <span className='text-sm font-medium text-orange-500'>
               Ngày liên tiếp
             </span>

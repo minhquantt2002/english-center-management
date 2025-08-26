@@ -21,8 +21,8 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
   const [formData, setFormData] = useState<ScheduleCreate>({
     class_id: classroomId,
     weekday: 'monday' as Weekday,
-    start_time: '08:00',
-    end_time: '09:30',
+    start_time: '',
+    end_time: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -79,12 +79,13 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
       newErrors.weekday = 'Vui lòng chọn ngày trong tuần';
     }
 
-    if (!formData.start_time) {
-      newErrors.start_time = 'Vui lòng chọn giờ bắt đầu';
-    }
-
-    if (!formData.end_time) {
-      newErrors.end_time = 'Vui lòng chọn giờ kết thúc';
+    if (
+      !formData.start_time ||
+      !formData.end_time ||
+      formData.start_time.trim() === '' ||
+      formData.end_time.trim() === ''
+    ) {
+      newErrors.time = 'Vui lòng chọn giờ bắt đầu và kết thúc';
     }
 
     setErrors(newErrors);
@@ -99,16 +100,7 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
     }
 
     setIsSubmitting(true);
-    try {
-      await onSubmit(formData);
-      handleClose();
-      toast.success('Tạo lịch học thành công!');
-    } catch (error) {
-      console.error('Error creating schedule:', error);
-      toast.error(error.detail || 'Tạo lịch học không thành công!');
-    } finally {
-      setIsSubmitting(false);
-    }
+    await onSubmit(formData);
   };
 
   const handleClose = () => {
@@ -200,6 +192,9 @@ const CreateScheduleModal: React.FC<CreateScheduleModalProps> = ({
                 </button>
               ))}
             </div>
+            {errors.time && (
+              <p className='text-red-500 text-sm mt-1'>{errors.time}</p>
+            )}
           </div>
 
           {/* Action Buttons */}

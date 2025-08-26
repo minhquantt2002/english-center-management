@@ -151,7 +151,7 @@ const ClassDetailPage: React.FC = () => {
             const skills = !['A1', 'A2', 'B1', 'B2'].includes(
               exam.classroom.course_level.toUpperCase()
             )
-              ? ['listening', 'speaking', 'reading', 'writing']
+              ? ['speaking', 'writing']
               : ['listening', 'reading'];
 
             const selectedSkillBands = ['A1', 'A2', 'B1', 'B2'].includes(
@@ -180,7 +180,7 @@ const ClassDetailPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-4'>
+                <div className='grid grid-cols-2 gap-8 mb-4'>
                   {skills.includes('listening') && (
                     <div className='text-center p-3 bg-blue-50 rounded-lg'>
                       <div className='text-lg font-bold text-blue-600 mb-1'>
@@ -276,7 +276,7 @@ const ClassDetailPage: React.FC = () => {
       scores?.classroom?.course_level
     )
       ? ['listening', 'reading']
-      : ['listening', 'reading', 'speaking', 'writing'];
+      : ['speaking', 'writing'];
 
     const skillBands = ['A1', 'A2', 'B1', 'B2'].includes(
       scores?.classroom?.course_level
@@ -303,7 +303,7 @@ const ClassDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+              <div className='grid grid-cols-2 gap-8'>
                 {[
                   { key: 'listening', label: 'Nghe', icon: '🎧' },
                   { key: 'reading', label: 'Đọc', icon: '📖' },

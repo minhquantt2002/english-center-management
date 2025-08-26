@@ -303,7 +303,7 @@ export default function ViewStudentModal({
             const skills = !['A1', 'A2', 'B1', 'B2'].includes(
               enrollment.classroom.course_level.toUpperCase()
             )
-              ? ['listening', 'speaking', 'reading', 'writing']
+              ? ['speaking', 'writing']
               : ['listening', 'reading'];
 
             const selectedSkillBands = ['A1', 'A2', 'B1', 'B2'].includes(
@@ -332,7 +332,7 @@ export default function ViewStudentModal({
                   </div>
                 </div>
 
-                <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-4'>
+                <div className='grid grid-cols-2 gap-8 mb-4'>
                   {skills.includes('listening') && (
                     <div className='text-center p-3 bg-blue-50 rounded-lg'>
                       <div className='text-lg font-bold text-blue-600 mb-1'>

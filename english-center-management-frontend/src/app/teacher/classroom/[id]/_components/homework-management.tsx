@@ -54,19 +54,9 @@ const HomeworkManagement: React.FC<{
   const toggleHomeworkStatus = async (
     homeworkId: string,
     studentId: string,
-    currentStatus: HomeworkStatus
+    newStatus: HomeworkStatus
   ) => {
     try {
-      let newStatus: HomeworkStatus;
-
-      if (currentStatus === HomeworkStatus.PASSED) {
-        newStatus = HomeworkStatus.FAILED;
-      } else if (currentStatus === HomeworkStatus.FAILED) {
-        newStatus = HomeworkStatus.PASSED;
-      } else {
-        newStatus = HomeworkStatus.PASSED;
-      }
-
       await updateHomework(homeworkId, {
         status: newStatus,
         student_id: studentId,
@@ -319,7 +309,6 @@ const HomeworkManagement: React.FC<{
                     const student = enrollments?.find(
                       (s) => s.student.id === homework.student_id
                     );
-                    console.log(student);
                     return (
                       <div
                         key={index}
@@ -349,7 +338,7 @@ const HomeworkManagement: React.FC<{
                                   toggleHomeworkStatus(
                                     homework.id,
                                     homework.student_id,
-                                    homework.status
+                                    HomeworkStatus.FAILED
                                   )
                                 }
                                 className='flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium hover:bg-green-200 transition-colors cursor-pointer'
@@ -363,7 +352,7 @@ const HomeworkManagement: React.FC<{
                                   toggleHomeworkStatus(
                                     homework.id,
                                     homework.student_id,
-                                    homework.status
+                                    HomeworkStatus.PASSED
                                   )
                                 }
                                 className='flex items-center px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium hover:bg-red-200 transition-colors cursor-pointer'
@@ -378,7 +367,7 @@ const HomeworkManagement: React.FC<{
                                     toggleHomeworkStatus(
                                       homework.id,
                                       homework.student_id,
-                                      homework.status
+                                      HomeworkStatus.PASSED
                                     )
                                   }
                                   className='flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium hover:bg-green-200 transition-colors'
@@ -391,7 +380,7 @@ const HomeworkManagement: React.FC<{
                                     toggleHomeworkStatus(
                                       homework.id,
                                       homework.student_id,
-                                      HomeworkStatus.PENDING
+                                      HomeworkStatus.FAILED
                                     )
                                   }
                                   className='flex items-center px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium hover:bg-red-200 transition-colors'
