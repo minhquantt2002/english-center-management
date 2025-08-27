@@ -18,17 +18,16 @@ import {
   TeacherResponse,
   TeacherUpdate,
 } from '../../../types/admin';
-import CreateTeacherModal, {
-  specializations,
-} from './_components/create-teacher';
+import CreateTeacherModal from './_components/create-teacher';
 import ViewTeacherModal, {
   getSpecializationLabel,
 } from './_components/view-teacher';
 import EditTeacherModal from './_components/edit-teacher';
 import { useTeacherApi } from '../_hooks';
 import { toast } from 'react-toastify';
-import GenericExcelExportButton, { teachersExportConfig } from '../../../components/GenericExcelExportButton';
-import { create } from 'domain';
+import GenericExcelExportButton, {
+  teachersExportConfig,
+} from '../../../components/GenericExcelExportButton';
 
 const TeacherManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -212,7 +211,7 @@ const TeacherManagement = () => {
           {/* Add Teacher Button */}
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className='px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl'
+            className='px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 focus:ring-blue-500 flex items-center space-x-2'
           >
             <Plus className='h-5 w-5' />
             <span className='font-semibold'>Thêm giáo viên</span>

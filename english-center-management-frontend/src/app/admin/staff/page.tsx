@@ -28,7 +28,7 @@ const StaffManagement = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<UserResponse | null>(null);
   const [staffs, setStaffs] = useState<UserResponse[]>([]);
-  
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -192,7 +192,8 @@ const StaffManagement = () => {
                     (total, t) =>
                       total +
                       (t.created_at &&
-                        new Date(t.created_at).getMonth() === new Date().getMonth()
+                      new Date(t.created_at).getMonth() ===
+                        new Date().getMonth()
                         ? 1
                         : 0),
                     0
@@ -235,7 +236,7 @@ const StaffManagement = () => {
           {/* Add Staff Button */}
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className='px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl'
+            className='px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl'
           >
             <Plus className='h-5 w-5' />
             <span className='font-semibold'>Thêm nhân sự</span>
@@ -346,7 +347,9 @@ const StaffManagement = () => {
           <div className='px-6 py-4 border-t border-gray-100 bg-gray-50'>
             <div className='flex items-center justify-between'>
               <div className='text-sm text-gray-700'>
-                Hiển thị {startIndex + 1} đến {Math.min(endIndex, filteredStaffs.length)} trong tổng số {filteredStaffs.length} nhân sự
+                Hiển thị {startIndex + 1} đến{' '}
+                {Math.min(endIndex, filteredStaffs.length)} trong tổng số{' '}
+                {filteredStaffs.length} nhân sự
               </div>
               <div className='flex items-center space-x-2'>
                 <button
@@ -360,22 +363,24 @@ const StaffManagement = () => {
                 >
                   <ChevronLeft className='w-4 h-4' />
                 </button>
-                
+
                 {/* Page numbers */}
                 <div className='flex items-center space-x-1'>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        currentPage === page
-                          ? 'bg-green-600 text-white'
-                          : 'text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          currentPage === page
+                            ? 'bg-green-600 text-white'
+                            : 'text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  )}
                 </div>
 
                 <button

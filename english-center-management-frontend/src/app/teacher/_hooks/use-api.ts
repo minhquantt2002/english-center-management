@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { api } from '../../../lib/api';
 import {
-  TeacherDashboard,
   TeacherClassroomResponse,
   ScheduleData,
   ScoreUpdate,
@@ -12,22 +11,20 @@ export const useTeacherApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getTeacherDashboard =
-    useCallback(async (): Promise<TeacherDashboard> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await api.get('/teacher/dashboard');
-        return response;
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Có lỗi xảy ra';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    }, []);
+  const getTeacherDashboard = useCallback(async (): Promise<any> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get('/teacher/dashboard');
+      return response;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const getTeachingSchedule = useCallback(async (): Promise<
     ScheduleResponse[]

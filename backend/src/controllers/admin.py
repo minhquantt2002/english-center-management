@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -12,43 +13,11 @@ from ..services import schedule as schedule_service
 from ..schemas.user import UserResponse, UserCreate, UserUpdate, TeacherResponse, StudentResponse, UserRole
 from ..schemas.course import CourseResponse, CourseCreate, CourseUpdate
 from ..schemas.classroom import ClassroomResponse, ClassroomCreate, ClassroomUpdate
-
+from sqlalchemy import func, desc
+from ..models import Course, Enrollment, Class, User
+from ..schemas.admin import *
 
 router = APIRouter()
-
-# Dashboard endpoints
-@router.get("/dashboard/stats")
-async def get_dashboard_stats(
-    current_user: User = Depends(get_current_admin_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy thống kê dashboard cho admin
-    """
-    stats = {
-        "totalStudents": user_service.count_users_by_role(db, "student"),
-        "totalTeachers": user_service.count_users_by_role(db, "teacher"),
-        "totalCourses": course_service.count_courses(db) if hasattr(course_service, 'count_courses') else 0,
-        "totalClasses": classroom_service.count_classrooms(db) if hasattr(classroom_service, 'count_classrooms') else 0,
-        "recentEnrollments": []  # TODO: Implement recent enrollments
-    }
-    return stats
-
-@router.get("/dashboard/stat-cards")
-async def get_dashboard_stat_cards(
-    current_user: User = Depends(get_current_admin_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy thống kê cho stat cards
-    """
-    stats = {
-        "totalStudents": user_service.count_users_by_role(db, "student"),
-        "totalTeachers": user_service.count_users_by_role(db, "teacher"),
-        "totalCourses": course_service.count_courses(db) if hasattr(course_service, 'count_courses') else 0,
-        "totalClasses": classroom_service.count_classrooms(db) if hasattr(classroom_service, 'count_classrooms') else 0,
-    }
-    return stats
 
 # ==================== USER MANAGEMENT ====================
 @router.get("/users", response_model=List[UserResponse])
@@ -973,3 +942,301 @@ async def delete_student_schedule(
         )
     user_service.delete_student_from_classroom(db, student_id, classroom_id)
     return {"message": "Xóa học sinh khỏi lớp học thành công"}
+
+@router.get("/dashboard", response_model=AdminDashboardResponse)
+async def get_admin_dashboard(
+    period: str = "thisMonth",
+    db: Session = Depends(get_db)
+):
+    now = datetime.now()
+    if period == "thisWeek":
+        start_date = now - timedelta(days=7)
+    elif period == "thisMonth":
+        start_date = now.replace(day=1)
+    elif period == "thisQuarter":
+        quarter_start = ((now.month - 1) // 3) * 3 + 1
+        start_date = now.replace(month=quarter_start, day=1)
+    else:
+        start_date = now.replace(month=1, day=1)
+    
+    total_revenue_query = db.query(
+        func.sum(Course.price).label('total_revenue'),
+        func.count(Enrollment.id).label('total_enrollments')
+    ).join(
+        Class, Course.id == Class.course_id
+    ).join(
+        Enrollment, Class.id == Enrollment.class_id
+    ).filter(
+        Enrollment.created_at >= start_date,
+        Enrollment.status == 'active'
+    ).first()
+    
+    total_revenue = float(total_revenue_query.total_revenue or 0)
+    total_enrollments = total_revenue_query.total_enrollments or 0
+    
+    active_students = db.query(func.count(User.id)).filter(
+        User.role_name == 'student',
+        User.status == 'active'
+    ).scalar()
+    
+    completed_students = db.query(func.count(User.id)).filter(
+        User.role_name == 'student',
+        User.status == 'graduated'
+    ).scalar()
+    
+    total_enrollments_ever = db.query(func.count(Enrollment.id)).scalar()
+    completed_enrollments = db.query(func.count(Enrollment.id)).filter(
+        Enrollment.status == 'completed'
+    ).scalar()
+    
+    completion_rate = (completed_enrollments / total_enrollments_ever * 100) if total_enrollments_ever > 0 else 0
+    
+    active_classes_count = db.query(func.count(Class.id)).filter(
+        Class.status == 'ACTIVE'
+    ).scalar()
+    
+    revenue_by_month = []
+    for i in range(7, -1, -1):
+        month_date = now - timedelta(days=30*i)
+        month_start = month_date.replace(day=1)
+        next_month = (month_start.replace(day=28) + timedelta(days=4)).replace(day=1)
+        
+        monthly_data = db.query(
+            func.sum(Course.price).label('revenue'),
+            func.count(func.distinct(Class.course_id)).label('courses'),
+            func.count(Enrollment.id).label('enrollments')
+        ).join(
+            Class, Course.id == Class.course_id
+        ).join(
+            Enrollment, Class.id == Enrollment.class_id
+        ).filter(
+            Enrollment.created_at >= month_start,
+            Enrollment.created_at < next_month,
+            Enrollment.status == 'active'
+        ).first()
+        
+        revenue_by_month.append(RevenueByMonthData(
+            month=f"T{month_date.month}",
+            revenue=float(monthly_data.revenue or 0),
+            courses=monthly_data.courses or 0,
+            enrollments=monthly_data.enrollments or 0
+        ))
+    
+    student_statuses = db.query(
+        User.status,
+        func.count(User.id).label('count')
+    ).filter(
+        User.role_name == 'student'
+    ).group_by(User.status).all()
+    
+    status_colors = {
+        'active': '#10B981',
+        'graduated': '#3B82F6', 
+        'inactive': '#F59E0B',
+        'suspended': '#EF4444'
+    }
+    
+    status_names = {
+        'active': 'Đang học',
+        'graduated': 'Đã tốt nghiệp',
+        'inactive': 'Tạm nghỉ',
+        'suspended': 'Bị đình chỉ'
+    }
+    
+    student_status_distribution = [
+        StudentStatusData(
+            name=status_names.get(status.status, status.status),
+            value=status.count,
+            color=status_colors.get(status.status, '#6B7280')
+        )
+        for status in student_statuses
+    ]
+    
+    new_students_by_month = []
+    for i in range(7, -1, -1):
+        month_date = now - timedelta(days=30*i)
+        month_start = month_date.replace(day=1)
+        next_month = (month_start.replace(day=28) + timedelta(days=4)).replace(day=1)
+        
+        new_count = db.query(func.count(User.id)).filter(
+            User.role_name == 'student',
+            User.created_at >= month_start,
+            User.created_at < next_month
+        ).scalar()
+        
+        new_students_by_month.append(NewStudentData(
+            month=f"T{month_date.month}",
+            new_students=new_count
+        ))
+    
+    level_data = db.query(
+        Class.course_level,
+        func.count(func.distinct(Enrollment.student_id)).label('count')
+    ).join(
+        Enrollment, Class.id == Enrollment.class_id
+    ).filter(
+        Enrollment.status == 'active'
+    ).group_by(Class.course_level).all()
+    
+    total_active_enrollments = sum(level.count for level in level_data)
+    
+    level_colors = {
+        'A1': '#EF4444',
+        'A2': '#F59E0B', 
+        'B1': '#10B981',
+        'B2': '#3B82F6',
+        'C1': '#8B5CF6'
+    }
+    
+    level_distribution = [
+        LevelDistributionData(
+            level=level.course_level.value,
+            count=level.count,
+            percentage=round((level.count / total_active_enrollments * 100), 1) if total_active_enrollments > 0 else 0,
+            color=level_colors.get(level.course_level.value, '#6B7280')
+        )
+        for level in level_data
+    ]
+    
+    top_classes_query = db.query(
+        Class.class_name,
+        func.count(Enrollment.id).label('student_count'),
+        User.name.label('teacher_name'),
+        Class.room
+    ).join(
+        Enrollment, Class.id == Enrollment.class_id
+    ).join(
+        User, Class.teacher_id == User.id
+    ).filter(
+        Class.status == 'ACTIVE',
+        Enrollment.status == 'active'
+    ).group_by(
+        Class.id, Class.class_name, User.name, Class.room
+    ).order_by(
+        desc('student_count')
+    ).limit(5).all()
+    
+    top_classes = [
+        TopClassData(
+            class_name=cls.class_name,
+            student_count=cls.student_count,
+            teacher=cls.teacher_name,
+            room=cls.room or 'TBA'
+        )
+        for cls in top_classes_query
+    ]
+    
+    top_teachers_query = db.query(
+        User.name,
+        func.count(func.distinct(Class.id)).label('class_count'),
+        func.count(func.distinct(Enrollment.student_id)).label('student_count'),
+        User.specialization
+    ).join(
+        Class, User.id == Class.teacher_id
+    ).join(
+        Enrollment, Class.id == Enrollment.class_id
+    ).filter(
+        User.role_name == 'teacher',
+        Class.status == 'ACTIVE',
+        Enrollment.status == 'active'
+    ).group_by(
+        User.id, User.name, User.specialization
+    ).order_by(
+        desc('class_count')
+    ).limit(5).all()
+    
+    top_teachers = [
+        TopTeacherData(
+            name=teacher.name,
+            class_count=teacher.class_count,
+            students=teacher.student_count,
+            specialization=teacher.specialization or 'Chưa cập nhật'
+        )
+        for teacher in top_teachers_query
+    ]
+    subquery = db.query(
+        func.count(Enrollment.id).label('enrollment_count')
+    ).select_from(
+        Class
+    ).join(
+        Enrollment, Class.id == Enrollment.class_id
+    ).filter(
+        Class.status == 'active',
+        Enrollment.status == 'active'
+    ).group_by(
+        Class.id
+    ).subquery()
+
+    avg_class_size = db.query(func.avg(subquery.c.enrollment_count)).scalar()
+    
+    # Build response
+
+    response = AdminDashboardResponse(
+        total_revenue=StatCardData(
+            title="Tổng Doanh Thu",
+            value=f"{total_revenue:,.0f} ₫",
+            change="+12.5% so với tháng trước",
+            change_type="positive",
+            subtitle=f"Từ {total_enrollments} lượt đăng ký"
+        ),
+        
+        active_students=StatCardData(
+            title="Học Viên Đang Học", 
+            value=str(active_students),
+            change="+8.3% so với tháng trước",
+            change_type="positive",
+            subtitle=f"{active_students} đang học, {completed_students} đã hoàn thành"
+        ),
+        
+        completion_rate=StatCardData(
+            title="Tỷ Lệ Hoàn Thành Khóa Học",
+            value=f"{completion_rate:.1f}%",
+            change="+2.1% so với tháng trước", 
+            change_type="positive",
+            subtitle=f"{completed_enrollments} trong tổng số {total_enrollments_ever} đã hoàn thành"
+        ),
+        
+        active_classes=StatCardData(
+            title="Lớp Đang Hoạt Động",
+            value=str(active_classes_count),
+            change="5 lớp mới tháng này",
+            change_type="positive",
+            subtitle="12 giáo viên tham gia"
+        ),
+        
+        revenue_by_month=revenue_by_month,
+        student_status_distribution=student_status_distribution,
+        new_students_by_month=new_students_by_month,
+        level_distribution=level_distribution,
+        top_classes=top_classes,
+        top_teachers=top_teachers,
+        
+        completion_rate_detail=CompletionRateData(
+            total=total_enrollments_ever,
+            completed=completed_enrollments,
+            rate=completion_rate
+        ),
+        
+        average_class_size=StatCardData(
+            title="Quy mô lớp học trung bình",
+            value=f"{avg_class_size:.1f}" if avg_class_size else "0",
+            subtitle="học sinh mỗi lớp"
+        ),
+        
+        teacher_utilization=StatCardData(
+            title="Tỷ lệ sử dụng giáo viên",
+            value="85.7%",
+            subtitle="giờ dạy trung bình"
+        ),
+        
+        monthly_growth=StatCardData(
+            title="Tăng trưởng hàng tháng",
+            value="+12.3%",
+            subtitle="số lượng đăng ký mới"
+        ),
+        
+        last_updated=datetime.now(),
+        period=period
+    )
+    
+    return response

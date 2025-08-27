@@ -1,598 +1,739 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Plus,
-  MessageCircle,
-  Calendar,
-  FileText,
-  GraduationCap,
-  Users,
-  Clock,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from 'recharts';
+import {
   BookOpen,
-  Award,
-  TrendingUp,
+  Users,
+  Calendar,
   CheckCircle,
-  AlertCircle,
-  BarChart3,
+  FileText,
+  TrendingUp,
+  AlertTriangle,
+  Award,
+  Target,
   Star,
-  ArrowUp,
-  User,
-  MapPin,
-  ChevronRight,
 } from 'lucide-react';
 import { useTeacherApi } from './_hooks/use-api';
 
-interface Student {
-  id: string;
-  name: string;
-  avatar: string;
-  status: 'Có mặt' | 'Sắp tới' | 'Vắng mặt';
-}
+// Mock data - In real app, this would come from your API based on current_teacher
+const mockData = {
+  currentTeacher: {
+    name: 'Cô Sarah Johnson',
+    specialization: 'TOEIC & Business English',
+    experience: '5 năm kinh nghiệm',
+    avatar:
+      'https://images.unsplash.com/photo-1494790108755-2616c4b25e57?w=150&h=150&fit=crop&crop=face',
+  },
 
-const TeacherDashboard = () => {
-  const [dashboardData, setDashboardData] = useState<any>(null);
-  const [todaysClasses, setTodaysClasses] = useState<any[]>([]);
-  const [studentsByClass, setStudentsByClass] = useState<{
-    [key: string]: Student[];
-  }>({});
-  const [isLoading, setIsLoading] = useState(true);
+  activeClasses: 6,
+  totalStudents: 142,
+  weeklySchedules: 18,
 
-  const { error, getTeacherDashboard, getClassrooms } = useTeacherApi();
+  classData: [
+    {
+      className: 'TOEIC Intensive A2',
+      students: 28,
+      attendance: 88.5,
+      avgScore: 7.2,
+      homeworkSubmitted: 85,
+      room: 'A205',
+      schedule: 'T2,T4,T6: 19:00-21:00',
+    },
+    {
+      className: 'Business English B2',
+      students: 24,
+      avgScore: 7.8,
+      attendance: 91.2,
+      homeworkSubmitted: 92,
+      room: 'B103',
+      schedule: 'T3,T5: 18:00-20:00',
+    },
+    {
+      className: 'TOEIC 600+ B1',
+      students: 32,
+      attendance: 85.7,
+      avgScore: 6.9,
+      homeworkSubmitted: 78,
+      room: 'C301',
+      schedule: 'T2,T4: 17:30-19:30',
+    },
+    {
+      className: 'Conversation Club A2',
+      students: 18,
+      attendance: 94.1,
+      avgScore: 7.5,
+      homeworkSubmitted: 89,
+      room: 'A108',
+      schedule: 'T7: 14:00-16:00',
+    },
+    {
+      className: 'Business Writing B1',
+      students: 22,
+      attendance: 87.3,
+      avgScore: 7.1,
+      homeworkSubmitted: 73,
+      room: 'B205',
+      schedule: 'T6: 19:00-21:00',
+    },
+    {
+      className: 'TOEIC Speaking B2',
+      students: 18,
+      attendance: 89.7,
+      avgScore: 8.1,
+      homeworkSubmitted: 94,
+      room: 'C102',
+      schedule: 'T7: 16:30-18:30',
+    },
+  ],
 
-  // Fetch teacher data on component mount
+  skillsAverage: [
+    { skill: 'Listening', score: 7.4, improvement: '+0.5' },
+    { skill: 'Reading', score: 7.8, improvement: '+0.3' },
+    { skill: 'Writing', score: 6.9, improvement: '+0.7' },
+    { skill: 'Speaking', score: 7.2, improvement: '+0.4' },
+  ],
+
+  recentHomework: [
+    {
+      studentName: 'Nguyễn Văn An',
+      className: 'TOEIC A2',
+      assignment: 'Listening Practice Unit 5',
+      score: 8.5,
+      status: 'passed',
+      submittedDate: '2024-08-25',
+      feedback: 'Rất tốt! Cải thiện nhiều về khả năng nghe.',
+    },
+    {
+      studentName: 'Trần Thị Bình',
+      className: 'Business B2',
+      assignment: 'Email Writing Task',
+      score: 7.2,
+      status: 'passed',
+      submittedDate: '2024-08-24',
+      feedback: 'Cấu trúc email tốt, cần chú ý grammar.',
+    },
+    {
+      studentName: 'Lê Minh Cường',
+      className: 'TOEIC B1',
+      assignment: 'Reading Comprehension',
+      score: 5.8,
+      status: 'failed',
+      submittedDate: '2024-08-24',
+      feedback: 'Cần làm thêm bài tập về từ vựng.',
+    },
+    {
+      studentName: 'Phạm Thu Dung',
+      className: 'Conversation A2',
+      assignment: 'Speaking Recording',
+      score: 9.0,
+      status: 'passed',
+      submittedDate: '2024-08-23',
+      feedback: 'Xuất sắc! Phát âm và lưu loát tốt.',
+    },
+  ],
+
+  homeworkStats: [
+    { className: 'TOEIC A2', pending: 4, passed: 22, failed: 2, total: 28 },
+    { className: 'Business B2', pending: 2, passed: 21, failed: 1, total: 24 },
+    { className: 'TOEIC B1', pending: 7, passed: 20, failed: 5, total: 32 },
+    {
+      className: 'Conversation A2',
+      pending: 2,
+      passed: 15,
+      failed: 1,
+      total: 18,
+    },
+    {
+      className: 'Business Writing B1',
+      pending: 6,
+      passed: 14,
+      failed: 2,
+      total: 22,
+    },
+    {
+      className: 'TOEIC Speaking B2',
+      pending: 1,
+      passed: 16,
+      failed: 1,
+      total: 18,
+    },
+  ],
+
+  classProgress: [
+    {
+      month: 'T5',
+      'TOEIC A2': 6.8,
+      'Business B2': 7.1,
+      'TOEIC B1': 6.2,
+      'Conversation A2': 7.0,
+    },
+    {
+      month: 'T6',
+      'TOEIC A2': 7.0,
+      'Business B2': 7.4,
+      'TOEIC B1': 6.5,
+      'Conversation A2': 7.3,
+    },
+    {
+      month: 'T7',
+      'TOEIC A2': 7.1,
+      'Business B2': 7.6,
+      'TOEIC B1': 6.8,
+      'Conversation A2': 7.4,
+    },
+    {
+      month: 'T8',
+      'TOEIC A2': 7.2,
+      'Business B2': 7.8,
+      'TOEIC B1': 6.9,
+      'Conversation A2': 7.5,
+    },
+  ],
+
+  absentStudents: [
+    {
+      name: 'Hoàng Văn Em',
+      className: 'TOEIC B1',
+      absentCount: 12,
+      totalSessions: 32,
+      absentRate: 37.5,
+      phone: '0912345678',
+      lastAttended: '2024-08-15',
+    },
+    {
+      name: 'Ngô Thị Phương',
+      className: 'Business Writing B1',
+      absentCount: 8,
+      totalSessions: 24,
+      absentRate: 33.3,
+      phone: '0987654321',
+      lastAttended: '2024-08-20',
+    },
+    {
+      name: 'Đặng Minh Tuấn',
+      className: 'TOEIC A2',
+      absentCount: 10,
+      totalSessions: 30,
+      absentRate: 33.3,
+      phone: '0901234567',
+      lastAttended: '2024-08-18',
+    },
+    {
+      name: 'Vũ Thu Hằng',
+      className: 'Business B2',
+      absentCount: 7,
+      totalSessions: 22,
+      absentRate: 31.8,
+      phone: '0934567890',
+      lastAttended: '2024-08-22',
+    },
+  ],
+
+  weeklyStats: {
+    totalSessions: 18,
+    averageAttendance: 89.2,
+    homeworkGraded: 45,
+    newAssignments: 12,
+  },
+};
+
+const StatCard: React.FC<{
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  subtitle?: string;
+  color?: string;
+  trend?: 'up' | 'down' | 'neutral';
+  trendValue?: string;
+}> = ({ title, value, icon, subtitle, color = 'blue', trend, trendValue }) => (
+  <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-200'>
+    <div className='flex items-center justify-between'>
+      <div>
+        <p className='text-sm font-medium text-gray-600'>{title}</p>
+        <p className='text-2xl font-bold text-gray-900 mt-1'>{value}</p>
+        {subtitle && <p className='text-xs text-gray-500 mt-1'>{subtitle}</p>}
+        {trend && trendValue && (
+          <p
+            className={`text-xs mt-2 flex items-center ${
+              trend === 'up'
+                ? 'text-green-600'
+                : trend === 'down'
+                ? 'text-red-600'
+                : 'text-gray-500'
+            }`}
+          >
+            <TrendingUp
+              className={`w-3 h-3 mr-1 ${trend === 'down' ? 'rotate-180' : ''}`}
+            />
+            {trendValue}
+          </p>
+        )}
+      </div>
+      <div
+        className={`p-3 bg-gradient-to-br from-${color}-50 to-${color}-100 rounded-lg`}
+      >
+        {icon}
+      </div>
+    </div>
+  </div>
+);
+
+const TeacherDashboard: React.FC = () => {
+  const [selectedClass, setSelectedClass] = useState('all');
+
+  const [mockData, setMockData] = useState(null);
+
+  const { getTeacherDashboard } = useTeacherApi();
+
   useEffect(() => {
-    fetchTeacherData();
+    const fetchData = async () => {
+      const data = await getTeacherDashboard();
+      setMockData(data);
+    };
+
+    fetchData();
   }, []);
-
-  const fetchTeacherData = async () => {
-    try {
-      const [dashboard, classes] = await Promise.all([
-        getTeacherDashboard(),
-        getClassrooms(),
-      ]);
-
-      setDashboardData(dashboard);
-
-      // Transform classes data for display
-      const transformedClasses = classes.slice(0, 3).map((classItem: any) => ({
-        id: classItem.id,
-        title: classItem.className || classItem.title || 'Lớp tiếng Anh',
-        level: `Cấp độ ${classItem.level || 'B1'}`,
-        room: classItem.room || 'Phòng 101',
-        studentCount: classItem.studentsCount || 15,
-        time: `${classItem.startTime || '9:00'} - ${
-          classItem.endTime || '10:30'
-        }`,
-        status: 'Đang diễn ra' as 'Đang diễn ra' | 'Sắp tới',
-      }));
-
-      setTodaysClasses(transformedClasses);
-
-      // Create simple students by class mapping for display
-      const studentsMapping: { [key: string]: Student[] } = {
-        'Intermediate B1': [
-          {
-            id: '1',
-            name: 'John Martinez',
-            avatar:
-              'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face',
-            status: 'Có mặt',
-          },
-          {
-            id: '2',
-            name: 'Emma Chen',
-            avatar:
-              'https://images.unsplash.com/photo-1494790108755-2616b612b29c?w=40&h=40&fit=crop&crop=face',
-            status: 'Có mặt',
-          },
-        ],
-        'Advanced C1': [
-          {
-            id: '4',
-            name: 'Sophie Williams',
-            avatar:
-              'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face',
-            status: 'Sắp tới',
-          },
-        ],
-      };
-
-      setStudentsByClass(studentsMapping);
-      setIsLoading(false);
-    } catch (err) {
-      console.error('Failed to fetch teacher data:', err);
-      setIsLoading(false);
-    }
-  };
-
-  const actionCards = [
-    {
-      title: 'Nhập điểm kiểm tra',
-      description: 'Cập nhật điểm số học viên',
-      icon: Plus,
-      bgColor: 'from-blue-500 to-blue-600',
-      hoverColor: 'hover:from-blue-600 hover:to-blue-700',
-    },
-    {
-      title: 'Gửi nhận xét',
-      description: 'Viết feedback cho học viên',
-      icon: MessageCircle,
-      bgColor: 'from-green-500 to-green-600',
-      hoverColor: 'hover:from-green-600 hover:to-green-700',
-    },
-    {
-      title: 'Lên lịch lớp học',
-      description: 'Quản lý lịch giảng dạy',
-      icon: Calendar,
-      bgColor: 'from-purple-500 to-purple-600',
-      hoverColor: 'hover:from-purple-600 hover:to-purple-700',
-    },
-    {
-      title: 'Tạo bài tập',
-      description: 'Giao bài tập mới',
-      icon: FileText,
-      bgColor: 'from-orange-500 to-orange-600',
-      hoverColor: 'hover:from-orange-600 hover:to-orange-700',
-    },
-  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Có mặt':
-      case 'Present':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'Sắp tới':
-      case 'Upcoming':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Vắng mặt':
-      case 'Absent':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'Đang diễn ra':
-      case 'In Progress':
-        return 'bg-green-100 text-green-800 border-green-200';
+      case 'passed':
+        return 'text-green-600 bg-green-100';
+      case 'failed':
+        return 'text-red-600 bg-red-100';
+      case 'pending':
+        return 'text-yellow-600 bg-yellow-100';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'text-gray-600 bg-gray-100';
     }
   };
 
-  const calendarDays = [
-    ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
-    [11, 12, 13, 14, 15, 16, 17],
-    [18, 19, 20, 21, 22, 23, 24],
-  ];
-
-  if (isLoading) {
-    return (
-      <div className='flex justify-center items-center py-12'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600'></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className='bg-red-50 border border-red-200 rounded-xl p-6 mb-6'>
-        <div className='flex items-center gap-3'>
-          <AlertCircle className='w-5 h-5 text-red-500' />
-          <p className='text-red-800 font-medium'>
-            Có lỗi xảy ra khi tải dữ liệu
-          </p>
-        </div>
-        <button
-          onClick={fetchTeacherData}
-          className='mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors'
-        >
-          Thử lại
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <>
-      {/* Header */}
-      <div className='mb-8'>
-        <div className='flex items-center gap-4 mb-4'>
-          <div className='w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg'>
-            <GraduationCap className='w-6 h-6 text-white' />
-          </div>
+    <div className='p-2'>
+      {/* Header with Teacher Profile */}
+      <div className='flex items-center justify-between'>
+        <div className='flex items-center space-x-4'>
           <div>
-            <h1 className='text-3xl font-bold text-gray-900'>
-              Chào mừng trở lại, {dashboardData?.teacherName || 'Giáo viên'}!
+            <h1 className='text-2xl font-bold text-gray-900'>
+              Chào {mockData?.currentTeacher?.name}!
             </h1>
-            <p className='text-gray-600 mt-1'>
-              Đây là tổng quan về hoạt động giảng dạy của bạn hôm nay
+            <p className='text-gray-600'>
+              {mockData?.currentTeacher?.specialization}
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
-        <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200'>
-          <div className='flex items-center justify-between mb-4'>
-            <div>
-              <p className='text-gray-500 text-sm font-medium'>
-                Lớp học hôm nay
-              </p>
-              <p className='text-3xl font-bold text-gray-900 mt-1'>
-                {todaysClasses.length}
-              </p>
-            </div>
-            <div className='w-14 h-14 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg'>
-              <BookOpen className='w-6 h-6' />
-            </div>
-          </div>
-          <div className='flex items-center gap-2'>
-            <ArrowUp
-              size={16}
-              className='text-green-500'
-            />
-            <span className='text-sm font-medium text-green-500'>
-              +2 so với tuần trước
-            </span>
-          </div>
-        </div>
-
-        <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200'>
-          <div className='flex items-center justify-between mb-4'>
-            <div>
-              <p className='text-gray-500 text-sm font-medium'>Tổng học viên</p>
-              <p className='text-3xl font-bold text-gray-900 mt-1'>45</p>
-            </div>
-            <div className='w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg'>
-              <Users className='w-6 h-6' />
-            </div>
-          </div>
-          <div className='flex items-center gap-2'>
-            <CheckCircle
-              size={16}
-              className='text-blue-500'
-            />
-            <span className='text-sm font-medium text-blue-500'>
-              Đang giảng dạy tích cực
-            </span>
-          </div>
-        </div>
-
-        <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200'>
-          <div className='flex items-center justify-between mb-4'>
-            <div>
-              <p className='text-gray-500 text-sm font-medium'>Giờ giảng dạy</p>
-              <p className='text-3xl font-bold text-gray-900 mt-1'>24h</p>
-            </div>
-            <div className='w-14 h-14 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white shadow-lg'>
-              <Clock className='w-6 h-6' />
-            </div>
-          </div>
-          <div className='flex items-center gap-2'>
-            <TrendingUp
-              size={16}
-              className='text-green-500'
-            />
-            <span className='text-sm font-medium text-green-500'>Tuần này</span>
-          </div>
-        </div>
-
-        <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200'>
-          <div className='flex items-center justify-between mb-4'>
-            <div>
-              <p className='text-gray-500 text-sm font-medium'>
-                Đánh giá trung bình
-              </p>
-              <p className='text-3xl font-bold text-gray-900 mt-1'>4.8</p>
-            </div>
-            <div className='w-14 h-14 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg'>
-              <Star className='w-6 h-6' />
-            </div>
-          </div>
-          <div className='flex items-center gap-2'>
-            <Award
-              size={16}
-              className='text-purple-500'
-            />
-            <span className='text-sm font-medium text-purple-500'>
-              Xuất sắc
-            </span>
-          </div>
+        <div className='flex items-center space-x-3'>
+          <select
+            value={selectedClass}
+            onChange={(e) => setSelectedClass(e.target.value)}
+            className='px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+          >
+            <option value='all'>Tất cả lớp</option>
+            {mockData?.classData?.map((cls, index) => (
+              <option
+                key={index}
+                value={cls.className}
+              >
+                {cls.className}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8'>
-        {actionCards.map((card, index) => {
-          const Icon = card.icon;
-          return (
-            <button
-              key={index}
-              className={`bg-gradient-to-r ${card.bgColor} ${card.hoverColor} text-white rounded-xl p-6 transition-all duration-200 text-left shadow-lg hover:shadow-xl transform hover:-translate-y-1`}
-            >
-              <Icon className='w-8 h-8 mb-3' />
-              <h3 className='text-lg font-semibold mb-1'>{card.title}</h3>
-              <p className='text-sm opacity-90'>{card.description}</p>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Main Content Grid */}
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
-        {/* Left Column */}
-        <div className='lg:col-span-2 space-y-8'>
-          {/* Today's Classes */}
-          <div className='bg-white rounded-xl border border-gray-100 shadow-sm'>
-            <div className='p-6 border-b border-gray-100'>
-              <div className='flex items-center justify-between'>
-                <h2 className='text-xl font-bold text-gray-900 flex items-center gap-2'>
-                  <Calendar className='w-5 h-5 text-orange-600' />
-                  Lớp học hôm nay
-                </h2>
-                <span className='text-sm text-gray-500'>
-                  {new Date().toLocaleDateString('vi-VN', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </span>
-              </div>
-            </div>
-
-            <div className='p-6'>
-              <div className='space-y-4'>
-                {todaysClasses.map((classItem) => (
-                  <div
-                    key={classItem.id}
-                    className='bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border border-orange-200 p-6 hover:shadow-md transition-all duration-200'
-                  >
-                    <div className='flex items-center justify-between'>
-                      <div className='flex-1'>
-                        <div className='flex items-center gap-3 mb-3'>
-                          <div className='w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center text-white shadow-lg'>
-                            <BookOpen className='w-6 h-6' />
-                          </div>
-                          <div>
-                            <h3 className='text-lg font-semibold text-gray-900'>
-                              {classItem.title}
-                              {classItem.level && (
-                                <span className='text-sm font-normal text-gray-500 ml-2'>
-                                  {classItem.level}
-                                </span>
-                              )}
-                            </h3>
-                            <div className='flex items-center gap-4 text-sm text-gray-600 mt-1'>
-                              <div className='flex items-center gap-1'>
-                                <MapPin className='w-4 h-4' />
-                                {classItem.room}
-                              </div>
-                              <div className='flex items-center gap-1'>
-                                <Users className='w-4 h-4' />
-                                {classItem.studentCount} học viên
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className='text-right'>
-                        <div className='text-sm font-medium text-gray-900 mb-2 flex items-center gap-1 justify-end'>
-                          <Clock className='w-4 h-4' />
-                          {classItem.time}
-                        </div>
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
-                            classItem.status
-                          )}`}
-                        >
-                          {classItem.status}
-                        </span>
-                      </div>
-                    </div>
-                    <div className='mt-4 flex justify-end'>
-                      <button className='flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors'>
-                        <span>Vào lớp</span>
-                        <ChevronRight className='w-4 h-4' />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Students */}
-          <div className='bg-white rounded-xl border border-gray-100 shadow-sm'>
-            <div className='p-6 border-b border-gray-100'>
-              <h2 className='text-xl font-bold text-gray-900 flex items-center gap-2'>
-                <Users className='w-5 h-5 text-blue-600' />
-                Học viên gần đây
-              </h2>
-            </div>
-            <div className='p-6'>
-              <div className='space-y-4'>
-                {Object.entries(studentsByClass).map(
-                  ([className, students]) => (
-                    <div
-                      key={className}
-                      className='space-y-3'
-                    >
-                      <h3 className='font-semibold text-gray-900 text-sm'>
-                        {className}
-                      </h3>
-                      <div className='space-y-2'>
-                        {students.map((student) => (
-                          <div
-                            key={student.id}
-                            className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'
-                          >
-                            <div className='flex items-center gap-3'>
-                              <img
-                                src={student.avatar}
-                                alt={student.name}
-                                className='w-8 h-8 rounded-full object-cover'
-                              />
-                              <span className='font-medium text-gray-900'>
-                                {student.name}
-                              </span>
-                            </div>
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
-                                student.status
-                              )}`}
-                            >
-                              {student.status}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
-          </div>
+      <div className='py-6'>
+        {/* Quick Stats */}
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6'>
+          <StatCard
+            title='Lớp Đang Dạy'
+            value={mockData?.activeClasses}
+            icon={<BookOpen className='w-6 h-6 text-indigo-600' />}
+            subtitle='lớp học hoạt động'
+            color='indigo'
+          />
+          <StatCard
+            title='Tổng Học Viên'
+            value={mockData?.totalStudents}
+            icon={<Users className='w-6 h-6 text-blue-600' />}
+            trend='up'
+            trendValue='+8 học viên mới'
+            color='blue'
+          />
+          <StatCard
+            title='Buổi Dạy Tuần Này'
+            value={mockData?.weeklySchedules}
+            icon={<Calendar className='w-6 h-6 text-green-600' />}
+            subtitle='trên tất cả các lớp'
+            color='green'
+          />
+          <StatCard
+            title='Điểm Danh TB'
+            value={`${mockData?.weeklyStats?.averageAttendance}%`}
+            icon={<CheckCircle className='w-6 h-6 text-purple-600' />}
+            trend='up'
+            trendValue='+2.3% so với tuần trước'
+            color='purple'
+          />
         </div>
 
-        {/* Right Column */}
-        <div className='space-y-8'>
-          {/* Teacher Info Card */}
-          <div className='bg-white rounded-xl border border-gray-100 shadow-sm'>
-            <div className='p-6 border-b border-gray-100'>
-              <h2 className='text-xl font-bold text-gray-900 flex items-center gap-2'>
-                <User className='w-5 h-5 text-orange-600' />
-                Thông tin giáo viên
-              </h2>
-            </div>
-            <div className='p-6'>
-              <div className='space-y-4'>
-                <div className='flex items-center gap-3'>
-                  <div className='w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
-                    {dashboardData?.teacherName?.charAt(0) || 'G'}
-                  </div>
-                  <div>
-                    <div className='font-semibold text-gray-900'>
-                      {dashboardData?.teacherName || 'Giáo viên'}
-                    </div>
-                    <div className='text-sm text-gray-500'>
-                      Giáo viên tiếng Anh
-                    </div>
-                  </div>
+        {/* Class Overview */}
+        <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6'>
+          <div className='flex items-center justify-between mb-6'>
+            <h2 className='text-xl font-semibold text-gray-900'>
+              Tổng Quan Lớp Học
+            </h2>
+            <Target className='w-6 h-6 text-indigo-500' />
+          </div>
+          <div className='grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4'>
+            {mockData?.classData?.map((classItem, index) => (
+              <div
+                key={index}
+                className='border border-gray-200 rounded-lg p-5 hover:shadow-md transition-all duration-200'
+              >
+                <div className='flex items-center justify-between mb-3'>
+                  <h3 className='font-bold text-gray-900 text-lg'>
+                    {classItem.className}
+                  </h3>
+                  <span className='text-sm text-indigo-600 text-center bg-indigo-100 px-2 py-1 rounded-full'>
+                    {classItem.students} HV
+                  </span>
                 </div>
-
-                <div className='space-y-3'>
-                  <div className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'>
-                    <span className='text-sm text-gray-600'>Chuyên môn</span>
-                    <span className='font-semibold text-gray-900'>
-                      Speaking & Grammar
+                <div className='space-y-2 text-sm'>
+                  <div className='flex justify-between'>
+                    <span className='text-gray-600'>Điểm danh:</span>
+                    <span
+                      className={`font-medium ${
+                        classItem.attendance >= 90
+                          ? 'text-green-600'
+                          : classItem.attendance >= 85
+                          ? 'text-yellow-600'
+                          : 'text-red-600'
+                      }`}
+                    >
+                      {classItem.attendance}%
                     </span>
                   </div>
-
-                  <div className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'>
-                    <span className='text-sm text-gray-600'>Kinh nghiệm</span>
-                    <span className='font-semibold text-gray-900'>5 năm</span>
+                  <div className='flex justify-between'>
+                    <span className='text-gray-600'>Điểm TB:</span>
+                    <span className='font-medium text-blue-600'>
+                      {classItem.avgScore}
+                    </span>
                   </div>
-
-                  <div className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'>
-                    <span className='text-sm text-gray-600'>Lớp đang dạy</span>
-                    <span className='font-semibold text-gray-900'>4 lớp</span>
+                  <div className='flex justify-between'>
+                    <span className='text-gray-600'>Bài tập nộp:</span>
+                    <span className='font-medium text-purple-600'>
+                      {classItem.homeworkSubmitted}%
+                    </span>
+                  </div>
+                  <div className='pt-2 border-t border-gray-100'>
+                    <p className='text-xs text-gray-500'>
+                      {classItem.schedule}
+                    </p>
+                    <p className='text-xs text-gray-500'>
+                      Phòng {classItem.room}
+                    </p>
                   </div>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Skills & Progress Charts */}
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6'>
+          {/* Skills Average */}
+          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6'>
+            <div className='flex items-center justify-between mb-6'>
+              <h2 className='text-lg font-semibold text-gray-900'>
+                Điểm Trung Bình Theo Kỹ Năng
+              </h2>
+              <Star className='w-5 h-5 text-yellow-500' />
+            </div>
+            <ResponsiveContainer
+              width='100%'
+              height={300}
+            >
+              <BarChart
+                data={mockData?.skillsAverage}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid
+                  strokeDasharray='3 3'
+                  stroke='#f0f0f0'
+                />
+                <XAxis
+                  dataKey='skill'
+                  stroke='#6B7280'
+                />
+                <YAxis
+                  stroke='#6B7280'
+                  domain={[0, 10]}
+                />
+                <Tooltip formatter={(value) => [value, 'Điểm TB']} />
+                <Bar
+                  dataKey='score'
+                  fill='#6366F1'
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+            <div className='grid grid-cols-4 gap-4 mt-4'>
+              {mockData?.skillsAverage?.map((skill, index) => (
+                <div
+                  key={index}
+                  className='text-center'
+                >
+                  <p className='text-xs text-gray-500'>{skill.skill}</p>
+                  <p className='text-green-600 font-medium text-sm'>
+                    {skill.improvement}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Mini Calendar */}
-          <div className='bg-white rounded-xl border border-gray-100 shadow-sm'>
-            <div className='p-6 border-b border-gray-100'>
-              <h2 className='text-xl font-bold text-gray-900 flex items-center gap-2'>
-                <Calendar className='w-5 h-5 text-green-600' />
-                Lịch tháng
+          {/* Class Progress Over Time */}
+          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6'>
+            <div className='flex items-center justify-between mb-6'>
+              <h2 className='text-lg font-semibold text-gray-900'>
+                Tiến Bộ Lớp Học Theo Thời Gian
               </h2>
+              <TrendingUp className='w-5 h-5 text-green-500' />
             </div>
-            <div className='p-6'>
-              <div className='text-center mb-4'>
-                <h3 className='text-lg font-semibold text-gray-900'>
-                  Tháng 3, 2024
-                </h3>
-              </div>
+            <ResponsiveContainer
+              width='100%'
+              height={300}
+            >
+              <LineChart data={mockData?.classProgress}>
+                <CartesianGrid
+                  strokeDasharray='3 3'
+                  stroke='#f0f0f0'
+                />
+                <XAxis
+                  dataKey='month'
+                  stroke='#6B7280'
+                />
+                <YAxis
+                  stroke='#6B7280'
+                  domain={[6, 8]}
+                />
+                <Tooltip />
+                <Legend />
+                <Line
+                  type='monotone'
+                  dataKey='TOEIC A2'
+                  stroke='#3B82F6'
+                  strokeWidth={2}
+                />
+                <Line
+                  type='monotone'
+                  dataKey='Business B2'
+                  stroke='#10B981'
+                  strokeWidth={2}
+                />
+                <Line
+                  type='monotone'
+                  dataKey='TOEIC B1'
+                  stroke='#F59E0B'
+                  strokeWidth={2}
+                />
+                <Line
+                  type='monotone'
+                  dataKey='Conversation A2'
+                  stroke='#8B5CF6'
+                  strokeWidth={2}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
-              <div className='space-y-2'>
-                {calendarDays.map((week, weekIndex) => (
-                  <div
-                    key={weekIndex}
-                    className='grid grid-cols-7 gap-1'
-                  >
-                    {week.map((day, dayIndex) => (
-                      <div
-                        key={dayIndex}
-                        className={`
-                          text-center text-sm py-2 rounded-lg cursor-pointer transition-colors
-                          ${
-                            typeof day === 'number' && day === 15
-                              ? 'bg-orange-600 text-white font-semibold'
-                              : typeof day === 'number'
-                              ? 'hover:bg-gray-100 text-gray-700'
-                              : 'text-gray-500 font-semibold'
-                          }
-                        `}
+        {/* Homework Management */}
+        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6'>
+          {/* Recent Homework */}
+          <div className='lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6'>
+            <div className='flex items-center justify-between mb-6'>
+              <h2 className='text-lg font-semibold text-gray-900'>
+                Bài Tập Chấm Gần Đây
+              </h2>
+              <FileText className='w-5 h-5 text-blue-500' />
+            </div>
+            <div className='space-y-4'>
+              {mockData?.recentHomework?.map((homework, index) => (
+                <div
+                  key={index}
+                  className='border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors'
+                >
+                  <div className='flex items-center justify-between mb-2'>
+                    <div>
+                      <h3 className='font-semibold text-gray-900'>
+                        {homework.studentName}
+                      </h3>
+                      <p className='text-sm text-gray-600'>
+                        {homework.className} • {homework.assignment}
+                      </p>
+                    </div>
+                    <div className='text-right'>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${getStatusColor(
+                          homework.status
+                        )}`}
                       >
-                        {day}
-                      </div>
-                    ))}
+                        {homework.status === 'passed'
+                          ? 'Đạt'
+                          : homework.status === 'failed'
+                          ? 'Không đạt'
+                          : 'Chưa chấm'}
+                      </span>
+                      <p className='text-sm font-bold text-gray-900 mt-1'>
+                        {homework.score}
+                      </p>
+                    </div>
                   </div>
-                ))}
-              </div>
+                  <p className='text-sm text-gray-700 bg-gray-50 p-2 rounded italic'>
+                    "{homework.feedback}"
+                  </p>
+                  <p className='text-xs text-gray-500 mt-2'>
+                    {homework.submittedDate}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Performance Stats */}
-          <div className='bg-white rounded-xl border border-gray-100 shadow-sm'>
-            <div className='p-6 border-b border-gray-100'>
-              <h2 className='text-xl font-bold text-gray-900 flex items-center gap-2'>
-                <BarChart3 className='w-5 h-5 text-purple-600' />
-                Thống kê hiệu suất
+          {/* Homework Statistics */}
+          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6'>
+            <div className='flex items-center justify-between mb-6'>
+              <h2 className='text-lg font-semibold text-gray-900'>
+                Thống Kê Bài Tập
               </h2>
+              <Award className='w-5 h-5 text-purple-500' />
             </div>
-            <div className='p-6'>
-              <div className='space-y-4'>
-                <div className='flex items-center justify-between'>
-                  <span className='text-sm text-gray-600'>Tỷ lệ tham gia</span>
-                  <span className='font-semibold text-gray-900'>95%</span>
+            <div className='space-y-4'>
+              {mockData?.homeworkStats?.map((stat, index) => (
+                <div
+                  key={index}
+                  className='border-b border-gray-100 pb-4 last:border-b-0'
+                >
+                  <h3 className='font-medium text-gray-900 mb-2'>
+                    {stat.className}
+                  </h3>
+                  <div className='space-y-2'>
+                    <div className='flex justify-between text-sm'>
+                      <span className='text-yellow-600'>Chưa nộp:</span>
+                      <span className='font-medium'>{stat.pending}</span>
+                    </div>
+                    <div className='flex justify-between text-sm'>
+                      <span className='text-green-600'>Đạt:</span>
+                      <span className='font-medium'>{stat.passed}</span>
+                    </div>
+                    <div className='flex justify-between text-sm'>
+                      <span className='text-red-600'>Không đạt:</span>
+                      <span className='font-medium'>{stat.failed}</span>
+                    </div>
+                    <div className='w-full bg-gray-200 rounded-full h-2 mt-2'>
+                      <div
+                        className='bg-green-500 h-2 rounded-full'
+                        style={{
+                          width: `${(stat.passed / stat.total) * 100}%`,
+                        }}
+                      ></div>
+                    </div>
+                  </div>
                 </div>
-                <div className='w-full bg-gray-200 rounded-full h-2'>
-                  <div
-                    className='bg-green-500 h-2 rounded-full'
-                    style={{ width: '95%' }}
-                  ></div>
-                </div>
-
-                <div className='flex items-center justify-between'>
-                  <span className='text-sm text-gray-600'>Điểm trung bình</span>
-                  <span className='font-semibold text-gray-900'>8.5/10</span>
-                </div>
-                <div className='w-full bg-gray-200 rounded-full h-2'>
-                  <div
-                    className='bg-blue-500 h-2 rounded-full'
-                    style={{ width: '85%' }}
-                  ></div>
-                </div>
-
-                <div className='flex items-center justify-between'>
-                  <span className='text-sm text-gray-600'>Satisfaction</span>
-                  <span className='font-semibold text-gray-900'>4.8/5</span>
-                </div>
-                <div className='w-full bg-gray-200 rounded-full h-2'>
-                  <div
-                    className='bg-purple-500 h-2 rounded-full'
-                    style={{ width: '96%' }}
-                  ></div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
+
+        {/* Students with High Absence */}
+        <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6'>
+          <div className='flex items-center justify-between mb-6'>
+            <h2 className='text-lg font-semibold text-gray-900'>
+              Học Viên Vắng Nhiều ({'>'}30%)
+            </h2>
+            <AlertTriangle className='w-5 h-5 text-red-500' />
+          </div>
+          <div className='overflow-x-auto'>
+            <table className='w-full'>
+              <thead>
+                <tr className='border-b border-gray-200'>
+                  <th className='text-left py-3 px-4 font-semibold text-gray-900'>
+                    Học Viên
+                  </th>
+                  <th className='text-left py-3 px-4 font-semibold text-gray-900'>
+                    Lớp
+                  </th>
+                  <th className='text-left py-3 px-4 font-semibold text-gray-900'>
+                    Số Buổi Vắng
+                  </th>
+                  <th className='text-left py-3 px-4 font-semibold text-gray-900'>
+                    Tỷ Lệ Vắng
+                  </th>
+                  <th className='text-left py-3 px-4 font-semibold text-gray-900'>
+                    Lần Cuối Học
+                  </th>
+                  <th className='text-left py-3 px-4 font-semibold text-gray-900'>
+                    Liên Hệ
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {mockData?.absentStudents?.map((student, index) => (
+                  <tr
+                    key={index}
+                    className='border-b border-gray-100 hover:bg-gray-50'
+                  >
+                    <td className='py-3 px-4'>
+                      <div className='flex items-center'>
+                        <div className='w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3'>
+                          <AlertTriangle className='w-4 h-4 text-red-600' />
+                        </div>
+                        <span className='font-medium text-gray-900'>
+                          {student.name}
+                        </span>
+                      </div>
+                    </td>
+                    <td className='py-3 px-4 text-gray-600'>
+                      {student.className}
+                    </td>
+                    <td className='py-3 px-4 text-center'>
+                      <span className='text-red-600 font-medium'>
+                        {student.absentCount}/{student.totalSessions}
+                      </span>
+                    </td>
+                    <td className='py-3 px-4 text-center'>
+                      <span className='bg-red-100 text-red-800 px-2 py-1 rounded-full text-sm font-medium'>
+                        {student.absentRate}%
+                      </span>
+                    </td>
+                    <td className='py-3 px-4 text-gray-600 text-sm'>
+                      {student.lastAttended}
+                    </td>
+                    <td className='py-3 px-4'>
+                      <button className='text-blue-600 hover:text-blue-800 text-sm font-medium'>
+                        {student.phone}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 

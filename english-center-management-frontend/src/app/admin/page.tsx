@@ -2,388 +2,453 @@
 
 import React, { useEffect, useState } from 'react';
 import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+} from 'recharts';
+import {
   Users,
-  GraduationCap,
   BookOpen,
-  PlayCircle,
-  UserPlus,
-  UserCheck,
-  Calendar,
-  ArrowUp,
+  GraduationCap,
+  DollarSign,
   TrendingUp,
-  CheckCircle,
-  AlertCircle,
+  Award,
+  Clock,
+  UserCheck,
 } from 'lucide-react';
 import { useDashboardApi } from './_hooks';
-import { DashboardStatCards, DashboardStats } from '../../types/admin';
+import { toast } from 'react-toastify';
 
-interface StatCardProps {
+const StatCard: React.FC<{
   title: string;
-  value: string;
-  change: string;
+  value: string | number;
   icon: React.ReactNode;
-  iconBg: string;
-  trend: 'up' | 'down' | 'neutral';
-}
-
-interface QuickActionProps {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  iconBg: string;
-  href: string;
-}
-
-interface EnrollmentProps {
-  name: string;
-  course: string;
-  time: string;
-  avatar: string;
-}
-
-interface SystemStatusProps {
-  service: string;
-  status: string;
-  statusColor: string;
-}
+  change?: string;
+  changeType?: 'positive' | 'negative' | 'neutral';
+  subtitle?: string;
+}> = ({ title, value, icon, change, changeType = 'neutral', subtitle }) => (
+  <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-200'>
+    <div className='flex items-center justify-between'>
+      <div>
+        <p className='text-sm font-medium text-gray-600'>{title}</p>
+        <p className='text-2xl font-bold text-gray-900 mt-1'>{value}</p>
+        {subtitle && <p className='text-xs text-gray-500 mt-1'>{subtitle}</p>}
+        {change && (
+          <p
+            className={`text-xs mt-2 flex items-center ${
+              changeType === 'positive'
+                ? 'text-green-600'
+                : changeType === 'negative'
+                ? 'text-red-600'
+                : 'text-gray-500'
+            }`}
+          >
+            <TrendingUp className='w-3 h-3 mr-1' />
+            {change}
+          </p>
+        )}
+      </div>
+      <div className='p-3 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg'>
+        {icon}
+      </div>
+    </div>
+  </div>
+);
 
 const AdminDashboard: React.FC = () => {
-  const { loading, error, getDashboardStats, getStatCards } = useDashboardApi();
-  const [stats, setStats] = useState<DashboardStatCards>();
-  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
-    null
-  );
+  const [selectedPeriod, setSelectedPeriod] = useState('thisMonth');
+  const [mockData, setMockData] = useState(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [statsData, dashboardData] = await Promise.all([
-          getStatCards(),
-          getDashboardStats(),
-        ]);
-        setStats(statsData);
-        setDashboardStats(dashboardData);
-      } catch (err) {
-        console.error('Error fetching dashboard data:', err);
-      }
-    };
+  const { getDashboard } = useDashboardApi();
 
-    fetchData();
-  }, [getStatCards, getDashboardStats]);
-
-  const getIconComponent = (iconName: string) => {
-    switch (iconName) {
-      case 'Users':
-        return <Users size={24} />;
-      case 'GraduationCap':
-        return <GraduationCap size={24} />;
-      case 'BookOpen':
-        return <BookOpen size={24} />;
-      case 'PlayCircle':
-        return <PlayCircle size={24} />;
-      default:
-        return <Users size={24} />;
+  const loadData = async () => {
+    try {
+      const data = await getDashboard();
+      setMockData(data);
+    } catch (error) {
+      toast.error('Lỗi xảy ra khi tải dữ liệu!');
     }
   };
 
-  const quickActions = [
-    {
-      title: 'Quản lý học viên',
-      description: 'Thêm, chỉnh sửa hoặc xóa tài khoản học viên',
-      icon: <UserPlus size={24} />,
-      iconBg: 'bg-gradient-to-r from-blue-500 to-blue-600',
-      href: '/admin/student',
-    },
-    {
-      title: 'Quản lý giáo viên',
-      description: 'Giám sát hồ sơ và phân công giáo viên',
-      icon: <UserCheck size={24} />,
-      iconBg: 'bg-gradient-to-r from-green-500 to-green-600',
-      href: '/admin/teacher',
-    },
-    {
-      title: 'Quản lý lớp học',
-      description: 'Tạo và lên lịch lớp học mới',
-      icon: <Calendar size={24} />,
-      iconBg: 'bg-gradient-to-r from-purple-500 to-purple-600',
-      href: '/admin/classroom',
-    },
-    {
-      title: 'Quản lý khóa học',
-      description: 'Tạo và cập nhật các khóa học',
-      icon: <BookOpen size={24} />,
-      iconBg: 'bg-gradient-to-r from-orange-500 to-orange-600',
-      href: '/admin/course',
-    },
-  ];
-
-  const StatCard: React.FC<StatCardProps> = ({
-    title,
-    value,
-    change,
-    icon,
-    iconBg,
-    trend,
-  }) => (
-    <div className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200'>
-      <div className='flex items-center justify-between mb-4'>
-        <div>
-          <p className='text-gray-500 text-sm font-medium'>{title}</p>
-          <p className='text-3xl font-bold text-gray-900 mt-1'>{value}</p>
-        </div>
-        <div
-          className={`w-14 h-14 rounded-xl flex items-center justify-center ${iconBg} text-white shadow-lg`}
-        >
-          {icon}
-        </div>
-      </div>
-      <div className='flex items-center gap-2'>
-        {trend === 'up' ? (
-          <ArrowUp size={16} className='text-green-500' />
-        ) : trend === 'down' ? (
-          <ArrowUp size={16} className='text-red-500 rotate-180' />
-        ) : (
-          <TrendingUp size={16} className='text-gray-500' />
-        )}
-        <span
-          className={`text-sm font-medium ${
-            trend === 'up'
-              ? 'text-green-500'
-              : trend === 'down'
-              ? 'text-red-500'
-              : 'text-gray-500'
-          }`}
-        >
-          {change}
-        </span>
-      </div>
-    </div>
-  );
-
-  const QuickActionCard: React.FC<QuickActionProps> = ({
-    title,
-    description,
-    icon,
-    iconBg,
-    href,
-  }) => (
-    <a
-      href={href}
-      className='bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer group'
-    >
-      <div
-        className={`w-14 h-14 rounded-xl flex items-center justify-center ${iconBg} text-white shadow-lg mb-4 group-hover:scale-110 transition-transform duration-200`}
-      >
-        {icon}
-      </div>
-      <h3 className='font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors'>
-        {title}
-      </h3>
-      <p className='text-gray-500 text-sm leading-relaxed'>{description}</p>
-    </a>
-  );
-
-  const EnrollmentItem: React.FC<EnrollmentProps> = ({
-    name,
-    course,
-    time,
-    avatar,
-  }) => (
-    <div className='flex items-center gap-4 py-4 border-b border-gray-50 last:border-b-0'>
-      <div className='relative'>
-        <img
-          src={
-            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-          }
-          alt={name}
-          className='w-12 h-12 rounded-full object-cover ring-2 ring-gray-100'
-        />
-        <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white'></div>
-      </div>
-      <div className='flex-1'>
-        <p className='font-semibold text-gray-900'>{name}</p>
-        <p className='text-sm text-gray-500'>Đăng ký {course}</p>
-      </div>
-      <div className='text-right'>
-        <p className='text-sm text-gray-400'>{time}</p>
-        <div className='flex items-center gap-1 mt-1'>
-          <CheckCircle size={12} className='text-green-500' />
-          <span className='text-xs text-green-600 font-medium'>Hoàn thành</span>
-        </div>
-      </div>
-    </div>
-  );
-
-  const StatusItem: React.FC<SystemStatusProps> = ({
-    service,
-    status,
-    statusColor,
-  }) => (
-    <div className='flex items-center justify-between py-3 border-b border-gray-50 last:border-b-0'>
-      <div className='flex items-center gap-3'>
-        <div
-          className={`w-3 h-3 rounded-full ${statusColor.replace(
-            'text-',
-            'bg-'
-          )}`}
-        ></div>
-        <span className='text-gray-700 font-medium'>{service}</span>
-      </div>
-      <span className={`text-sm font-semibold ${statusColor}`}>{status}</span>
-    </div>
-  );
+  useEffect(() => {
+    loadData();
+  }, []);
 
   return (
-    <>
-      {/* Header */}
-      <div className='mb-8'>
-        <h1 className='text-3xl font-bold text-gray-900 mb-2'>
-          Chào mừng trở lại, Admin!
-        </h1>
-        <p className='text-gray-600'>
-          Đây là tổng quan về trung tâm tiếng Anh của bạn
-        </p>
-      </div>
-
-      {/* Loading state */}
-      {loading && (
-        <div className='flex justify-center items-center py-12'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600'></div>
+    <div>
+      <div className='flex items-center justify-between'>
+        <div>
+          <h1 className='text-2xl font-bold text-gray-900'>
+            Bảng Điều Khiển Admin
+          </h1>
+          <p className='text-gray-600 mt-1'>Quản Lý Trung Tâm Tiếng Anh</p>
         </div>
-      )}
-
-      {/* Error state */}
-      {error && (
-        <div className='bg-red-50 border border-red-200 rounded-xl p-6 mb-6'>
-          <div className='flex items-center gap-3'>
-            <AlertCircle className='w-5 h-5 text-red-500' />
-            <p className='text-red-800 font-medium'>{error}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Thống kê chính */}
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
-        {stats && (
-          <>
-            <StatCard
-              title='Tổng học viên'
-              value={stats.totalStudents?.toString() || '0'}
-              change='+12% so với tháng trước'
-              icon={getIconComponent('Users')}
-              iconBg='bg-gradient-to-r from-blue-500 to-blue-600'
-              trend='up'
-            />
-            <StatCard
-              title='Tổng giáo viên'
-              value={stats.totalTeachers?.toString() || '0'}
-              change='+3% so với tháng trước'
-              icon={getIconComponent('GraduationCap')}
-              iconBg='bg-gradient-to-r from-green-500 to-green-600'
-              trend='up'
-            />
-            <StatCard
-              title='Tổng khóa học'
-              value={stats.totalCourses?.toString() || '0'}
-              change='+5% so với tháng trước'
-              icon={getIconComponent('BookOpen')}
-              iconBg='bg-gradient-to-r from-orange-500 to-orange-600'
-              trend='up'
-            />
-            <StatCard
-              title='Tổng lớp học'
-              value={stats.totalClasses?.toString() || '0'}
-              change='+8% so với tháng trước'
-              icon={getIconComponent('PlayCircle')}
-              iconBg='bg-gradient-to-r from-purple-500 to-purple-600'
-              trend='up'
-            />
-          </>
-        )}
-      </div>
-
-      {/* Thao tác nhanh */}
-      <div className='mb-8'>
-        <h2 className='text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3'>
-          <div className='w-1 h-8 bg-blue-600 rounded-full'></div>
-          Thao tác nhanh
-        </h2>
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
-          {quickActions.map((action, index) => (
-            <QuickActionCard key={index} {...action} />
-          ))}
+        <div className='flex items-center space-x-3'>
+          <select
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+            className='px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+          >
+            <option value='thisWeek'>Tuần Này</option>
+            <option value='thisMonth'>Tháng Này</option>
+            <option value='thisQuarter'>Quý Này</option>
+            <option value='thisYear'>Năm Này</option>
+          </select>
         </div>
       </div>
 
-      {/* Content Grid */}
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
-        {/* Đăng ký gần đây */}
-        <div className='lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm'>
-          <div className='p-6 border-b border-gray-100'>
-            <div className='flex items-center justify-between'>
-              <h3 className='text-xl font-bold text-gray-900 flex items-center gap-2'>
-                <Users className='w-5 h-5 text-blue-600' />
-                Đăng ký gần đây
-              </h3>
-              <button className='text-blue-600 text-sm font-semibold hover:text-blue-700 transition-colors'>
-                Xem tất cả
-              </button>
+      <div className='py-4'>
+        {/* KPI Cards */}
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
+          <StatCard
+            title={mockData?.total_revenue?.title}
+            value={mockData?.total_revenue?.value}
+            icon={<DollarSign className='w-6 h-6 text-blue-600' />}
+            change={mockData?.total_revenue?.change}
+            changeType={mockData?.total_revenue?.changeType}
+            subtitle={mockData?.total_revenue?.subtitle}
+          />
+          <StatCard
+            title={mockData?.active_students?.title}
+            value={mockData?.active_students?.value}
+            icon={<Users className='w-6 h-6 text-green-600' />}
+            change={mockData?.active_students?.change}
+            changeType={mockData?.active_students?.changeType}
+            subtitle={mockData?.active_students?.subtitle}
+          />
+          <StatCard
+            title={mockData?.completion_rate?.title}
+            value={mockData?.completion_rate?.value}
+            icon={<GraduationCap className='w-6 h-6 text-purple-600' />}
+            change={mockData?.completion_rate?.change}
+            changeType={mockData?.completion_rate?.changeType}
+            subtitle={mockData?.completion_rate?.subtitle}
+          />
+          <StatCard
+            title={mockData?.active_classes?.title}
+            value={mockData?.active_classes?.value}
+            icon={<BookOpen className='w-6 h-6 text-orange-600' />}
+            change={mockData?.active_classes?.change}
+            changeType={mockData?.active_classes?.changeType}
+            subtitle={mockData?.active_classes?.subtitle}
+          />
+        </div>
+
+        {/* Charts Grid */}
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
+          {/* Revenue Chart */}
+          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6'>
+            <div className='flex items-center justify-between mb-6'>
+              <h2 className='text-lg font-semibold text-gray-900'>
+                Doanh Thu Theo Tháng
+              </h2>
+              <div className='text-sm text-gray-500'>
+                Tổng:{' '}
+                {mockData?.revenue_by_month.reduce(
+                  (acc, item) => acc + item.revenue,
+                  0
+                )}{' '}
+                triệu ₫
+              </div>
             </div>
+            <ResponsiveContainer
+              width='100%'
+              height={300}
+            >
+              <AreaChart data={mockData?.revenue_by_month}>
+                <defs>
+                  <linearGradient
+                    id='colorRevenue'
+                    x1='0'
+                    y1='0'
+                    x2='0'
+                    y2='1'
+                  >
+                    <stop
+                      offset='5%'
+                      stopColor='#3B82F6'
+                      stopOpacity={0.8}
+                    />
+                    <stop
+                      offset='95%'
+                      stopColor='#3B82F6'
+                      stopOpacity={0.1}
+                    />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  strokeDasharray='3 3'
+                  stroke='#f0f0f0'
+                />
+                <XAxis
+                  dataKey='month'
+                  stroke='#6B7280'
+                />
+                <YAxis
+                  stroke='#6B7280'
+                  tickFormatter={(value) => `$${value / 1000}K`}
+                />
+                <Tooltip
+                  formatter={(value) => [
+                    `$${value.toLocaleString()}`,
+                    'Revenue',
+                  ]}
+                />
+                <Area
+                  type='monotone'
+                  dataKey='revenue'
+                  stroke='#3B82F6'
+                  fillOpacity={1}
+                  fill='url(#colorRevenue)'
+                  strokeWidth={2}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
-          <div className='p-6'>
-            <div className='space-y-2'>
-              {dashboardStats?.recentEnrollments?.map((enrollment, index) => (
-                <EnrollmentItem key={index} {...enrollment} />
-              )) || (
-                <div className='text-center py-8'>
-                  <Users className='w-12 h-12 text-gray-300 mx-auto mb-3' />
-                  <p className='text-gray-500 font-medium'>
-                    Không có đăng ký gần đây
-                  </p>
-                  <p className='text-gray-400 text-sm'>
-                    Học viên mới sẽ xuất hiện ở đây
-                  </p>
+
+          {/* Student Status Distribution */}
+          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6'>
+            <div className='flex items-center justify-between mb-6'>
+              <h2 className='text-lg font-semibold text-gray-900'>
+                Phân Bổ Trạng Thái Học Viên
+              </h2>
+              <div className='text-sm text-gray-500'>
+                Tổng:{' '}
+                {mockData?.student_status_distribution?.reduce(
+                  (acc, item) => acc + item.value,
+                  0
+                )}{' '}
+                học sinh
+              </div>
+            </div>
+            <ResponsiveContainer
+              width='100%'
+              height={300}
+            >
+              <PieChart>
+                <Pie
+                  data={mockData?.student_status_distribution}
+                  cx='50%'
+                  cy='50%'
+                  innerRadius={60}
+                  outerRadius={120}
+                  paddingAngle={2}
+                  dataKey='value'
+                >
+                  {mockData?.student_status_distribution.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.color}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value, name) => [value, name]} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* New Students & Level Distribution */}
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
+          {/* New Students by Month */}
+          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6'>
+            <div className='flex items-center justify-between mb-6'>
+              <h2 className='text-lg font-semibold text-gray-900'>
+                Học Viên Mới Theo Tháng
+              </h2>
+              <div className='text-sm text-gray-500'>
+                {mockData?.new_students?.new_students} học viên năm nay
+              </div>
+            </div>
+            <ResponsiveContainer
+              width='100%'
+              height={300}
+            >
+              <LineChart data={mockData?.new_students_by_month}>
+                <CartesianGrid
+                  strokeDasharray='3 3'
+                  stroke='#f0f0f0'
+                />
+                <XAxis
+                  dataKey='month'
+                  stroke='#6B7280'
+                />
+                <YAxis stroke='#6B7280' />
+                <Tooltip />
+                <Line
+                  type='monotone'
+                  dataKey='newStudents'
+                  stroke='#10B981'
+                  strokeWidth={3}
+                  dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Level Distribution */}
+          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6'>
+            <div className='flex items-center justify-between mb-6'>
+              <h2 className='text-lg font-semibold text-gray-900'>
+                Học sinh theo cấp độ
+              </h2>
+              <div className='text-sm text-gray-500'>
+                {mockData?.level_distribution?.reduce(
+                  (acc, item) => acc + item.count,
+                  0
+                )}{' '}
+                tổng
+              </div>
+            </div>
+            <ResponsiveContainer
+              width='100%'
+              height={300}
+            >
+              <BarChart
+                data={mockData?.level_distribution}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid
+                  strokeDasharray='3 3'
+                  stroke='#f0f0f0'
+                />
+                <XAxis
+                  dataKey='level'
+                  stroke='#6B7280'
+                />
+                <YAxis stroke='#6B7280' />
+                <Tooltip formatter={(value) => [value, 'Học sinh']} />
+                <Bar
+                  dataKey='count'
+                  radius={[4, 4, 0, 0]}
+                >
+                  {mockData?.level_distribution.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.color}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6'>
+            <div className='flex items-center justify-between mb-6'>
+              <h2 className='text-lg font-semibold text-gray-900'>
+                Top 5 lớp học theo số lượng tuyển sinh
+              </h2>
+              <Award className='w-5 h-5 text-yellow-500' />
+            </div>
+            <div className='space-y-4'>
+              {mockData?.top_classes.map((classItem, index) => (
+                <div
+                  key={index}
+                  className='flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors'
+                >
+                  <div className='flex items-center space-x-3'>
+                    <div className='flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold'>
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className='font-medium text-gray-900'>
+                        {classItem.className}
+                      </p>
+                      <p className='text-sm text-gray-500'>
+                        {classItem.teacher} • Lớp {classItem.room}
+                      </p>
+                    </div>
+                  </div>
+                  <div className='flex items-center space-x-2'>
+                    <UserCheck className='w-4 h-4 text-gray-400' />
+                    <span className='font-semibold text-gray-900'>
+                      {classItem.student_count}
+                    </span>
+                  </div>
                 </div>
-              )}
+              ))}
+            </div>
+          </div>
+
+          {/* Top Teachers */}
+          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6'>
+            <div className='flex items-center justify-between mb-6'>
+              <h2 className='text-lg font-semibold text-gray-900'>
+                Giáo viên hàng đầu theo số lượng lớp học
+              </h2>
+              <GraduationCap className='w-5 h-5 text-purple-500' />
+            </div>
+            <div className='space-y-4'>
+              {mockData?.top_teachers.map((teacher, index) => (
+                <div
+                  key={index}
+                  className='flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors'
+                >
+                  <div className='flex items-center space-x-3'>
+                    <div className='flex items-center justify-center w-8 h-8 bg-purple-100 text-purple-600 rounded-full text-sm font-semibold'>
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className='font-medium text-gray-900'>
+                        {teacher.name}
+                      </p>
+                      <p className='text-sm text-gray-500'>
+                        {teacher.specialization}
+                      </p>
+                    </div>
+                  </div>
+                  <div className='text-right'>
+                    <p className='font-semibold text-gray-900'>
+                      {teacher.class_count} lớp
+                    </p>
+                    <p className='text-sm text-gray-500'>
+                      {teacher.students} học sinh
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Trạng thái hệ thống */}
-        <div className='bg-white rounded-xl border border-gray-100 shadow-sm'>
-          <div className='p-6 border-b border-gray-100'>
-            <h3 className='text-xl font-bold text-gray-900 flex items-center gap-2'>
-              <CheckCircle className='w-5 h-5 text-green-600' />
-              Trạng thái hệ thống
-            </h3>
-          </div>
-          <div className='p-6'>
-            <div className='space-y-2'>
-              <StatusItem
-                service='Cơ sở dữ liệu'
-                status='Hoạt động'
-                statusColor='text-green-600'
-              />
-              <StatusItem
-                service='API Server'
-                status='Hoạt động'
-                statusColor='text-green-600'
-              />
-              <StatusItem
-                service='Email Service'
-                status='Hoạt động'
-                statusColor='text-green-600'
-              />
-              <StatusItem
-                service='File Storage'
-                status='Hoạt động'
-                statusColor='text-green-600'
-              />
-            </div>
-          </div>
+        {/* Additional KPIs Row */}
+        <div className='mt-8 grid grid-cols-1 md:grid-cols-3 gap-6'>
+          <StatCard
+            title={mockData?.average_class_size?.title}
+            value={mockData?.average_class_size?.value}
+            icon={<Users className='w-6 h-6 text-blue-600' />}
+            subtitle={mockData?.average_class_size?.subtitle}
+          />
+          <StatCard
+            title={mockData?.teacher_utilization?.title}
+            value={mockData?.teacher_utilization?.value}
+            icon={<Clock className='w-6 h-6 text-green-600' />}
+            subtitle={mockData?.teacher_utilization?.subtitle}
+          />
+          <StatCard
+            title={mockData?.monthly_growth?.title}
+            value={mockData?.monthly_growth?.value}
+            icon={<TrendingUp className='w-6 h-6 text-purple-600' />}
+            subtitle={mockData?.monthly_growth?.subtitle}
+          />
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -12,6 +12,3 @@ export { useStaffClassroomApi } from './use-classroom';
 
 // Schedule hooks
 export { useStaffScheduleApi } from './use-schedule';
-
-// Stats and Room hooks
-export { useStaffStatsApi } from './use-stats';
