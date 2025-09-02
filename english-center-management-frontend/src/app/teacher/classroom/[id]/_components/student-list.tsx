@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 import { useStaffClassroomApi } from '../../../../staff/_hooks';
 import { HomeworkStatus } from '../../../_hooks/use-homework';
 import { checkIsPassed } from '../../../../staff/list-classroom/[id]/page';
+import { getInitials } from '../../../../staff/list-teacher/page';
 
 interface StudentListProps {
   classroomId: string;
@@ -73,11 +74,11 @@ const StudentList: React.FC<StudentListProps> = ({
         className='bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow'
       >
         <div className='flex items-start space-x-3'>
-          <img
-            src='https://cdn-icons-png.flaticon.com/512/4196/4196591.png'
-            alt={student.student.name}
-            className='w-12 h-12 rounded-full'
-          />
+          <div className='h-12 w-12 flex-shrink-0'>
+            <div className='w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
+              {getInitials(student.student.name.charAt(0))}
+            </div>
+          </div>
           <div className='flex-1 min-w-0'>
             <h4 className='text-sm font-semibold text-gray-900 truncate'>
               {student.student.name}
@@ -115,7 +116,7 @@ const StudentList: React.FC<StudentListProps> = ({
                   {checkIsPassed(student, courseLevel) === 2
                     ? 'Đạt'
                     : checkIsPassed(student, courseLevel) === 0
-                    ? 'Không'
+                    ? 'Không đạt'
                     : 'Chưa đánh giá'}
                 </span>
               </div>

@@ -56,7 +56,6 @@ export default function ViewStudentModal({
   const [student, setStudent] = useState<StudentResponse | null>(null);
   const [scores, setScores] = useState<ScoreNested | null>(null);
 
-  // Fetch student data when modal opens
   useEffect(() => {
     if (isOpen && studentId) {
       const fetchStudentData = async () => {
@@ -148,7 +147,7 @@ export default function ViewStudentModal({
       <div className='flex items-start space-x-6 mb-4'>
         <div className='h-12 w-12 flex-shrink-0'>
           <div className='w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
-            {getInitials(student?.name?.charAt(0))}
+            {getInitials(student ? student?.name?.charAt(0) : '')}
           </div>
         </div>
         <div className='flex-1'>

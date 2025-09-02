@@ -16,7 +16,6 @@ import {
   BookOpen,
   CheckCircle,
   Clock,
-  FileText,
 } from 'lucide-react';
 import { useStaffClassroomApi } from '../../_hooks';
 import AssignStudentModal from './_components/assign-student';
@@ -31,6 +30,7 @@ import {
 } from '../../../../types/staff';
 import { toast } from 'react-toastify';
 import { HomeworkStatus } from '../../../teacher/_hooks/use-homework';
+import { getInitials } from '../../list-teacher/page';
 
 export const checkIsPassed = (enrollment: any, courseLevel: string) => {
   let rangeScore = 0;
@@ -537,11 +537,11 @@ export default function ClassroomDetailPage() {
                       >
                         <td className='px-6 py-4 whitespace-nowrap'>
                           <div className='flex items-center'>
-                            <img
-                              className='h-10 w-10 rounded-full'
-                              src={`https://ui-avatars.com/api/?name=${student.name}&background=0D9488&color=fff`}
-                              alt={student.name}
-                            />
+                            <div className='h-8 w-8 flex-shrink-0'>
+                              <div className='w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
+                                {getInitials(student.name.charAt(0))}
+                              </div>
+                            </div>
                             <div className='ml-4'>
                               <div className='text-sm font-medium text-gray-900'>
                                 {student.name}
@@ -602,18 +602,18 @@ export default function ClassroomDetailPage() {
                         <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
                           {checkIsPassed(enrollment, classroom.course_level) ===
                           2 ? (
-                            <div className='text-green-600 font-semibold py-3 bg-green-50 text-center rounded-full'>
+                            <div className='text-green-600 font-semibold p-2 bg-green-50 text-center rounded-full'>
                               Đạt
                             </div>
                           ) : checkIsPassed(
                               enrollment,
                               classroom.course_level
                             ) === 0 ? (
-                            <div className='text-red-600 font-semibold py-3 bg-red-50 text-center rounded-full'>
+                            <div className='text-red-600 font-semibold p-2 bg-red-50 text-center rounded-full'>
                               Không đạt
                             </div>
                           ) : (
-                            <div className='text-yellow-600 font-semibold py-3 bg-yellow-50 text-center rounded-full'>
+                            <div className='text-yellow-600 font-semibold p-2 bg-yellow-50 text-center rounded-full'>
                               Chưa đánh giá
                             </div>
                           )}

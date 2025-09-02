@@ -396,25 +396,11 @@ async def get_student_classes(
 
 @router.get("/classes/{classroom_id}", response_model=ClassroomResponse)
 async def get_student_classroom(
-    classroom_id: str,
+    classroom_id: UUID,
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
-    try:
-        classroom_uuid = UUID(classroom_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="classroom_id không hợp lệ"
-        )
-    
-    if not user_service.check_student_enrollment_permission(db, current_user.id, classroom_uuid):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Bạn chưa đăng ký lớp học này"
-        )
-    
-    classroom = classroom_service.get_classroom(db, classroom_uuid)
+    classroom = classroom_service.get_classroom(db, classroom_id)
     if not classroom:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -435,23 +421,9 @@ async def get_student_schedule(
 
 @router.get("/classes/{classroom_id}/schedules", response_model=List[ScheduleResponse])
 async def get_classroom_schedules(
-    classroom_id: str,
+    classroom_id: UUID,
     current_user: User = Depends(get_current_student_user),
     db: Session = Depends(get_db)
 ):
-    try:
-        classroom_uuid = UUID(classroom_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="classroom_id không hợp lệ"
-        )
-    
-    if not user_service.check_student_enrollment_permission(db, current_user.id, classroom_uuid):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Bạn chưa đăng ký lớp học này"
-        )
-    
-    schedules = schedule_service.get_schedules_by_classroom(db, classroom_uuid)
+    schedules = schedule_service.get_schedules_by_classroom(db, classroom_id)
     return schedules

@@ -119,6 +119,10 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
         updateData.experience_years = personalInfo.experienceYears;
       }
 
+      if (personalInfo.dateOfBirth.trim() === '') {
+        delete updateData.date_of_birth;
+      }
+
       await updateUserInfo(updateData);
       toast.success('Cập nhật thông tin thành công!');
       setIsEditing(false);
@@ -239,10 +243,7 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
             <div
               className={`w-20 h-20 ${theme.button} rounded-full flex items-center justify-center text-white text-2xl font-bold`}
             >
-              {personalInfo.name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')}
+              {personalInfo.name.charAt(0)}
             </div>
             <div>
               <h3 className='text-xl font-semibold text-gray-900'>
