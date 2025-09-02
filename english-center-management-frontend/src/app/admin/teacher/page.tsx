@@ -28,6 +28,7 @@ import { toast } from 'react-toastify';
 import GenericExcelExportButton, {
   teachersExportConfig,
 } from '../../../components/GenericExcelExportButton';
+import { getInitials } from '../../staff/list-teacher/page';
 
 const TeacherManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,6 +59,7 @@ const TeacherManagement = () => {
 
   // Use teachers data from API
   const teachersList = teachers.map((teacher: TeacherResponse) => ({
+    ...teacher,
     id: teacher.id,
     name: teacher.name,
     specialization:
@@ -238,6 +240,15 @@ const TeacherManagement = () => {
                   Lớp đã phân công
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  % HV đi học
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  % HV đạt BTVN
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  % HV đạt đầu ra
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                   Thao tác
                 </th>
               </tr>
@@ -251,13 +262,9 @@ const TeacherManagement = () => {
                   <td className='px-6 py-4 whitespace-nowrap'>
                     <div className='flex items-center'>
                       <div className='h-12 w-12 flex-shrink-0'>
-                        <img
-                          className='h-12 w-12 rounded-full object-cover ring-2 ring-gray-100'
-                          src={
-                            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-                          }
-                          alt={teacher.name}
-                        />
+                        <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
+                          {getInitials(teacher.name.charAt(0))}
+                        </div>
                       </div>
                       <div className='ml-4'>
                         <div className='text-sm font-semibold text-gray-900'>
@@ -296,6 +303,15 @@ const TeacherManagement = () => {
                         <span className='text-gray-500'>Chưa phân lớp</span>
                       )}
                     </div>
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    {teacher.rate_attendanced}%
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    {teacher.rate_passed_homework}%
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap'>
+                    {teacher.rate_passed}%
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                     <div className='flex items-center space-x-2'>

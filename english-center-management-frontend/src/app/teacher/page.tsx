@@ -27,228 +27,6 @@ import {
 } from 'lucide-react';
 import { useTeacherApi } from './_hooks/use-api';
 
-// Mock data - In real app, this would come from your API based on current_teacher
-const mockData = {
-  currentTeacher: {
-    name: 'Cô Sarah Johnson',
-    specialization: 'TOEIC & Business English',
-    experience: '5 năm kinh nghiệm',
-    avatar:
-      'https://images.unsplash.com/photo-1494790108755-2616c4b25e57?w=150&h=150&fit=crop&crop=face',
-  },
-
-  activeClasses: 6,
-  totalStudents: 142,
-  weeklySchedules: 18,
-
-  classData: [
-    {
-      className: 'TOEIC Intensive A2',
-      students: 28,
-      attendance: 88.5,
-      avgScore: 7.2,
-      homeworkSubmitted: 85,
-      room: 'A205',
-      schedule: 'T2,T4,T6: 19:00-21:00',
-    },
-    {
-      className: 'Business English B2',
-      students: 24,
-      avgScore: 7.8,
-      attendance: 91.2,
-      homeworkSubmitted: 92,
-      room: 'B103',
-      schedule: 'T3,T5: 18:00-20:00',
-    },
-    {
-      className: 'TOEIC 600+ B1',
-      students: 32,
-      attendance: 85.7,
-      avgScore: 6.9,
-      homeworkSubmitted: 78,
-      room: 'C301',
-      schedule: 'T2,T4: 17:30-19:30',
-    },
-    {
-      className: 'Conversation Club A2',
-      students: 18,
-      attendance: 94.1,
-      avgScore: 7.5,
-      homeworkSubmitted: 89,
-      room: 'A108',
-      schedule: 'T7: 14:00-16:00',
-    },
-    {
-      className: 'Business Writing B1',
-      students: 22,
-      attendance: 87.3,
-      avgScore: 7.1,
-      homeworkSubmitted: 73,
-      room: 'B205',
-      schedule: 'T6: 19:00-21:00',
-    },
-    {
-      className: 'TOEIC Speaking B2',
-      students: 18,
-      attendance: 89.7,
-      avgScore: 8.1,
-      homeworkSubmitted: 94,
-      room: 'C102',
-      schedule: 'T7: 16:30-18:30',
-    },
-  ],
-
-  skillsAverage: [
-    { skill: 'Listening', score: 7.4, improvement: '+0.5' },
-    { skill: 'Reading', score: 7.8, improvement: '+0.3' },
-    { skill: 'Writing', score: 6.9, improvement: '+0.7' },
-    { skill: 'Speaking', score: 7.2, improvement: '+0.4' },
-  ],
-
-  recentHomework: [
-    {
-      studentName: 'Nguyễn Văn An',
-      className: 'TOEIC A2',
-      assignment: 'Listening Practice Unit 5',
-      score: 8.5,
-      status: 'passed',
-      submittedDate: '2024-08-25',
-      feedback: 'Rất tốt! Cải thiện nhiều về khả năng nghe.',
-    },
-    {
-      studentName: 'Trần Thị Bình',
-      className: 'Business B2',
-      assignment: 'Email Writing Task',
-      score: 7.2,
-      status: 'passed',
-      submittedDate: '2024-08-24',
-      feedback: 'Cấu trúc email tốt, cần chú ý grammar.',
-    },
-    {
-      studentName: 'Lê Minh Cường',
-      className: 'TOEIC B1',
-      assignment: 'Reading Comprehension',
-      score: 5.8,
-      status: 'failed',
-      submittedDate: '2024-08-24',
-      feedback: 'Cần làm thêm bài tập về từ vựng.',
-    },
-    {
-      studentName: 'Phạm Thu Dung',
-      className: 'Conversation A2',
-      assignment: 'Speaking Recording',
-      score: 9.0,
-      status: 'passed',
-      submittedDate: '2024-08-23',
-      feedback: 'Xuất sắc! Phát âm và lưu loát tốt.',
-    },
-  ],
-
-  homeworkStats: [
-    { className: 'TOEIC A2', pending: 4, passed: 22, failed: 2, total: 28 },
-    { className: 'Business B2', pending: 2, passed: 21, failed: 1, total: 24 },
-    { className: 'TOEIC B1', pending: 7, passed: 20, failed: 5, total: 32 },
-    {
-      className: 'Conversation A2',
-      pending: 2,
-      passed: 15,
-      failed: 1,
-      total: 18,
-    },
-    {
-      className: 'Business Writing B1',
-      pending: 6,
-      passed: 14,
-      failed: 2,
-      total: 22,
-    },
-    {
-      className: 'TOEIC Speaking B2',
-      pending: 1,
-      passed: 16,
-      failed: 1,
-      total: 18,
-    },
-  ],
-
-  classProgress: [
-    {
-      month: 'T5',
-      'TOEIC A2': 6.8,
-      'Business B2': 7.1,
-      'TOEIC B1': 6.2,
-      'Conversation A2': 7.0,
-    },
-    {
-      month: 'T6',
-      'TOEIC A2': 7.0,
-      'Business B2': 7.4,
-      'TOEIC B1': 6.5,
-      'Conversation A2': 7.3,
-    },
-    {
-      month: 'T7',
-      'TOEIC A2': 7.1,
-      'Business B2': 7.6,
-      'TOEIC B1': 6.8,
-      'Conversation A2': 7.4,
-    },
-    {
-      month: 'T8',
-      'TOEIC A2': 7.2,
-      'Business B2': 7.8,
-      'TOEIC B1': 6.9,
-      'Conversation A2': 7.5,
-    },
-  ],
-
-  absentStudents: [
-    {
-      name: 'Hoàng Văn Em',
-      className: 'TOEIC B1',
-      absentCount: 12,
-      totalSessions: 32,
-      absentRate: 37.5,
-      phone: '0912345678',
-      lastAttended: '2024-08-15',
-    },
-    {
-      name: 'Ngô Thị Phương',
-      className: 'Business Writing B1',
-      absentCount: 8,
-      totalSessions: 24,
-      absentRate: 33.3,
-      phone: '0987654321',
-      lastAttended: '2024-08-20',
-    },
-    {
-      name: 'Đặng Minh Tuấn',
-      className: 'TOEIC A2',
-      absentCount: 10,
-      totalSessions: 30,
-      absentRate: 33.3,
-      phone: '0901234567',
-      lastAttended: '2024-08-18',
-    },
-    {
-      name: 'Vũ Thu Hằng',
-      className: 'Business B2',
-      absentCount: 7,
-      totalSessions: 22,
-      absentRate: 31.8,
-      phone: '0934567890',
-      lastAttended: '2024-08-22',
-    },
-  ],
-
-  weeklyStats: {
-    totalSessions: 18,
-    averageAttendance: 89.2,
-    homeworkGraded: 45,
-    newAssignments: 12,
-  },
-};
-
 const StatCard: React.FC<{
   title: string;
   value: string | number;
@@ -289,6 +67,21 @@ const StatCard: React.FC<{
     </div>
   </div>
 );
+
+const mapSkillToVietnamese = (skill: string) => {
+  switch (skill.toLowerCase()) {
+    case 'listening':
+      return 'Nghe';
+    case 'speaking':
+      return 'Nói';
+    case 'reading':
+      return 'Đọc';
+    case 'writing':
+      return 'Viết';
+    default:
+      return skill;
+  }
+};
 
 const TeacherDashboard: React.FC = () => {
   const [selectedClass, setSelectedClass] = useState('all');
@@ -333,7 +126,7 @@ const TeacherDashboard: React.FC = () => {
             </p>
           </div>
         </div>
-        <div className='flex items-center space-x-3'>
+        {/* <div className='flex items-center space-x-3'>
           <select
             value={selectedClass}
             onChange={(e) => setSelectedClass(e.target.value)}
@@ -349,7 +142,7 @@ const TeacherDashboard: React.FC = () => {
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
       </div>
 
       <div className='py-6'>
@@ -367,7 +160,7 @@ const TeacherDashboard: React.FC = () => {
             value={mockData?.totalStudents}
             icon={<Users className='w-6 h-6 text-blue-600' />}
             trend='up'
-            trendValue='+8 học viên mới'
+            trendValue=''
             color='blue'
           />
           <StatCard
@@ -382,7 +175,7 @@ const TeacherDashboard: React.FC = () => {
             value={`${mockData?.weeklyStats?.averageAttendance}%`}
             icon={<CheckCircle className='w-6 h-6 text-purple-600' />}
             trend='up'
-            trendValue='+2.3% so với tuần trước'
+            trendValue=''
             color='purple'
           />
         </div>
@@ -465,7 +258,10 @@ const TeacherDashboard: React.FC = () => {
               height={300}
             >
               <BarChart
-                data={mockData?.skillsAverage}
+                data={mockData?.skillsAverage?.map((v) => ({
+                  ...v,
+                  skill: mapSkillToVietnamese(v.skill),
+                }))}
                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid
@@ -488,7 +284,7 @@ const TeacherDashboard: React.FC = () => {
                 />
               </BarChart>
             </ResponsiveContainer>
-            <div className='grid grid-cols-4 gap-4 mt-4'>
+            {/* <div className='grid grid-cols-4 gap-4 mt-4'>
               {mockData?.skillsAverage?.map((skill, index) => (
                 <div
                   key={index}
@@ -500,7 +296,7 @@ const TeacherDashboard: React.FC = () => {
                   </p>
                 </div>
               ))}
-            </div>
+            </div> */}
           </div>
 
           {/* Class Progress Over Time */}
@@ -530,30 +326,6 @@ const TeacherDashboard: React.FC = () => {
                 />
                 <Tooltip />
                 <Legend />
-                <Line
-                  type='monotone'
-                  dataKey='TOEIC A2'
-                  stroke='#3B82F6'
-                  strokeWidth={2}
-                />
-                <Line
-                  type='monotone'
-                  dataKey='Business B2'
-                  stroke='#10B981'
-                  strokeWidth={2}
-                />
-                <Line
-                  type='monotone'
-                  dataKey='TOEIC B1'
-                  stroke='#F59E0B'
-                  strokeWidth={2}
-                />
-                <Line
-                  type='monotone'
-                  dataKey='Conversation A2'
-                  stroke='#8B5CF6'
-                  strokeWidth={2}
-                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -596,9 +368,9 @@ const TeacherDashboard: React.FC = () => {
                           ? 'Không đạt'
                           : 'Chưa chấm'}
                       </span>
-                      <p className='text-sm font-bold text-gray-900 mt-1'>
+                      {/* <p className='text-sm font-bold text-gray-900 mt-1'>
                         {homework.score}
-                      </p>
+                      </p> */}
                     </div>
                   </div>
                   <p className='text-sm text-gray-700 bg-gray-50 p-2 rounded italic'>

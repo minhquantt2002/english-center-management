@@ -13,8 +13,9 @@ from ..services import schedule as schedule_service
 from ..schemas.user import UserResponse, UserCreate, UserUpdate, TeacherResponse, StudentResponse, UserRole
 from ..schemas.course import CourseResponse, CourseCreate, CourseUpdate
 from ..schemas.classroom import ClassroomResponse, ClassroomCreate, ClassroomUpdate
-from sqlalchemy import func, desc
-from ..models import Course, Enrollment, Class, User
+from ..models.attendance import HomeworkStatus
+from sqlalchemy import func, desc, select
+from ..models import Course, Enrollment, Class, User, CourseLevel
 from ..schemas.admin import *
 
 router = APIRouter()
@@ -553,11 +554,61 @@ async def get_all_teachers(
     current_user: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy danh sách tất cả giáo viên
-    """
     teachers = user_service.get_teachers(db)
-    return teachers
+    response = []
+
+    for teacher in teachers:
+        total = 0
+        total_attendanced = 0
+        total_passed_homework = 0
+
+        total_passed = 0
+        total_scores = 0
+
+        class_ids = [cls.id for cls in teacher.taught_classes]
+        classrooms = db.execute(select(Class).where(Class.id.in_(class_ids))).scalars().all()
+        classrooms = [ClassroomResponse.model_validate(cls) for cls in classrooms]
+        for classroom in classrooms:
+            total_scores += len(classroom.enrollments)
+            range_score = 0
+            is_sw = True
+            if classroom.course_level == CourseLevel.C1:
+                range_score = 250
+            else:
+                is_sw = False
+                if classroom.course_level == CourseLevel.A1:
+                    range_score = 150
+                elif classroom.course_level == CourseLevel.A2:
+                    range_score = 350
+                elif classroom.course_level == CourseLevel.B1:
+                    range_score = 500
+                elif classroom.course_level == CourseLevel.B2:
+                    range_score = 750
+
+            for enrollment in classroom.enrollments:
+                if len(enrollment.score) > 0:
+                    if is_sw:
+                        if enrollment.score[0].speaking is not None and enrollment.score[0].writing is not None:
+                            total_passed += 1 if enrollment.score[0].speaking + enrollment.score[0].writing >= range_score else 0
+                    else:
+                        if enrollment.score[0].reading is not None and enrollment.score[0].listening is not None:
+                            total_passed += 1 if enrollment.score[0].reading + enrollment.score[0].listening >= range_score else 0
+
+            for session in classroom.sessions:
+                total += len(session.attendances)
+                present_attendances = [att for att in session.attendances if att.is_present]
+                total_attendanced += len(present_attendances)
+                passeds = [hw for hw in session.homeworks if hw.status == HomeworkStatus.PASSED]
+                total_passed_homework += len(passeds)
+
+        response.append(UserResponse(
+            **teacher.__dict__,
+            rate_passed_homework=round(total_passed_homework / total * 100, 2) if total > 0 else 0,
+            rate_attendanced=round(total_attendanced / total * 100, 2) if total > 0 else 0,
+            rate_passed=round(total_passed / total_scores * 100, 2) if total > 0 else 0,
+        ))
+
+    return response
 
 @router.get("/teachers/{teacher_id}", response_model=TeacherResponse)
 async def get_teacher_by_id(

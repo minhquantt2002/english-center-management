@@ -95,7 +95,7 @@ const AdminDashboard: React.FC = () => {
           </h1>
           <p className='text-gray-600 mt-1'>Quản Lý Trung Tâm Tiếng Anh</p>
         </div>
-        <div className='flex items-center space-x-3'>
+        {/* <div className='flex items-center space-x-3'>
           <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}
@@ -106,7 +106,7 @@ const AdminDashboard: React.FC = () => {
             <option value='thisQuarter'>Quý Này</option>
             <option value='thisYear'>Năm Này</option>
           </select>
-        </div>
+        </div> */}
       </div>
 
       <div className='py-4'>
@@ -116,7 +116,7 @@ const AdminDashboard: React.FC = () => {
             title={mockData?.total_revenue?.title}
             value={mockData?.total_revenue?.value}
             icon={<DollarSign className='w-6 h-6 text-blue-600' />}
-            change={mockData?.total_revenue?.change}
+            // change={mockData?.total_revenue?.change}
             changeType={mockData?.total_revenue?.changeType}
             subtitle={mockData?.total_revenue?.subtitle}
           />
@@ -124,7 +124,7 @@ const AdminDashboard: React.FC = () => {
             title={mockData?.active_students?.title}
             value={mockData?.active_students?.value}
             icon={<Users className='w-6 h-6 text-green-600' />}
-            change={mockData?.active_students?.change}
+            // change={mockData?.active_students?.change}
             changeType={mockData?.active_students?.changeType}
             subtitle={mockData?.active_students?.subtitle}
           />
@@ -132,7 +132,7 @@ const AdminDashboard: React.FC = () => {
             title={mockData?.completion_rate?.title}
             value={mockData?.completion_rate?.value}
             icon={<GraduationCap className='w-6 h-6 text-purple-600' />}
-            change={mockData?.completion_rate?.change}
+            // change={mockData?.completion_rate?.change}
             changeType={mockData?.completion_rate?.changeType}
             subtitle={mockData?.completion_rate?.subtitle}
           />
@@ -140,7 +140,7 @@ const AdminDashboard: React.FC = () => {
             title={mockData?.active_classes?.title}
             value={mockData?.active_classes?.value}
             icon={<BookOpen className='w-6 h-6 text-orange-600' />}
-            change={mockData?.active_classes?.change}
+            // change={mockData?.active_classes?.change}
             changeType={mockData?.active_classes?.changeType}
             subtitle={mockData?.active_classes?.subtitle}
           />
@@ -156,11 +156,13 @@ const AdminDashboard: React.FC = () => {
               </h2>
               <div className='text-sm text-gray-500'>
                 Tổng:{' '}
-                {mockData?.revenue_by_month.reduce(
-                  (acc, item) => acc + item.revenue,
-                  0
-                )}{' '}
-                triệu ₫
+                {String(
+                  mockData?.revenue_by_month.reduce(
+                    (acc, item) => acc + item.revenue,
+                    0
+                  )
+                ).toLocaleString()}{' '}
+                ₫
               </div>
             </div>
             <ResponsiveContainer
@@ -198,12 +200,12 @@ const AdminDashboard: React.FC = () => {
                 />
                 <YAxis
                   stroke='#6B7280'
-                  tickFormatter={(value) => `$${value / 1000}K`}
+                  tickFormatter={(value) => `${value} đ`}
                 />
                 <Tooltip
                   formatter={(value) => [
-                    `$${value.toLocaleString()}`,
-                    'Revenue',
+                    `${value.toLocaleString()}đ`,
+                    'Doanh thu',
                   ]}
                 />
                 <Area

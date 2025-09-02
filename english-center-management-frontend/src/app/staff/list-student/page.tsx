@@ -28,6 +28,8 @@ import { Trash2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import GenericExcelExportButton from '../../../components/GenericExcelExportButton';
 import { studentsExportConfig } from '../../../components/GenericExcelExportButton';
+import { HomeworkStatus } from '../../teacher/_hooks/use-homework';
+import { calculateScore } from '../../admin/student/page';
 
 export default function StudentManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -66,6 +68,7 @@ export default function StudentManagement() {
 
   const studentsWithDisplay = (students || []).map(
     (student: StudentResponse): StudentResponse => ({
+      ...student,
       id: student.id,
       name: student.name,
       phone_number: student.phone_number || 'N/A',
@@ -277,8 +280,9 @@ export default function StudentManagement() {
                 </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
                   {
-                    studentsWithDisplay.filter((s) => s.enrollments.length === 0)
-                      .length
+                    studentsWithDisplay.filter(
+                      (s) => s.enrollments.length === 0
+                    ).length
                   }
                 </p>
               </div>
@@ -324,13 +328,13 @@ export default function StudentManagement() {
               className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent'
             />
           </div>
- {/* Export to Excel Button */}
-            <GenericExcelExportButton
-              data={filteredStudents}
-              config={studentsExportConfig}
-              onExportStart={() => setIsLoading(true)}
-              onExportComplete={() => setIsLoading(false)}
-            />
+          {/* Export to Excel Button */}
+          <GenericExcelExportButton
+            data={filteredStudents}
+            config={studentsExportConfig}
+            onExportStart={() => setIsLoading(true)}
+            onExportComplete={() => setIsLoading(false)}
+          />
           {/* Add Student Button */}
           <button
             onClick={() => setIsCreateModalOpen(true)}
@@ -358,6 +362,15 @@ export default function StudentManagement() {
                   Lớp học hiện tại
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  % đi học
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  % đạt btvn
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  % đạt đầu ra
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                   Trạng thái
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
@@ -366,76 +379,103 @@ export default function StudentManagement() {
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-100'>
-              {paginatedStudents.map((student) => (
-                <tr
-                  key={student.id}
-                  className='hover:bg-gray-50 transition-colors'
-                >
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <div className='flex items-center'>
-                      <div className='h-12 w-12 flex-shrink-0'>
-                        <div className='w-12 h-12 bg-gradient-to-r from-teal-500 to-teal-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
-                          {getInitials(student.name).charAt(0)}
+              {paginatedStudents.map((student) => {
+                const total = student?.attendances?.length;
+                const totalAttended = student?.attendances?.filter(
+                  (att) => att.is_present === true
+                ).length;
+
+                const totalPassedHomework = student?.homeworks?.filter(
+                  (hw) => hw.status === HomeworkStatus.PASSED
+                ).length;
+
+                const totalPassed = student?.enrollments?.filter((enrollment) =>
+                  calculateScore(enrollment)
+                ).length;
+
+                return (
+                  <tr
+                    key={student.id}
+                    className='hover:bg-gray-50 transition-colors'
+                  >
+                    <td className='px-6 py-4 whitespace-nowrap'>
+                      <div className='flex items-center'>
+                        <div className='h-12 w-12 flex-shrink-0'>
+                          <div className='w-12 h-12 bg-gradient-to-r from-teal-500 to-teal-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
+                            {getInitials(student.name).charAt(0)}
+                          </div>
+                        </div>
+                        <div className='ml-4'>
+                          <div className='text-sm font-semibold text-gray-900'>
+                            {student.name}
+                          </div>
                         </div>
                       </div>
-                      <div className='ml-4'>
-                        <div className='text-sm font-semibold text-gray-900'>
-                          {student.name}
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap'>
+                      <div className='flex flex-col space-y-1'>
+                        <div className='flex items-center text-sm text-gray-900'>
+                          <Mail className='w-4 h-4 text-gray-400 mr-2' />
+                          {student.email}
+                        </div>
+                        <div className='flex items-center text-sm text-gray-500'>
+                          <Phone className='w-4 h-4 text-gray-400 mr-2' />
+                          {student.phone_number}
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <div className='flex flex-col space-y-1'>
-                      <div className='flex items-center text-sm text-gray-900'>
-                        <Mail className='w-4 h-4 text-gray-400 mr-2' />
-                        {student.email}
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                      {student.enrollments.length} lớp
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                      {Math.round((totalAttended / total) * 100) || 0}%
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                      {Math.round((totalPassedHomework / total) * 100) || 0}%
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                      {Math.round(
+                        (totalPassed / student?.enrollments?.length) * 100
+                      ) || 0}
+                      %
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap'>
+                      <span
+                        className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getStatusBadgeColor(
+                          student.status
+                        )}`}
+                      >
+                        {statusLabels[student.status]}
+                      </span>
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
+                      <div className='flex items-center space-x-2'>
+                        <button
+                          onClick={() => handleViewStudent(student)}
+                          className='text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors'
+                          title='Xem chi tiết'
+                        >
+                          <Eye className='w-4 h-4' />
+                        </button>
+                        <button
+                          onClick={() => handleEditStudent(student)}
+                          className='text-green-600 hover:text-green-900 p-1 rounded-lg hover:bg-green-50 transition-colors'
+                          title='Chỉnh sửa'
+                        >
+                          <Edit className='w-4 h-4' />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteStudent(student.id)}
+                          className='text-red-600 hover:text-red-900 p-1 rounded-lg hover:bg-red-50 transition-colors'
+                          title='Xóa'
+                        >
+                          <Trash2 className='w-4 h-4' />
+                        </button>
                       </div>
-                      <div className='flex items-center text-sm text-gray-500'>
-                        <Phone className='w-4 h-4 text-gray-400 mr-2' />
-                        {student.phone_number}
-                      </div>
-                    </div>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                    {student.enrollments.length} lớp
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <span
-                      className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getStatusBadgeColor(
-                        student.status
-                      )}`}
-                    >
-                      {statusLabels[student.status]}
-                    </span>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
-                    <div className='flex items-center space-x-2'>
-                      <button
-                        onClick={() => handleViewStudent(student)}
-                        className='text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors'
-                        title='Xem chi tiết'
-                      >
-                        <Eye className='w-4 h-4' />
-                      </button>
-                      <button
-                        onClick={() => handleEditStudent(student)}
-                        className='text-green-600 hover:text-green-900 p-1 rounded-lg hover:bg-green-50 transition-colors'
-                        title='Chỉnh sửa'
-                      >
-                        <Edit className='w-4 h-4' />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteStudent(student.id)}
-                        className='text-red-600 hover:text-red-900 p-1 rounded-lg hover:bg-red-50 transition-colors'
-                        title='Xóa'
-                      >
-                        <Trash2 className='w-4 h-4' />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

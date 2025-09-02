@@ -118,7 +118,7 @@ const StaffDashboard: React.FC = () => {
             Quản Lý Hàng Ngày - Trung Tâm Tiếng Anh
           </p>
         </div>
-        <div className='flex items-center space-x-3'>
+        {/* <div className='flex items-center space-x-3'>
           <select
             value={selectedView}
             onChange={(e) => setSelectedView(e.target.value)}
@@ -129,7 +129,7 @@ const StaffDashboard: React.FC = () => {
             <option value='homework'>Bài Tập</option>
             <option value='schedule'>Lịch Học</option>
           </select>
-        </div>
+        </div> */}
       </div>
 
       <div className='py-4'>
@@ -139,7 +139,7 @@ const StaffDashboard: React.FC = () => {
             title='Tổng Số Học Viên'
             value={mockData?.totalStudents.toLocaleString()}
             icon={<Users className='w-6 h-6 text-blue-600' />}
-            change='+15 học viên tuần này'
+            change=''
             changeType='positive'
             color='blue'
           />
@@ -147,14 +147,14 @@ const StaffDashboard: React.FC = () => {
             title='Học Viên Chưa Xếp Lớp'
             value={mockData?.unassignedStudents}
             icon={<UserX className='w-6 h-6 text-orange-600' />}
-            subtitle='Cần xếp lớp sớm'
+            subtitle=''
             color='orange'
           />
           <StatCard
             title='Lớp Đang Hoạt Động'
             value={mockData?.activeClasses}
             icon={<BookOpen className='w-6 h-6 text-green-600' />}
-            change='+3 lớp mới'
+            change=''
             changeType='positive'
             color='green'
           />
@@ -173,7 +173,7 @@ const StaffDashboard: React.FC = () => {
             title='Điểm Danh Trung Bình'
             value={`${avgAttendance.toFixed(1)}%`}
             icon={<CheckCircle className='w-6 h-6 text-green-600' />}
-            change='+2.3% so với tuần trước'
+            change=''
             changeType='positive'
             subtitle='Toàn trung tâm'
             color='green'

@@ -15,6 +15,15 @@ import TeachingScheduleModal from './_components/teaching-schedule-modal';
 import { useStaffTeacherApi } from '../_hooks';
 import GenericExcelExportButton from '../../../components/GenericExcelExportButton';
 import { teachersExportConfig } from '../../../components/GenericExcelExportButton';
+
+export const getInitials = (name: string) => {
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase();
+};
+
 export default function TeacherManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTeacher, setSelectedTeacher] =
@@ -45,6 +54,7 @@ export default function TeacherManagement() {
   // Use teachers data from API
   const teachersWithDisplay = teachers.map(
     (teacher: TeacherResponse, index: number) => ({
+      ...teacher,
       id: teacher.id,
       name: teacher.name,
       experience_years: teacher.experience_years
@@ -99,14 +109,6 @@ export default function TeacherManagement() {
     );
   }
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase();
-  };
-
   return (
     <>
       {/* Header */}
@@ -144,7 +146,11 @@ export default function TeacherManagement() {
                   Lớp đang dạy
                 </p>
                 <p className='text-2xl font-bold text-gray-900 mt-1'>
-                  {teachersWithDisplay.reduce((acc, teacher) => acc + (teacher.assignedClasses.length || 0), 0)}
+                  {teachersWithDisplay.reduce(
+                    (acc, teacher) =>
+                      acc + (teacher.assignedClasses.length || 0),
+                    0
+                  )}
                 </p>
               </div>
               <div className='w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center'>
@@ -204,6 +210,15 @@ export default function TeacherManagement() {
                   Lớp đang dạy
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  % HV đi học
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  % HV đạt BTVN
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  % HV đạt đầu ra
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                   Thao tác
                 </th>
               </tr>
@@ -252,6 +267,15 @@ export default function TeacherManagement() {
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
                     {teacher.assignedClasses.length} lớp
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                    {teacher.rate_attendanced} %
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                    {teacher.rate_passed_homework} %
+                  </td>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                    {teacher.rate_passed} %
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                     <button

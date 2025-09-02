@@ -14,6 +14,7 @@ import {
   Edit,
 } from 'lucide-react';
 import { TeacherResponse } from '../../../../types/admin';
+import { getInitials } from '../../../staff/list-teacher/page';
 
 interface ViewTeacherModalProps {
   isOpen: boolean;
@@ -83,14 +84,10 @@ export default function ViewTeacherModal({
         <div className='p-6 space-y-4'>
           {/* Teacher Header */}
           <div className='flex items-start gap-6 p-6 bg-gradient-to-r from-teal-50 to-blue-50 rounded-lg'>
-            <div className='flex-shrink-0'>
-              <img
-                className='h-16 w-16 rounded-full object-cover border-4 border-white shadow-lg'
-                src={
-                  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-                }
-                alt={teacher.name}
-              />
+            <div className='h-12 w-12 flex-shrink-0'>
+              <div className='w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
+                {getInitials(teacher.name.charAt(0))}
+              </div>
             </div>
             <div className='flex-1'>
               <h3 className='text-xl font-bold text-gray-900 mb-1'>

@@ -1,6 +1,7 @@
 import { SessionAttendanceResponse } from '../app/teacher/_hooks/use-attendance';
 import { SessionHomeworkResponse } from '../app/teacher/_hooks/use-homework';
 import { AttendanceStudentResponse, HomeworkStudentResponse } from './student';
+import { SessionNested } from './teacher';
 
 // Staff specific types based on backend schemas
 export type InvoiceStatus = 'pending' | 'paid' | 'overdue' | 'cancelled';
@@ -88,6 +89,9 @@ export interface TeacherResponse {
   phone_number?: string;
   created_at: string;
   taught_classes?: ClassroomNested[];
+  rate_passed?: number;
+  rate_attendanced?: number;
+  rate_passed_homework?: number;
 }
 
 // ==================== COURSE MANAGEMENT ====================
@@ -140,6 +144,7 @@ export interface ClassroomResponse {
   teacher?: TeacherNested;
   enrollments?: EnrollmentNested[];
   schedules?: ScheduleNested[];
+  sessions?: SessionNested[];
 }
 
 // ==================== SCHEDULE MANAGEMENT ====================

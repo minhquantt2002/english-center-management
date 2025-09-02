@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  ArrowLeft,
   Users,
   MapPin,
   Calendar,
@@ -14,15 +13,75 @@ import {
   Plus,
   Trash2,
   Eye,
+  BookOpen,
+  CheckCircle,
+  Clock,
+  FileText,
 } from 'lucide-react';
-import { useStaffClassroomApi, useStaffStudentApi } from '../../_hooks';
+import { useStaffClassroomApi } from '../../_hooks';
 import AssignStudentModal from './_components/assign-student';
 import ViewStudentModal from './_components/view-student';
 import EditStudentModal from './_components/edit-student';
 import StudyingScheduleModal from './_components/studying-schedule';
 import EditClassroomInfoModal from './_components/edit-classroom-info';
-import { ClassroomResponse, StudentResponse } from '../../../../types/staff';
+import {
+  ClassroomResponse,
+  EnrollmentNested,
+  StudentResponse,
+} from '../../../../types/staff';
 import { toast } from 'react-toastify';
+import { HomeworkStatus } from '../../../teacher/_hooks/use-homework';
+
+export const checkIsPassed = (enrollment: any, courseLevel: string) => {
+  let rangeScore = 0;
+  let isSW = true;
+  if (courseLevel === 'C1') {
+    rangeScore = 250;
+  } else {
+    isSW = false;
+    if (courseLevel === 'A1') {
+      rangeScore = 150;
+    } else if (courseLevel === 'A2') {
+      rangeScore = 350;
+    } else if (courseLevel === 'B1') {
+      rangeScore = 600;
+    } else if (courseLevel === 'B2') {
+      rangeScore = 750;
+    }
+  }
+  if (enrollment?.score.length > 0) {
+    if (isSW) {
+      if (
+        enrollment?.score[0].speaking !== null &&
+        enrollment?.score[0].writing !== null
+      ) {
+        if (
+          enrollment?.score[0].speaking + enrollment?.score[0].writing >=
+          rangeScore
+        ) {
+          return 2;
+        }
+      } else {
+        return 1;
+      }
+    } else {
+      if (
+        enrollment?.score[0].listening !== null &&
+        enrollment?.score[0].reading !== null
+      ) {
+        if (
+          enrollment?.score[0].listening + enrollment?.score[0].reading >=
+          rangeScore
+        ) {
+          return 2;
+        }
+      } else {
+        return 1;
+      }
+    }
+  }
+  return 0;
+};
 
 export function formatDays(days: string[]) {
   const mapDays: Record<string, string> = {
@@ -69,7 +128,7 @@ export default function ClassroomDetailPage() {
   } = useStaffClassroomApi();
 
   const [classroom, setClassroom] = useState<ClassroomResponse | null>(null);
-  const [students, setStudents] = useState<StudentResponse[]>([]);
+  const [students, setStudents] = useState<EnrollmentNested[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] =
@@ -84,7 +143,7 @@ export default function ClassroomDetailPage() {
     try {
       const classroomData = await getClassroomById(classroomId);
       setClassroom(classroomData);
-      setStudents(classroomData.enrollments.map((v) => v.student));
+      setStudents(classroomData.enrollments);
     } catch (err) {
       console.error('Error loading classroom data:', err);
     }
@@ -97,16 +156,18 @@ export default function ClassroomDetailPage() {
   const filteredStudents = students.filter((student) => {
     if (!student) return false;
     const matchesSearch =
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.id.toLowerCase().includes(searchTerm.toLowerCase());
+      student.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.student.id.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
   const handleSaveStudent = (updatedStudent: StudentResponse) => {
     setStudents((prev) =>
       prev.map((student) =>
-        student.id === updatedStudent.id ? updatedStudent : student
+        student.student.id === updatedStudent.id
+          ? { ...student, student: updatedStudent }
+          : student
       )
     );
   };
@@ -209,6 +270,35 @@ export default function ClassroomDetailPage() {
     );
   }
 
+  const totalSessions = classroom?.sessions?.length;
+
+  const totalAttendance = classroom?.sessions?.reduce((acc, session) => {
+    return (
+      acc +
+      (session.attendances.filter((att) => att.is_present === true).length || 0)
+    );
+  }, 0);
+
+  const totalPassed = classroom?.sessions?.reduce((acc, session) => {
+    return (
+      acc +
+      (session.homeworks.filter((e) => e.status === HomeworkStatus.PASSED)
+        .length || 0)
+    );
+  }, 0);
+
+  const totalHomeworks = classroom?.sessions?.reduce((acc, session) => {
+    return acc + (session.homeworks.length || 0);
+  }, 0);
+
+  const attendanceRate =
+    totalSessions > 0
+      ? (totalAttendance / (totalSessions * classroom?.enrollments?.length)) *
+        100
+      : 0;
+  const homeworkPassRate =
+    totalHomeworks > 0 ? (totalPassed / totalHomeworks) * 100 : 0;
+
   return (
     <>
       <main>
@@ -245,7 +335,8 @@ export default function ClassroomDetailPage() {
               </div>
             </div>
 
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
+            {/* Main classroom info grid */}
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6'>
               <div className='flex items-center space-x-3'>
                 <User className='w-5 h-5 text-gray-500' />
                 <div>
@@ -283,6 +374,50 @@ export default function ClassroomDetailPage() {
                   <p className='font-medium text-gray-900'>
                     {classroom.enrollments.length} học viên
                   </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Statistics section */}
+            <div className='border-t border-gray-200 pt-4'>
+              <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6'>
+                {/* Attendance Rate */}
+                <div className='flex items-center space-x-3'>
+                  <div className='w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center'>
+                    <CheckCircle className='w-5 h-5 text-green-600' />
+                  </div>
+                  <div>
+                    <p className='text-sm text-gray-600'>Tỷ lệ điểm danh</p>
+                    <p className='font-semibold text-lg text-gray-900'>
+                      {attendanceRate.toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+
+                {/* Homework Pass Rate */}
+                <div className='flex items-center space-x-3'>
+                  <div className='w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center'>
+                    <BookOpen className='w-5 h-5 text-blue-600' />
+                  </div>
+                  <div>
+                    <p className='text-sm text-gray-600'>Tỷ lệ hoàn thành BT</p>
+                    <p className='font-semibold text-lg text-gray-900'>
+                      {homeworkPassRate.toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+
+                {/* Total Sessions */}
+                <div className='flex items-center space-x-3'>
+                  <div className='w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center'>
+                    <Clock className='w-5 h-5 text-purple-600' />
+                  </div>
+                  <div>
+                    <p className='text-sm text-gray-600'>Tổng buổi học</p>
+                    <p className='font-semibold text-lg text-gray-900'>
+                      {totalSessions || 0}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -347,6 +482,15 @@ export default function ClassroomDetailPage() {
                     Ngày nhập học
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                    % Tham gia lớp
+                  </th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                    % Đạt bài tập
+                  </th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                    Đầu ra
+                  </th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                     Thao tác
                   </th>
                 </tr>
@@ -366,82 +510,136 @@ export default function ClassroomDetailPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredStudents.map((student) => (
-                    <tr
-                      key={student.id}
-                      className='hover:bg-gray-50'
-                    >
-                      <td className='px-6 py-4 whitespace-nowrap'>
-                        <div className='flex items-center'>
-                          <img
-                            className='h-10 w-10 rounded-full'
-                            src={`https://ui-avatars.com/api/?name=${student.name}&background=0D9488&color=fff`}
-                            alt={student.name}
-                          />
-                          <div className='ml-4'>
-                            <div className='text-sm font-medium text-gray-900'>
-                              {student.name}
-                            </div>
-                            <div className='text-sm text-gray-500'>
-                              {student.email}
-                            </div>
-                            <div className='text-sm text-gray-500'>
-                              #{student.id.substring(0, 5)}
+                  filteredStudents.map((enrollment) => {
+                    const student = enrollment.student;
+                    const totalSessions = classroom?.sessions.length;
+                    const totalAttended = classroom?.sessions.filter(
+                      (session) =>
+                        session.attendances.some(
+                          (att) =>
+                            att.student_id === student.id &&
+                            att.is_present === true
+                        )
+                    ).length;
+                    const totalPassedHomework = classroom?.sessions.filter(
+                      (session) =>
+                        session.homeworks.some(
+                          (hw) =>
+                            hw.student_id === student.id &&
+                            hw.status === HomeworkStatus.PASSED
+                        )
+                    ).length;
+
+                    return (
+                      <tr
+                        key={student.id}
+                        className='hover:bg-gray-50'
+                      >
+                        <td className='px-6 py-4 whitespace-nowrap'>
+                          <div className='flex items-center'>
+                            <img
+                              className='h-10 w-10 rounded-full'
+                              src={`https://ui-avatars.com/api/?name=${student.name}&background=0D9488&color=fff`}
+                              alt={student.name}
+                            />
+                            <div className='ml-4'>
+                              <div className='text-sm font-medium text-gray-900'>
+                                {student.name}
+                              </div>
+                              <div className='text-sm text-gray-500'>
+                                {student.email}
+                              </div>
+                              <div className='text-sm text-gray-500'>
+                                #{student.id.substring(0, 5)}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className='px-6 py-4 whitespace-nowrap'>
-                        <span
-                          className={`px-2 py-1 text-xs font-medium rounded-full ${getLevelColor(
-                            student.input_level
-                          )}`}
-                        >
-                          {getLevelText(student.input_level)}
-                        </span>
-                      </td>
-                      <td className='px-6 py-4 whitespace-nowrap'>
-                        <div className='text-sm text-gray-900'>
-                          <div className='flex items-center space-x-1'>
-                            <Phone className='w-3 h-3 text-gray-400' />
-                            <span>{student.phone_number}</span>
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap'>
+                          <span
+                            className={`px-2 py-1 text-xs font-medium rounded-full ${getLevelColor(
+                              student.input_level
+                            )}`}
+                          >
+                            {getLevelText(student.input_level)}
+                          </span>
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap'>
+                          <div className='text-sm text-gray-900'>
+                            <div className='flex items-center space-x-1'>
+                              <Phone className='w-3 h-3 text-gray-400' />
+                              <span>{student.phone_number}</span>
+                            </div>
+                            {student.parent_phone && (
+                              <div className='flex items-center space-x-1 mt-1'>
+                                <Mail className='w-3 h-3 text-gray-400' />
+                                <span className='text-xs text-gray-500'>
+                                  PH: {student.parent_phone}
+                                </span>
+                              </div>
+                            )}
                           </div>
-                          {student.parent_phone && (
-                            <div className='flex items-center space-x-1 mt-1'>
-                              <Mail className='w-3 h-3 text-gray-400' />
-                              <span className='text-xs text-gray-500'>
-                                PH: {student.parent_phone}
-                              </span>
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                          {new Date(student.created_at).toLocaleDateString(
+                            'vi-VN'
+                          )}
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                          {totalSessions > 0
+                            ? Math.round((totalAttended / totalSessions) * 100)
+                            : 0}
+                          %
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                          {totalSessions > 0
+                            ? Math.round(
+                                (totalPassedHomework / totalSessions) * 100
+                              )
+                            : 0}
+                          %
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                          {checkIsPassed(enrollment, classroom.course_level) ===
+                          2 ? (
+                            <div className='text-green-600 font-semibold py-3 bg-green-50 text-center rounded-full'>
+                              Đạt
+                            </div>
+                          ) : checkIsPassed(
+                              enrollment,
+                              classroom.course_level
+                            ) === 0 ? (
+                            <div className='text-red-600 font-semibold py-3 bg-red-50 text-center rounded-full'>
+                              Không đạt
+                            </div>
+                          ) : (
+                            <div className='text-yellow-600 font-semibold py-3 bg-yellow-50 text-center rounded-full'>
+                              Chưa đánh giá
                             </div>
                           )}
-                        </div>
-                      </td>
-                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                        {new Date(student.created_at).toLocaleDateString(
-                          'vi-VN'
-                        )}
-                      </td>
-                      <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
-                        <div className='flex items-center space-x-2'>
-                          <button
-                            onClick={() => {
-                              setSelectedStudent(student);
-                              setIsViewModalOpen(true);
-                            }}
-                            className='text-cyan-600 hover:text-cyan-800 transition-colors'
-                          >
-                            <Eye className='w-4 h-4' />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteStudent(student.id)}
-                            className='text-red-600 hover:text-red-800 transition-colors'
-                          >
-                            <Trash2 className='w-4 h-4' />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
+                          <div className='flex items-center space-x-2'>
+                            <button
+                              onClick={() => {
+                                setSelectedStudent(student);
+                                setIsViewModalOpen(true);
+                              }}
+                              className='text-cyan-600 hover:text-cyan-800 transition-colors'
+                            >
+                              <Eye className='w-4 h-4' />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteStudent(student.id)}
+                              className='text-red-600 hover:text-red-800 transition-colors'
+                            >
+                              <Trash2 className='w-4 h-4' />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

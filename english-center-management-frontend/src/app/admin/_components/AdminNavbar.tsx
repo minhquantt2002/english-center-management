@@ -14,6 +14,7 @@ import {
 import { signOut } from 'next-auth/react';
 import { usePersonalInfo } from '../../../components/PersonalInfoContext';
 import { useUserInfo } from '../../../components/UserInfoContext';
+import { getInitials } from '../../staff/list-teacher/page';
 
 interface AdminNavbarProps {
   onToggleSidebar?: () => void;
@@ -77,8 +78,6 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar }) => {
         name: 'Đang tải...',
         email: '',
         role: 'Quản trị viên',
-        avatar:
-          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
       };
     }
 
@@ -87,8 +86,6 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar }) => {
         name: 'Quản trị viên',
         email: '',
         role: 'Quản trị viên',
-        avatar:
-          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
       };
     }
 
@@ -97,8 +94,6 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar }) => {
       email: userInfo.email || '',
       role:
         userInfo.role_name === 'admin' ? 'Quản trị viên' : userInfo.role_name,
-      avatar:
-        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
     };
   };
 
@@ -157,11 +152,11 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar }) => {
               className='flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors'
             >
               <div className='relative'>
-                <img
-                  src={userDisplay.avatar}
-                  alt='Admin'
-                  className='w-8 h-8 rounded-full object-cover ring-2 ring-gray-100'
-                />
+                <div className='h-8 w-8 flex-shrink-0'>
+                  <div className='w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
+                    {getInitials(userDisplay.name.charAt(0))}
+                  </div>
+                </div>
                 <div className='absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white'></div>
               </div>
               <div className='hidden md:block text-left'>
@@ -178,11 +173,11 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar }) => {
               <div className='absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-50'>
                 <div className='p-4 border-b border-gray-200'>
                   <div className='flex items-center gap-3'>
-                    <img
-                      src={userDisplay.avatar}
-                      alt='Admin'
-                      className='w-12 h-12 rounded-full object-cover ring-2 ring-gray-100'
-                    />
+                    <div className='h-12 w-12 flex-shrink-0'>
+                      <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
+                        {getInitials(userDisplay.name.charAt(0))}
+                      </div>
+                    </div>
                     <div>
                       <p className='text-sm font-semibold text-gray-900'>
                         {userDisplay.name}

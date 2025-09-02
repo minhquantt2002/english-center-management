@@ -1,20 +1,30 @@
-import { Eye, Plus, Search, Trash2 } from 'lucide-react';
+import { Eye, Home, Plus, Search, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
-import { EnrollmentNested, StudentInClass } from '../../../../../types/teacher';
+import {
+  EnrollmentNested,
+  SessionNested,
+  StudentInClass,
+} from '../../../../../types/teacher';
 import ViewStudentModal from './view-student-modal';
 import AssignStudentModal from './assign-student';
 import { toast } from 'react-toastify';
 import { useStaffClassroomApi } from '../../../../staff/_hooks';
+import { HomeworkStatus } from '../../../_hooks/use-homework';
+import { checkIsPassed } from '../../../../staff/list-classroom/[id]/page';
 
 interface StudentListProps {
   classroomId: string;
+  sessions: SessionNested[];
   students: EnrollmentNested[];
+  courseLevel?: string;
   refetchData: any;
 }
 
 const StudentList: React.FC<StudentListProps> = ({
   students,
+  sessions,
   classroomId,
+  courseLevel,
   refetchData,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,43 +51,95 @@ const StudentList: React.FC<StudentListProps> = ({
     }
   };
 
-  const renderStudentCard = (student: EnrollmentNested) => (
-    <div
-      key={student.id}
-      className='bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow'
-    >
-      <div className='flex items-start space-x-3'>
-        <img
-          src='https://cdn-icons-png.flaticon.com/512/4196/4196591.png'
-          alt={student.student.name}
-          className='w-12 h-12 rounded-full'
-        />
-        <div className='flex-1 min-w-0'>
-          <h4 className='text-sm font-semibold text-gray-900 truncate'>
-            {student.student.name}
-          </h4>
-          <p className='text-xs text-gray-500 truncate'>
-            {student.student.email}
-          </p>
-        </div>
-        <div className='flex items-center space-x-2'>
-          <button
-            className='p-1 text-blue-600 hover:text-blue-400'
-            onClick={() => setIsOpenView(student.student)}
-          >
-            <Eye className='w-4 h-4' />
-          </button>
+  const renderStudentCard = (student: EnrollmentNested) => {
+    const totalSessions = sessions.length;
+    const totalAttended = sessions.filter((session) =>
+      session.attendances.some(
+        (att) =>
+          att.student_id === student.student.id && att.is_present === true
+      )
+    ).length;
+    const totalPassedHomework = sessions.filter((session) =>
+      session.homeworks.some(
+        (hw) =>
+          hw.student_id === student.student.id &&
+          hw.status === HomeworkStatus.PASSED
+      )
+    ).length;
 
-          <button
-            className='p-1 text-red-600 hover:text-red-400'
-            onClick={() => handleDeleteStudent(student.student.id)}
-          >
-            <Trash2 className='w-4 h-4' />
-          </button>
+    return (
+      <div
+        key={student.id}
+        className='bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow'
+      >
+        <div className='flex items-start space-x-3'>
+          <img
+            src='https://cdn-icons-png.flaticon.com/512/4196/4196591.png'
+            alt={student.student.name}
+            className='w-12 h-12 rounded-full'
+          />
+          <div className='flex-1 min-w-0'>
+            <h4 className='text-sm font-semibold text-gray-900 truncate'>
+              {student.student.name}
+            </h4>
+            <p className='text-xs text-gray-500 truncate'>
+              {student.student.email}
+            </p>
+
+            {/* Statistics Section */}
+            <div className='mt-2 flex flex-col text-xs'>
+              <div className='flex items-center space-x-1'>
+                <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                <span className='font-medium text-gray-700'>
+                  Điểm danh:{' '}
+                  {totalSessions > 0
+                    ? Math.round((totalAttended / totalSessions) * 100)
+                    : 0}
+                  %
+                </span>
+              </div>
+              <div className='flex items-center space-x-1'>
+                <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
+                <span className='font-medium text-gray-700'>
+                  Hoàn thành bài tập:{' '}
+                  {totalSessions > 0
+                    ? Math.round((totalPassedHomework / totalSessions) * 100)
+                    : 0}
+                  %
+                </span>
+              </div>
+              <div className='flex items-center space-x-1'>
+                <div className='w-2 h-2 bg-orange-500 rounded-full'></div>
+                <span className='font-medium text-gray-700'>
+                  Đầu ra:{' '}
+                  {checkIsPassed(student, courseLevel) === 2
+                    ? 'Đạt'
+                    : checkIsPassed(student, courseLevel) === 0
+                    ? 'Không'
+                    : 'Chưa đánh giá'}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className='flex items-center space-x-2'>
+            <button
+              className='p-1 text-blue-600 hover:text-blue-400'
+              onClick={() => setIsOpenView(student.student)}
+            >
+              <Eye className='w-4 h-4' />
+            </button>
+
+            <button
+              className='p-1 text-red-600 hover:text-red-400'
+              onClick={() => handleDeleteStudent(student.student.id)}
+            >
+              <Trash2 className='w-4 h-4' />
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className='space-y-6'>

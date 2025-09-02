@@ -1,3 +1,5 @@
+import { AttendanceNested, HomeworkNested } from './teacher';
+
 // Admin types based on backend schemas
 export type UserRole = 'admin' | 'staff' | 'teacher' | 'student';
 export type StudentStatus = 'active' | 'inactive' | 'suspended' | 'graduated';
@@ -48,6 +50,7 @@ export interface ClassroomNested {
   id: string;
   class_name: string;
   room?: string;
+  course_level?: string;
 }
 
 export interface EnrollmentNested {
@@ -55,6 +58,7 @@ export interface EnrollmentNested {
   enrollment_at: string;
   status: string;
   score: ScoreNested[];
+  classroom?: ClassroomNested;
 }
 
 export interface ScoreNested {
@@ -217,6 +221,9 @@ export interface TeacherResponse extends TeacherBase {
   id: string;
   created_at: string;
   taught_classes?: ClassroomNested[];
+  rate_passed?: number;
+  rate_attendanced?: number;
+  rate_passed_homework?: number;
 }
 
 // Student specific types
@@ -254,6 +261,8 @@ export interface StudentResponse extends StudentBase {
   id: string;
   created_at: string;
   enrollments?: EnrollmentNested[];
+  attendances?: AttendanceNested[];
+  homeworks?: HomeworkNested[];
 }
 
 // Missing interfaces for hooks

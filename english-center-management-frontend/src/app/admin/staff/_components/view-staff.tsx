@@ -1,19 +1,9 @@
 'use client';
 
 import React from 'react';
-import {
-  X,
-  User,
-  Phone,
-  Mail,
-  BookOpen,
-  Clock,
-  FileText,
-  Users,
-  MapPin,
-  Edit,
-} from 'lucide-react';
+import { X, User, Phone, Mail } from 'lucide-react';
 import { UserResponse } from '../../../../types/admin';
+import { getInitials } from '../../../staff/list-teacher/page';
 
 interface ViewStaffModalProps {
   isOpen: boolean;
@@ -49,14 +39,10 @@ export default function ViewStaffModal({
         <div className='p-6 space-y-6'>
           {/* Staff Header */}
           <div className='flex items-start gap-6 p-6 bg-gradient-to-r from-teal-50 to-blue-50 rounded-lg'>
-            <div className='flex-shrink-0'>
-              <img
-                className='h-24 w-24 rounded-full object-cover border-4 border-white shadow-lg'
-                src={
-                  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-                }
-                alt={staff.name}
-              />
+            <div className='h-24 w-24 flex-shrink-0'>
+              <div className='w-24 h-24 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
+                {getInitials(staff.name.charAt(0))}
+              </div>
             </div>
             <div className='flex-1'>
               <h3 className='text-2xl font-bold text-gray-900 mb-2'>

@@ -16,7 +16,11 @@ import {
   ChevronRight,
   Download,
 } from 'lucide-react';
-import { StudentResponse, StudentCreate } from '../../../types/admin';
+import {
+  StudentResponse,
+  StudentCreate,
+  EnrollmentNested,
+} from '../../../types/admin';
 import ViewStudentModal from './_components/view-student';
 import EditStudentModal from './_components/edit-student';
 import CreateStudentModal from './_components/create-student';
@@ -24,6 +28,56 @@ import { useStudentApi } from '../_hooks';
 import { toast } from 'react-toastify';
 import GenericExcelExportButton from '../../../components/GenericExcelExportButton';
 import { studentsExportConfig } from '../../../components/GenericExcelExportButton';
+import { HomeworkStatus } from '../../teacher/_hooks/use-homework';
+import { getInitials } from '../../staff/list-teacher/page';
+
+export const calculateScore = (enrollment: EnrollmentNested) => {
+  let rangeScore = 0;
+  let isSW = true;
+  if (enrollment.classroom.course_level === 'C1') {
+    rangeScore = 250;
+  } else {
+    isSW = false;
+    if (enrollment.classroom.course_level === 'A1') {
+      rangeScore = 150;
+    } else if (enrollment.classroom.course_level === 'A2') {
+      rangeScore = 350;
+    } else if (enrollment.classroom.course_level === 'B1') {
+      rangeScore = 600;
+    } else if (enrollment.classroom.course_level === 'B2') {
+      rangeScore = 750;
+    }
+  }
+  if (enrollment.score.length > 0) {
+    if (isSW) {
+      if (
+        enrollment.score[0].speaking !== null &&
+        enrollment.score[0].writing !== null
+      ) {
+        if (
+          enrollment.score[0].speaking + enrollment.score[0].writing >=
+          rangeScore
+        ) {
+          return true;
+        }
+      }
+    } else {
+      if (
+        enrollment.score[0].listening !== null &&
+        enrollment.score[0].reading !== null
+      ) {
+        if (
+          enrollment.score[0].listening + enrollment.score[0].reading >=
+          rangeScore
+        ) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+};
+
 const StudentManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudent, setSelectedStudent] =
@@ -161,9 +215,6 @@ const StudentManagement = () => {
     }
   };
 
-
-  const [loading, setLoading] = useState(false);
-
   return (
     <>
       {/* Header */}
@@ -277,8 +328,8 @@ const StudentManagement = () => {
             <GenericExcelExportButton
               data={filteredStudents}
               config={studentsExportConfig}
-              onExportStart={() => setLoading(true)}
-              onExportComplete={() => setLoading(false)}
+              onExportStart={() => {}}
+              onExportComplete={() => {}}
             />
             {/* Create Student Button */}
             <button
@@ -311,6 +362,15 @@ const StudentManagement = () => {
                   Lớp học hiện tại
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  % đi học
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  % đạt BTVN
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                  % đạt đầu ra
+                </th>
+                <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
                   Trạng thái
                 </th>
                 <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
@@ -319,105 +379,128 @@ const StudentManagement = () => {
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-100'>
-              {paginatedStudents.map((student: StudentResponse) => (
-                <tr
-                  key={student.id}
-                  className='hover:bg-gray-50 transition-colors'
-                >
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <div className='flex items-center'>
-                      <div className='h-12 w-12 flex-shrink-0'>
-                        <img
-                          className='h-12 w-12 rounded-full object-cover ring-2 ring-gray-100'
-                          src={
-                            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-                          }
-                          alt={student.name}
-                        />
-                      </div>
-                      <div className='ml-4'>
-                        <div className='text-sm font-semibold text-gray-900'>
-                          {student.name}
+              {paginatedStudents.map((student: StudentResponse) => {
+                const total = student?.attendances?.length;
+                const totalAttended = student?.attendances?.filter(
+                  (att) => att.is_present === true
+                ).length;
+
+                const totalPassedHomework = student?.homeworks?.filter(
+                  (hw) => hw.status === HomeworkStatus.PASSED
+                ).length;
+
+                const totalPassed = student?.enrollments?.filter((enrollment) =>
+                  calculateScore(enrollment)
+                ).length;
+
+                return (
+                  <tr
+                    key={student.id}
+                    className='hover:bg-gray-50 transition-colors'
+                  >
+                    <td className='px-6 py-4 whitespace-nowrap'>
+                      <div className='flex items-center'>
+                        <div className='h-12 w-12 flex-shrink-0'>
+                          <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
+                            {getInitials(student.name.charAt(0))}
+                          </div>
+                        </div>
+                        <div className='ml-4'>
+                          <div className='text-sm font-semibold text-gray-900'>
+                            {student.name}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <div className='flex flex-col space-y-1'>
-                      <div className='flex items-center text-sm text-gray-900'>
-                        <Mail className='w-4 h-4 text-gray-400 mr-2' />
-                        {student.email}
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap'>
+                      <div className='flex flex-col space-y-1'>
+                        <div className='flex items-center text-sm text-gray-900'>
+                          <Mail className='w-4 h-4 text-gray-400 mr-2' />
+                          {student.email}
+                        </div>
+                        <div className='flex items-center text-sm text-gray-500'>
+                          <Phone className='w-4 h-4 text-gray-400 mr-2' />
+                          {student.phone_number || 'Chưa cập nhật'}
+                        </div>
                       </div>
-                      <div className='flex items-center text-sm text-gray-500'>
-                        <Phone className='w-4 h-4 text-gray-400 mr-2' />
-                        {student.phone_number || 'Chưa cập nhật'}
-                      </div>
-                    </div>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <span
-                      className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getLevelBadgeColor(
-                        student.input_level
-                      )}`}
-                    >
-                      {student.input_level === 'A1'
-                        ? 'A1 - Mất gốc'
-                        : student.input_level === 'A2'
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap'>
+                      <span
+                        className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getLevelBadgeColor(
+                          student.input_level
+                        )}`}
+                      >
+                        {student.input_level === 'A1'
+                          ? 'A1 - Mất gốc'
+                          : student.input_level === 'A2'
                           ? 'A2 - Sơ cấp'
                           : student.input_level === 'B1'
-                            ? 'B1 - Trung cấp thấp'
-                            : student.input_level === 'B2'
-                              ? 'B2 - Trung cấp cao'
-                              : student.input_level === 'C1'
-                                ? 'C1 - Nâng cao'
-                                : student.input_level}
-                    </span>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                    {student.enrollments?.length > 0
-                      ? student.enrollments.length
-                      : 'Chưa phân lớp'}
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap'>
-                    <span
-                      className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getStatusBadgeColor(
-                        student.status || 'active'
-                      )}`}
-                    >
-                      {student.status === 'active'
-                        ? 'Đang học'
-                        : student.status === 'inactive'
+                          ? 'B1 - Trung cấp thấp'
+                          : student.input_level === 'B2'
+                          ? 'B2 - Trung cấp cao'
+                          : student.input_level === 'C1'
+                          ? 'C1 - Nâng cao'
+                          : student.input_level}
+                      </span>
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                      {student.enrollments?.length > 0
+                        ? student.enrollments.length
+                        : 'Chưa phân lớp'}
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                      {Math.round((totalAttended / total) * 100) || 0}%
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                      {Math.round((totalPassedHomework / total) * 100) || 0}%
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                      {Math.round(
+                        (totalPassed / student?.enrollments?.length) * 100
+                      ) || 0}
+                      %
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap'>
+                      <span
+                        className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getStatusBadgeColor(
+                          student.status || 'active'
+                        )}`}
+                      >
+                        {student.status === 'active'
+                          ? 'Đang học'
+                          : student.status === 'inactive'
                           ? 'Đã huỷ'
                           : 'Đã hoàn thành'}
-                    </span>
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
-                    <div className='flex items-center space-x-2'>
-                      <button
-                        onClick={() => handleViewStudent(student)}
-                        className='text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors'
-                        title='Xem chi tiết'
-                      >
-                        <Eye className='w-4 h-4' />
-                      </button>
-                      <button
-                        onClick={() => handleEditStudent(student)}
-                        className='text-green-600 hover:text-green-900 p-1 rounded-lg hover:bg-green-50 transition-colors'
-                        title='Chỉnh sửa'
-                      >
-                        <Edit className='w-4 h-4' />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteStudent(student.id)}
-                        className='text-red-600 hover:text-red-900 p-1 rounded-lg hover:bg-red-50 transition-colors'
-                        title='Xóa'
-                      >
-                        <Trash2 className='w-4 h-4' />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                      </span>
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
+                      <div className='flex items-center space-x-2'>
+                        <button
+                          onClick={() => handleViewStudent(student)}
+                          className='text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors'
+                          title='Xem chi tiết'
+                        >
+                          <Eye className='w-4 h-4' />
+                        </button>
+                        <button
+                          onClick={() => handleEditStudent(student)}
+                          className='text-green-600 hover:text-green-900 p-1 rounded-lg hover:bg-green-50 transition-colors'
+                          title='Chỉnh sửa'
+                        >
+                          <Edit className='w-4 h-4' />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteStudent(student.id)}
+                          className='text-red-600 hover:text-red-900 p-1 rounded-lg hover:bg-red-50 transition-colors'
+                          title='Xóa'
+                        >
+                          <Trash2 className='w-4 h-4' />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -459,10 +542,11 @@ const StudentManagement = () => {
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${currentPage === 1
+                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  currentPage === 1
                     ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                  }`}
+                }`}
               >
                 <ChevronLeft className='w-4 h-4' />
               </button>
@@ -473,10 +557,11 @@ const StudentManagement = () => {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === page
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        currentPage === page
                           ? 'bg-blue-600 text-white'
                           : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                        }`}
+                      }`}
                     >
                       {page}
                     </button>
@@ -489,10 +574,11 @@ const StudentManagement = () => {
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${currentPage === totalPages
+                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  currentPage === totalPages
                     ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                  }`}
+                }`}
               >
                 <ChevronRight className='w-4 h-4' />
               </button>

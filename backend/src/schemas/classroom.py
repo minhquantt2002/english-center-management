@@ -1,5 +1,6 @@
 from datetime import date, datetime, time
 from typing import Optional, List
+from src.models.attendance import HomeworkStatus
 from src.schemas.base import BaseSchema
 from src.schemas.user import StudentBase
 from src.models.classroom import ClassStatus
@@ -79,6 +80,26 @@ class ScheduleNested(BaseSchema):
     end_time: time
 
 
+class AttendanceNested(BaseSchema):
+    id: UUID
+    session_id: UUID
+    student_id: UUID
+    is_present: bool
+
+
+class HomeworkNested(BaseSchema):
+    id: UUID
+    session_id: UUID
+    student_id: UUID
+    status: HomeworkStatus
+    feedback: Optional[str] = None
+
+
+class SessionNested(BaseSchema):
+    id: UUID
+    attendances: List[AttendanceNested] = []
+    homeworks: List[HomeworkNested] = []
+
 # Classroom with relationships
 class ClassroomResponse(ClassroomBase):
     id: UUID
@@ -87,3 +108,4 @@ class ClassroomResponse(ClassroomBase):
     teacher: Optional[TeacherNested] = None
     enrollments: Optional[List[EnrollmentNested]] = None
     schedules: Optional[List[ScheduleNested]] = None
+    sessions: Optional[List[SessionNested]] = None

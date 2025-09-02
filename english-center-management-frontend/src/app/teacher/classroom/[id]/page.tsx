@@ -125,7 +125,9 @@ const ClassDetailPage = () => {
             {activeTab === 'students' && (
               <StudentList
                 classroomId={classDetails.id}
+                sessions={classDetails.sessions}
                 students={classDetails.enrollments.filter((en) => en.student)}
+                courseLevel={classDetails.course.level}
                 refetchData={fetchClassData}
               />
             )}

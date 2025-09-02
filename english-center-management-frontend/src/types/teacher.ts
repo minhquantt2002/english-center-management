@@ -1,3 +1,5 @@
+import { HomeworkStatus } from '../app/teacher/_hooks/use-homework';
+
 // Teacher specific types based on backend schemas
 export type Weekday =
   | 'monday'
@@ -82,6 +84,28 @@ export interface ClassDetails {
   created_at: string;
   enrollments: EnrollmentNested[];
   schedules: ScheduleNested[];
+  sessions: SessionNested[];
+}
+
+export interface SessionNested {
+  id: string;
+  attendances: AttendanceNested[];
+  homeworks: HomeworkNested[];
+}
+
+export interface AttendanceNested {
+  id: string;
+  session_id: string;
+  student_id: string;
+  is_present: boolean;
+}
+
+export interface HomeworkNested {
+  id: string;
+  session_id: string;
+  student_id: string;
+  status: HomeworkStatus;
+  feedback: string;
 }
 
 // Dashboard types

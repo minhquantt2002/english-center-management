@@ -21,6 +21,7 @@ import CreateStaffModal from './_components/create-staff';
 import { toast } from 'react-toastify';
 import GenericExcelExportButton from '../../../components/GenericExcelExportButton';
 import { staffExportConfig } from '../../../components/GenericExcelExportButton';
+import { getInitials } from '../../staff/list-teacher/page';
 const StaffManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -273,13 +274,9 @@ const StaffManagement = () => {
                   <td className='px-6 py-4 whitespace-nowrap'>
                     <div className='flex items-center'>
                       <div className='h-12 w-12 flex-shrink-0'>
-                        <img
-                          className='h-12 w-12 rounded-full object-cover ring-2 ring-gray-100'
-                          src={
-                            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-                          }
-                          alt={staff.name}
-                        />
+                        <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
+                          {getInitials(staff.name.charAt(0))}
+                        </div>
                       </div>
                       <div className='ml-4'>
                         <div className='text-sm font-semibold text-gray-900'>

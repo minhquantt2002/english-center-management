@@ -19,6 +19,7 @@ import {
 import { ScoreNested, StudentResponse } from '../../../../../types/staff';
 import { HomeworkStatus } from '../../../../teacher/_hooks/use-homework';
 import { useStaffStudentApi } from '../../../../staff/_hooks';
+import { getInitials } from '../../../../staff/list-teacher/page';
 
 interface ViewStudentModalProps {
   isOpen: boolean;
@@ -144,13 +145,11 @@ export default function ViewStudentModal({
     <div className='space-y-6'>
       {/* Student Header */}
       <div className='flex items-start space-x-6 mb-4'>
-        <img
-          className='h-16 w-16 rounded-full border-4 border-gray-200'
-          src={
-            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-          }
-          alt={student?.name}
-        />
+        <div className='h-16 w-16 flex-shrink-0'>
+          <div className='w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
+            {getInitials(student.name.charAt(0))}
+          </div>
+        </div>
         <div className='flex-1'>
           <div className='flex items-center space-x-3 mb-2'>
             <h1 className='text-xl font-bold text-gray-900'>{student?.name}</h1>

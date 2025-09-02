@@ -11,6 +11,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import { UserUpdate } from '../../../../types/admin';
+import { getInitials } from '../../../staff/list-teacher/page';
 
 interface EditStudentModalProps {
   student: UserUpdate | null;
@@ -296,13 +297,9 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({
         <div className='flex items-center justify-between p-6 border-b border-gray-200'>
           <div className='flex items-center space-x-3'>
             <div className='h-12 w-12 flex-shrink-0'>
-              <img
-                className='h-12 w-12 rounded-full object-cover'
-                src={
-                  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-                }
-                alt={formData.name || 'Student'}
-              />
+              <div className='w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
+                {getInitials(student.name.charAt(0))}
+              </div>
             </div>
             <div>
               <h2 className='text-xl font-semibold text-gray-900'>

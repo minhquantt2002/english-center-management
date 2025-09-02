@@ -165,12 +165,19 @@ class UserResponse(UserBase):
     # Student relationships
     enrollments: Optional[List[EnrollmentNested]] = None
 
+    rate_passed: Optional[float] = None
+    rate_attendanced: Optional[float] = None
+    rate_passed_homework: Optional[float] = None
+
 
 class TeacherResponse(TeacherBase):
     id: UUID
     created_at: datetime
     
     taught_classes: Optional[List[ClassroomNested]] = None
+    rate_passed: Optional[float] = None
+    rate_attendanced: Optional[float] = None
+    rate_passed_homework: Optional[float] = None
 
 
 class SessionNested(BaseSchema):
