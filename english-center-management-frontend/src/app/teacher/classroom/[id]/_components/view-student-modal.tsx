@@ -147,7 +147,7 @@ export default function ViewStudentModal({
       <div className='flex items-start space-x-6 mb-4'>
         <div className='h-16 w-16 flex-shrink-0'>
           <div className='w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg'>
-            {getInitials(student.name.charAt(0))}
+            {getInitials(student?.name?.charAt(0))}
           </div>
         </div>
         <div className='flex-1'>
